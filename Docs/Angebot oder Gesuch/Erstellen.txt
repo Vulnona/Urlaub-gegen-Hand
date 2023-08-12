@@ -1,0 +1,11 @@
+Erstellen eines Angebots oder Gesuchs
+
+Das Angebot oder das Gesuch kann ein Benutzer über ein vorgefertigtes Formular erstellen.
+
+Dort gibt es viele Auswahlboxen, die später für die Suche benutzt werden. 
+Es wird Hauptkategorien geben wie z.B für Familien, für Alleinreisende mit Hund, für Senioren nur für Frauen bei Frauen und weitere. 
+
+Es können Bilder hochgeladen werden, die automatisiert in ein Format umgewandelt werden, dass ich am besten anzeigen lässt.
+Der Zugang zu diesem angeboten und gesuchen soll dann auch über einen Short-Link möglich sein.
+
+Es ist darauf zu achten, dass man, wenn man diesen Link in einem Facebook Beitrag veröffentlicht, die Vorschau des Beitrages innerhalb Facebooks optimal ist

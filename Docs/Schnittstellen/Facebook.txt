@@ -1,0 +1,8 @@
+Spiegeln des Beitrages in einer geschlossenen Facebook-Gruppe
+
+das Ganze ist dann schon ein wenig schwieriger. Denn die API von Facebook lässt an sich nicht zu, dass man von außen in einer geschlossenen Facebook-Gruppe etwas veröffentlichen können.
+
+Die Veröffentlichung kann ohnehin nur über einen neu einzurichten Facebook-Account funktionieren. 
+Dieser Account spiegelt dann die Beiträge der neuen Plattform in den Facebook-Gruppen.
+Mein Sohn hatte vor ca. zwei Jahren, als wir das Projekt schon einmal umsetzen wollten, damit angefangen das umzusetzen. 
+Falls es nicht über die API geht, muss man eine neue Möglichkeit schaffen.

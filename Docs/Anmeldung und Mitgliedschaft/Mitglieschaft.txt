@@ -1,0 +1,8 @@
+Anmeldung und Mitgliederverwaltung
+
+Die Anmeldung als neues Mitglied sollte über die Eingabe eines Coupons ermöglicht werden.
+
+Der Code gibt an, wie lange die Mitgliedschaft gültig ist.
+Sie ist selbst kündigend. Bedeutet, wenn man einen Code für einen 2-Jahres-Abo eingibt,
+sollte der Account nach zwei Jahren abgeschaltet werden,
+außer es wird ein Verlängerungscode eingegeben.

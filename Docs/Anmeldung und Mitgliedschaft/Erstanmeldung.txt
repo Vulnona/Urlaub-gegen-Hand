@@ -1,0 +1,21 @@
+Erstanmeldung
+
+Wenn man sich zum ersten Mal auf der Seite anmeldet, muss man seine ganzen persönlichen Daten eingeben wie Name und Anschrift, Telefonnummer für Videochat, dann geht der Account in Ruhestellung, bis die Daten verifiziert sind. Er wird dann durch einen Admin manuell freigeschaltet. Am Anfang, bei wenigen Mitgliedern, wird die Verifizierung per Videochat durchgeführt. Bedeutet, dass das neue Mitglied seinen Ausweis beim Videochat in die Kamera hält und man die Daten überprüfen kann. Auf der Anmeldeseite ermöglichen einen Peer-to-Peer Videochat durchführen zu können.
+
+Auf der Anmeldeseite ermöglichen einen Videochat durchführen.
+Integration einer Videochat Applikation. Dann wird der Account per Hand vom Webmaster aktiviert.
+
+Gegebenenfalls wird auch eine App für Android und iOS einen Auftrag gegeben, dass die Vorder- und Rückseite des Ausweises ablichtet und Daten, die man die nicht benötigt wie die Ausweisnummer anonymisiert und dann direkt zusendet. dass man zu der App kommt, kann man über einen QR-Code abwickeln, so könnten die Bilder dann gleich mit den Daten des neuen Mitgliedes in Zusammenhang gebracht werden. Die Daten werden dann per Peer-to-Peer-Verschlüsselung übertragen. Nach der Verifizierung werden die Daten nur noch offline gespeichert.
+
+Vier Wochen, bevor die Mitgliedschaft endet, sollte der Benutzer in seinem internen Postfach der Plattform, aber auch per E-Mail benachrichtigt werden, dass eine Mitgliedschaft abläuft und er einen neuen Code erwerben soll, wenn er seine Mitgliedschaft verlängern möchte.
+
+Es sollte jederzeit möglich sein auch eine bestehende Mitgliedschaft von z. B. 6 Monate mit einem Code für eine drei Jahres-Mitgliedschaft um diese Zeit verlängern zu können. Also das die Mitgliedschaft dann 3,6 Jahre beträgt.
+
+Alle Mitgliedschaften sind selbst kündigend.
+Die Laufzeit ist in den Coupon-Code hinterlegt.
+Wenn die Laufzeit abgelaufen ist, geht die Profilseite in Ruhestellung und ist nicht mehr sichtbar.
+Wir können aber jederzeit wieder aktiviert werden durch Eingabe eines sein Aktivierungscodes.
+
+Es können nur Mitglieder der Plattform untereinander kommunizieren.
+
+Das Mitglied soll sein Passwort, wenn nötig, selbst wiederherstellen können.

@@ -1,0 +1,21 @@
+Profilseite der Mitglieder
+
+Profilseite der Mitglieder, unter der dann auch die Bewertungen einsehbar sind.
+
+jedes Mitglied hat Zugang zu einer (seine) Profilseite, die er auch selbst gestalten kann, auf der er sich vorstellen kann, die von außen über einen Short-link erreicht werden soll.
+
+Auf dieser Profilseite gibt es vorgefertigte Auswahlboxen, wo man z. B. angeben kann, ob man Raucher ist, ein Haustier hat, im Besitz einer Haftpflichtversicherung ist und so weiter.
+
+Auf der Seite kann der Benutzer mehrere Bilder hochladen.
+
+Auf der Seite sind dann auch die Bewertungen einsehbar. Die Benutzerdaten derjenigen, die bewertet haben, sieht man allerdings auch nicht, außer man ist ein registriertes Mitglied.
+
+Die Profilseite soll vom Design her das Mitglied als verifiziert ausweisen.
+ 
+Es soll in einem Facebook Beitrag, wenn man den Link zu dem Profil eingibt, gut erkennbar sein.
+
+Die Realdaten des Benutzers sollen nicht erkennbar sein, sondern nur ein Benutzername.
+
+Eine Kommunikation mit dem Benutzer ist nur für Mitglieder der Plattform möglich.
+
+Es soll die Möglichkeit bestehen, dass man als Administrator dem Benutzer in sein Profil an einem Ort, der bei jedem Benutzer gleich ist, speziellere Grafiken zuweisen kann. Beispiel top bewertet, sozial engagiert, und so weiter.
