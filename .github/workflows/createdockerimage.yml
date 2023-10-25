@@ -15,3 +15,4 @@ jobs:
           context: .
           dockerfile: Dockerfile
           push: true
+          tag: latest
