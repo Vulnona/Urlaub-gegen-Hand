@@ -20,3 +20,4 @@ jobs:
           dockerfile: Dockerfile.dockerfile
           push: true
           tag: urlaubgegenhand:latest
+          repository: urlaubgegenhand
