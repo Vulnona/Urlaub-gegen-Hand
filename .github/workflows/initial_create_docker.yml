@@ -17,6 +17,6 @@ jobs:
       - uses: docker/build-push-action@v5
         with:
           context: .
-          dockerfile: Dockerfile.dockerfile
+          file: ./Dockerfile.dockerfile
           push: true
-          tag: urlaubgegenhand/urlaubgegenhand:latest
+          tags: urlaubgegenhand/urlaubgegenhand:latest
