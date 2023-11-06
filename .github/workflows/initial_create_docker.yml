@@ -19,4 +19,4 @@ jobs:
           context: .
           dockerfile: Dockerfile.dockerfile
           push: true
-          tag: UrlaubgegenHand:latest
+          tag: urlaubgegenhand:latest
