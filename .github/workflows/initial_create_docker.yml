@@ -19,5 +19,5 @@ jobs:
           context: .
           dockerfile: Dockerfile.dockerfile
           push: true
-          tag: urlaubgegenhand:latest
-          repository: urlaubgegenhand
+          tag: urlaubgegenhand/urlaubgegenhand:latest
+          repository: urlaubgegenhand/urlaubgegenhand
