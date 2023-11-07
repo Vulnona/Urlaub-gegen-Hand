@@ -20,3 +20,4 @@ jobs:
           file: ./Dockerfile.dockerfile
           push: true
           tags: urlaubgegenhand/urlaubgegenhand:latest
+      - run: docker exec -it urlaubgegenhand/urlaubgegenhand:latest systemctl start mysql
