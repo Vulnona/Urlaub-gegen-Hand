@@ -29,4 +29,6 @@ jobs:
           file: ./Dockerfile.dockerfile
           push: true
           tags: urlaubgegenhand/urlaubgegenhand:latest
+env:
+    DOCKER_BUILDKIT_ARGS: "--build-arg USER=root"
       
