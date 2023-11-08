@@ -1,5 +1,6 @@
 FROM mcr.microsoft.com/dotnet/sdk:7.0-alpine
 
+RUN apk search mysql-server
 RUN apk add mysql-server
 
 # Codes in das Image kopieren
