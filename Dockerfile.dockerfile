@@ -1,6 +1,6 @@
 FROM mcr.microsoft.com/dotnet/sdk:7.0-alpine
 
-RUN apt-get update && apt-get install -y mysql-server
+RUN apk add mysql-server
 
 # Codes in das Image kopieren
 COPY ./Backend /app/Backend
