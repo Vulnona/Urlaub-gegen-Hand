@@ -1,6 +1,7 @@
 FROM mcr.microsoft.com/dotnet/sdk:7.0-alpine
 
-RUN apk add --repository=http://dl-cdn.alpinelinux.org/alpine/v3.18/community/x86_64 mysql-server
+RUN apk add mysql
+RUN apk add mysql-client
 
 # Codes in das Image kopieren
 COPY ./Backend /app/Backend
