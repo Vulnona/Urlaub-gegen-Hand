@@ -6,7 +6,7 @@ using UGHModels;
 
     public class UghContext : DbContext
 {
-    static readonly string connectionString = "Server=localhost; User ID=root; Password=Hummel; Database=ughdata";
+    //static readonly string connectionString = "Server=db; User ID=root; Password=password; Database=db";
     public UghContext (DbContextOptions<UghContext> options) :base(options){}
     public DbSet<User> Users { get; set; }
     public DbSet<Profile> Profiles{get;set;}
@@ -16,6 +16,11 @@ using UGHModels;
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
+        IConfigurationRoot configuration =new ConfigurationBuilder()
+            .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
+            .AddJsonFile("appsettings.json")
+            .Build();
+        var connectionString =configuration.GetConnectionString("DefaultConnection"); 
         optionsBuilder.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
     }
 }
