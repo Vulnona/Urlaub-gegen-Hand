@@ -8,6 +8,15 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_DATABASE: user
+          MYSQL_ROOT_PASSWORD: password
+        ports:
+          - 80:80
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
     steps:
       - uses: actions/checkout@v4
       - uses: docker/login-action@v1
@@ -17,6 +26,9 @@ jobs:
       - uses: docker/build-push-action@v5
         with:
           context: .
-          dockerfile: Dockerfile
+          file: ./Dockerfile.dockerfile
           push: true
-          tag: UrlaubgegenHand:latest
+          tags: urlaubgegenhand/urlaubgegenhand:latest
+env:
+    DOCKER_BUILDKIT_ARGS: "--build-arg USER=root --build-arg DEBUG=1"
+      

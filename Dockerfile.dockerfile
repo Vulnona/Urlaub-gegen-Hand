@@ -1,20 +1,19 @@
-FROM mcr.microsoft.com/dotnet/sdk:6.0-alpine
+FROM mcr.microsoft.com/dotnet/sdk:7.0-alpine
 
-#RUN apt-get update && apt-get install -y mysql-server
+RUN apk add mysql
+RUN apk add mysql-client
 
-#RUN mysql -u root -p < /docker-entrypoint-initdb.d/create-user.sql
+# Codes in das Image kopieren
+COPY ./Backend /app/Backend
+COPY ./Frontend /app/Frontend
 
-# EF Migration
-#RUN dotnet ef migrations add InitialCreate
-#RUN dotnet ef database update
-# Build application
-RUN dotnet publish ./Backend/UGHApi.csproj
-# Copy application
-#COPY /bin/Release/netcoreapp3.1/ugh-api /app/ugh-api
-COPY /Backend/bin/Release//net7.0/publish /app/ugh-api
+# Backend aus Quellcode bauen
+RUN dotnet publish /app/Backend/UGHApi.csproj --use-current-runtime --self-contained false -o /app/binaries
 
-# Start application
-CMD ["/app/ugh-api"]
+# Quellcode aus Image entfernen
+RUN rm -r /app/Backend
 
 EXPOSE 80
 
+# Backend starten
+CMD ["dotnet","/app/binaries/UGHApi.dll","--urls", "http://+:80"]
