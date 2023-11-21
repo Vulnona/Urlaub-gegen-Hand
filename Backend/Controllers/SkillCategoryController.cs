@@ -11,35 +11,25 @@ namespace UGHApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class SkillController : ControllerBase
+    public class SkillCategoryController : ControllerBase
     {
         private readonly UghContext _context;
 
-        public SkillController(UghContext context)
+        public SkillCategoryController(UghContext context)
         {
             _context = context;
         }
 
-       
-
-        // GET: api/Skill/5
-        [HttpGet("{Category_id}")]
-        public async Task<ActionResult<IEnumerable<Skill>>> GetSkills(int Category_id)
+        // GET: api/SkillCategory
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<Skill>>> GetSkills()
         {
           if (_context.Skills == null)
           {
               return NotFound();
           }
-            var skills =  _context.Skills.Where( b=> b.ParentSkill_ID==Category_id);
-
-            if (skills.Count() == 0)
-            {
-                return NotFound();
-            }
-
-            return await skills.ToListAsync();
+            var skillCategories = _context.Skills.Where ( b=> b.ParentSkill_ID == null);
+            return await skillCategories.ToListAsync();
         }
-
-
     }
 }
