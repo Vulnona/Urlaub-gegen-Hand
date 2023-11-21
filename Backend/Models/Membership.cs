@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using NuGet.Common;
 
 namespace UGHApi.Models
 {
