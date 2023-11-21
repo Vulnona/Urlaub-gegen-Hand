@@ -4,15 +4,16 @@ namespace UGHApi.Models
 {
     public class Skill
     {
-        public Skill(int skill_ID, string skillDescrition) 
+        public Skill(int skill_ID, string skillDescrition, Skill parentSkill)
         {
             this.Skill_ID = skill_ID;
-                this.SkillDescrition = skillDescrition;
-               
+            this.SkillDescrition = skillDescrition;
+            ParentSkill = parentSkill;
         }
         [Key]
-        public int Skill_ID{get;set;}
+        public int Skill_ID{get;}
         [Required]
         public string SkillDescrition{get;set;}
+        public Skill ParentSkill{get;set;}
     }
 }
