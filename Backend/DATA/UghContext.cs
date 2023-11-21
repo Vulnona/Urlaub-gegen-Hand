@@ -1,3 +1,5 @@
+using System.Drawing;
+using Backend.Models;
 using Microsoft.EntityFrameworkCore;
 using UGHApi.Models;
 using UGHModels;
@@ -12,6 +14,9 @@ using UGHModels;
     public DbSet<Profile> Profiles{get;set;}
     public DbSet<Membership> Memberships{get;set;}
     public DbSet<Skill> Skills{get;set;}
+    public DbSet<Continent> Continents {get;set;}
+    public DbSet<Backend.Models.Region> Regions{get;set;}
+    public DbSet<Country> Countries{get;set;}
     
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
