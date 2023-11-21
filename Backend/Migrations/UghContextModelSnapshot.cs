@@ -18,6 +18,34 @@ namespace UGHApi.Migrations
                 .HasAnnotation("ProductVersion", "7.0.10")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
+            modelBuilder.Entity("UGHApi.Models.Continent", b =>
+                {
+                    b.Property<int>("Continent_ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.HasKey("Continent_ID");
+
+                    b.ToTable("Continents");
+                });
+
+            modelBuilder.Entity("UGHApi.Models.Country", b =>
+                {
+                    b.Property<int>("Country_ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<string>("CountryName")
+                        .HasColumnType("longtext");
+
+                    b.Property<int?>("Region_ID")
+                        .HasColumnType("int");
+
+                    b.HasKey("Country_ID");
+
+                    b.ToTable("Countries");
+                });
+
             modelBuilder.Entity("UGHApi.Models.Membership", b =>
                 {
                     b.Property<int>("MembershipID")
@@ -46,6 +74,26 @@ namespace UGHApi.Migrations
                     b.ToTable("Profiles");
                 });
 
+            modelBuilder.Entity("UGHApi.Models.Region", b =>
+                {
+                    b.Property<int>("Region_ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ContinentID")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("CountryID")
+                        .HasColumnType("int");
+
+                    b.Property<string>("RegionName")
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Region_ID");
+
+                    b.ToTable("Regions");
+                });
+
             modelBuilder.Entity("UGHApi.Models.Skill", b =>
                 {
                     b.Property<int>("Skill_ID")
@@ -56,7 +104,6 @@ namespace UGHApi.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("SkillDescrition")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.HasKey("Skill_ID");
