@@ -205,7 +205,7 @@ CREATE PROCEDURE MigrationsScript()
 BEGIN
     IF NOT EXISTS(SELECT 1 FROM `__EFMigrationsHistory` WHERE `MigrationId` = '20231004072133_ClassesInitially') THEN
 
-    ALTER TABLE `Users` CHANGE `UserName` `Name` longtext NOT NULL;
+    ALTER TABLE `Users` RENAME COLUMN `UserName` TO `Name`;
 
     END IF;
 END //
@@ -219,7 +219,7 @@ CREATE PROCEDURE MigrationsScript()
 BEGIN
     IF NOT EXISTS(SELECT 1 FROM `__EFMigrationsHistory` WHERE `MigrationId` = '20231004072133_ClassesInitially') THEN
 
-    ALTER TABLE `Users` CHANGE `UserId` `VerificationState` int NOT NULL;
+    ALTER TABLE `Users` RENAME COLUMN `UserId` TO `VerificationState`;
 
     END IF;
 END //
@@ -426,7 +426,7 @@ CREATE PROCEDURE MigrationsScript()
 BEGIN
     IF NOT EXISTS(SELECT 1 FROM `__EFMigrationsHistory` WHERE `MigrationId` = '20231009162507_Class_User') THEN
 
-    ALTER TABLE `Users` CHANGE `Name` `VisibleName` longtext NOT NULL;
+    ALTER TABLE `Users` RENAME COLUMN `Name` TO `VisibleName`;
 
     END IF;
 END //
@@ -440,7 +440,7 @@ CREATE PROCEDURE MigrationsScript()
 BEGIN
     IF NOT EXISTS(SELECT 1 FROM `__EFMigrationsHistory` WHERE `MigrationId` = '20231009162507_Class_User') THEN
 
-    ALTER TABLE `Users` CHANGE `Adress` `Street` longtext NOT NULL;
+    ALTER TABLE `Users` RENAME COLUMN `Adress` TO `Street`;
 
     END IF;
 END //
@@ -666,6 +666,39 @@ BEGIN
 
     INSERT INTO `__EFMigrationsHistory` (`MigrationId`, `ProductVersion`)
     VALUES ('20231009164115_Class_Skills', '7.0.10');
+
+    END IF;
+END //
+DELIMITER ;
+CALL MigrationsScript();
+DROP PROCEDURE MigrationsScript;
+
+COMMIT;
+
+START TRANSACTION;
+
+DROP PROCEDURE IF EXISTS MigrationsScript;
+DELIMITER //
+CREATE PROCEDURE MigrationsScript()
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM `__EFMigrationsHistory` WHERE `MigrationId` = '20231121090805_Class_skills_changed') THEN
+
+    ALTER TABLE `Skills` ADD `ParentSkill_ID` int NULL;
+
+    END IF;
+END //
+DELIMITER ;
+CALL MigrationsScript();
+DROP PROCEDURE MigrationsScript;
+
+DROP PROCEDURE IF EXISTS MigrationsScript;
+DELIMITER //
+CREATE PROCEDURE MigrationsScript()
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM `__EFMigrationsHistory` WHERE `MigrationId` = '20231121090805_Class_skills_changed') THEN
+
+    INSERT INTO `__EFMigrationsHistory` (`MigrationId`, `ProductVersion`)
+    VALUES ('20231121090805_Class_skills_changed', '7.0.10');
 
     END IF;
 END //
