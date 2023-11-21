@@ -1,5 +1,5 @@
 using System.ComponentModel.DataAnnotations;
-namespace Backend.Models
+namespace UGHApi.Models
 {
     public class Region
     {   [Key]
