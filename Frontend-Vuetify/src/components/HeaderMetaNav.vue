@@ -51,7 +51,7 @@ ul {
 }
 
 .label {
-  @media screen and (max-width: 767px) {
+  @media screen and (max-width: 959px) {
     visibility: hidden;
     display: block;
     width: 0;
