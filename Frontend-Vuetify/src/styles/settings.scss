@@ -1,0 +1,16 @@
+/**
+ * src/styles/settings.scss
+ *
+ * Configures SASS variables and Vuetify overwrites
+ */
+
+// https://vuetifyjs.com/features/sass-variables/`
+@use 'vuetify/settings' with (
+   $container-max-widths: (
+      sm: 540px,
+      md: 720px,
+      lg: 960px,
+      xl: 1140px,
+      xxl: 1320px
+   )
+);
