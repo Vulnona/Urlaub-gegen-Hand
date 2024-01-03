@@ -13,5 +13,43 @@ public class RegisterRequest
     [EmailAddress]
     public string Email { get; set; }
 
-    // ggf. weitere erforderliche attribute für die Registrierung
+    [Required]
+    public int User_Id { get; set; }
+
+    [Required]
+    public string VisibleName { get; set; }
+
+    [Required]
+    public string FirstName { get; set; }
+
+    [Required]
+    public string LastName { get; set; }
+
+    [Required]
+    public DateTime DateOfBirth { get; set; }
+
+    [Required]
+    public string Gender { get; set; }
+
+    [Required]
+    public string Street { get; set; }
+
+    [Required]
+    public string HouseNumber { get; set; }
+
+    [Required]
+    public string PostCode { get; set; }
+
+    [Required]
+    public string City { get; set; }
+
+    [Required]
+    public string Country { get; set; }
+
+    [Required]
+    public string Email_Adress { get; set; }
+
+    [Required]
+    public bool IsEmailVerified { get; set; }
+
 }
