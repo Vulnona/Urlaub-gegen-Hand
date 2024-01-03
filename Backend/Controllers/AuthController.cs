@@ -2,7 +2,7 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 using UGHModels;
-using UGHApi.Services; // Stellen Sie sicher, dass der richtige Namespace für EmailService verwendet wird
+using UGHApi.Services; 
 
 namespace UGHApi.Controllers
 {
