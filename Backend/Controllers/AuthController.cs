@@ -21,6 +21,26 @@ namespace UGHApi.Controllers
             _context = context;
         }
 
+        public class AuthController : ControllerBase
+        {
+            private readonly EmailService _emailService;
+        
+            public AuthController(EmailService emailService)
+            {
+                _emailService = emailService;
+            }
+        
+            [HttpPost]
+            public ActionResult Register(UserRegistrationModel model)
+            {
+                // Registrierungslogik
+        
+                _emailService.SendEmail(user.Email, "Bestätigen Sie Ihre E-Mail", "Hier ist Ihr Bestätigungslink...");
+        
+                // Weitere Logik
+            }
+        }
+
         [HttpPost("register")]
         public async Task<ActionResult<User>> Register([FromBody] RegisterRequest request)
         {
