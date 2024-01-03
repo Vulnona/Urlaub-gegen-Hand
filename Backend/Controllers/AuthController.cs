@@ -24,26 +24,26 @@ namespace UGHApi.Controllers
         {
             if (_context.Users.Any(u => u.Email_Adress == request.Email_Adress))
             {
-                return Conflict("A user with this email already exists");
+                return Conflict("E-Mail Adresse existiert bereits");
             }
 
-        
-            var newUser = new User
-            {
-                User_Id = request.User_Id,
-                VisibleName = request.VisibleName,
-                FirstName = request.FirstName,
-                LastName = request.LastName,
-                DateOfBirth = request.DateOfBirth,
-                Gender = request.Gender,
-                Street = request.Street,
-                HouseNumber = request.HouseNumber,
-                PostCode = request.PostCode,
-                City = request.City,
-                Country = request.Country,
-                Email_Adress = request.Email_Adress,
-                IsEmailVerified = request.IsEmailVerified
-            };
+            DateOnly dateOfBirth = new DateOnly(request.DateOfBirth);
+
+            var newUser = new User(
+                request.User_Id,
+                request.VisibleName,
+                request.FirstName,
+                request.LastName,
+                dateOfBirth,
+                request.Gender,
+                request.Street,
+                request.HouseNumber,
+                request.PostCode,
+                request.City,
+                request.Country,
+                request.Email_Adress,
+                request.IsEmailVerified
+            );
 
             _context.Users.Add(newUser);
             _context.SaveChanges();
