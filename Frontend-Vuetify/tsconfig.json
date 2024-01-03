@@ -12,6 +12,10 @@
     "sourceMap": false,
     "resolveJsonModule": true,
     "esModuleInterop": true,
+<<<<<<< HEAD
+=======
+	"allowJs": true,
+>>>>>>> merge-master-to-main
     "lib": ["esnext", "dom"],
     "types": [
       "node",
