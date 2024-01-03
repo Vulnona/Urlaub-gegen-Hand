@@ -27,9 +27,7 @@ namespace UGHApi.Controllers
                 return Conflict("A user with this email already exists");
             }
 
-            // Hier sollten Sie die Validierung des 'request' Modells durchführen,
-            // um sicherzustellen, dass die Daten korrekt sind, bevor Sie sie verwenden.
-
+        
             var newUser = new User
             {
                 User_Id = request.User_Id,
