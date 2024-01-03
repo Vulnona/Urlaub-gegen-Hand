@@ -37,7 +37,7 @@ namespace UGHApi.Controllers
         
                 _emailService.SendEmail(user.Email, "Bestätigen Sie Ihre E-Mail", "Hier ist Ihr Bestätigungslink...");
         
-                // Weitere Logik
+                // ggf. weitere Logik
             }
         }
 
