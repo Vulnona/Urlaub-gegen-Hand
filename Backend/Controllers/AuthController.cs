@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using UGHModels;
+using UGHApi.Services;
 using System.ComponentModel.DataAnnotations;
 
 namespace UGHApi.Controllers
