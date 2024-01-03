@@ -1,13 +1,8 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using UGHModels;
-using UGHApi.Services;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Mvc;
+using UGHModels;
+using UGHApi.Services; // Stellen Sie sicher, dass der richtige Namespace für EmailService verwendet wird
 
 namespace UGHApi.Controllers
 {
@@ -16,103 +11,49 @@ namespace UGHApi.Controllers
     public class AuthController : ControllerBase
     {
         private readonly UghContext _context;
+        private readonly EmailService _emailService;
 
-        public AuthController(UghContext context)
+        public AuthController(UghContext context, EmailService emailService)
         {
             _context = context;
-        }
-
-        public class AuthController : ControllerBase
-        {
-            private readonly EmailService _emailService;
-        
-            public AuthController(EmailService emailService)
-            {
-                _emailService = emailService;
-            }
-        
-            [HttpPost]
-            public ActionResult Register(UserRegistrationModel model)
-            {
-                // Registrierungslogik
-        
-                _emailService.SendEmail(user.Email, "Bestätigen Sie Ihre E-Mail", "Hier ist Ihr Bestätigungslink...");
-        
-                // ggf. weitere Logik
-            }
+            _emailService = emailService;
         }
 
         [HttpPost("register")]
-        public async Task<ActionResult<User>> Register([FromBody] RegisterRequest request)
+        public ActionResult Register([FromBody] RegisterRequest request)
         {
             if (_context.Users.Any(u => u.Email_Adress == request.Email_Adress))
             {
                 return Conflict("A user with this email already exists");
             }
 
-            var newUser = new User(
-                request.User_Id,
-                request.VisibleName,
-                request.FirstName,
-                request.LastName,
-                request.DateOfBirth,
-                request.Gender,
-                request.Street,
-                request.HouseNumber,
-                request.PostCode,
-                request.City,
-                request.Country,
-                request.Email_Adress,
-                request.IsEmailVerified
-            );
+            // Hier sollten Sie die Validierung des 'request' Modells durchführen,
+            // um sicherzustellen, dass die Daten korrekt sind, bevor Sie sie verwenden.
+
+            var newUser = new User
+            {
+                User_Id = request.User_Id,
+                VisibleName = request.VisibleName,
+                FirstName = request.FirstName,
+                LastName = request.LastName,
+                DateOfBirth = request.DateOfBirth,
+                Gender = request.Gender,
+                Street = request.Street,
+                HouseNumber = request.HouseNumber,
+                PostCode = request.PostCode,
+                City = request.City,
+                Country = request.Country,
+                Email_Adress = request.Email_Adress,
+                IsEmailVerified = request.IsEmailVerified
+            };
 
             _context.Users.Add(newUser);
-            await _context.SaveChangesAsync();
+            _context.SaveChanges();
+
+            // Hier senden Sie die Bestätigungsmail
+            _emailService.SendEmail(newUser.Email_Adress, "Bestätigen Sie Ihre E-Mail", "Hier ist Ihr Bestätigungslink...");
 
             return Ok(newUser);
         }
     }
-
-    public class RegisterRequest
-    {
-        [Required]
-        public int User_Id { get; set; }
-
-        [Required]
-        public string VisibleName { get; set; }
-
-        [Required]
-        public string FirstName { get; set; }
-
-        [Required]
-        public string LastName { get; set; }
-
-        [Required]
-        public DateOnly DateOfBirth { get; set; }
-
-        [Required]
-        public string Gender { get; set; }
-
-        [Required]
-        public string Street { get; set; }
-
-        [Required]
-        public string HouseNumber { get; set; }
-
-        [Required]
-        public string PostCode { get; set; }
-
-        [Required]
-        public string City { get; set; }
-
-        [Required]
-        public string Country { get; set; }
-
-        [Required]
-        public string Email_Adress { get; set; }
-
-        [Required]
-        public bool IsEmailVerified { get; set; }
-    }
 }
-
