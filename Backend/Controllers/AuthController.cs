@@ -48,7 +48,6 @@ namespace UGHApi.Controllers
             _context.Users.Add(newUser);
             _context.SaveChanges();
 
-            // Hier senden Sie die Bestätigungsmail
             _emailService.SendEmail(newUser.Email_Adress, "Bestätigen Sie Ihre E-Mail", "Hier ist Ihr Bestätigungslink...");
 
             return Ok(newUser);
