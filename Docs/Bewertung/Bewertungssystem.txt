@@ -1,0 +1,14 @@
+Bewertungssystem
+
+hier kann man sich an Airbnb orientieren.
+ 
+Die Mitglieder haben 14 Tage Zeit, sich gegenseitig zu bewerten. 
+Sie werden auch mehrmals daran erinnert, dass sie das machen sollen.
+
+Die Bewertungen werden erst veröffentlicht, wenn sie von beiden abgegeben worden ist. 
+
+Sollte nur eine Person bewerten, dann wird diese Bewertung nach 14 Tagen freigegeben.
+ 
+Es gibt keine Möglichkeit im Nachhinein die Bewertungen abzuändern. Ausschließlich der Administrator könnte sie löschen.
+
+Es gibt vorgefertigte Punkte wie Sauberkeit, Kommunikation, Wahrheitsgehalt der Anzeige und so weiter, die mit ein bis fünf Sternen bewertet werden können
