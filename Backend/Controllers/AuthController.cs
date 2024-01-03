@@ -36,7 +36,7 @@ namespace UGHApi.Controllers
                 request.VisibleName,
                 request.FirstName,
                 request.LastName,
-                parsedDateOfBirth,
+                dateOnly,
                 request.Gender,
                 request.Street,
                 request.HouseNumber,
