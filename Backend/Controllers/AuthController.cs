@@ -27,14 +27,14 @@ namespace UGHApi.Controllers
                 return Conflict("E-Mail Adresse existiert bereits");
             }
 
-            DateOnly dateOfBirth = new DateOnly(request.DateOfBirth);
+            DateTime parsedDateOfBirth = DateTime.Parse(request.DateOfBirth);
 
             var newUser = new User(
                 request.User_Id,
                 request.VisibleName,
                 request.FirstName,
                 request.LastName,
-                dateOfBirth,
+                parsedDateOfBirth,
                 request.Gender,
                 request.Street,
                 request.HouseNumber,
