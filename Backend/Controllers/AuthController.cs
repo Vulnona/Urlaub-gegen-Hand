@@ -28,6 +28,8 @@ namespace UGHApi.Controllers
             }
 
             DateTime parsedDateOfBirth = DateTime.Parse(request.DateOfBirth);
+            DateOnly dateOnly = new DateOnly(parsedDateOfBirth.Year, parsedDateOfBirth.Month, parsedDateOfBirth.Day);
+
 
             var newUser = new User(
                 request.User_Id,
