@@ -49,5 +49,8 @@ public class RegisterRequest
     [Required]
     public string Email_Adress { get; set; }
 
+    [Required]
+    // ATTENTION: URL has to contain placeholders 'USER_ID' for User_ID and 'TOKEN' for VerificationToken !
+    public string VerificationURL{get;set;}
     
 }
