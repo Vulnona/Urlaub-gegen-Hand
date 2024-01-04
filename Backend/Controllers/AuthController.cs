@@ -22,7 +22,7 @@ namespace UGHApi.Controllers
         [HttpPost("register")]
         public ActionResult Register([FromBody] RegisterRequest request)
         {
-            if (_context.Users.Any(u => u.Email_Adress == request.Email_Adress))
+            if (_context.Users.Any(u => u.Email_Adress.ToLower().Equals(request.Email_Adress.ToLower())))
             {
                 return Conflict("E-Mail Adresse existiert bereits");
             }
