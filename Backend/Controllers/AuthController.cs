@@ -44,7 +44,7 @@ namespace UGHApi.Controllers
                 request.City,
                 request.Country,
                 request.Email_Adress,
-                request.IsEmailVerified
+                false
             );
 
             _context.Users.Add(newUser);
