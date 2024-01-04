@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 public class RegisterRequest
 {
+    private string _VerificationURL=string.Empty;
     [Required]
     public string Username { get; set; }
 
@@ -50,7 +51,27 @@ public class RegisterRequest
     public string Email_Adress { get; set; }
 
     [Required]
-    // ATTENTION: URL has to contain placeholders 'USER_ID' for User_ID and 'TOKEN' for VerificationToken !
-    public string VerificationURL{get;set;}
+    // ATTENTION: URL needs to contain placeholders 'USER_ID' for User_ID and 'TOKEN' for VerificationToken !
+    public string VerificationURL
+    {
+        get
+            {
+                return _VerificationURL;
+            } 
+        
+        set
+        {
+            if (!( (value.ToUpper().Contains("USER_ID"))&& (value.ToUpper().Contains("TOKEN"))))
+            {
+                throw (new InvalidDataException("URL needs to contain placeholders 'USER_ID' for User_ID and 'TOKEN' for VerificationToken !"));
+            }
+            else
+            {
+                _VerificationURL=value;
+            }
+        }
+        
+    }
+
     
 }
