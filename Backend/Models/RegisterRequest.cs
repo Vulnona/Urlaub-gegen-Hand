@@ -49,7 +49,5 @@ public class RegisterRequest
     [Required]
     public string Email_Adress { get; set; }
 
-    [Required]
-    public bool IsEmailVerified { get; set; }
-
+    
 }
