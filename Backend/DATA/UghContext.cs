@@ -2,10 +2,11 @@ using System.Drawing;
 using UGHApi.Models;
 using Microsoft.EntityFrameworkCore;
 using UGHModels;
+using Backend.Models;
 
 
 
-    public class UghContext : DbContext
+public class UghContext : DbContext
 {
     //static readonly string connectionString = "Server=db; User ID=root; Password=password; Database=db";
     public UghContext (DbContextOptions<UghContext> options) :base(options){}
@@ -16,6 +17,7 @@ using UGHModels;
     public DbSet<Continent> Continents {get;set;}
     public DbSet<UGHApi.Models.Region> Regions{get;set;}
     public DbSet<Country> Countries{get;set;}
+    public DbSet<EmailVerificator> EmailVerificators{get;set;}
     
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
