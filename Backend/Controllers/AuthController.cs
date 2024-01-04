@@ -2,7 +2,9 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 using UGHModels;
-using UGHApi.Services; 
+using UGHApi.Services;
+using UGHApi.Models;
+using Backend.Models;
 
 namespace UGHApi.Controllers
 {
@@ -32,7 +34,6 @@ namespace UGHApi.Controllers
 
 
             var newUser = new User(
-                request.User_Id,
                 request.VisibleName,
                 request.FirstName,
                 request.LastName,
@@ -47,10 +48,22 @@ namespace UGHApi.Controllers
                 false
             );
 
+            newUser.VerificationState=UGH_Enums.VerificationState.isNew;
+
             _context.Users.Add(newUser);
             _context.SaveChanges();
 
-            _emailService.SendEmail(newUser.Email_Adress, "Bestätigen Sie Ihre E-Mail", "Hier ist Ihr Bestätigungslink...");
+            EmailVerificator newVerificator= new EmailVerificator();
+            newVerificator.requestDate=DateTime.Now;
+            newVerificator.user_Id=newUser.User_Id;
+            newVerificator.verificationToken=Guid.NewGuid();
+
+            _context.EmailVerificators.Add(newVerificator);
+            _context.SaveChanges();
+
+            string verificationURL=request.VerificationURL.Replace("*USER_ID*",newUser.User_Id.ToString()).Replace("*TOKEN*",newVerificator.verificationToken.ToString());
+
+            _emailService.SendEmail(newUser.Email_Adress, "Bestätigen Sie Ihre E-Mail", "<a href="+""+verificationURL+""+">Hier klicken um Ihre E-Mail zu bestätigen</a>");
 
             return Ok(newUser);
         }

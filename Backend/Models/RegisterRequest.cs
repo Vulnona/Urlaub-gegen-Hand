@@ -15,9 +15,6 @@ public class RegisterRequest
     public string Email { get; set; }
 
     [Required]
-    public int User_Id { get; set; }
-
-    [Required]
     public string VisibleName { get; set; }
 
     [Required]

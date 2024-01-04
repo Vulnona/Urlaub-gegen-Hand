@@ -28,6 +28,24 @@ namespace UGHModels{
                 
                
         }
+
+        public User( string visibleName, string firstName, string lastName, DateOnly dateOfBirth, string gender, string street, string houseNumber, string postCode, string city, string country, string email_Adress, bool isEmailVerified) 
+        {
+                this.VisibleName = visibleName;
+                this.FirstName = firstName;
+                this.LastName = lastName;
+                this.DateOfBirth = dateOfBirth;
+                this.Gender = gender;
+                this.Street = street;
+                this.HouseNumber = houseNumber;
+                this.PostCode = postCode;
+                this.City = city;
+                this.Country = country;
+                this.Email_Adress = email_Adress;
+                this.IsEmailVerified = isEmailVerified;
+                
+               
+        }
         [Key]
         public int User_Id {get;set;}
         [Required]
@@ -52,9 +70,9 @@ namespace UGHModels{
         [Required]
         public string Email_Adress {get;set;}
         public bool IsEmailVerified{get;set;}
-        public string PasswordHash{get;}
+        public string? PasswordHash{get;}
         [Required]
         public UGH_Enums.VerificationState VerificationState{get;set;}
-        public Membership CurrentMembership{get;set;}
+        public Membership? CurrentMembership{get;set;}
     }
 }
