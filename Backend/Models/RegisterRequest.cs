@@ -51,7 +51,7 @@ public class RegisterRequest
     public string Email_Adress { get; set; }
 
     [Required]
-    // ATTENTION: URL needs to contain placeholders 'USER_ID' for User_ID and 'TOKEN' for VerificationToken !
+    // ATTENTION: URL needs to contain placeholders '*USER_ID*' for User_ID and '*TOKEN*' for VerificationToken !
     public string VerificationURL
     {
         get
@@ -61,9 +61,9 @@ public class RegisterRequest
         
         set
         {
-            if (!( (value.ToUpper().Contains("USER_ID"))&& (value.ToUpper().Contains("TOKEN"))))
+            if (!( (value.ToUpper().Contains("*USER_ID*"))&& (value.ToUpper().Contains("*TOKEN*"))))
             {
-                throw (new InvalidDataException("URL needs to contain placeholders 'USER_ID' for User_ID and 'TOKEN' for VerificationToken !"));
+                throw (new InvalidDataException("URL needs to contain placeholders '*USER_ID*' for User_ID and '*TOKEN*' for VerificationToken !"));
             }
             else
             {
