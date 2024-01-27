@@ -15,11 +15,14 @@ namespace UGHApi.Controllers
     public class ProfileController : ControllerBase
     {
         private readonly UghContext _context;
-
-        public ProfileController(UghContext context)
+		private readonly ILogger<ProfileController> _logger;
+		
+		public ProfileController(UghContext context, ILogger<ProfileController> logger)
         {
             _context = context;
-        }
+            _logger = logger;
+		}
+
 
         // GET: api/Profile
         [HttpGet]
@@ -36,18 +39,19 @@ namespace UGHApi.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Profile>> GetProfile(int id)
         {
-          if (_context.Profiles == null)
-          {
-              return NotFound();
-          }
-            var profile = await _context.Profiles.FindAsync(id);
+			_logger.LogInformation($"GetProfile called with ID: {id}");
+			if (_context.Profiles == null)
+			{
+			  return NotFound();
+			}
+			var profile = await _context.Profiles.FindAsync(id);
 
-            if (profile == null)
-            {
-                return NotFound();
-            }
+			if (profile == null)
+			{
+				return NotFound();
+			}
 
-            return profile;
+			return profile;
         }
 
         // PUT: api/Profile/5

@@ -1,0 +1,1 @@
+INSERT INTO Profiles (NickName) VALUES ('TestNickName');

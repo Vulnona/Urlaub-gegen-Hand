@@ -14,33 +14,19 @@ ggf. Datenbank migrieren
 cd UGH/Backend 
 dotnet ef database update
 
+In die Db:
+docker exec -it ugh-db-1 mysql -u user -p
 
 Testnutzer
 
 Datenbank touchen
 USE db;
 
-Tabelle erstellen
-CREATE TABLE TestUser (
-    ID INT AUTO_INCREMENT PRIMARY KEY,
-    VisibleName VARCHAR(100),
-    FirstName VARCHAR(50),
-    LastName VARCHAR(50),
-    DateOfBirth DATE,
-    Gender CHAR(1),
-    Street VARCHAR(100),
-    HouseNumber VARCHAR(10),
-    PostCode VARCHAR(10),
-    City VARCHAR(100),
-    Country VARCHAR(100),
-    Email_Address VARCHAR(100),
-    IsEmailVerified BOOLEAN
-);
+(weitere) Testnutzer erstellen
+INSERT INTO Profiles (NickName) VALUES ('TestNickName');
 
-User erstellen und einfügen
-INSERT INTO TestUser (VisibleName, FirstName, LastName, DateOfBirth, Gender, Street, HouseNumber, PostCode, City, Country, Email_Address, IsEmailVerified)
-VALUES ('Testuser', 'Vorname', 'Nachname', '2000-01-01', 'M', 'Musterstraße', '123', '12345', 'Musterstadt', 'Deutschland', 'testuser@example.com', 1);
+bzw.
+docker exec -it ugh-db-1 mysql -u user -p db < /docker-entrypoint-initdb.d/init_db_test.sql
 
-
-Datensätze anzeigen lassen
-SELECT * FROM TestUser;
+Hat es geklappt?
+select * from Profiles;

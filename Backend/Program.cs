@@ -21,7 +21,7 @@ namespace UGHApi
 			
 			builder.WebHost.ConfigureKestrel(serverOptions =>
 			{
-				serverOptions.ListenAnyIP(8080); 
+				serverOptions.ListenAnyIP(8080); // PORT
 			});
 
             // Add services to the container.
