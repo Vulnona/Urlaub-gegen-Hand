@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 
 namespace UGHApi
 {
@@ -11,6 +13,11 @@ namespace UGHApi
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+			
+			builder.WebHost.ConfigureKestrel(serverOptions =>
+			{
+            serverOptions.ListenAnyIP(8080); 
+			});
 
             // Add services to the container.
             builder.Services.AddControllers();
