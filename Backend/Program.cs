@@ -46,8 +46,6 @@ namespace UGHApi
             //app.UseHttpsRedirection();
             app.UseAuthorization();
             app.MapControllers();
-			
-			app.MapGet("/hello", () => "Hello World!");
 
             app.Run();
         }
