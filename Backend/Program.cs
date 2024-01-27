@@ -6,6 +6,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 
+
 namespace UGHApi
 {
     public class Program
@@ -14,9 +15,13 @@ namespace UGHApi
         {
             var builder = WebApplication.CreateBuilder(args);
 			
+			builder.Logging.ClearProviders();
+			builder.Logging.AddConsole();
+			builder.Logging.SetMinimumLevel(LogLevel.Debug);
+			
 			builder.WebHost.ConfigureKestrel(serverOptions =>
 			{
-            serverOptions.ListenAnyIP(8080); 
+				serverOptions.ListenAnyIP(8080); 
 			});
 
             // Add services to the container.
@@ -29,6 +34,7 @@ namespace UGHApi
             builder.Services.AddSingleton<EmailService>();
 
             var app = builder.Build();
+			
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
@@ -37,9 +43,11 @@ namespace UGHApi
                 app.UseSwaggerUI();
             }
 
-            app.UseHttpsRedirection();
+            //app.UseHttpsRedirection();
             app.UseAuthorization();
             app.MapControllers();
+			
+			app.MapGet("/hello", () => "Hello World!");
 
             app.Run();
         }

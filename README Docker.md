@@ -9,3 +9,7 @@ docker logs [containername]
 
 lokaler Aufruf
 http://localhost:8000/
+
+
+Inkl "allem":
+docker-compose up -d --build

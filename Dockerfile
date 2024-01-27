@@ -19,8 +19,8 @@ RUN npm run build
 FROM mcr.microsoft.com/dotnet/aspnet:7.0-alpine
 WORKDIR /app
 
-# Nginx installieren
-RUN apk add nginx
+# Nginx installieren und Netzwerktools hinzufügen
+RUN apk add nginx iputils
 
 # Backend kopieren
 COPY --from=backend-build /app/binaries /app/binaries
