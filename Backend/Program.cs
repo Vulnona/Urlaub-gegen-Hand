@@ -26,12 +26,13 @@ namespace UGHApi
 			
 			var appsettingsPath = "/app/binaries"; 
 			
-			var config = new ConfigurationBuilder()
-				.SetBasePath(appsettingsPath)
-				.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-				.Build();
+			IConfigurationRoot config =new ConfigurationBuilder()
+            .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
+            .AddJsonFile("appsettings.json")
+            .Build();
 			
-			var connectionString = Environment.GetEnvironmentVariable("DefaultConnection");
+			//var connectionString = Environment.GetEnvironmentVariable("DefaultConnection");
+            var connectionString=config.GetConnectionString("DefaultConnection");
 			
 			var logger = builder.Services.BuildServiceProvider().GetRequiredService<ILogger<Program>>();       
             // Logging des Connection Strings
