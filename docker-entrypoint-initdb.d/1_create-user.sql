@@ -1,4 +1,4 @@
-CREATE USER 'urlaubgegenhand'@'localhost' IDENTIFIED BY 'passwort';
-GRANT ALL PRIVILEGES ON *.* TO 'urlaubgegenhand'@'localhost';
+CREATE USER 'user' IDENTIFIED BY 'password';
+GRANT ALL PRIVILEGES ON *.* TO 'user';
 
 CREATE DATABASE urlaubgegenhand;

@@ -37,12 +37,16 @@ export const useUserProfileStore = defineStore('userProfile', {
   },
 
   actions: {
-    async fetchUserProfile(userId: number): Promise<void> {
+    async fetchUserProfile(Profile_ID: number) {  
+      console.log("fetchUserProfile called with:", Profile_ID);
       try {
-        const response = await axios.get<UserProfile>(`/api/Profile/${userId}`);
-
+        const response = await axios.get(`/api/Profile/${Profile_ID}`); 
+        console.log(response.data);
         if (response.status === 200) {
-          this.userProfile = response.data;
+          const userProfile = response.data;
+          userProfile.MembershipFirstActivation = new Date(userProfile.MembershipFirstActivation);
+          userProfile.UghUser.DateOfBirth = new Date(userProfile.UghUser.DateOfBirth);
+          this.userProfile = userProfile;
         } else {
           this.userProfile = null;
         }

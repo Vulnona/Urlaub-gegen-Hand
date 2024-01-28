@@ -6,7 +6,6 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 
-
 namespace UGHApi
 {
     public class Program
@@ -19,10 +18,27 @@ namespace UGHApi
 			builder.Logging.AddConsole();
 			builder.Logging.SetMinimumLevel(LogLevel.Debug);
 			
+			
 			builder.WebHost.ConfigureKestrel(serverOptions =>
 			{
 				serverOptions.ListenAnyIP(8080); // PORT
 			});
+			
+			var appsettingsPath = "/app/binaries"; 
+			
+			var config = new ConfigurationBuilder()
+				.SetBasePath(appsettingsPath)
+				.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+				.Build();
+			
+			var connectionString = Environment.GetEnvironmentVariable("DefaultConnection");
+			
+			var logger = builder.Services.BuildServiceProvider().GetRequiredService<ILogger<Program>>();       
+            // Logging des Connection Strings
+            logger.LogInformation($"Geladener Connection String: {connectionString}");
+
+			builder.Services.AddDbContext<UghContext>(options =>
+                options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 
             // Add services to the container.
             builder.Services.AddControllers();
@@ -35,6 +51,9 @@ namespace UGHApi
 
             var app = builder.Build();
 			
+			app.UseMiddleware<ErrorHandlingMiddleware>();
+			
+			DatabaseWaiter.WaitForDatabaseConnection(connectionString); 
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())

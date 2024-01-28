@@ -16,6 +16,7 @@ dotnet ef database update
 
 In die Db:
 docker exec -it ugh-db-1 mysql -u user -p
+-> Passwort ("password")
 
 Testnutzer
 
@@ -30,3 +31,8 @@ docker exec -it ugh-db-1 mysql -u user -p db < /docker-entrypoint-initdb.d/init_
 
 Hat es geklappt?
 select * from Profiles;
+
+Workaround solange wir noch keine Auth haben:
+docker exec -it ugh-db-1 mysql -u root -p
+GRANT ALL PRIVILEGES ON db.* TO 'user'@'localhost' IDENTIFIED BY 'password';
+FLUSH PRIVILEGES;

@@ -2,7 +2,7 @@
   <div>
     <h1>Benutzerkonto</h1>
     <div v-if="userProfile">
-      <p>Benutzername: {{ userProfile.username }}</p>
+      <p>Benutzername: {{ userProfile.UghUser.VisibleName }}</p>
       <!-- Weitere Benutzerdaten hier anzeigen -->
     </div>
     <div v-else>
@@ -20,9 +20,9 @@ const userProfile = ref(null);
 
 onMounted(async () => {
   try {
-    const response = await fetch('/api/profile'); 
-    const userData = await response.json();
-    userProfile.value = userData; 
+    const Profile_ID = 1; //fürs Testing
+    await userProfileStore.fetchUserProfile(Profile_ID);
+    userProfile.value = userProfileStore.getUserProfile();
   } catch (error) {
     console.error('Fehler beim Laden des Benutzerprofils', error);
   }

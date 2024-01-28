@@ -13,3 +13,6 @@ http://localhost:8000/
 
 Inkl "allem":
 docker-compose up -d --build
+
+Herunterfahren der Container:
+docker-compose down

@@ -31,7 +31,8 @@ COPY --from=frontend-build /app/dist /www
 # Nginx config hinzufügen
 COPY nginx.conf /etc/nginx/nginx.conf
 
-EXPOSE 80
+#PORT
+EXPOSE 80 
 
 # Nginx und Backend starten
 CMD ["sh", "-c", "nginx && dotnet /app/binaries/UGHApi.dll --urls http://+:80"]
