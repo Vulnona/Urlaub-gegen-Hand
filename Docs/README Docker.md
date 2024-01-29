@@ -1,3 +1,10 @@
+ ##### TL;DR
+
+docker-compose up --build
+
+
+
+
 ## Setup and Start Docker
 # Docker builden
 docker build -t ugh .
@@ -25,6 +32,8 @@ docker-compose up migration
 
 # Mysql Container erstellen
 docker run -d --name silly_einstein -e MYSQL_ROOT_PASSWORD=passwort -e MYSQL_DATABASE=db mysql/mysql-server
+# bzw.
+docker-compose run db mysql -h db -u user -p password
 
 # Verbindung erfolgreich?
 docker ps
