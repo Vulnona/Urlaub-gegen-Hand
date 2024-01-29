@@ -70,3 +70,6 @@ If you get an error `ERROR: error during connect: in the default daemon configur
 make sure Docker Desktop is running.  
 Proof this by checking your status in Docker Desktop's left bottom corner, should display
 > Engine running
+
+
+If you did "docker-compose up migration", you need to make sure to start "docker-compose up server" after that. Always check with "docker ps" if you're not sure which container are running atm 
