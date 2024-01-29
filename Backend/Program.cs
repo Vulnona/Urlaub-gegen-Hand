@@ -31,7 +31,6 @@ namespace UGHApi
             .AddJsonFile("appsettings.json")
             .Build();
 			
-			//var connectionString = Environment.GetEnvironmentVariable("DefaultConnection");
             var connectionString=config.GetConnectionString("DefaultConnection");
 			
 			var logger = builder.Services.BuildServiceProvider().GetRequiredService<ILogger<Program>>();       

@@ -8,7 +8,6 @@ using Backend.Models;
 
 public class UghContext : DbContext
 {
-    //static readonly string connectionString = "Server=db; User ID=root; Password=password; Database=db";
     public UghContext (DbContextOptions<UghContext> options) :base(options){}
     public DbSet<User> Users { get; set; }
     public DbSet<Profile> Profiles{get;set;}

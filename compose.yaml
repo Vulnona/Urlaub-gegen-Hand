@@ -10,7 +10,6 @@ services:
       - ./Frontend-Vuetify/dist:/www
     environment:
       - ASPNETCORE_URLS=http://+:8080 #PORT
-      - DefaultConnection=Server=db;User ID=user;Password=password;Database=db;SSL Mode=None
     depends_on:
       - db
 
