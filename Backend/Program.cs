@@ -35,7 +35,7 @@ namespace UGHApi
 			
 			var logger = builder.Services.BuildServiceProvider().GetRequiredService<ILogger<Program>>();       
             // Logging des Connection Strings
-            logger.LogInformation($"Geladener Connection String: {connectionString}");
+            //logger.LogInformation($"Geladener Connection String: {connectionString}");
 
 			builder.Services.AddDbContext<UghContext>(options =>
                 options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));

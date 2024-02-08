@@ -27,16 +27,16 @@ services:
     ports:
       - '3306:3306'
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      test: ["CMD", "mysqladmin", "ping", "-h"]
       timeout: 20s
-      retries: 10
+      retries: 3
     
   migration:
     build:
       context: .
       dockerfile: Dockerfile-Migration
     environment:
-      - ConnectionStrings__DefaultConnection=Server=db;User ID=user;Password=password;Database=db;SSL Mode=None
+      - ConnectionStrings__DefaultConnection=Server=db;User ID=localhost;Password=password;Database=db;SSL Mode=None
     depends_on:
       - db
 
