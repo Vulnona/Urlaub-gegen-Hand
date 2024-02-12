@@ -74,5 +74,6 @@ namespace UGHModels{
         [Required]
         public UGH_Enums.VerificationState VerificationState{get;set;}
         public Membership? CurrentMembership{get;set;}
+		public string FacebookProfil { get; set; }
     }
 }
