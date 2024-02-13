@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -9,9 +10,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace UGHApi.Migrations
 {
     [DbContext(typeof(UghContext))]
-    partial class UghContextModelSnapshot : ModelSnapshot
+    [Migration("20240212064014_EmailVerificator")]
+    partial class EmailVerificator
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -174,15 +177,7 @@ namespace UGHApi.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<string>("Password")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
                     b.Property<string>("PostCode")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("SaltKey")
                         .IsRequired()
                         .HasColumnType("longtext");
 

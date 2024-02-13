@@ -47,28 +47,28 @@ public class RegisterRequest
     [Required]
     public string Email_Adress { get; set; }
 
-    [Required]
+    //[Required]
     // ATTENTION: URL needs to contain placeholders '*USER_ID*' for User_ID and '*TOKEN*' for VerificationToken !
-    public string VerificationURL
-    {
-        get
-            {
-                return _VerificationURL;
-            } 
+    //public string VerificationURL
+    //{
+    //    get
+    //        {
+    //            return _VerificationURL;
+    //        } 
         
-        set
-        {
-            if (!( (value.ToUpper().Contains("*USER_ID*"))&& (value.ToUpper().Contains("*TOKEN*"))))
-            {
-                throw (new InvalidDataException("URL needs to contain placeholders '*USER_ID*' for User_ID and '*TOKEN*' for VerificationToken !"));
-            }
-            else
-            {
-                _VerificationURL=value;
-            }
-        }
+    //    set
+    //    {
+    //        if (!( (value.ToUpper().Contains("*USER_ID*"))&& (value.ToUpper().Contains("*TOKEN*"))))
+    //        {
+    //            throw (new InvalidDataException("URL needs to contain placeholders '*USER_ID*' for User_ID and '*TOKEN*' for VerificationToken !"));
+    //        }
+    //        else
+    //        {
+    //            _VerificationURL=value;
+    //        }
+    //    }
         
-    }
+    //}
 
     
 }

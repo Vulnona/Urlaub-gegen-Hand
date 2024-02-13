@@ -5,6 +5,7 @@ using UGHModels;
 using UGHApi.Services;
 using UGHApi.Models;
 using Backend.Models;
+using Microsoft.AspNetCore.Mvc.Abstractions;
 
 namespace UGHApi.Controllers
 {
@@ -13,12 +14,16 @@ namespace UGHApi.Controllers
     public class AuthController : ControllerBase
     {
         private readonly UghContext _context;
+        private readonly UserService _userService;
         private readonly EmailService _emailService;
+        private readonly PasswordService _passwordService;
 
-        public AuthController(UghContext context, EmailService emailService)
+        public AuthController(UghContext context, EmailService emailService,UserService userService,PasswordService passwordService)
         {
             _context = context;
             _emailService = emailService;
+            _userService = userService;
+            _passwordService = passwordService;
         }
 
         [HttpPost("register")]
@@ -32,7 +37,8 @@ namespace UGHApi.Controllers
             DateTime parsedDateOfBirth = DateTime.Parse(request.DateOfBirth);
             DateOnly dateOnly = new DateOnly(parsedDateOfBirth.Year, parsedDateOfBirth.Month, parsedDateOfBirth.Day);
 
-
+            var salt = _passwordService.GenerateSalt();
+            var HashPassword = _passwordService.HashPassword(request.Password, salt);
             var newUser = new User(
                 request.VisibleName,
                 request.FirstName,
@@ -45,7 +51,9 @@ namespace UGHApi.Controllers
                 request.City,
                 request.Country,
                 request.Email_Adress,
-                false
+                false,
+                HashPassword,
+                salt
             );
 
             newUser.VerificationState=UGH_Enums.VerificationState.isNew;
@@ -61,11 +69,27 @@ namespace UGHApi.Controllers
             _context.EmailVerificators.Add(newVerificator);
             _context.SaveChanges();
 
-            string verificationURL=request.VerificationURL.Replace("*USER_ID*",newUser.User_Id.ToString()).Replace("*TOKEN*",newVerificator.verificationToken.ToString());
+            //string verificationURL=request.VerificationURL.Replace("*USER_ID*",newUser.User_Id.ToString()).Replace("*TOKEN*",newVerificator.verificationToken.ToString());
 
-            _emailService.SendEmail(newUser.Email_Adress, "Bestätigen Sie Ihre E-Mail", "<a href="+""+verificationURL+""+">Hier klicken um Ihre E-Mail zu bestätigen</a>");
+            _emailService.SendVerificationEmail(newUser.Email_Adress, newVerificator.verificationToken);
 
             return Ok(newUser);
         }
+
+
+        [HttpGet("verifyemail")]
+        public IActionResult Verify(string token)
+        {
+            var user = _userService.GetUserByToken(token);
+            if (user == null)
+            {
+                return NotFound("Invalid token");
+            }
+
+            user.IsEmailVerified = true;
+            _context.SaveChanges();
+            return Ok("Email verified successfully");
+        }
+       
     }
 }

@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
+using UGHApi.Services;
 
 namespace UGHApi
 {
@@ -48,6 +49,8 @@ namespace UGHApi
 
             // Register the EmailService as a Singleton
             builder.Services.AddSingleton<EmailService>();
+            builder.Services.AddTransient<UserService>();
+            builder.Services.AddScoped<PasswordService>();
 
             var app = builder.Build();
 			
@@ -65,7 +68,7 @@ namespace UGHApi
             //app.UseHttpsRedirection();
             app.UseAuthorization();
             app.MapControllers();
-
+           
             app.Run();
         }
     }
