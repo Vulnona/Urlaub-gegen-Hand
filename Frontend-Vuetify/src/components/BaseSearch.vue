@@ -8,9 +8,10 @@
             label="Region"
             :items="states"
           >
-            <template v-slot:append>
-              <v-btn class="h-100"
-                     color="primary"
+            <template #append>
+              <v-btn
+                class="h-100"
+                color="primary"
               >
                 <v-icon icon="mdi-map-search-outline" />
                 <span class="d-none d-sm-flex ml-2">Suchen</span>

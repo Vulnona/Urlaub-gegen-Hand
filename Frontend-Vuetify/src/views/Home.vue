@@ -1,9 +1,13 @@
 <template>
   <BaseSearch />
-  <OfferGrid />
+  <OfferGrid
+    v-if="productsResult"
+    :result="productsResult"
+  />
 </template>
 
-<script lang="ts" setup>
-  import OfferGrid from '@/components/OfferGrid.vue'
-  import BaseSearch from '@/components/BaseSearch.vue'
+<script setup>
+import OfferGrid from '@/components/OfferGrid.vue'
+import BaseSearch from '@/components/BaseSearch.vue'
+
 </script>
