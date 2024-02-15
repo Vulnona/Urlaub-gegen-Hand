@@ -4,16 +4,16 @@ using System.ComponentModel.DataAnnotations;
 public class RegisterRequest
 {
     private string _VerificationURL=string.Empty;
-    [Required]
-    public string Username { get; set; }
-
-    [Required]
-    public string Password { get; set; }
-
+    //[Required]
+    //public string Username { get; set; }
     [Required]
     [EmailAddress]
     public string Email { get; set; }
 
+    [Required]
+    public string Password { get; set; }
+
+    
     [Required]
     public string VisibleName { get; set; }
 
@@ -71,4 +71,20 @@ public class RegisterRequest
     //}
 
     
+}
+
+public class LoginModel
+{
+    [Required]
+    public string Email { get; set; }
+    [Required]
+    public string Password { get; set; }
+}
+public class RefreshTokenRequest
+{
+    public required string RefreshToken { get; set; }
+}
+public class ResentEmailVerification
+{
+    public required string Email { get; set; }
 }
