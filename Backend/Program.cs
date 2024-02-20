@@ -10,6 +10,9 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.OpenApi.Models;
+using UGHApi.Models;
+using UGHModels;
+using System;
 
 namespace UGHApi
 {
@@ -119,11 +122,19 @@ namespace UGHApi
             builder.Services.AddMemoryCache();
             builder.Services.AddScoped<TokenService>();
 
+            // Seed default roles if they don't exist
+            SeedDefaultRoles(builder.Services);
+
+            // Create an auto-admin user
+            CreateAutoAdminUser(builder.Services.BuildServiceProvider().GetService<UserService>());
+
+           
             var app = builder.Build();
 			
 			app.UseMiddleware<ErrorHandlingMiddleware>();
 			
-			DatabaseWaiter.WaitForDatabaseConnection(connectionString); 
+			DatabaseWaiter.WaitForDatabaseConnection(connectionString);
+
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
@@ -138,6 +149,47 @@ namespace UGHApi
             app.MapControllers();
            
             app.Run();
+        }
+        private static void SeedDefaultRoles(IServiceCollection services)
+        {
+            using var scope = services.BuildServiceProvider().CreateScope();
+            var dbContext = scope.ServiceProvider.GetRequiredService<UghContext>();
+
+            // Check if roles exist, if not, add them
+            if (!dbContext.UserRoles.Any())
+            {
+                dbContext.UserRoles.AddRange(new List<UserRole>
+            {
+                new UserRole { RoleName = "Admin" },
+                new UserRole { RoleName = "User" }
+            });
+                dbContext.SaveChanges();
+            }
+        }
+        private static async void CreateAutoAdminUser(UserService userService)
+        {
+            // Check if the auto-admin user already exists
+            var user = await userService.GetUserByEmailAsync("admin@example.com");
+            if (user==null)
+            {
+               RegisterRequest AdminUser = new RegisterRequest
+               {
+                   VisibleName = "Admin",
+                   FirstName = "Admin",
+                   LastName = "User",
+                   DateOfBirth = "1990-01-01", // Format: "YYYY-MM-DD"
+                   Gender = "Male", // Or "Female" or any other value
+                   Street = "Admin Street",
+                   HouseNumber = "123",
+                   PostCode = "12345",
+                   City = "Admin City",
+                   Country = "Admin Country",
+                   Email_Adress = "admin@example.com",
+                   Password = "admin@123", // Your desired password
+                                                  // You can add additional fields here if needed
+               };
+                userService.CreateAdmin(AdminUser);
+            }
         }
     }
 }

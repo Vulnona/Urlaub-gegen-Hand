@@ -72,6 +72,19 @@ namespace UGHApi.Controllers
             _context.Users.Add(newUser);
             _context.SaveChanges();
 
+            // Add default role for the user (e.g., "User")
+            var defaultUserRole = _context.UserRoles.FirstOrDefault(r => r.RoleName == "User");
+            if (defaultUserRole != null)
+            {
+                var userRoleMapping = new UserRoleMapping
+                {
+                    UserId = newUser.User_Id,
+                    RoleId = defaultUserRole.RoleId
+                };
+                _context.UserRolesMapping.Add(userRoleMapping);
+                _context.SaveChanges();
+            }
+
             var verificatioToken = _tokenService.GenrateNewEmailVerificator(newUser.User_Id);
 
             //string verificationURL=request.VerificationURL.Replace("*USER_ID*",newUser.User_Id.ToString()).Replace("*TOKEN*",newVerificator.verificationToken.ToString());
@@ -96,29 +109,35 @@ namespace UGHApi.Controllers
             return Ok("Email verified successfully");
         }
         [HttpPost("login")]
-        public IActionResult Login(LoginModel model)
+        public async Task<IActionResult> Login(LoginModel model)
         {
             // Validate user credentials (e.g., check username and password against database)
-            if (_userService.IsValidUser(model.Email, model.Password))
+            var validationResult = _userService.ValidateUser(model.Email, model.Password);
+
+            if (validationResult.IsValid)
             {
-                var accessToken =_tokenService.GenerateJwtToken(model.Email);
-                var refreshToken =_tokenService.GenerateRefreshToken();
+                var accessToken = await _tokenService.GenerateJwtToken(model.Email);
+                var refreshToken = _tokenService.GenerateRefreshToken();
                 _tokenService.StoreRefreshToken(refreshToken, model.Email);
-               
+
                 return Ok(new { accessToken, refreshToken });
             }
-
-            return Unauthorized();
+           else
+            {
+                
+                // Return the specific error message
+                return BadRequest(validationResult.ErrorMessage);
+            }
         }
         [HttpPost("refresh")]
-        public IActionResult Refresh(RefreshTokenRequest request)
+        public async Task<IActionResult> Refresh(RefreshTokenRequest request)
         {
             if (!_tokenService.TryGetUserEmail(request.RefreshToken, out var Email))
             {
                 return Unauthorized();
             }
 
-            var accessToken =_tokenService.GenerateJwtToken(Email);
+            var accessToken =await _tokenService.GenerateJwtToken(Email);
 
             return Ok(new { accessToken });
         }

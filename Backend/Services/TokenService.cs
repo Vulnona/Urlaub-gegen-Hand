@@ -8,6 +8,8 @@ using System.Text;
 using UGHModels;
 using Microsoft.Extensions.Caching.Memory;
 using Backend.Models;
+using UGHApi.Models;
+using Microsoft.AspNetCore.Http.HttpResults;
 namespace UGHApi.Services
 {
     public class TokenService
@@ -15,22 +17,30 @@ namespace UGHApi.Services
         private readonly IConfiguration _configuration;
         private readonly IMemoryCache _cache;
         private readonly UghContext _context;
-        public TokenService(IConfiguration configuration, IMemoryCache cache, UghContext context)
+        private readonly UserService _userService;
+        public TokenService(IConfiguration configuration, IMemoryCache cache, UghContext context, UserService userService)
         {
             _configuration = configuration;
             _cache = cache;
             _context = context;
+            _userService =userService;
         }
-        public string GenerateJwtToken(string username)
+        public async Task<string> GenerateJwtToken(string username)
         {
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
-
-            var claims = new[]
+            var roles = await _userService.GetUserRolesByUserEmail(username);
+            
+            var claims = new List<Claim>
             {
                 new Claim(JwtRegisteredClaimNames.Sub, username),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+
             };
+            foreach (var role in roles)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, role));
+            }
 
             var token = new JwtSecurityToken(
                 _configuration["Jwt:Issuer"],
@@ -74,5 +84,7 @@ namespace UGHApi.Services
             _context.SaveChanges();
             return newVerificator.verificationToken;
         }
+        
+        
     }
 }
