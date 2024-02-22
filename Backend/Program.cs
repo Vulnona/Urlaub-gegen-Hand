@@ -121,6 +121,7 @@ namespace UGHApi
             builder.Services.AddScoped<PasswordService>();
             builder.Services.AddMemoryCache();
             builder.Services.AddScoped<TokenService>();
+            builder.Services.AddTransient<CouponService>();
 
             // Seed default roles if they don't exist
             SeedDefaultRoles(builder.Services);

@@ -18,7 +18,7 @@ namespace UGHApi.Controllers
             _context = context;
             _userService = userService;
         }
-        
+        #region verifyUserState
         [HttpGet("verify-user/{userId}")]
         [Authorize(Roles = "Admin")]
         public IActionResult VerifyUser(int userId)
@@ -74,5 +74,7 @@ namespace UGHApi.Controllers
             var users = await _context.Users.ToListAsync();
             return users;
         }
+        #endregion
+        
     }
 }
