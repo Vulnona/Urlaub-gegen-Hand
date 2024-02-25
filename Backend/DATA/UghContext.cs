@@ -17,8 +17,10 @@ public class UghContext : DbContext
     public DbSet<UGHApi.Models.Region> Regions{get;set;}
     public DbSet<Country> Countries{get;set;}
     public DbSet<EmailVerificator> EmailVerificators{get;set;}
-    
-
+    public DbSet<UserRole> UserRoles { get;set;}
+    public DbSet<UserRoleMapping> UserRolesMapping { get;set;}
+    public DbSet<Coupon> Coupons { get;set;}    
+    public DbSet<Redemption>Redemptions { get;set;}
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         IConfigurationRoot configuration =new ConfigurationBuilder()

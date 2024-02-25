@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -9,9 +10,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace UGHApi.Migrations
 {
     [DbContext(typeof(UghContext))]
-    partial class UghContextModelSnapshot : ModelSnapshot
+    [Migration("20240220062907_AddUserRole")]
+    partial class AddUserRole
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -66,41 +69,6 @@ namespace UGHApi.Migrations
                     b.ToTable("Countries");
                 });
 
-            modelBuilder.Entity("UGHApi.Models.Coupon", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<decimal>("DiscountAmount")
-                        .HasColumnType("decimal(65,30)");
-
-                    b.Property<DateTime>("EndDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<DateTime>("StartDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Coupons");
-                });
-
             modelBuilder.Entity("UGHApi.Models.Membership", b =>
                 {
                     b.Property<int>("MembershipID")
@@ -127,28 +95,6 @@ namespace UGHApi.Migrations
                     b.HasKey("Profile_ID");
 
                     b.ToTable("Profiles");
-                });
-
-            modelBuilder.Entity("UGHApi.Models.Redemption", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<int>("CouponId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("RedeemedDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CouponId");
-
-                    b.ToTable("Redemptions");
                 });
 
             modelBuilder.Entity("UGHApi.Models.Region", b =>
@@ -295,17 +241,6 @@ namespace UGHApi.Migrations
                     b.HasIndex("CurrentMembershipMembershipID");
 
                     b.ToTable("Users");
-                });
-
-            modelBuilder.Entity("UGHApi.Models.Redemption", b =>
-                {
-                    b.HasOne("UGHApi.Models.Coupon", "Coupon")
-                        .WithMany()
-                        .HasForeignKey("CouponId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Coupon");
                 });
 
             modelBuilder.Entity("UGHApi.Models.UserRoleMapping", b =>

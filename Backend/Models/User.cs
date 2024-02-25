@@ -29,7 +29,7 @@ namespace UGHModels{
                
         }
 
-        public User( string visibleName, string firstName, string lastName, DateOnly dateOfBirth, string gender, string street, string houseNumber, string postCode, string city, string country, string email_Adress, bool isEmailVerified) 
+        public User( string visibleName, string firstName, string lastName, DateOnly dateOfBirth, string gender, string street, string houseNumber, string postCode, string city, string country, string email_Adress, bool isEmailVerified,string password,string saltKey) 
         {
                 this.VisibleName = visibleName;
                 this.FirstName = firstName;
@@ -43,11 +43,16 @@ namespace UGHModels{
                 this.Country = country;
                 this.Email_Adress = email_Adress;
                 this.IsEmailVerified = isEmailVerified;
+                this.Password = password;
+            this.SaltKey = saltKey;
                 
                
         }
         [Key]
         public int User_Id {get;set;}
+        [Required]
+        public string Password { get;set;}
+        public string SaltKey {  get;set;}
         [Required]
         public string VisibleName{get;set;}
         [Required]
