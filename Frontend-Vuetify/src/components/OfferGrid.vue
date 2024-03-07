@@ -1,29 +1,42 @@
 <template>
   <v-container>
-    <v-row v-if="OffersSelected">
+    <v-row v-if="offersSelected">
       <v-col>
-      <p>Wir haben <strong>{{ OffersSelected }}</strong> Treffer zu deiner Suche gefunden</p>
+        <p>Wir haben <strong>{{ offersSelected }}</strong> Treffer zu deiner Suche gefunden</p>
       </v-col>
     </v-row>
+    <v-row>Anzahl der Produkte: {{ result.total }}</v-row>
     <v-row>
       <v-col
-        v-for="n in Offers"
-        :key="n"
-        cols='12'
-        sm='6'
-        md='4'
-        lg='3'
+        v-for="(item, index) in result.products"
+        :key="index"
+        cols="12"
+        sm="6"
+        md="4"
+        lg="3"
       >
-        <OfferCard />
+        <OfferCard
+          :id="item.id"
+          :title="item.title"
+          :description="item.description"
+          :image="item.thumbnail"
+        />
       </v-col>
     </v-row>
   </v-container>
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue'
 import OfferCard from './OfferCard.vue'
+import {PropType, ref} from 'vue'
+import {Result} from '@/types';
 
-const Offers = ref(20)
-const OffersSelected = ref(0)
+defineProps({
+  result: {
+    type: Object as PropType<Result>,
+    required: true
+  }
+})
+
+const offersSelected = ref(0)
 </script>

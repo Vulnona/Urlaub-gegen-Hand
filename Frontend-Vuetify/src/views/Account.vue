@@ -1,30 +1,51 @@
 <template>
-  <div>
-    <h1>Benutzerkonto</h1>
-    <div v-if="userProfile">
-      <p>Benutzername: {{ userProfile.UghUser.VisibleName }}</p>
-      <!-- Weitere Benutzerdaten hier anzeigen -->
-    </div>
-    <div v-else>
-      <p>Lade Benutzerprofil...</p>
-    </div>
-  </div>
+  <AccountDetail v-if="isLoggedIn" />
+  <v-row
+    v-else
+    class="justify-center"
+  >
+    <v-card
+      width="500"
+    >
+      <v-tabs
+        v-model="accountMode"
+        color="primary"
+        align-tabs="center"
+      >
+        <v-tab :value="AccountModes.login">
+          Anmelden
+        </v-tab>
+        <v-tab :value="AccountModes.register">
+          Registrieren
+        </v-tab>
+      </v-tabs>
+
+      <v-card-text>
+        <v-container>
+          <v-row>
+            <v-col cols="12">
+              <AccountLogin v-if="accountMode === AccountModes.login" />
+              <AccountRegister v-else-if="accountMode === AccountModes.register" />
+            </v-col>
+          </v-row>
+        </v-container>
+      </v-card-text>
+    </v-card>
+  </v-row>
 </template>
 
-<script setup>
-import { ref, onMounted } from 'vue';
-import { useUserProfileStore } from '@/store/userProfileStore'; 
+<script lang="ts" setup>
+import { computed, ref} from 'vue';
+import { useAppStore} from '@/store/app';
+import AccountLogin from '@/components/account/AccountLogin.vue'
+import AccountRegister from '@/components/account/AccountRegister.vue'
+import AccountDetail from '@/components/account/AccountDetail.vue';
 
-const userProfileStore = useUserProfileStore();
-const userProfile = ref(null);
-
-onMounted(async () => {
-  try {
-    const Profile_ID = 1; //fürs Testing
-    await userProfileStore.fetchUserProfile(Profile_ID);
-    userProfile.value = userProfileStore.getUserProfile();
-  } catch (error) {
-    console.error('Fehler beim Laden des Benutzerprofils', error);
-  }
-});
+enum AccountModes {
+  login,
+  register
+}
+const store = useAppStore()
+const isLoggedIn = computed(() => store.isLoggedIn)
+const accountMode = ref(AccountModes.login)
 </script>

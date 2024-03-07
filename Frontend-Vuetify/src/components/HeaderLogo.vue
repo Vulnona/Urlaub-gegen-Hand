@@ -1,7 +1,6 @@
 <template>
   <RouterLink to="/">
-    <v-icon icon="mdi-hand-heart-outline" />
-    Urlaub gegen Hand
+    <img src="@/assets/images/logo/logo-desktop.svg">
   </RouterLink>
 </template>
 
@@ -9,4 +8,7 @@
 </script>
 
 <style lang="scss" scoped>
+img {
+  inline-size: 200px;
+}
 </style>

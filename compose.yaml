@@ -1,13 +1,34 @@
-version: '3.3'
+version: '3.7'
 services:
-  server:
+  webserver:
+    image: "nginx:alpine"
+    restart: unless-stopped
     ports:
-        - '80:80'
+      - '80:80'
+    volumes:
+      - .docker/webserver/config/vhost.dev.conf:/etc/nginx/templates/default.conf.template
+
+  frontend:
+    build:
+      context: ./Frontend-Vuetify
+      dockerfile: ../.docker/frontend/Dockerfile
+      target: dev
+    restart: unless-stopped
+    environment:
+      APP_ENV: "dev"
+    ports:
+      - 3000:3000
+    volumes:
+      - ../Frontend-Vuetify:/opt/frontend
+      - /opt/frontend/node_modules
+
+  backend:
     build:
       context: .
-      dockerfile: Dockerfile
-    volumes:
-      - ./Frontend-Vuetify/dist:/www
+      dockerfile: .docker/backend/Dockerfile
+    restart: unless-stopped
+    ports:
+      - 8080:8080
     environment:
       - ASPNETCORE_URLS=http://+:8080 #PORT
       - ASPNETCORE_ENVIRONMENT=Development
@@ -16,25 +37,28 @@ services:
 
   db:
     image: mysql:5.7
-    restart: always
-    command: --default-authentication-plugin=mysql_native_password
+    restart: unless-stopped
+    command: '--default-authentication-plugin=mysql_native_password'
     environment:
       MYSQL_DATABASE: 'db'
       MYSQL_USER: 'user'
       MYSQL_PASSWORD: 'password'
       MYSQL_ROOT_PASSWORD: 'password'
       MYSQL_HOST: 'db'
+      MYSQL_ROOT_HOST: '%'
+    volumes:
+      - db-data:/var/lib/mysql
     ports:
       - '3306:3306'
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h"]
       timeout: 20s
       retries: 3
-    
+
   migration:
     build:
       context: .
-      dockerfile: Dockerfile-Migration
+      dockerfile: .docker/backend/Dockerfile-Migration
     environment:
       - ConnectionStrings__DefaultConnection=Server=db;User ID=localhost;Password=password;Database=db;SSL Mode=None
     depends_on:
