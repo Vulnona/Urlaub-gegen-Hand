@@ -75,6 +75,6 @@ volumes:
 
 secrets:
   db__root_password:
-    file: .docker/db/db-root-password.txt
+    file: .docker/db/secrets/db-root-password.txt
   db__user_password:
-    file: .docker/db/db-user-password.txt
+    file: .docker/db/secrets/db-user-password.txt
