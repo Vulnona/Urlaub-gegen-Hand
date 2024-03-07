@@ -5,12 +5,11 @@ ENV TZ=Europe/Berlin
 
 WORKDIR /app/frontend
 
-COPY . .
+FROM base AS dev
 
 RUN npm install -g npm
-
-FROM base AS dev
 WORKDIR /app/frontend
+COPY . .
 
 RUN npm install
 
