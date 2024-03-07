@@ -4,3 +4,5 @@
 * * [Docker](10.installation/10.docker.md)
 * [Guide](20.guide)
 * * [Verzeichnisstruktur](20.guide/10.directory-structure.md)
+* * [Interfaces](20.guide/20.interfaces.md)
+* * [API](20.guide/30.api.md)
