@@ -9,12 +9,12 @@ import { fileURLToPath, URL } from 'node:url'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  devServer: {
-    port: 3000,
-  },
   server: {
     host: '0.0.0.0',
     port: 3000,
+    watch: {
+      usePolling: import.meta.env.VITE_USE_POLLING === 'true',
+    }
   },
   plugins: [
     vue({
