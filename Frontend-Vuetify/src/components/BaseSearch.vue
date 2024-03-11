@@ -4,7 +4,7 @@
       <v-row>
         <v-col cols="12">
           <v-autocomplete
-            clearable="true"
+            :clearable="true"
             label="Region"
             :items="states"
           >

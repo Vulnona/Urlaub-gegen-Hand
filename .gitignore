@@ -572,3 +572,6 @@ Backend/obj/UGHApi.csproj.nuget.g.targets
 
 # IntelliJ Config
 /.idea/
+
+/.docker/*/secrets/*
+!/.docker/*/secrets/.*

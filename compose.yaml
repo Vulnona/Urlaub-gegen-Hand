@@ -19,8 +19,8 @@ services:
     ports:
       - 3000:3000
     volumes:
-      - ../Frontend-Vuetify:/opt/frontend
-      - /opt/frontend/node_modules
+      - ./Frontend-Vuetify:/app/frontend
+      - /app/frontend/node_modules
 
   backend:
     build:
@@ -32,6 +32,8 @@ services:
     environment:
       - ASPNETCORE_URLS=http://+:8080 #PORT
       - ASPNETCORE_ENVIRONMENT=Development
+    secrets: # Need to be used in the connection string
+      - db__user_password
     depends_on:
       - db
 
@@ -42,8 +44,8 @@ services:
     environment:
       MYSQL_DATABASE: 'db'
       MYSQL_USER: 'user'
-      MYSQL_PASSWORD: 'password'
-      MYSQL_ROOT_PASSWORD: 'password'
+      MYSQL_PASSWORD_FILE: /run/secrets/db__user_password
+      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/db__root_password
       MYSQL_HOST: 'db'
       MYSQL_ROOT_HOST: '%'
     volumes:
@@ -51,18 +53,28 @@ services:
     ports:
       - '3306:3306'
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h"]
-      timeout: 20s
-      retries: 3
+      test: ['CMD-SHELL', 'mysqladmin ping -h 127.0.0.1 --password="$$(cat /run/secrets/db__root_password)" --silent']
+      interval: 10s
+      retries: 5
+      start_period: 30s
+    secrets:
+      - db__user_password
+      - db__root_password
 
   migration:
     build:
       context: .
       dockerfile: .docker/backend/Dockerfile-Migration
     environment:
-      - ConnectionStrings__DefaultConnection=Server=db;User ID=localhost;Password=password;Database=db;SSL Mode=None
+      - ConnectionStrings__DefaultConnection=Server=db;User ID=root;Password=password;Database=db;SSL Mode=None
     depends_on:
       - db
 
 volumes:
   db-data:
+
+secrets:
+  db__root_password:
+    file: .docker/db/secrets/db-root-password.txt
+  db__user_password:
+    file: .docker/db/secrets/db-user-password.txt
