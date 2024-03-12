@@ -5,7 +5,9 @@
     </v-card-title>
     <v-card-text class="pa-0">
       <v-container>
-        <h3 class="pb-2">Kontaktdaten bearbeiten</h3>
+        <h3 class="pb-2">
+          Kontaktdaten bearbeiten
+        </h3>
         <v-row>
           <v-col cols="12">
             <v-text-field
@@ -14,17 +16,20 @@
             />
             <v-text-field
               label="Postleitzahl"
-              :model-value="user.address.postalCode" />
+              :model-value="user.address.postalCode"
+            />
             <v-text-field
               label="Stadt"
-              :model-value="user.address.city" />
+              :model-value="user.address.city"
+            />
           </v-col>
         </v-row>
 
         <v-select
           label="Land"
           :items="countries"
-          :model-value="user.address.country" />
+          :model-value="user.address.country"
+        />
         <v-autocomplete
           :items="regions"
           :model-value="user.address.state"
@@ -34,7 +39,9 @@
           :model-value="user.phone"
           label="Telefonnummer"
         />
-        <h3 class="pb-2">Konto bearbeiten</h3>
+        <h3 class="pb-2">
+          Konto bearbeiten
+        </h3>
         <v-row>
           <v-col cols="12">
             <v-text-field

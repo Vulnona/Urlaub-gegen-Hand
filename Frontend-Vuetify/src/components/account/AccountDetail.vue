@@ -1,12 +1,15 @@
 <template>
-  <v-row v-if="user"
-         class="justify-center"
+  <v-row
+    v-if="user"
+    class="justify-center"
   >
     <v-card
       width="500"
     >
       <v-card-title>
-        <h1 class="pt-4">Hallo {{ user.firstName }} {{ user.lastName }}</h1>
+        <h1 class="pt-4">
+          Hallo {{ user.firstName }} {{ user.lastName }}
+        </h1>
       </v-card-title>
       <v-card-text>
         <section>
@@ -90,8 +93,6 @@
 import { ref } from 'vue'
 import { useAppStore } from '@/store/app'
 import AccountEdit from '@/components/account/AccountEdit.vue'
-import AccountLogin from '@/components/account/AccountLogin.vue'
-import AccountRegister from '@/components/account/AccountRegister.vue'
 
 const showEditForm = ref(false)
 const showPassword = ref(false)
