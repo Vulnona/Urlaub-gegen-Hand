@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Configuration;
 using UGHApi.Models;
 using UGHApi.Services;
 using UGHModels;
@@ -12,10 +13,12 @@ namespace UGHApi.Controllers
     public class AdminController : ControllerBase
     {
         private readonly UghContext _context;
-        private readonly UserService _userService;
-        public AdminController(UghContext context, UserService userService)
+        private readonly UserService _userService; private readonly IConfiguration _configuration;
+
+        public AdminController(UghContext context, UserService userService, IConfiguration configuration)
         {
             _context = context;
+            _configuration = configuration;
             _userService = userService;
         }
         #region verifyUserState
@@ -42,7 +45,7 @@ namespace UGHApi.Controllers
             return Ok("User verification completed successfully.");
         }
 
-        [HttpPost("UpdateVerifyState/{userId}/{verificationState}")]
+        [HttpPost("updateverifystate/{userId}/{verificationState}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateVerifyState(int userId, UGH_Enums.VerificationState verificationState)
         {
@@ -67,11 +70,16 @@ namespace UGHApi.Controllers
                 return StatusCode(500, "Database error occurred while updating verification state.");
             }
         }
-        [HttpGet("GetAllUsers")]
+        [HttpGet("getallusers")]
         [Authorize(Roles = "Admin")] // Optional: Restrict access to admin role
         public async Task<ActionResult<IEnumerable<User>>> GetAllUsersByAdmin()
         {
+            string baseUrl = _configuration["BaseUrl"];
             var users = await _context.Users.ToListAsync();
+            foreach (var user in users)
+            {
+                user.SetImageUrl(user.IdCard, baseUrl);
+            }
             return users;
         }
         #endregion

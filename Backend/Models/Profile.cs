@@ -9,6 +9,6 @@ namespace UGHApi.Models
         public int Profile_ID{get;set;}
         public DateTime MembershipFirstActivation{get;}
         public User? UghUser {get;}
-        public string? NickName {get;set;}
+        public string? userName { get;set;}
     }
 }

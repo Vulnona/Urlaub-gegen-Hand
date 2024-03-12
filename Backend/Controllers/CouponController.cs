@@ -24,7 +24,7 @@ namespace UGHApi.Controllers
         }
 
         #region Coupon
-        [HttpPost("Admin/AddCoupon")]
+        [HttpPost("Admin/addcoupon")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> AddCoupon(Coupon coupon)
         {
@@ -48,7 +48,7 @@ namespace UGHApi.Controllers
         }
 
 
-        [HttpPost("Admin/UpdateCoupon")]
+        [HttpPost("Admin/updatecoupon")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateCoupon(Coupon updatedCoupon)
         {
@@ -68,14 +68,14 @@ namespace UGHApi.Controllers
             }
         }
 
-        [HttpGet("Admin/GetAllCoupon")]
+        [HttpGet("Admin/getallcoupon")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetAllCoupon()
         {
             var coupons = await _couponService.GetAllCoupons();
             return Ok(coupons);
         }
-        [HttpDelete("Admin/deleteCoupon/{couponId}")]
+        [HttpDelete("Admin/deletecoupon/{couponId}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteCoupon(int couponId)
         {

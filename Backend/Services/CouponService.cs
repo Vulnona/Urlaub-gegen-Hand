@@ -33,9 +33,9 @@ namespace UGHApi.Services
             existingCoupon.Name = updatedCoupon.Name;
             existingCoupon.Description = updatedCoupon.Description;
             existingCoupon.CreatedDate = DateTime.Now;
-            existingCoupon.EndDate = updatedCoupon.EndDate;
-            existingCoupon.StartDate = updatedCoupon.StartDate;
-            existingCoupon.DiscountAmount = updatedCoupon.DiscountAmount;
+            //existingCoupon.EndDate = updatedCoupon.EndDate;
+            //existingCoupon.StartDate = updatedCoupon.StartDate;
+            //existingCoupon.DiscountAmount = updatedCoupon.DiscountAmount;
 
             _context.Entry(existingCoupon).State = EntityState.Modified;
             await _context.SaveChangesAsync();
@@ -75,15 +75,15 @@ namespace UGHApi.Services
 
             var currentDate = DateTime.UtcNow.Date;
 
-            if (currentDate < coupon.StartDate.Date || currentDate > coupon.EndDate.Date)
-            {
-                throw new CouponRedeemException("Coupon is not valid at this time.");
-            }
+            //if (currentDate < coupon.StartDate.Date || currentDate > coupon.EndDate.Date)
+            //{
+            //    throw new CouponRedeemException("Coupon is not valid at this time.");
+            //}
 
-            if (coupon.EndDate.Date < currentDate)
-            {
-                throw new CouponRedeemException("Coupon has expired.");
-            }
+            //if (coupon.EndDate.Date < currentDate)
+            //{
+            //    throw new CouponRedeemException("Coupon has expired.");
+            //}
 
             var redemption = new Redemption
             {

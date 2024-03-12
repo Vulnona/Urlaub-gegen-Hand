@@ -14,36 +14,51 @@ namespace UGHApi.Controllers
     public class UserController : ControllerBase
     {
         private readonly UghContext _context;
+        private readonly IConfiguration _configuration;
 
-        public UserController(UghContext context)
+        public UserController(UghContext context, IConfiguration configuration)
         {
             _context = context;
+        _configuration = configuration;
         }
 
         // GET: api/User
-        [HttpGet]
+        [HttpGet("user")]
         public async Task<ActionResult<IEnumerable<User>>> GetUsers()
         {
           if (_context.Users == null)
           {
               return NotFound();
           }
-            return await _context.Users.ToListAsync();
+
+            string baseUrl = _configuration["BaseUrl"];
+            var Users= await _context.Users.ToListAsync();
+            foreach (var user in Users)
+            {
+                user.SetImageUrl(user.IdCard,baseUrl);
+            }
+            return Ok(Users);
         }
 
         // GET: api/User/5
-        [HttpGet("{id}")]
+        [HttpGet("user/{id}")]
         public async Task<ActionResult<User>> GetUser(int id)
         {
           if (_context.Users == null)
           {
               return NotFound();
           }
-            var user = await _context.Users.FindAsync(id);
 
+            string baseUrl = _configuration["BaseUrl"];
+            var user = await _context.Users.FindAsync(id);
+          
             if (user == null)
             {
                 return NotFound();
+            }
+            else
+            {
+                user.SetImageUrl(user.IdCard,baseUrl);
             }
 
             return user;
@@ -51,7 +66,7 @@ namespace UGHApi.Controllers
 
         // PUT: api/User/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
+        [HttpPut("user/{id}")]
         public async Task<IActionResult> PutUser(int id, User user)
         {
             if (id != user.User_Id)
@@ -82,7 +97,7 @@ namespace UGHApi.Controllers
 
         // POST: api/User
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
+        [HttpPost("user")]
         public async Task<ActionResult<User>> PostUser(User user)
         {
           if (_context.Users == null)
@@ -96,7 +111,7 @@ namespace UGHApi.Controllers
         }
 
         // DELETE: api/User/5
-        [HttpDelete("{id}")]
+        [HttpDelete("user/{id}")]
         public async Task<IActionResult> DeleteUser(int id)
         {
             if (_context.Users == null)
