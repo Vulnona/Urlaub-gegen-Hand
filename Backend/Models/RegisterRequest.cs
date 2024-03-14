@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using static UGHApi.Models.UGH_Enums;
 
 public class RegisterRequest
 {
@@ -95,3 +96,27 @@ public class ResendEmailVerification
 {
     public required string Email { get; set; }
 }
+public class UserPatchDTO
+{
+    public string? Password { get; set; }
+    public string? SaltKey { get; set; }
+    public string? FirstName { get; set; }
+    public string? LastName { get; set; }
+    public string? DateOfBirth { get; set; }
+    public string? Gender { get; set; }
+    public string? Street { get; set; }
+    public string? HouseNumber { get; set; }
+    public string? PostCode { get; set; }
+    public string? City { get; set; }
+    public string? Country { get; set; }
+    public string? Email_Adress { get; set; }
+    public bool? IsEmailVerified { get; set; }
+    public string? FacebookUrl { get; set; }
+    public string? CouponCode { get; set; }
+    public string? IdCard { get; set; }
+    public string? IdDocumentUrl { get; set; }
+    public VerificationState? VerificationState { get; set; }
+}
+
+
+

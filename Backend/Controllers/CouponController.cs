@@ -24,7 +24,7 @@ namespace UGHApi.Controllers
         }
 
         #region Coupon
-        [HttpPost("Admin/addcoupon")]
+        [HttpPost("admin/add-coupon")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> AddCoupon(Coupon coupon)
         {
@@ -48,7 +48,7 @@ namespace UGHApi.Controllers
         }
 
 
-        [HttpPost("Admin/updatecoupon")]
+        [HttpPut("admin/update-coupon")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateCoupon(Coupon updatedCoupon)
         {
@@ -68,14 +68,14 @@ namespace UGHApi.Controllers
             }
         }
 
-        [HttpGet("Admin/getallcoupon")]
+        [HttpGet("admin/get-all-coupon")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetAllCoupon()
         {
             var coupons = await _couponService.GetAllCoupons();
             return Ok(coupons);
         }
-        [HttpDelete("Admin/deletecoupon/{couponId}")]
+        [HttpDelete("admin/delete-coupon/{couponId}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteCoupon(int couponId)
         {
@@ -94,29 +94,29 @@ namespace UGHApi.Controllers
                 return StatusCode(500, "An error occurred while deleting the coupon.");
             }
         }
-        [HttpPost("[Controller]/redeem")]
-        [Authorize]
-        public async Task<IActionResult> RedeemCoupon(string couponCode)
-        {
-            try
-            {
-                var result = await _couponService.RedeemCoupon(couponCode, User);
-                return Ok(result);
-            }
-            catch (CouponNotFoundException)
-            {
-                return NotFound("Coupon not found.");
-            }
-            catch (CouponRedeemException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                // Log the exception or handle it appropriately
-                return StatusCode(500, "An error occurred while redeeming the coupon.");
-            }
-        }
+        //[HttpPost("[Controller]/redeem")]
+        //[Authorize]
+        //public async Task<IActionResult> RedeemCoupon(string couponCode)
+        //{
+        //    try
+        //    {
+        //        var result = await _couponService.RedeemCoupon(couponCode, User);
+        //        return Ok(result);
+        //    }
+        //    catch (CouponNotFoundException)
+        //    {
+        //        return NotFound("Coupon not found.");
+        //    }
+        //    catch (CouponRedeemException ex)
+        //    {
+        //        return BadRequest(ex.Message);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        // Log the exception or handle it appropriately
+        //        return StatusCode(500, "An error occurred while redeeming the coupon.");
+        //    }
+        //}
         #endregion
     }
 }

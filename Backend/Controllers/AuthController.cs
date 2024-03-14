@@ -108,7 +108,7 @@ namespace UGHApi.Controllers
         }
 
 
-        [HttpGet("verifyemail")]
+        [HttpGet("verify-email")]
         public IActionResult Verify(string token)
         {
             var user = _userService.GetUserByToken(token);
@@ -155,7 +155,7 @@ namespace UGHApi.Controllers
             return Ok(new { accessToken });
         }
 
-        [HttpPost("resendemailverification")]
+        [HttpPost("resend-email-verification")]
         public async Task<IActionResult> ResendVerificationEmail([FromBody] ResendEmailVerification resentUrl)
         {
             // Validate email address

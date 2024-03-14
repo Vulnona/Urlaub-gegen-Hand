@@ -58,7 +58,7 @@ namespace UGHModels{
         public int User_Id {get;set;}
         [Required]
         public string Password { get;set;}
-        public string SaltKey {  get;set;}
+        public string? SaltKey {  get;set;}
         [Required]
         public string FirstName {get;set;}
         [Required]
@@ -81,10 +81,10 @@ namespace UGHModels{
         public bool IsEmailVerified{get;set;}
         public string? PasswordHash{get;}
         public string? FacebookUrl { get;set;}
-        public string CouponCode { get;set;}
+        public string? CouponCode { get;set;}
         public string? IdCard { get;set;}
         [NotMapped]
-        public string IdDocumentUrl {  get;set;}
+        public string? IdDocumentUrl {  get;set;}
 
         [Required]
         public UGH_Enums.VerificationState VerificationState{get;set;}
