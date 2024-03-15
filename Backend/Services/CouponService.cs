@@ -45,7 +45,19 @@ namespace UGHApi.Services
         {
             return await _context.Coupons.ToListAsync();
         }
-
+        public async Task<Coupon> GetCouponsById(int id)
+        {
+            if (_context.Coupons == null)
+            {
+                return null;
+            }
+            var coupon = await _context.Coupons.FindAsync(id);
+            if(coupon == null)
+            {
+                return null;
+            }
+            return coupon;
+        }
         public async Task DeleteCoupon(int couponId)
         {
             var coupon = await _context.Coupons.FindAsync(couponId);
