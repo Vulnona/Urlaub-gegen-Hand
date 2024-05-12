@@ -20,16 +20,28 @@ jobs:
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
     steps:
       - uses: actions/checkout@v4
-      - uses: docker/login-action@v1
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-      - uses: docker/build-push-action@v5
+      - name: Create secrets
+        env:
+          DATABASE_ROOT_PASSWORD: ${{ secrets.DATABASE_ROOT_PASSWORD }}
+          DATABASE_USER_PASSWORD: ${{ secrets.DATABASE_USER_PASSWORD }}
+        run: |
+          touch .docker/db/secrets/db-root-password.txt
+          touch .docker/db/secrets/db-user-password.txt
+          echo "$DATABASE_ROOT_PASSWORD" >> .docker/db/secrets/db-root-password.txt
+          echo "$DATABASE_USER_PASSWORD" >> .docker/db/secrets/db-user-password.txt
+        shell: sh
+      - name: Build Stack
+        uses: isbang/compose-action@v1.5.1
         with:
-          context: .
-          file: ./Dockerfile
-          push: true
-          tags: urlaubgegenhand/urlaubgegenhand:latest
+          compose-file: "./compose.yaml"
+          services: |
+            frontend
+            backend
 env:
     DOCKER_BUILDKIT_ARGS: "--build-arg USER=root --build-arg DEBUG=1"
       
