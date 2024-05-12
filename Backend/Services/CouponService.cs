@@ -33,9 +33,9 @@ namespace UGHApi.Services
             existingCoupon.Name = updatedCoupon.Name;
             existingCoupon.Description = updatedCoupon.Description;
             existingCoupon.CreatedDate = DateTime.Now;
-            existingCoupon.EndDate = updatedCoupon.EndDate;
-            existingCoupon.StartDate = updatedCoupon.StartDate;
-            existingCoupon.DiscountAmount = updatedCoupon.DiscountAmount;
+            //existingCoupon.EndDate = updatedCoupon.EndDate;
+            //existingCoupon.StartDate = updatedCoupon.StartDate;
+            //existingCoupon.DiscountAmount = updatedCoupon.DiscountAmount;
 
             _context.Entry(existingCoupon).State = EntityState.Modified;
             await _context.SaveChangesAsync();
@@ -45,7 +45,19 @@ namespace UGHApi.Services
         {
             return await _context.Coupons.ToListAsync();
         }
-
+        public async Task<Coupon> GetCouponsById(int id)
+        {
+            if (_context.Coupons == null)
+            {
+                return null;
+            }
+            var coupon = await _context.Coupons.FindAsync(id);
+            if(coupon == null)
+            {
+                return null;
+            }
+            return coupon;
+        }
         public async Task DeleteCoupon(int couponId)
         {
             var coupon = await _context.Coupons.FindAsync(couponId);
@@ -75,15 +87,15 @@ namespace UGHApi.Services
 
             var currentDate = DateTime.UtcNow.Date;
 
-            if (currentDate < coupon.StartDate.Date || currentDate > coupon.EndDate.Date)
-            {
-                throw new CouponRedeemException("Coupon is not valid at this time.");
-            }
+            //if (currentDate < coupon.StartDate.Date || currentDate > coupon.EndDate.Date)
+            //{
+            //    throw new CouponRedeemException("Coupon is not valid at this time.");
+            //}
 
-            if (coupon.EndDate.Date < currentDate)
-            {
-                throw new CouponRedeemException("Coupon has expired.");
-            }
+            //if (coupon.EndDate.Date < currentDate)
+            //{
+            //    throw new CouponRedeemException("Coupon has expired.");
+            //}
 
             var redemption = new Redemption
             {

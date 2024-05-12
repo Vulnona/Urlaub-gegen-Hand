@@ -175,7 +175,6 @@ namespace UGHApi
             {
                RegisterRequest AdminUser = new RegisterRequest
                {
-                   VisibleName = "Admin",
                    FirstName = "Admin",
                    LastName = "User",
                    DateOfBirth = "1990-01-01", // Format: "YYYY-MM-DD"
@@ -185,9 +184,11 @@ namespace UGHApi
                    PostCode = "12345",
                    City = "Admin City",
                    Country = "Admin Country",
-                   Email_Adress = "admin@example.com",
+                   EmailAddress = "admin@example.com",
                    Password = "admin@123", // Your desired password
-                                                  // You can add additional fields here if needed
+                   FacebookUrl="",
+                   couponCode="AdminCoupon"
+                   // You can add additional fields here if needed
                };
                 userService.CreateAdmin(AdminUser);
             }

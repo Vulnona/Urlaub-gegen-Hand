@@ -44,7 +44,7 @@ namespace UGHApi.Services
         {
             try
             {
-                if (_context.Users.Any(u => u.Email_Adress.ToLower().Equals(request.Email_Adress.ToLower())))
+                if (_context.Users.Any(u => u.Email_Adress.ToLower().Equals(request.EmailAddress.ToLower())))
                 {
                     // Email already exists
                     return false;
@@ -56,24 +56,24 @@ namespace UGHApi.Services
                 var salt = _passwordService.GenerateSalt();
                 var hashPassword = _passwordService.HashPassword(request.Password, salt);
 
-                var newUser = new User(
+                var newUser = new User();
+                newUser.FirstName =request.FirstName;
+                newUser.LastName= request.LastName;
+                newUser.DateOfBirth= dateOfBirth;
+                 newUser.Gender = request.Gender;
+                newUser.Street = request.Street;
+                newUser.HouseNumber = request.HouseNumber;
+                newUser.PostCode = request.PostCode;
+                newUser.City = request.City;
+                newUser.Country = request.Country;
+                newUser.Email_Adress = request.EmailAddress;
+                newUser.IsEmailVerified= false;
+                newUser.Password= hashPassword;
+                newUser.SaltKey= salt;
+                newUser.FacebookUrl = request.FacebookUrl;
+                newUser.CouponCode= request.couponCode;
+                newUser.IdCard = "";
 
-                    request.VisibleName,
-                request.FirstName,
-                request.LastName,
-                dateOfBirth,
-                request.Gender,
-                request.Street,
-                request.HouseNumber,
-                request.PostCode,
-                request.City,
-                request.Country,
-                request.Email_Adress,
-                false,
-                hashPassword,
-                salt
-                    );
-               
                 newUser.VerificationState = UGH_Enums.VerificationState.verified;
                 _context.Users.Add(newUser);
                 _context.SaveChanges();

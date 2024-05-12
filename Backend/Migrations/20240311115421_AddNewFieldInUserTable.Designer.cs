@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -9,9 +10,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace UGHApi.Migrations
 {
     [DbContext(typeof(UghContext))]
-    partial class UghContextModelSnapshot : ModelSnapshot
+    [Migration("20240311115421_AddNewFieldInUserTable")]
+    partial class AddNewFieldInUserTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -112,7 +115,7 @@ namespace UGHApi.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<string>("userName")
+                    b.Property<string>("NickName")
                         .HasColumnType("longtext");
 
                     b.HasKey("Profile_ID");
@@ -287,6 +290,10 @@ namespace UGHApi.Migrations
 
                     b.Property<int>("VerificationState")
                         .HasColumnType("int");
+
+                    b.Property<string>("VisibleName")
+                        .IsRequired()
+                        .HasColumnType("longtext");
 
                     b.HasKey("User_Id");
 

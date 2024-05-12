@@ -6,10 +6,11 @@ using System.Security.Claims;
 using UGHApi.Models;
 using UGHApi.Services;
 using UGHModels;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace UGHApi.Controllers
 {
-    [Route("api")]
+    [Route("api/[controller]")]
     [ApiController]
     public class CouponController : ControllerBase
     {
@@ -24,7 +25,7 @@ namespace UGHApi.Controllers
         }
 
         #region Coupon
-        [HttpPost("Admin/AddCoupon")]
+        [HttpPost]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> AddCoupon(Coupon coupon)
         {
@@ -38,7 +39,7 @@ namespace UGHApi.Controllers
                 }
 
                 await _couponService.AddCoupon(coupon);
-                return Ok("Coupon inserted successfully.");
+                return CreatedAtAction("GetCoupon", new { id = coupon.Id }, coupon);
             }
             catch (Exception ex)
             {
@@ -48,7 +49,7 @@ namespace UGHApi.Controllers
         }
 
 
-        [HttpPost("Admin/UpdateCoupon")]
+        [HttpPut]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateCoupon(Coupon updatedCoupon)
         {
@@ -68,14 +69,27 @@ namespace UGHApi.Controllers
             }
         }
 
-        [HttpGet("Admin/GetAllCoupon")]
+        [HttpGet]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetAllCoupon()
         {
             var coupons = await _couponService.GetAllCoupons();
             return Ok(coupons);
         }
-        [HttpDelete("Admin/deleteCoupon/{couponId}")]
+        [HttpGet("{id}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<ActionResult<Coupon>> GetCoupon(int id)
+        {
+            var coupon = await _couponService.GetCouponsById(id);
+
+            if (coupon == null)
+            {
+                return NotFound();
+            }
+
+            return coupon;
+        }
+        [HttpDelete("{couponId}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteCoupon(int couponId)
         {
@@ -94,29 +108,29 @@ namespace UGHApi.Controllers
                 return StatusCode(500, "An error occurred while deleting the coupon.");
             }
         }
-        [HttpPost("[Controller]/redeem")]
-        [Authorize]
-        public async Task<IActionResult> RedeemCoupon(string couponCode)
-        {
-            try
-            {
-                var result = await _couponService.RedeemCoupon(couponCode, User);
-                return Ok(result);
-            }
-            catch (CouponNotFoundException)
-            {
-                return NotFound("Coupon not found.");
-            }
-            catch (CouponRedeemException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                // Log the exception or handle it appropriately
-                return StatusCode(500, "An error occurred while redeeming the coupon.");
-            }
-        }
+        //[HttpPost("[Controller]/redeem")]
+        //[Authorize]
+        //public async Task<IActionResult> RedeemCoupon(string couponCode)
+        //{
+        //    try
+        //    {
+        //        var result = await _couponService.RedeemCoupon(couponCode, User);
+        //        return Ok(result);
+        //    }
+        //    catch (CouponNotFoundException)
+        //    {
+        //        return NotFound("Coupon not found.");
+        //    }
+        //    catch (CouponRedeemException ex)
+        //    {
+        //        return BadRequest(ex.Message);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        // Log the exception or handle it appropriately
+        //        return StatusCode(500, "An error occurred while redeeming the coupon.");
+        //    }
+        //}
         #endregion
     }
 }

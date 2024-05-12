@@ -38,20 +38,31 @@ namespace UGHApi.Controllers
         }
        
         [HttpPost("register")]
-        public ActionResult Register([FromBody] RegisterRequest request)
+        [Consumes("multipart/form-data")]
+        public ActionResult Register([FromForm] RegisterRequest request)
         {
-            if (_context.Users.Any(u => u.Email_Adress.ToLower().Equals(request.Email_Adress.ToLower())))
+            if (_context.Users.Any(u => u.Email_Adress.ToLower().Equals(request.EmailAddress.ToLower())))
             {
                 return Conflict("E-Mail Adresse existiert bereits");
             }
+            if (!_context.Coupons.Any(c => c.Code.ToLower().Equals(request.couponCode.ToLower())))
+            {
+                return Conflict("Invalid Coupon Code.");
+            }
+            // File storage logic
+            var fileName = Guid.NewGuid().ToString() + Path.GetExtension(request.IdCard.FileName);
+            var filePath = Path.Combine("IdDocument", fileName);
 
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                request.IdCard.CopyToAsync(stream);
+            }
             DateTime parsedDateOfBirth = DateTime.Parse(request.DateOfBirth);
             DateOnly dateOnly = new DateOnly(parsedDateOfBirth.Year, parsedDateOfBirth.Month, parsedDateOfBirth.Day);
-
+            
             var salt = _passwordService.GenerateSalt();
             var HashPassword = _passwordService.HashPassword(request.Password, salt);
             var newUser = new User(
-                request.VisibleName,
                 request.FirstName,
                 request.LastName,
                 dateOnly,
@@ -61,10 +72,12 @@ namespace UGHApi.Controllers
                 request.PostCode,
                 request.City,
                 request.Country,
-                request.Email_Adress,
+                request.EmailAddress,
                 false,
                 HashPassword,
-                salt
+                salt,request.FacebookUrl,
+                request.couponCode,
+                fileName
             );
 
             newUser.VerificationState=UGH_Enums.VerificationState.isNew;
@@ -95,7 +108,7 @@ namespace UGHApi.Controllers
         }
 
 
-        [HttpGet("verifyemail")]
+        [HttpGet("verify-email")]
         public IActionResult Verify(string token)
         {
             var user = _userService.GetUserByToken(token);
@@ -142,8 +155,8 @@ namespace UGHApi.Controllers
             return Ok(new { accessToken });
         }
 
-        [HttpPost("resendemailverification")]
-        public async Task<IActionResult> ResendVerificationEmail([FromBody] ResentEmailVerification resentUrl)
+        [HttpPost("resend-email-verification")]
+        public async Task<IActionResult> ResendVerificationEmail([FromBody] ResendEmailVerification resentUrl)
         {
             // Validate email address
             if (string.IsNullOrEmpty(resentUrl.Email) || !_emailService.IsValidEmail(resentUrl.Email))
