@@ -4,8 +4,6 @@ on:
   push:
     branches:
       - main
-      - Testing-docker-fix
-      - workflow_dispatch
 
 jobs:
   build:
