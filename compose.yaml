@@ -1,4 +1,5 @@
 version: '3.7'
+
 services:
   webserver:
     image: "nginx:alpine"
@@ -6,7 +7,7 @@ services:
     ports:
       - '80:80'
     volumes:
-      - .docker/webserver/config/vhost.dev.conf:/etc/nginx/templates/default.conf.template
+      - ./.docker/webserver/config/vhost.dev.conf:/etc/nginx/templates/default.conf.template
 
   frontend:
     build:
@@ -15,9 +16,9 @@ services:
       target: dev
     restart: unless-stopped
     environment:
-      APP_ENV: "dev"
+      - APP_ENV=dev
     ports:
-      - 3000:3000
+      - '3000:3000'
     volumes:
       - ./Frontend-Vuetify:/app/frontend
       - /app/frontend/node_modules
@@ -28,11 +29,11 @@ services:
       dockerfile: .docker/backend/Dockerfile
     restart: unless-stopped
     ports:
-      - 8080:8080
+      - '8080:8080'
     environment:
       - ASPNETCORE_URLS=http://+:8080 
       - ASPNETCORE_ENVIRONMENT=Development
-    secrets: 
+    secrets:
       - db__user_password
     depends_on:
       - db
@@ -50,10 +51,18 @@ services:
       MYSQL_ROOT_HOST: '%'
     volumes:
       - db-data:/var/lib/mysql
-      - ./docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+      
     ports:
       - '3306:3306'
-
+    healthcheck:
+      test: ['CMD-SHELL', 'mysqladmin ping -h 127.0.0.1 --password="$$(cat /run/secrets/db__root_password)" --silent']
+      interval: 10s
+      retries: 5
+      start_period: 30s
+    secrets:
+      - db__user_password
+      - db__root_password
+      
   migration:
     build:
       context: .
@@ -68,6 +77,6 @@ volumes:
 
 secrets:
   db__root_password:
-    file: .docker/db/secrets/db-root-password.txt
+    file: .docker/db/secrets/.db-root-password.txt
   db__user_password:
-    file: .docker/db/secrets/db-user-password.txt
+    file: .docker/db/secrets/.db-user-password.txt
