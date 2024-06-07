@@ -31,23 +31,23 @@ services:
     ports:
       - '8080:8080'
     environment:
-      - ASPNETCORE_URLS=http://+:8080 #PORT
+      - ASPNETCORE_URLS=http://+:8080 
       - ASPNETCORE_ENVIRONMENT=Development
     secrets:
       - db__user_password
     depends_on:
       - db
-
+       
+      
   db:
     image: mysql:5.7
     restart: unless-stopped
     command: '--default-authentication-plugin=mysql_native_password'
     environment:
-      MYSQL_DATABASE: 'db'
+      MYSQL_DATABASE: 'urlaubgegenhand'
       MYSQL_USER: 'user'
-      MYSQL_PASSWORD_FILE: /run/secrets/db__user_password
-      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/db__root_password
-      MYSQL_HOST: 'db'
+      MYSQL_PASSWORD: 'password'
+      MYSQL_ROOT_PASSWORD: 'rootpassword'
       MYSQL_ROOT_HOST: '%'
     volumes:
       - db-data:/var/lib/mysql
@@ -62,7 +62,7 @@ services:
     secrets:
       - db__user_password
       - db__root_password
-
+      
   migration:
     build:
       context: .
