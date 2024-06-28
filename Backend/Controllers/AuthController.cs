@@ -1,190 +1,216 @@
-using System;
-using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 using UGHModels;
 using UGHApi.Services;
 using UGHApi.Models;
-using Backend.Models;
-using Microsoft.AspNetCore.Mvc.Abstractions;
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
-using System.Security.Cryptography;
-using System.Text.RegularExpressions;
+using Microsoft.EntityFrameworkCore;
 
 namespace UGHApi.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api")]
     [ApiController]
     public class AuthController : ControllerBase
     {
         private readonly UghContext _context;
-        private readonly UserService _userService;
+        private readonly userservice _userservice;
         private readonly EmailService _emailService;
         private readonly PasswordService _passwordService;
         private readonly IConfiguration _configuration;
         private readonly TokenService _tokenService;
-        
 
-        public AuthController(UghContext context, EmailService emailService,UserService userService,PasswordService passwordService, IConfiguration configuration, TokenService tokenService)
+        public AuthController(UghContext context, EmailService emailService, userservice userservice, PasswordService passwordService, IConfiguration configuration, TokenService tokenService)
         {
             _context = context;
             _emailService = emailService;
-            _userService = userService;
+            _userservice = userservice;
             _passwordService = passwordService;
             _configuration = configuration;
             _tokenService = tokenService;
         }
-       
-        [HttpPost("register")]
-        [Consumes("multipart/form-data")]
-        public ActionResult Register([FromForm] RegisterRequest request)
+
+        [HttpPost("auth/register")]
+        public ActionResult Register([FromBody] RegisterRequest request)
         {
-            if (_context.Users.Any(u => u.Email_Adress.ToLower().Equals(request.EmailAddress.ToLower())))
+            try
             {
-                return Conflict("E-Mail Adresse existiert bereits");
-            }
-            if (!_context.Coupons.Any(c => c.Code.ToLower().Equals(request.couponCode.ToLower())))
-            {
-                return Conflict("Invalid Coupon Code.");
-            }
-            // File storage logic
-            var fileName = Guid.NewGuid().ToString() + Path.GetExtension(request.IdCard.FileName);
-            var filePath = Path.Combine("IdDocument", fileName);
-
-            using (var stream = new FileStream(filePath, FileMode.Create))
-            {
-                request.IdCard.CopyToAsync(stream);
-            }
-            DateTime parsedDateOfBirth = DateTime.Parse(request.DateOfBirth);
-            DateOnly dateOnly = new DateOnly(parsedDateOfBirth.Year, parsedDateOfBirth.Month, parsedDateOfBirth.Day);
-            
-            var salt = _passwordService.GenerateSalt();
-            var HashPassword = _passwordService.HashPassword(request.Password, salt);
-            var newUser = new User(
-                request.FirstName,
-                request.LastName,
-                dateOnly,
-                request.Gender,
-                request.Street,
-                request.HouseNumber,
-                request.PostCode,
-                request.City,
-                request.Country,
-                request.EmailAddress,
-                false,
-                HashPassword,
-                salt,request.FacebookUrl,
-                request.couponCode,
-                fileName
-            );
-
-            newUser.VerificationState=UGH_Enums.VerificationState.isNew;
-
-            _context.Users.Add(newUser);
-            _context.SaveChanges();
-
-            // Add default role for the user (e.g., "User")
-            var defaultUserRole = _context.UserRoles.FirstOrDefault(r => r.RoleName == "User");
-            if (defaultUserRole != null)
-            {
-                var userRoleMapping = new UserRoleMapping
+                if (_context.users.Any(u => u.Email_Address.ToLower().Equals(request.Email_Address.ToLower())))
                 {
-                    UserId = newUser.User_Id,
-                    RoleId = defaultUserRole.RoleId
-                };
-                _context.UserRolesMapping.Add(userRoleMapping);
+                    return Conflict("E-Mail Adresse existiert bereits");
+                }
+
+                DateTime parsedDateOfBirth = DateTime.Parse(request.DateOfBirth);
+                DateOnly dateOnly = new DateOnly(parsedDateOfBirth.Year, parsedDateOfBirth.Month, parsedDateOfBirth.Day);
+
+                var salt = _passwordService.GenerateSalt();
+                var hashPassword = _passwordService.HashPassword(request.Password, salt);
+
+                var newUser = new User(
+                    request.FirstName,
+                    request.LastName,
+                    dateOnly,
+                    request.Gender,
+                    request.Street,
+                    request.HouseNumber,
+                    request.PostCode,
+                    request.City,
+                    request.Country,
+                    request.Email_Address,
+                    false,
+                    hashPassword,
+                    salt,
+                    request.Facebook_link,
+                    request.Link_RS,
+                    request.Link_VS
+                );
+
+                newUser.VerificationState = UGH_Enums.VerificationState.isNew;
+
+                _context.users.Add(newUser);
                 _context.SaveChanges();
+
+                // create profile automatic 
+                var getRegUser = _context.users.FirstOrDefault(u => u.Email_Address == request.Email_Address);
+
+                var newProfile = new UserProfile
+                {
+                    User_Id = getRegUser.User_Id,
+                };
+
+                _context.userprofiles.Add(newProfile);
+                _context.SaveChanges();
+
+                // Add default role for the user (e.g., "User")
+                var defaultUserRole = _context.userroles.FirstOrDefault(r => r.RoleName == "User");
+                if (defaultUserRole != null)
+                {
+                    var userRoleMapping = new UserRoleMapping
+                    {
+                        UserId = newUser.User_Id,
+                        RoleId = defaultUserRole.RoleId
+                    };
+                    _context.userrolesmapping.Add(userRoleMapping);
+                    _context.SaveChanges();
+                }
+
+                var verificationToken = _tokenService.GenerateNewEmailVerificator(newUser.User_Id);
+                _emailService.SendVerificationEmail(newUser.Email_Address, verificationToken);
+
+                return Ok(newUser);
             }
-
-            var verificatioToken = _tokenService.GenrateNewEmailVerificator(newUser.User_Id);
-
-            //string verificationURL=request.VerificationURL.Replace("*USER_ID*",newUser.User_Id.ToString()).Replace("*TOKEN*",newVerificator.verificationToken.ToString());
-
-            _emailService.SendVerificationEmail(newUser.Email_Adress, verificatioToken);
-
-            return Ok(newUser);
+            catch (Exception ex)
+            {
+                // Log the exception 
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
         }
 
-
-        [HttpGet("verify-email")]
+        [HttpGet("auth/verify-email")]
         public IActionResult Verify(string token)
         {
-            var user = _userService.GetUserByToken(token);
-            if (user == null)
+            try
             {
-                return NotFound("Invalid token");
-            }
+                var user = _userservice.GetUserByToken(token);
+                if (user == null)
+                {
+                    return NotFound("Invalid token");
+                }
 
-            user.IsEmailVerified = true;
-            _context.SaveChanges();
-            return Ok("Email verified successfully");
+                user.IsEmailVerified = true;
+                _context.SaveChanges();
+                return Ok("Email verified successfully");
+            }
+            catch (Exception ex)
+            {
+                // Log the exception 
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
         }
-        [HttpPost("login")]
+
+        [HttpPost("auth/login")]
         public async Task<IActionResult> Login(LoginModel model)
         {
-            // Validate user credentials (e.g., check username and password against database)
-            var validationResult = _userService.ValidateUser(model.Email, model.Password);
-
-            if (validationResult.IsValid)
+            try
             {
-                var accessToken = await _tokenService.GenerateJwtToken(model.Email);
-                var refreshToken = _tokenService.GenerateRefreshToken();
-                _tokenService.StoreRefreshToken(refreshToken, model.Email);
+                var validationResult = _userservice.ValidateUser(model.Email, model.Password);
 
-                return Ok(new { accessToken, refreshToken });
+                var user = await _context.users.FirstOrDefaultAsync(u => u.Email_Address == model.Email);
+                if (validationResult.IsValid)
+                {
+                    var accessToken = await _tokenService.GenerateJwtToken(model.Email, user.User_Id.ToString());
+                    var refreshToken = _tokenService.GenerateRefreshToken();
+                    _tokenService.StoreRefreshToken(refreshToken, model.Email);
+
+                    return Ok(new { accessToken, refreshToken, model.Email, user.User_Id, user.FirstName });
+                }
+                else
+                {
+                    return Unauthorized(new { errorMessage = validationResult.ErrorMessage });
+                }
             }
-           else
+            catch (Exception ex)
             {
-                
-                // Return the specific error message
-                return BadRequest(validationResult.ErrorMessage);
+                // Log the exception 
+               //return StatusCode(500, $"Internal server error: {ex.Source+"***"+ ex.StackTrace}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+
             }
         }
-        [HttpPost("refresh")]
+
+        [HttpPost("auth/refresh")]
         public async Task<IActionResult> Refresh(RefreshTokenRequest request)
         {
-            if (!_tokenService.TryGetUserEmail(request.RefreshToken, out var Email))
+            try
             {
-                return Unauthorized();
+                if (!_tokenService.TryGetUserEmail(request.RefreshToken, out var Email))
+                {
+                    return Unauthorized();
+                }
+
+                var accessToken = await _tokenService.GenerateJwtToken(Email, string.Empty); // Assuming you have a method that generates the token
+
+                return Ok(new { accessToken });
             }
-
-            var accessToken =await _tokenService.GenerateJwtToken(Email);
-
-            return Ok(new { accessToken });
+            catch (Exception ex)
+            {
+                // Log the exception
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
         }
 
-        [HttpPost("resend-email-verification")]
+        [HttpPost("auth/resend-email-verification")]
         public async Task<IActionResult> ResendVerificationEmail([FromBody] ResendEmailVerification resentUrl)
         {
-            // Validate email address
-            if (string.IsNullOrEmpty(resentUrl.Email) || !_emailService.IsValidEmail(resentUrl.Email))
+            try
             {
-                return BadRequest("Invalid email address.");
-            }
+                // Validate email address
+                if (string.IsNullOrEmpty(resentUrl.Email) || !_emailService.IsValidEmail(resentUrl.Email))
+                {
+                    return BadRequest("Invalid email address.");
+                }
 
-            // Get user by email address
-            var user = await _userService.GetUserByEmailAsync(resentUrl.Email);
-            if (user == null)
+                // Get user by email address
+                var user = await _userservice.GetUserByEmailAsync(resentUrl.Email);
+                if (user == null)
+                {
+                    return NotFound("User not found.");
+                }
+
+                // Generate new verification token
+                var verificationToken = _tokenService.GenerateNewEmailVerificator(user.User_Id);
+
+                // Send verification email
+                var emailSent = _emailService.SendVerificationEmail(resentUrl.Email, verificationToken);
+                if (!emailSent)
+                {
+                    return StatusCode(500, "Failed to send verification email.");
+                }
+
+                return Ok("Verification email sent successfully.");
+            }
+            catch (Exception ex)
             {
-                return NotFound("User not found.");
+                // Log the exception 
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
-
-            // Generate new verification token
-            var verificatioToken = _tokenService.GenrateNewEmailVerificator(user.User_Id);
-
-            // Send verification email
-            var emailSent= _emailService.SendVerificationEmail(resentUrl.Email, verificatioToken);
-            if (!emailSent)
-            {
-                return StatusCode(500, "Failed to send verification email.");
-            }
-
-            return Ok("Verification email sent successfully.");
         }
-       
-
     }
 }
-

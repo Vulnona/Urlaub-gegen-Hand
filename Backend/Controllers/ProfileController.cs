@@ -1,128 +1,123 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using UGHApi.Models;
-
+using UGHApi.Services;
 
 namespace UGHApi.Controllers
 {
-	[Route("api/[controller]")]
+    [Route("api/")]
     [ApiController]
     public class ProfileController : ControllerBase
     {
         private readonly UghContext _context;
-		private readonly ILogger<ProfileController> _logger;
-		
-		public ProfileController(UghContext context, ILogger<ProfileController> logger)
+        private readonly TokenService _tokenService;
+
+        public ProfileController(UghContext context, TokenService tokenService)
         {
             _context = context;
-            _logger = logger;
-		}
-
-
-        // GET: api/Profile
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Profile>>> GetProfiles()
-        {
-          if (_context.Profiles == null)
-          {
-              return NotFound();
-          }
-            return await _context.Profiles.ToListAsync();
+            _tokenService = tokenService;
         }
 
-        // GET: api/Profile/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Profile>> GetProfile(int id)
+        [HttpGet("profile/get-profile")]
+        public async Task<IActionResult> GetProfile(string token)
         {
-			_logger.LogInformation($"GetProfile called with ID: {id}");
-			if (_context.Profiles == null)
-			{
-			  return NotFound();
-			}
-			var profile = await _context.Profiles.FindAsync(id);
-
-			if (profile == null)
-			{
-				return NotFound();
-			}
-
-			return profile;
-        }
-
-        // PUT: api/Profile/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutProfile(int id, Profile profile)
-        {
-            if (id != profile.Profile_ID)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(profile).State = EntityState.Modified;
-
             try
             {
+                var accessUserId = await _tokenService.GetUserIdFromToken(token);
+
+                if (accessUserId == null)
+                {
+                    return Unauthorized("Invalid token");
+                }
+                var userId = accessUserId.Value;
+
+                var profile = await _context.userprofiles.Include(u => u.User).FirstOrDefaultAsync(p => p.User_Id == userId);
+                if (profile == null)
+                {
+                    var newProfile = new UserProfile
+                    {
+                        User_Id = userId,
+                    };
+
+                    _context.userprofiles.Add(newProfile);
+                    await _context.SaveChangesAsync();
+
+                    profile = await _context.userprofiles.Include(u => u.User).FirstOrDefaultAsync(p => p.User_Id == userId);
+                }
+
+                return Ok(new { Profile = profile });
+            }
+            catch (Exception ex)
+            {
+                // Log the exception 
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        [HttpPut("profile/update-profile")]
+        public async Task<IActionResult> UpdateProfile(string token, [FromBody] UserProfile profile)
+        {
+            try
+            {
+                var accessUserId = await _tokenService.GetUserIdFromToken(token);
+
+                if (accessUserId == null)
+                {
+                    return Unauthorized("Invalid token");
+                }
+
+                var userId = accessUserId.Value;
+
+                if (profile == null || profile.User_Id != userId)
+                {
+                    return BadRequest("Profile object is null or User ID mismatch");
+                }
+
+                var existingProfile = await _context.userprofiles.Include(p => p.User).FirstOrDefaultAsync(p => p.User_Id == userId);
+                if (existingProfile == null)
+                {
+                    _context.userprofiles.Add(profile);
+                    await _context.SaveChangesAsync();
+                    return Ok(profile);
+                }
+
+                // Update profile fields
+                existingProfile.Hobbies = profile.Hobbies;
+                existingProfile.Options = profile.Options;
+                if (profile.UserPic != null)
+                {
+                    existingProfile.UserPic = profile.UserPic;
+                }
+
+                // Update user fields if provided in the profile
+                if (profile.User != null)
+                {
+                    existingProfile.User.FirstName = profile.User.FirstName;
+                    existingProfile.User.LastName = profile.User.LastName;
+                    existingProfile.User.DateOfBirth = profile.User.DateOfBirth;
+                    existingProfile.User.Gender = profile.User.Gender;
+                    existingProfile.User.Street = profile.User.Street;
+                    existingProfile.User.HouseNumber = profile.User.HouseNumber;
+                    existingProfile.User.PostCode = profile.User.PostCode;
+                    existingProfile.User.City = profile.User.City;
+                    existingProfile.User.Country = profile.User.Country;
+                    existingProfile.User.Facebook_link = profile.User.Facebook_link;
+                    existingProfile.User.Link_RS = profile.User.Link_RS;
+                    existingProfile.User.Link_VS = profile.User.Link_VS;
+                }
+
+                // Update the database
+                _context.userprofiles.Update(existingProfile);
+                _context.users.Update(existingProfile.User);
                 await _context.SaveChangesAsync();
+
+                return Ok(existingProfile);
             }
-            catch (DbUpdateConcurrencyException)
+            catch (Exception ex)
             {
-                if (!ProfileExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                // Log the exception (use your preferred logging mechanism)
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
-
-            return NoContent();
-        }
-
-        // POST: api/Profile
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<Profile>> PostProfile(Profile profile)
-        {
-          if (_context.Profiles == null)
-          {
-              return Problem("Entity set 'UghContext.Profiles'  is null.");
-          }
-            _context.Profiles.Add(profile);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetProfile", new { id = profile.Profile_ID }, profile);
-        }
-
-        // DELETE: api/Profile/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteProfile(int id)
-        {
-            if (_context.Profiles == null)
-            {
-                return NotFound();
-            }
-            var profile = await _context.Profiles.FindAsync(id);
-            if (profile == null)
-            {
-                return NotFound();
-            }
-
-            _context.Profiles.Remove(profile);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool ProfileExists(int id)
-        {
-            return (_context.Profiles?.Any(e => e.Profile_ID == id)).GetValueOrDefault();
         }
     }
 }

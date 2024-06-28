@@ -48,7 +48,7 @@ namespace UGHApi.Migrations
                     b.Property<int>("CurrentMembershipMembershipID")
                         .HasColumnType("int");
 
-                    b.Property<string>("Email_Adress")
+                    b.Property<string>("Email_Address")
                         .IsRequired()
                         .HasColumnType("longtext");
 
@@ -63,7 +63,7 @@ namespace UGHApi.Migrations
 
                     b.HasIndex("CurrentMembershipMembershipID");
 
-                    b.ToTable("Users");
+                    b.ToTable("users");
                 });
 
             modelBuilder.Entity("UGHModels.User", b =>

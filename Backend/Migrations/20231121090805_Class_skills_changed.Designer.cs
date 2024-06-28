@@ -32,7 +32,7 @@ namespace UGHApi.Migrations
 
                     b.HasKey("MembershipID");
 
-                    b.ToTable("Memberships");
+                    b.ToTable("memberships");
                 });
 
             modelBuilder.Entity("UGHApi.Models.Profile", b =>
@@ -64,7 +64,7 @@ namespace UGHApi.Migrations
 
                     b.HasKey("Skill_ID");
 
-                    b.ToTable("Skills");
+                    b.ToTable("skills");
                 });
 
             modelBuilder.Entity("UGHModels.User", b =>
@@ -87,7 +87,7 @@ namespace UGHApi.Migrations
                     b.Property<DateOnly>("DateOfBirth")
                         .HasColumnType("date");
 
-                    b.Property<string>("Email_Adress")
+                    b.Property<string>("Email_Address")
                         .IsRequired()
                         .HasColumnType("longtext");
 
@@ -129,7 +129,7 @@ namespace UGHApi.Migrations
 
                     b.HasIndex("CurrentMembershipMembershipID");
 
-                    b.ToTable("Users");
+                    b.ToTable("users");
                 });
 
             modelBuilder.Entity("UGHModels.User", b =>

@@ -13,7 +13,7 @@ namespace UGHApi.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Coupons",
+                name: "coupons",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -31,12 +31,12 @@ namespace UGHApi.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Coupons", x => x.Id);
+                    table.PrimaryKey("PK_coupons", x => x.Id);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "Redemptions",
+                name: "redemptions",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -47,19 +47,19 @@ namespace UGHApi.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Redemptions", x => x.Id);
+                    table.PrimaryKey("PK_redemptions", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Redemptions_Coupons_CouponId",
+                        name: "FK_redemptions_coupons_CouponId",
                         column: x => x.CouponId,
-                        principalTable: "Coupons",
+                        principalTable: "coupons",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Redemptions_CouponId",
-                table: "Redemptions",
+                name: "IX_redemptions_CouponId",
+                table: "redemptions",
                 column: "CouponId");
         }
 
@@ -67,10 +67,10 @@ namespace UGHApi.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Redemptions");
+                name: "redemptions");
 
             migrationBuilder.DropTable(
-                name: "Coupons");
+                name: "coupons");
         }
     }
 }

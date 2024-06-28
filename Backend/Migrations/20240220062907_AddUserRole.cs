@@ -12,7 +12,7 @@ namespace UGHApi.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "UserRoles",
+                name: "userroles",
                 columns: table => new
                 {
                     RoleId = table.Column<int>(type: "int", nullable: false)
@@ -22,12 +22,12 @@ namespace UGHApi.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_UserRoles", x => x.RoleId);
+                    table.PrimaryKey("PK_userroles", x => x.RoleId);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "UserRolesMapping",
+                name: "userrolesmapping",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -37,30 +37,30 @@ namespace UGHApi.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_UserRolesMapping", x => x.Id);
+                    table.PrimaryKey("PK_userrolesmapping", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_UserRolesMapping_UserRoles_RoleId",
+                        name: "FK_userrolesmapping_userroles_RoleId",
                         column: x => x.RoleId,
-                        principalTable: "UserRoles",
+                        principalTable: "userroles",
                         principalColumn: "RoleId",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_UserRolesMapping_Users_UserId",
+                        name: "FK_userrolesmapping_users_UserId",
                         column: x => x.UserId,
-                        principalTable: "Users",
+                        principalTable: "users",
                         principalColumn: "User_Id",
                         onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateIndex(
-                name: "IX_UserRolesMapping_RoleId",
-                table: "UserRolesMapping",
+                name: "IX_userrolesmapping_RoleId",
+                table: "userrolesmapping",
                 column: "RoleId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_UserRolesMapping_UserId",
-                table: "UserRolesMapping",
+                name: "IX_userrolesmapping_UserId",
+                table: "userrolesmapping",
                 column: "UserId");
         }
 
@@ -68,10 +68,10 @@ namespace UGHApi.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "UserRolesMapping");
+                name: "userrolesmapping");
 
             migrationBuilder.DropTable(
-                name: "UserRoles");
+                name: "userroles");
         }
     }
 }

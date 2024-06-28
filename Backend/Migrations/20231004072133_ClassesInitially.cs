@@ -13,34 +13,34 @@ namespace UGHApi.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropPrimaryKey(
-                name: "PK_Users",
-                table: "Users");
+                name: "PK_users",
+                table: "users");
 
             migrationBuilder.DropColumn(
                 name: "IsVerified",
-                table: "Users");
+                table: "users");
 
             migrationBuilder.DropColumn(
                 name: "MembershipActive",
-                table: "Users");
+                table: "users");
 
             migrationBuilder.DropColumn(
                 name: "MembershipExireDate",
-                table: "Users");
+                table: "users");
 
             migrationBuilder.RenameColumn(
                 name: "UserName",
-                table: "Users",
+                table: "users",
                 newName: "Name");
 
             migrationBuilder.RenameColumn(
                 name: "UserId",
-                table: "Users",
+                table: "users",
                 newName: "VerificationState");
 
             migrationBuilder.AlterColumn<int>(
                 name: "VerificationState",
-                table: "Users",
+                table: "users",
                 type: "int",
                 nullable: false,
                 oldClrType: typeof(int),
@@ -49,7 +49,7 @@ namespace UGHApi.Migrations
 
             migrationBuilder.AddColumn<int>(
                 name: "User_Id",
-                table: "Users",
+                table: "users",
                 type: "int",
                 nullable: false,
                 defaultValue: 0)
@@ -57,28 +57,28 @@ namespace UGHApi.Migrations
 
             migrationBuilder.AddColumn<string>(
                 name: "Adress",
-                table: "Users",
+                table: "users",
                 type: "longtext",
                 nullable: false)
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.AddColumn<int>(
                 name: "CurrentMembershipMembershipID",
-                table: "Users",
+                table: "users",
                 type: "int",
                 nullable: false,
                 defaultValue: 0);
 
             migrationBuilder.AddColumn<string>(
-                name: "Email_Adress",
-                table: "Users",
+                name: "Email_Address",
+                table: "users",
                 type: "longtext",
                 nullable: false)
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.AddPrimaryKey(
-                name: "PK_Users",
-                table: "Users",
+                name: "PK_users",
+                table: "users",
                 column: "User_Id");
 
             migrationBuilder.CreateTable(
@@ -96,13 +96,13 @@ namespace UGHApi.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Users_CurrentMembershipMembershipID",
-                table: "Users",
+                name: "IX_users_CurrentMembershipMembershipID",
+                table: "users",
                 column: "CurrentMembershipMembershipID");
 
             migrationBuilder.AddForeignKey(
-                name: "FK_Users_Membership_CurrentMembershipMembershipID",
-                table: "Users",
+                name: "FK_users_Membership_CurrentMembershipMembershipID",
+                table: "users",
                 column: "CurrentMembershipMembershipID",
                 principalTable: "Membership",
                 principalColumn: "MembershipID",
@@ -113,49 +113,49 @@ namespace UGHApi.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
-                name: "FK_Users_Membership_CurrentMembershipMembershipID",
-                table: "Users");
+                name: "FK_users_Membership_CurrentMembershipMembershipID",
+                table: "users");
 
             migrationBuilder.DropTable(
                 name: "Membership");
 
             migrationBuilder.DropPrimaryKey(
-                name: "PK_Users",
-                table: "Users");
+                name: "PK_users",
+                table: "users");
 
             migrationBuilder.DropIndex(
-                name: "IX_Users_CurrentMembershipMembershipID",
-                table: "Users");
+                name: "IX_users_CurrentMembershipMembershipID",
+                table: "users");
 
             migrationBuilder.DropColumn(
                 name: "User_Id",
-                table: "Users");
+                table: "users");
 
             migrationBuilder.DropColumn(
                 name: "Adress",
-                table: "Users");
+                table: "users");
 
             migrationBuilder.DropColumn(
                 name: "CurrentMembershipMembershipID",
-                table: "Users");
+                table: "users");
 
             migrationBuilder.DropColumn(
-                name: "Email_Adress",
-                table: "Users");
+                name: "Email_Address",
+                table: "users");
 
             migrationBuilder.RenameColumn(
                 name: "VerificationState",
-                table: "Users",
+                table: "users",
                 newName: "UserId");
 
             migrationBuilder.RenameColumn(
                 name: "Name",
-                table: "Users",
+                table: "users",
                 newName: "UserName");
 
             migrationBuilder.AlterColumn<int>(
                 name: "UserId",
-                table: "Users",
+                table: "users",
                 type: "int",
                 nullable: false,
                 oldClrType: typeof(int),
@@ -164,28 +164,28 @@ namespace UGHApi.Migrations
 
             migrationBuilder.AddColumn<bool>(
                 name: "IsVerified",
-                table: "Users",
+                table: "users",
                 type: "tinyint(1)",
                 nullable: false,
                 defaultValue: false);
 
             migrationBuilder.AddColumn<bool>(
                 name: "MembershipActive",
-                table: "Users",
+                table: "users",
                 type: "tinyint(1)",
                 nullable: false,
                 defaultValue: false);
 
             migrationBuilder.AddColumn<DateTime>(
                 name: "MembershipExireDate",
-                table: "Users",
+                table: "users",
                 type: "datetime(6)",
                 nullable: false,
                 defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
 
             migrationBuilder.AddPrimaryKey(
-                name: "PK_Users",
-                table: "Users",
+                name: "PK_users",
+                table: "users",
                 column: "UserId");
         }
     }

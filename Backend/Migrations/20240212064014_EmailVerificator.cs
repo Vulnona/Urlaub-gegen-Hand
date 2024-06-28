@@ -13,19 +13,19 @@ namespace UGHApi.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
-                name: "FK_Users_Memberships_CurrentMembershipMembershipID",
-                table: "Users");
+                name: "FK_users_memberships_CurrentMembershipMembershipID",
+                table: "users");
 
             migrationBuilder.AlterColumn<int>(
                 name: "CurrentMembershipMembershipID",
-                table: "Users",
+                table: "users",
                 type: "int",
                 nullable: true,
                 oldClrType: typeof(int),
                 oldType: "int");
 
             migrationBuilder.CreateTable(
-                name: "EmailVerificators",
+                name: "emailverificators",
                 columns: table => new
                 {
                     verivicationID = table.Column<int>(type: "int", nullable: false)
@@ -36,15 +36,15 @@ namespace UGHApi.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_EmailVerificators", x => x.verivicationID);
+                    table.PrimaryKey("PK_emailverificators", x => x.verivicationID);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.AddForeignKey(
-                name: "FK_Users_Memberships_CurrentMembershipMembershipID",
-                table: "Users",
+                name: "FK_users_memberships_CurrentMembershipMembershipID",
+                table: "users",
                 column: "CurrentMembershipMembershipID",
-                principalTable: "Memberships",
+                principalTable: "memberships",
                 principalColumn: "MembershipID");
         }
 
@@ -52,15 +52,15 @@ namespace UGHApi.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
-                name: "FK_Users_Memberships_CurrentMembershipMembershipID",
-                table: "Users");
+                name: "FK_users_memberships_CurrentMembershipMembershipID",
+                table: "users");
 
             migrationBuilder.DropTable(
-                name: "EmailVerificators");
+                name: "emailverificators");
 
             migrationBuilder.AlterColumn<int>(
                 name: "CurrentMembershipMembershipID",
-                table: "Users",
+                table: "users",
                 type: "int",
                 nullable: false,
                 defaultValue: 0,
@@ -69,10 +69,10 @@ namespace UGHApi.Migrations
                 oldNullable: true);
 
             migrationBuilder.AddForeignKey(
-                name: "FK_Users_Memberships_CurrentMembershipMembershipID",
-                table: "Users",
+                name: "FK_users_memberships_CurrentMembershipMembershipID",
+                table: "users",
                 column: "CurrentMembershipMembershipID",
-                principalTable: "Memberships",
+                principalTable: "memberships",
                 principalColumn: "MembershipID",
                 onDelete: ReferentialAction.Cascade);
         }

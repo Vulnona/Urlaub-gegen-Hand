@@ -12,14 +12,14 @@ namespace UGHApi.Migrations
         {
             migrationBuilder.AddColumn<string>(
                 name: "Password",
-                table: "Users",
+                table: "users",
                 type: "longtext",
                 nullable: false)
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.AddColumn<string>(
                 name: "SaltKey",
-                table: "Users",
+                table: "users",
                 type: "longtext",
                 nullable: false)
                 .Annotation("MySql:CharSet", "utf8mb4");
@@ -30,11 +30,11 @@ namespace UGHApi.Migrations
         {
             migrationBuilder.DropColumn(
                 name: "Password",
-                table: "Users");
+                table: "users");
 
             migrationBuilder.DropColumn(
                 name: "SaltKey",
-                table: "Users");
+                table: "users");
         }
     }
 }

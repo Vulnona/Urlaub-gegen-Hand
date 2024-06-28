@@ -1,15 +1,10 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using UGHApi.Models;
 
 namespace UGHApi.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api")]
     [ApiController]
     public class MembershipController : ControllerBase
     {
@@ -21,25 +16,25 @@ namespace UGHApi.Controllers
         }
 
         // GET: api/Membership
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Membership>>> GetMemberships()
+        [HttpGet("membership/get-membership")]
+        public async Task<ActionResult<IEnumerable<Membership>>> Getmemberships()
         {
-          if (_context.Memberships == null)
+          if (_context.memberships == null)
           {
               return NotFound();
           }
-            return await _context.Memberships.ToListAsync();
+            return await _context.memberships.ToListAsync();
         }
 
         // GET: api/Membership/5
-        [HttpGet("{id}")]
+        [HttpGet("membership/{id}")]
         public async Task<ActionResult<Membership>> GetMembership(int id)
         {
-          if (_context.Memberships == null)
+          if (_context.memberships == null)
           {
               return NotFound();
           }
-            var membership = await _context.Memberships.FindAsync(id);
+            var membership = await _context.memberships.FindAsync(id);
 
             if (membership == null)
             {
@@ -51,7 +46,7 @@ namespace UGHApi.Controllers
 
         // PUT: api/Membership/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
+        [HttpPut("membership/update-membership/{id}")]
         public async Task<IActionResult> PutMembership(int id, Membership membership)
         {
             if (id != membership.MembershipID)
@@ -82,34 +77,34 @@ namespace UGHApi.Controllers
 
         // POST: api/Membership
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
+        [HttpPost("membership/add-new-membership")]
         public async Task<ActionResult<Membership>> PostMembership(Membership membership)
         {
-          if (_context.Memberships == null)
+          if (_context.memberships == null)
           {
-              return Problem("Entity set 'UghContext.Memberships'  is null.");
+              return Problem("Entity set 'UghContext.memberships'  is null.");
           }
-            _context.Memberships.Add(membership);
+            _context.memberships.Add(membership);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetMembership", new { id = membership.MembershipID }, membership);
         }
 
         // DELETE: api/Membership/5
-        [HttpDelete("{id}")]
+        [HttpDelete("membership/delete-membership/{id}")]
         public async Task<IActionResult> DeleteMembership(int id)
         {
-            if (_context.Memberships == null)
+            if (_context.memberships == null)
             {
                 return NotFound();
             }
-            var membership = await _context.Memberships.FindAsync(id);
+            var membership = await _context.memberships.FindAsync(id);
             if (membership == null)
             {
                 return NotFound();
             }
 
-            _context.Memberships.Remove(membership);
+            _context.memberships.Remove(membership);
             await _context.SaveChangesAsync();
 
             return NoContent();
@@ -117,7 +112,7 @@ namespace UGHApi.Controllers
 
         private bool MembershipExists(int id)
         {
-            return (_context.Memberships?.Any(e => e.MembershipID == id)).GetValueOrDefault();
+            return (_context.memberships?.Any(e => e.MembershipID == id)).GetValueOrDefault();
         }
     }
 }

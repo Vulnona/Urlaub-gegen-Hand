@@ -6,24 +6,24 @@ using UGHApi.Models;
 using UGHModels;
 namespace UGHApi.Services
 {
-    public class CouponService
+    public class couponservice
     {
         private readonly UghContext _context;
 
-        public CouponService(UghContext context)
+        public couponservice(UghContext context)
         {
             _context = context;
         }
         public async Task AddCoupon(Coupon coupon)
         {
             coupon.CreatedDate = DateTime.Now;
-            _context.Coupons.Add(coupon);
+            _context.coupons.Add(coupon);
             await _context.SaveChangesAsync();
         }
 
         public async Task UpdateCoupon(Coupon updatedCoupon)
         {
-            var existingCoupon = await _context.Coupons.FindAsync(updatedCoupon.Id);
+            var existingCoupon = await _context.coupons.FindAsync(updatedCoupon.Id);
             if (existingCoupon == null)
             {
                 throw new CouponNotFoundException();
@@ -33,53 +33,41 @@ namespace UGHApi.Services
             existingCoupon.Name = updatedCoupon.Name;
             existingCoupon.Description = updatedCoupon.Description;
             existingCoupon.CreatedDate = DateTime.Now;
-            //existingCoupon.EndDate = updatedCoupon.EndDate;
-            //existingCoupon.StartDate = updatedCoupon.StartDate;
-            //existingCoupon.DiscountAmount = updatedCoupon.DiscountAmount;
+            existingCoupon.EndDate = updatedCoupon.EndDate;
+            existingCoupon.StartDate = updatedCoupon.StartDate;
+            existingCoupon.DiscountAmount = updatedCoupon.DiscountAmount;
 
             _context.Entry(existingCoupon).State = EntityState.Modified;
             await _context.SaveChangesAsync();
         }
 
-        public async Task<List<Coupon>> GetAllCoupons()
+        public async Task<List<Coupon>> GetAllcoupons()
         {
-            return await _context.Coupons.ToListAsync();
+            return await _context.coupons.ToListAsync();
         }
-        public async Task<Coupon> GetCouponsById(int id)
-        {
-            if (_context.Coupons == null)
-            {
-                return null;
-            }
-            var coupon = await _context.Coupons.FindAsync(id);
-            if(coupon == null)
-            {
-                return null;
-            }
-            return coupon;
-        }
+
         public async Task DeleteCoupon(int couponId)
         {
-            var coupon = await _context.Coupons.FindAsync(couponId);
+            var coupon = await _context.coupons.FindAsync(couponId);
             if (coupon == null)
             {
                 throw new CouponNotFoundException();
             }
 
-            _context.Coupons.Remove(coupon);
+            _context.coupons.Remove(coupon);
             await _context.SaveChangesAsync();
         }
 
         public async Task<string> RedeemCoupon(string couponCode, ClaimsPrincipal user)
         {
-            var coupon = await _context.Coupons.FirstOrDefaultAsync(c => c.Code == couponCode);
+            var coupon = await _context.coupons.FirstOrDefaultAsync(c => c.Code == couponCode);
             if (coupon == null)
             {
                 throw new CouponNotFoundException();
             }
 
             var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var userRecord = await _context.Users.FirstOrDefaultAsync(u => u.Email_Adress == userId);
+            var userRecord = await _context.users.FirstOrDefaultAsync(u => u.Email_Address == userId);
             if (userRecord == null)
             {
                 throw new UserNotFoundException();
@@ -87,15 +75,15 @@ namespace UGHApi.Services
 
             var currentDate = DateTime.UtcNow.Date;
 
-            //if (currentDate < coupon.StartDate.Date || currentDate > coupon.EndDate.Date)
-            //{
-            //    throw new CouponRedeemException("Coupon is not valid at this time.");
-            //}
+            if (currentDate < coupon.StartDate.Date || currentDate > coupon.EndDate.Date)
+            {
+                throw new CouponRedeemException("Coupon is not valid at this time.");
+            }
 
-            //if (coupon.EndDate.Date < currentDate)
-            //{
-            //    throw new CouponRedeemException("Coupon has expired.");
-            //}
+            if (coupon.EndDate.Date < currentDate)
+            {
+                throw new CouponRedeemException("Coupon has expired.");
+            }
 
             var redemption = new Redemption
             {
@@ -104,7 +92,7 @@ namespace UGHApi.Services
                 RedeemedDate = currentDate
             };
 
-            _context.Redemptions.Add(redemption);
+            _context.redemptions.Add(redemption);
             await _context.SaveChangesAsync();
 
             return "Coupon redeemed successfully.";

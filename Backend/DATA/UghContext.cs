@@ -1,26 +1,33 @@
-using System.Drawing;
 using UGHApi.Models;
 using Microsoft.EntityFrameworkCore;
 using UGHModels;
 using Backend.Models;
 
-
-
 public class UghContext : DbContext
 {
     public UghContext (DbContextOptions<UghContext> options) :base(options){}
-    public DbSet<User> Users { get; set; }
-    public DbSet<Profile> Profiles{get;set;}
-    public DbSet<Membership> Memberships{get;set;}
-    public DbSet<Skill> Skills{get;set;}
-    public DbSet<Continent> Continents {get;set;}
-    public DbSet<UGHApi.Models.Region> Regions{get;set;}
-    public DbSet<Country> Countries{get;set;}
-    public DbSet<EmailVerificator> EmailVerificators{get;set;}
-    public DbSet<UserRole> UserRoles { get;set;}
-    public DbSet<UserRoleMapping> UserRolesMapping { get;set;}
-    public DbSet<Coupon> Coupons { get;set;}    
-    public DbSet<Redemption>Redemptions { get;set;}
+    public DbSet<User> users { get; set; }
+    public DbSet<UserProfile> userprofiles { get; set; }
+    public DbSet<Membership> memberships { get;set;}
+    public DbSet<Skill> skills{ get;set;}
+    public DbSet<Continent> continents { get;set;}
+    public DbSet<UGHApi.Models.Region> regions{get;set;}
+    public DbSet<Country> countries{get;set;}
+    public DbSet<EmailVerificator> emailverificators { get;set;}
+    public DbSet<UserRole> userroles { get;set;}
+    public DbSet<UserRoleMapping> userrolesmapping { get;set;}
+    public DbSet<Coupon> coupons { get;set;}    
+    public DbSet<Redemption>redemptions { get;set;}
+    public DbSet<Offer> offers { get; set; }
+    public DbSet<Accomodation> accomodations { get;set;}
+    public DbSet<accomodationsuitable> accomodationsuitables { get;set;}
+    public DbSet<ratings>  ratings { get;set;}
+    public DbSet<Review> reviews { get; set; }
+    public DbSet<ReviewOfferUser> reviewofferusers { get; set; }
+    public DbSet<ReviewLoginUser> reviewloginusers { get; set; }
+    public DbSet<ReviewPost> reviewposts { get; set; }
+    public DbSet<RatingUserLogin> ratinguserlogins { get; set; }
+    public DbSet<RatingHostLogin> ratinghostlogins { get; set; }     
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         IConfigurationRoot configuration =new ConfigurationBuilder()

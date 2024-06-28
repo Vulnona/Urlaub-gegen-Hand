@@ -7,20 +7,8 @@
     </v-row>
     <v-row>Anzahl der Produkte: {{ result.total }}</v-row>
     <v-row>
-      <v-col
-        v-for="(item, index) in result.products"
-        :key="index"
-        cols="12"
-        sm="6"
-        md="4"
-        lg="3"
-      >
-        <OfferCard
-          :id="item.id"
-          :title="item.title"
-          :description="item.description"
-          :image="item.thumbnail"
-        />
+      <v-col v-for="(item, index) in result.products" :key="index" cols="12" sm="6" md="4" lg="3">
+        <OfferCard :id="item.id" :title="item.title" :description="item.description" :image="item.thumbnail" />
       </v-col>
     </v-row>
   </v-container>
@@ -28,8 +16,8 @@
 
 <script lang="ts" setup>
 import OfferCard from './OfferCard.vue'
-import {PropType, ref} from 'vue'
-import {Result} from '@/types';
+import { PropType, ref } from 'vue'
+import { Result } from '@/types';
 
 defineProps({
   result: {
