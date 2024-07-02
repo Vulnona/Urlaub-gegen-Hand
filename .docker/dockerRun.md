@@ -52,3 +52,6 @@ Falls der Fehler weiterhin besteht, verwenden Sie "CTRL+C“, um den Docker anzu
 
 Nachdem der Docker hochgefahren ist, 
 Klicken Sie auf die in Docker Desktop erstellten URLs, klicken Sie direkt auf die URL und die Anwendung beginnt zu funktionieren:
+
+1. Frontend:  http://localhost:3000
+2. Backend: http://localhost:8080/swagger/index.html
