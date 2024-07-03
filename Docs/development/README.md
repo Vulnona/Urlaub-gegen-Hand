@@ -8,3 +8,4 @@
 * * [Interfaces](20.guide/20.interfaces.md)
 * * [API](20.guide/30.api.md)
 * [Facebook Crawler](30.facebookcrawler.md)
+* [Reviews and Ratings](40.reviewsandratings.md)
