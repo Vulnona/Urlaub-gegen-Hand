@@ -6,13 +6,13 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace UGHApi.Migrations
 {
     /// <inheritdoc />
-    public partial class ClassSkills : Migration
+    public partial class Classskills : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Skills",
+                name: "skills",
                 columns: table => new
                 {
                     SkillID = table.Column<int>(name: "Skill_ID", type: "int", nullable: false)
@@ -22,7 +22,7 @@ namespace UGHApi.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Skills", x => x.SkillID);
+                    table.PrimaryKey("PK_skills", x => x.SkillID);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
         }
@@ -31,7 +31,7 @@ namespace UGHApi.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Skills");
+                name: "skills");
         }
     }
 }

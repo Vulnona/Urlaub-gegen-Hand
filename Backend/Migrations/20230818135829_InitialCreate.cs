@@ -16,7 +16,7 @@ namespace UGHApi.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "Users",
+                name: "users",
                 columns: table => new
                 {
                     UserId = table.Column<int>(type: "int", nullable: false)
@@ -29,7 +29,7 @@ namespace UGHApi.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Users", x => x.UserId);
+                    table.PrimaryKey("PK_users", x => x.UserId);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
         }
@@ -38,7 +38,7 @@ namespace UGHApi.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Users");
+                name: "users");
         }
     }
 }

@@ -38,7 +38,7 @@ namespace UGHApi.Migrations
 
                     b.HasKey("verivicationID");
 
-                    b.ToTable("EmailVerificators");
+                    b.ToTable("emailverificators");
                 });
 
             modelBuilder.Entity("UGHApi.Models.Continent", b =>
@@ -49,7 +49,7 @@ namespace UGHApi.Migrations
 
                     b.HasKey("Continent_ID");
 
-                    b.ToTable("Continents");
+                    b.ToTable("continents");
                 });
 
             modelBuilder.Entity("UGHApi.Models.Country", b =>
@@ -66,7 +66,7 @@ namespace UGHApi.Migrations
 
                     b.HasKey("Country_ID");
 
-                    b.ToTable("Countries");
+                    b.ToTable("countries");
                 });
 
             modelBuilder.Entity("UGHApi.Models.Coupon", b =>
@@ -101,7 +101,7 @@ namespace UGHApi.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Coupons");
+                    b.ToTable("coupons");
                 });
 
             modelBuilder.Entity("UGHApi.Models.Membership", b =>
@@ -115,7 +115,7 @@ namespace UGHApi.Migrations
 
                     b.HasKey("MembershipID");
 
-                    b.ToTable("Memberships");
+                    b.ToTable("memberships");
                 });
 
             modelBuilder.Entity("UGHApi.Models.Profile", b =>
@@ -151,7 +151,7 @@ namespace UGHApi.Migrations
 
                     b.HasIndex("CouponId");
 
-                    b.ToTable("Redemptions");
+                    b.ToTable("redemptions");
                 });
 
             modelBuilder.Entity("UGHApi.Models.Region", b =>
@@ -171,7 +171,7 @@ namespace UGHApi.Migrations
 
                     b.HasKey("Region_ID");
 
-                    b.ToTable("Regions");
+                    b.ToTable("regions");
                 });
 
             modelBuilder.Entity("UGHApi.Models.Skill", b =>
@@ -188,7 +188,7 @@ namespace UGHApi.Migrations
 
                     b.HasKey("Skill_ID");
 
-                    b.ToTable("Skills");
+                    b.ToTable("skills");
                 });
 
             modelBuilder.Entity("UGHApi.Models.UserRole", b =>
@@ -203,7 +203,7 @@ namespace UGHApi.Migrations
 
                     b.HasKey("RoleId");
 
-                    b.ToTable("UserRoles");
+                    b.ToTable("userroles");
                 });
 
             modelBuilder.Entity("UGHApi.Models.UserRoleMapping", b =>
@@ -224,7 +224,7 @@ namespace UGHApi.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UserRolesMapping");
+                    b.ToTable("userrolesmapping");
                 });
 
             modelBuilder.Entity("UGHModels.User", b =>
@@ -247,7 +247,7 @@ namespace UGHApi.Migrations
                     b.Property<DateOnly>("DateOfBirth")
                         .HasColumnType("date");
 
-                    b.Property<string>("Email_Adress")
+                    b.Property<string>("Email_Address")
                         .IsRequired()
                         .HasColumnType("longtext");
 
@@ -297,7 +297,7 @@ namespace UGHApi.Migrations
 
                     b.HasIndex("CurrentMembershipMembershipID");
 
-                    b.ToTable("Users");
+                    b.ToTable("users");
                 });
 
             modelBuilder.Entity("UGHApi.Models.Redemption", b =>

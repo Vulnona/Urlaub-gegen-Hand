@@ -1,15 +1,10 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using UGHApi.Models;
 
 namespace UGHApi.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api")]
     [ApiController]
     public class SkillCategoryController : ControllerBase
     {
@@ -21,14 +16,14 @@ namespace UGHApi.Controllers
         }
 
         // GET: api/SkillCategory
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Skill>>> GetSkills()
+        [HttpGet("skill-category")]
+        public async Task<ActionResult<IEnumerable<Skill>>> Getskills()
         {
-          if (_context.Skills == null)
+          if (_context.skills == null)
           {
-              return NotFound();
+              return NoContent();
           }
-            var skillCategories = _context.Skills.Where ( b=> b.ParentSkill_ID == null);
+            var skillCategories = _context.skills.Where ( b=> b.ParentSkill_ID == null);
             return await skillCategories.ToListAsync();
         }
     }

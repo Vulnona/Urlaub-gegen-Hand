@@ -1,15 +1,10 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using UGHApi.Models;
 
 namespace UGHApi.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api")]
     [ApiController]
     public class SkillController : ControllerBase
     {
@@ -20,26 +15,44 @@ namespace UGHApi.Controllers
             _context = context;
         }
 
-       
-
         // GET: api/Skill/5
-        [HttpGet("{Category_id}")]
-        public async Task<ActionResult<IEnumerable<Skill>>> GetSkills(int Category_id)
+        [HttpGet("skill/{category_id}")]
+        public async Task<ActionResult<IEnumerable<Skill>>> Getskills(int Category_id)
         {
-          if (_context.Skills == null)
-          {
-              return NotFound();
-          }
-            var skills =  _context.Skills.Where( b=> b.ParentSkill_ID==Category_id);
-
-            if (skills.Count() == 0)
+            if (_context.skills == null)
             {
                 return NotFound();
             }
 
-            return await skills.ToListAsync();
+            try
+            {
+                var skills = _context.skills.Where(b => b.ParentSkill_ID == Category_id);
+
+                if (!skills.Any())
+                {
+                    return NotFound();
+                }
+
+                return await skills.ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
         }
 
-
+        [HttpGet("get-all-skills")]
+        public async Task<ActionResult> GetAllskills()
+        {
+            try
+            {
+                var allskills = await _context.skills.ToListAsync();
+                return Ok(allskills);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
     }
 }

@@ -12,7 +12,7 @@ namespace UGHApi.Migrations
         {
             migrationBuilder.AddColumn<int>(
                 name: "ParentSkill_ID",
-                table: "Skills",
+                table: "skills",
                 type: "int",
                 nullable: true);
         }
@@ -22,7 +22,7 @@ namespace UGHApi.Migrations
         {
             migrationBuilder.DropColumn(
                 name: "ParentSkill_ID",
-                table: "Skills");
+                table: "skills");
         }
     }
 }

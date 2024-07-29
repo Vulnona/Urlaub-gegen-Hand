@@ -13,7 +13,7 @@ namespace UGHApi.Migrations
         {
             migrationBuilder.AlterColumn<string>(
                 name: "SkillDescrition",
-                table: "Skills",
+                table: "skills",
                 type: "longtext",
                 nullable: true,
                 oldClrType: typeof(string),
@@ -22,7 +22,7 @@ namespace UGHApi.Migrations
                 .OldAnnotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "Continents",
+                name: "continents",
                 columns: table => new
                 {
                     ContinentID = table.Column<int>(name: "Continent_ID", type: "int", nullable: false)
@@ -30,12 +30,12 @@ namespace UGHApi.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Continents", x => x.ContinentID);
+                    table.PrimaryKey("PK_continents", x => x.ContinentID);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "Countries",
+                name: "countries",
                 columns: table => new
                 {
                     CountryID = table.Column<int>(name: "Country_ID", type: "int", nullable: false)
@@ -46,12 +46,12 @@ namespace UGHApi.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Countries", x => x.CountryID);
+                    table.PrimaryKey("PK_countries", x => x.CountryID);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "Regions",
+                name: "regions",
                 columns: table => new
                 {
                     RegionID = table.Column<int>(name: "Region_ID", type: "int", nullable: false)
@@ -63,7 +63,7 @@ namespace UGHApi.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Regions", x => x.RegionID);
+                    table.PrimaryKey("PK_regions", x => x.RegionID);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
         }
@@ -72,16 +72,16 @@ namespace UGHApi.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Continents");
+                name: "continents");
 
             migrationBuilder.DropTable(
-                name: "Countries");
+                name: "countries");
 
             migrationBuilder.DropTable(
-                name: "Regions");
+                name: "regions");
 
             migrationBuilder.UpdateData(
-                table: "Skills",
+                table: "skills",
                 keyColumn: "SkillDescrition",
                 keyValue: null,
                 column: "SkillDescrition",
@@ -89,7 +89,7 @@ namespace UGHApi.Migrations
 
             migrationBuilder.AlterColumn<string>(
                 name: "SkillDescrition",
-                table: "Skills",
+                table: "skills",
                 type: "longtext",
                 nullable: false,
                 oldClrType: typeof(string),

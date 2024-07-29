@@ -11,5 +11,6 @@ namespace UGHApi.Models
         {
             return this.Expiration <= DateTime.Now;
         }}
+        
     }
 }

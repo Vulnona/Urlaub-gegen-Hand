@@ -8,7 +8,7 @@ namespace UGHApi.Models
             verificationPending,
             verificationFailed,
             verified
-
         }
+     
     }
 }

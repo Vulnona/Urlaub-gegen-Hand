@@ -1,62 +1,101 @@
 <template>
-  <v-card>
-    <RouterLink :to="`/offer-${id}`">
-      <img
-        height="150"
-        :src="image"
-        alt=""
-      >
-    </RouterLink>
-    <div class="header pa-3">
-      <RouterLink :to="`/offer-${id}`">
-        <h3>
-          {{ title }}
-        </h3>
-        <h4>
-          <v-icon icon="mdi-map-marker-outline" />
-          {{ description }}
-        </h4>
-      </RouterLink>
+  <div class="container">
+    <div class="row">
+      <div class="col-sm-12">
+        <div class="flexBox justify-between align-items-center top_headingBox mb-25">
+          <h1 class="main-title">Offers</h1>
+          <div class="SearchBox">
+            <i class="ri-search-line"></i>
+            <input type="text" v-model="searchTerm" @input="searchOffers" placeholder="Search offers..."
+              class="form-control">
+          </div>
+        </div>
+      </div>
     </div>
-  </v-card>
+    <div v-if="loading" class="text-center">Loading...</div>
+    <div v-else class="row">
+      <div v-for="offer in offers" :key="offer.id" class="col-md-4 mb-4">
+        <div class="card">
+          <div class="card-body">
+            <h3 class="card-title">{{ offer.title }}</h3>
+            <p class="card-text">{{ offer.description }}</p>
+            <p class="card-text"><strong>Location:</strong> {{ offer.location }}</p>
+            <p class="card-text"><strong>Skill:</strong> {{ offer.skill.skillDescrition }}</p>
+            <p class="card-text"><strong>Accomodation:</strong> {{ offer.accomodation.nameAccomodationType }}</p>
+            <p class="card-text"><strong>Suitable for:</strong> {{ offer.accomodationSuitable.name }}</p>
+            <button @click="SendRequest()" class="btn btn-success" style="float: right;">Request</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
+<script>
+import axios from 'axios';
 
-<script lang="ts" setup>
-defineProps({
-  id: {
-    type: Number,
-    required: true
+export default {
+  data() {
+    return {
+      loading: true,
+      offers: [],
+      searchTerm: ''
+    };
   },
-  image: {
-    type: String,
-    required: false,
-    default: 'https://via.placeholder.com/768x432/'
+  mounted() {
+    this.fetchOffers();
   },
-  title: {
-    type: String,
-    required: false,
-    default: 'Hier ein tolles Angebot'
+  methods: {
+    async fetchOffers() {
+      try {
+        const response = await axios.get(`${process.env.baseURL}offer/get-all-offers`, {
+          params: {
+            searchTerm: this.searchTerm
+          }
+        });
+        this.offers = response.data;
+        console.log(response.data);
+        this.loading = false;
+      } catch (error) {
+        console.error('Error fetching offers:', error);
+        this.loading = false;
+      }
+    },
+    searchOffers() {
+      this.loading = true;
+      this.fetchOffers();
+    }
   },
-  description: {
-    type: String,
-    required: false,
-    default: 'Bundesland / Region / Stadt'
+  computed: {
+    filteredOffers() {
+      if (!this.searchTerm) {
+        return this.offers;
+      }
+      return this.offers.filter(offer =>
+        offer.title.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+        offer.description.toLowerCase().includes(this.searchTerm.toLowerCase())
+      );
+    }
   }
-})
+};
 </script>
 
-<style lang="scss" scoped>
-
-img {
-  object-fit: cover;
-  object-position: bottom;
-  width: 100%;
-  aspect-ratio: 16/9;
+<style scoped>
+.card {
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.header {
-  display: flex;
-  flex-direction: column-reverse;
-  gap: 1rem
+.card-title {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.card-text {
+  margin-bottom: 0.5rem;
+}
+
+.container {
+  padding-top: 20px;
 }
 </style>

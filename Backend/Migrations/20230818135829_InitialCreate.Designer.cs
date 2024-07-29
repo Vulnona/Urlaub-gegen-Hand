@@ -42,7 +42,7 @@ namespace UGHApi.Migrations
 
                     b.HasKey("UserId");
 
-                    b.ToTable("Users");
+                    b.ToTable("users");
                 });
 #pragma warning restore 612, 618
         }

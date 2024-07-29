@@ -1,53 +1,70 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System;
+﻿using Microsoft.EntityFrameworkCore;
 using UGHApi.Models;
 using UGHModels;
 
 namespace UGHApi.Services
 {
-    public class UserService
+    public class userservice
     {
         private readonly UghContext _context;
         private readonly PasswordService _passwordService;
-        public UserService(UghContext context, PasswordService passwordService)
+
+        public userservice(UghContext context, PasswordService passwordService)
         {
             _context = context;
             _passwordService = passwordService;
         }
-        public  User GetUserByToken(string token)
+
+        public User GetUserByToken(string token)
         {
-            var userId = _context.EmailVerificators.Where(x => x.verificationToken.ToString().Equals(token)).Select(x=>x.user_Id).FirstOrDefault();
-            if (userId>0)
+            try
             {
-                 var user = _context.Users.Where(x=>x.User_Id == userId).FirstOrDefault();
-                if (user != null)
+                var userId = _context.emailverificators
+                                     .Where(x => x.verificationToken.ToString().Equals(token))
+                                     .Select(x => x.user_Id)
+                                     .FirstOrDefault();
+                if (userId > 0)
+                {
+                    var user = _context.users.FirstOrDefault(x => x.User_Id == userId);
+                    if (user != null)
+                    {
+                        return user;
+                    }
+                }
+                return null;
+            }
+            catch (Exception ex)
+            {
+                // Log the exception or handle as needed
+                throw new InvalidOperationException("An error occurred while getting user by token.", ex);
+            }
+        }
+
+        public async Task<User?> GetUserByEmailAsync(string email)
+        {
+            try
+            {
+                var user = await _context.users.FirstOrDefaultAsync(x => x.Email_Address == email);
+                if (user != null && user.User_Id > 0)
                 {
                     return user;
                 }
+                return null;
             }
-            return null;
+            catch (Exception ex)
+            {
+                // Log the exception or handle as needed
+                throw new InvalidOperationException("An error occurred while getting user by email asynchronously.", ex);
+            }
         }
 
-      
-        public async Task<User?> GetUserByEmailAsync(string email)
-        {
-            // Simulate async operation (e.g., database query)
-            var user= await _context.Users.Where(x => x.Email_Adress == email).FirstOrDefaultAsync();
-            if(user != null && user.User_Id > 0)
-            {
-                return user;
-            }
-            return null;
-        }
         public bool CreateAdmin(RegisterRequest request)
         {
             try
             {
-                if (_context.Users.Any(u => u.Email_Adress.ToLower().Equals(request.EmailAddress.ToLower())))
+                if (_context.users.Any(u => u.Email_Address.ToLower().Equals(request.Email_Address.ToLower())))
                 {
-                    // Email already exists
-                    return false;
+                    return false; // User already exists
                 }
 
                 DateTime parsedDateOfBirth = DateTime.Parse(request.DateOfBirth);
@@ -55,31 +72,29 @@ namespace UGHApi.Services
 
                 var salt = _passwordService.GenerateSalt();
                 var hashPassword = _passwordService.HashPassword(request.Password, salt);
-
-                var newUser = new User();
-                newUser.FirstName =request.FirstName;
-                newUser.LastName= request.LastName;
-                newUser.DateOfBirth= dateOfBirth;
-                 newUser.Gender = request.Gender;
-                newUser.Street = request.Street;
-                newUser.HouseNumber = request.HouseNumber;
-                newUser.PostCode = request.PostCode;
-                newUser.City = request.City;
-                newUser.Country = request.Country;
-                newUser.Email_Adress = request.EmailAddress;
-                newUser.IsEmailVerified= false;
-                newUser.Password= hashPassword;
-                newUser.SaltKey= salt;
-                newUser.FacebookUrl = request.FacebookUrl;
-                newUser.CouponCode= request.couponCode;
-                newUser.IdCard = "";
-
+                var newUser = new User(
+                    request.FirstName,
+                    request.LastName,
+                    dateOfBirth,
+                    request.Gender,
+                    request.Street,
+                    request.HouseNumber,
+                    request.PostCode,
+                    request.City,
+                    request.Country,
+                    request.Email_Address,
+                    false,
+                    hashPassword,
+                    salt,
+                    request.Facebook_link,
+                    request.Link_RS,
+                    request.Link_VS
+                );
                 newUser.VerificationState = UGH_Enums.VerificationState.verified;
-                _context.Users.Add(newUser);
+                _context.users.Add(newUser);
                 _context.SaveChanges();
 
-                // Add default role for the user (e.g., "User")
-                var defaultUserRole = _context.UserRoles.FirstOrDefault(r => r.RoleName == "Admin");
+                var defaultUserRole = _context.userroles.FirstOrDefault(r => r.RoleName == "user");
                 if (defaultUserRole != null)
                 {
                     var userRoleMapping = new UserRoleMapping
@@ -87,61 +102,90 @@ namespace UGHApi.Services
                         UserId = newUser.User_Id,
                         RoleId = defaultUserRole.RoleId
                     };
-                    _context.UserRolesMapping.Add(userRoleMapping);
+                    _context.userrolesmapping.Add(userRoleMapping);
                     _context.SaveChanges();
                 }
-
                 return true;
             }
             catch (Exception ex)
             {
-                // Log or handle the exception
-                return false;
+                // Log the exception or handle as needed
+                throw new InvalidOperationException("An error occurred while creating admin.", ex);
             }
         }
-        public async Task<IEnumerable<string>> GetUserRolesByUserEmail(string userEmail)
-        {
-            var userRoles = await _context.Users
-                .Where(ur => ur.Email_Adress == userEmail)
-                .SelectMany(ur => _context.UserRolesMapping
-                    .Where(urm => urm.UserId == ur.User_Id)
-                    .Join(_context.UserRoles,
-                        urm => urm.RoleId,
-                        role => role.RoleId,
-                        (urm, role) => role.RoleName))
-                .ToListAsync();
 
-            return userRoles;
+        public async Task<IEnumerable<string>> GetuserrolesByUserEmail(string userEmail)
+        {
+            try
+            {
+                var userroles = await _context.users
+                    .Where(ur => ur.Email_Address == userEmail)
+                    .SelectMany(ur => _context.userrolesmapping
+                        .Where(urm => urm.UserId == ur.User_Id)
+                        .Join(_context.userroles,
+                            urm => urm.RoleId,
+                            role => role.RoleId,
+                            (urm, role) => role.RoleName))
+                    .ToListAsync();
+                return userroles;
+            }
+            catch (Exception ex)
+            {
+                // Log the exception or handle as needed
+                throw new InvalidOperationException("An error occurred while getting user roles by user email asynchronously.", ex);
+            }
         }
 
         public (bool IsValid, string ErrorMessage) ValidateUser(string Email, string Password)
         {
-            var user = _context.Users.FirstOrDefault(x => x.Email_Adress.Equals(Email));
-
-            if (user == null)
+            try
             {
-                return (false, "User not found");
-            }
+                var user = _context.users.FirstOrDefault(x => x.Email_Address.Equals(Email));
 
-            if (!user.IsEmailVerified)
+                if (user == null)
+                {
+                    return (false, "User not found");
+                }
+
+                if (!user.IsEmailVerified)
+                {
+                    return (false, "Email not verified");
+                }
+
+                string newHash = _passwordService.HashPassword(Password, user.SaltKey);
+
+                if (newHash != user.Password)
+                {
+                    return (false, "Incorrect password");
+                }
+
+                return (true, "User is valid");
+            }
+            catch (Exception ex)
             {
-                return (false, "Email not verified");
+                // Log the exception or handle as needed
+                throw new InvalidOperationException("An error occurred while validating user.", ex);
             }
-
-            if (user.VerificationState != UGH_Enums.VerificationState.verified)
-            {
-                return (false, "User not verified");
-            }
-
-            string newHash = _passwordService.HashPassword(Password, user.SaltKey);
-
-            if (newHash != user.Password)
-            {
-                return (false, "Incorrect password");
-            }
-
-            return (true, "User is valid");
         }
 
+        public void DeleteUserInfo(int userId)
+        {
+            try
+            {
+                var user = _context.users.FirstOrDefault(u => u.User_Id == userId);
+                if (user != null)
+                {
+                    user.Link_RS = null;
+                    user.Link_VS = null;
+
+                    _context.SaveChanges();
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log the exception or handle as needed
+                throw new InvalidOperationException("An error occurred while deleting user information.", ex);
+            }
+        }
     }
 }

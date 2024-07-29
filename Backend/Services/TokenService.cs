@@ -1,15 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
+﻿using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using UGHModels;
 using Microsoft.Extensions.Caching.Memory;
 using Backend.Models;
-using UGHApi.Models;
-using Microsoft.AspNetCore.Http.HttpResults;
+
 namespace UGHApi.Services
 {
     public class TokenService
@@ -17,74 +13,162 @@ namespace UGHApi.Services
         private readonly IConfiguration _configuration;
         private readonly IMemoryCache _cache;
         private readonly UghContext _context;
-        private readonly UserService _userService;
-        public TokenService(IConfiguration configuration, IMemoryCache cache, UghContext context, UserService userService)
+        private readonly userservice _userservice;
+
+        public TokenService(IConfiguration configuration, IMemoryCache cache, UghContext context, userservice userservice)
         {
             _configuration = configuration;
             _cache = cache;
             _context = context;
-            _userService =userService;
+            _userservice = userservice;
         }
-        public async Task<string> GenerateJwtToken(string username)
+
+        public async Task<string> GenerateJwtToken(string username, string userId)
         {
-            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
-            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
-            var roles = await _userService.GetUserRolesByUserEmail(username);
-            
-            var claims = new List<Claim>
+            try
             {
-                new Claim(JwtRegisteredClaimNames.Sub, username),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+                var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
+                var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+                var roles = await _userservice.GetuserrolesByUserEmail(username);
 
-            };
-            foreach (var role in roles)
-            {
-                claims.Add(new Claim(ClaimTypes.Role, role));
+                var claims = new List<Claim>
+                {
+                    new Claim(ClaimTypes.NameIdentifier, userId), // Use ClaimTypes.NameIdentifier for user ID
+                    new Claim(JwtRegisteredClaimNames.Sub, username),
+                    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+                };
+
+                foreach (var role in roles)
+                {
+                    claims.Add(new Claim(ClaimTypes.Role, role));
+                }
+
+                var token = new JwtSecurityToken(
+                    _configuration["Jwt:Issuer"],
+                    _configuration["Jwt:Audience"],
+                    claims,
+                    expires: DateTime.Now.AddMinutes(30),
+                    signingCredentials: credentials);
+
+                return new JwtSecurityTokenHandler().WriteToken(token);
             }
-
-            var token = new JwtSecurityToken(
-                _configuration["Jwt:Issuer"],
-                _configuration["Jwt:Audience"],
-                claims,
-                expires: DateTime.Now.AddMinutes(30),
-                signingCredentials: credentials);
-
-            return new JwtSecurityTokenHandler().WriteToken(token);
+            catch (Exception ex)
+            {
+                // Log the exception or handle as needed
+                throw new InvalidOperationException("An error occurred while generating the JWT token.", ex);
+            }
         }
+
+        public async Task<int?> GetUserIdFromToken(string token)
+        {
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]);
+
+            try
+            {
+                tokenHandler.ValidateToken(token, new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(key),
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    ClockSkew = TimeSpan.Zero
+                }, out SecurityToken validatedToken);
+
+                var jwtToken = (JwtSecurityToken)validatedToken;
+                var userIdClaim = jwtToken.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier);
+
+                if (userIdClaim != null && int.TryParse(userIdClaim.Value, out int userId))
+                {
+                    return userId;
+                }
+                else
+                {
+                    throw new FormatException("User ID claim could not be parsed as an integer.");
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log the exception or handle as needed
+                throw new ArgumentException("Invalid token", ex);
+            }
+        }
+
         public string GenerateRefreshToken()
         {
-            // Generate a random refresh token
-            var randomNumber = new byte[32];
-            using var rng = RandomNumberGenerator.Create();
-            rng.GetBytes(randomNumber);
-            return Convert.ToBase64String(randomNumber);
+            try
+            {
+                var randomNumber = new byte[32];
+                using var rng = RandomNumberGenerator.Create();
+                rng.GetBytes(randomNumber);
+                return Convert.ToBase64String(randomNumber);
+            }
+            catch (Exception ex)
+            {
+                // Log the exception or handle as needed
+                throw new InvalidOperationException("An error occurred while generating the refresh token.", ex);
+            }
         }
+
         public void StoreRefreshToken(string token, string email)
         {
-            _cache.Set(token, email);
+            try
+            {
+                _cache.Set(token, email);
+            }
+            catch (Exception ex)
+            {
+                // Log the exception or handle as needed
+                throw new InvalidOperationException("An error occurred while storing the refresh token.", ex);
+            }
         }
 
         public bool TryGetUserEmail(string token, out string userEmail)
         {
-            return _cache.TryGetValue(token, out userEmail);
+            try
+            {
+                return _cache.TryGetValue(token, out userEmail);
+            }
+            catch (Exception ex)
+            {
+                // Log the exception or handle as needed
+                throw new InvalidOperationException("An error occurred while retrieving the user email from the cache.", ex);
+            }
         }
 
         public void RemoveRefreshToken(string token)
         {
-            _cache.Remove(token);
+            try
+            {
+                _cache.Remove(token);
+            }
+            catch (Exception ex)
+            {
+                // Log the exception or handle as needed
+                throw new InvalidOperationException("An error occurred while removing the refresh token from the cache.", ex);
+            }
         }
-        public Guid GenrateNewEmailVerificator(int userId)
-        {
-            EmailVerificator newVerificator = new EmailVerificator();
-            newVerificator.requestDate = DateTime.Now;
-            newVerificator.user_Id = userId;
-            newVerificator.verificationToken = Guid.NewGuid();
 
-            _context.EmailVerificators.Add(newVerificator);
-            _context.SaveChanges();
-            return newVerificator.verificationToken;
+        public Guid GenerateNewEmailVerificator(int userId)
+        {
+            try
+            {
+                var newVerificator = new EmailVerificator
+                {
+                    requestDate = DateTime.Now,
+                    user_Id = userId,
+                    verificationToken = Guid.NewGuid()
+                };
+
+                _context.emailverificators.Add(newVerificator);
+                _context.SaveChanges();
+                return newVerificator.verificationToken;
+            }
+            catch (Exception ex)
+            {
+                // Log the exception or handle as needed
+                throw new InvalidOperationException("An error occurred while generating the email verificator.", ex);
+            }
         }
-        
-        
     }
 }
