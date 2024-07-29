@@ -1,3 +1,5 @@
+
+
 import json
 import os
 import mysql.connector
@@ -169,3 +171,5 @@ finally:
     time.sleep(5) 
     driver.quit()
     connection.close()
+
+
