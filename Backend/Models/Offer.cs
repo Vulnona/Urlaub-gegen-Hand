@@ -14,15 +14,18 @@ namespace UGHApi.Models
         public string Description { get; set; }
         [Required]
         public string Location { get; set; }
-        public byte[]? ImageData { get; set; }
-        public string? ImageMimeType { get; set; }
+        public byte[] ImageData { get; set; }
+        public string ImageMimeType { get; set; }
         public string Contact { get; set; }
         public string Accomodation { get; set; }
         public string accomodationsuitable { get; set; }
         public string skills { get; set; }
-        public int Region_ID { get; set; }
-        [ForeignKey("Region_ID")]
-        public Region Region { get; set; }
+        public string country { get; set; }
+        public string state { get; set; }
+        public string city { get; set; }
+        //public int Region_ID { get; set; }
+        //[ForeignKey("Region_ID")]
+        //public Region Region { get; set; }
         public int User_Id { get; set; }
         [ForeignKey("User_Id")]
         public User User { get; set; }

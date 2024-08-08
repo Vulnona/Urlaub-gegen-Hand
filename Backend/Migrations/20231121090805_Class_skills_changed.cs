@@ -10,19 +10,19 @@ namespace UGHApi.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<int>(
-                name: "ParentSkill_ID",
-                table: "skills",
-                type: "int",
-                nullable: true);
+            //migrationBuilder.AddColumn<int>(
+            //    name: "ParentSkill_ID",
+            //    table: "skills",
+            //    type: "int",
+            //    nullable: true);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "ParentSkill_ID",
-                table: "skills");
+            //migrationBuilder.DropColumn(
+            //    name: "ParentSkill_ID",
+            //    table: "skills");
         }
     }
 }

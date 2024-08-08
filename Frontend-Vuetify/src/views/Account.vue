@@ -50,13 +50,13 @@ const axiosInstance = axios.create(); // Creating an axios instance for custom c
 // Adding a request interceptor to the axios instance
 axiosInstance.interceptors.request.use(
   config => {
-    const token = localStorage.getItem('token');
+    const token = sessionStorage.getItem('token');
     if (token) {
       const decryptedToken = decryptToken(token);
       if (decryptedToken) {
         config.headers['Authorization'] = `Bearer ${decryptedToken}`;
       } else {
-        localStorage.removeItem('token');
+        sessionStorage.removeItem('token');
       }
     }
     return config;
@@ -99,14 +99,14 @@ export default {
   },
   mounted() {
     this.Securitybot(); // Call security check on component mount
-    this.fetchUserData(localStorage.getItem('UserId')); // Fetch user data on component mount
-    this.fetchUserRating(localStorage.getItem('UserId')); // Fetch user rating on component mount
+    this.fetchUserData(sessionStorage.getItem('UserId')); // Fetch user data on component mount
+    this.fetchUserRating(sessionStorage.getItem('UserId')); // Fetch user rating on component mount
     this.checkLoginStatus(); // Check login status on component mount
   },
   methods: {
     // Method to check if the user is logged in
     Securitybot() {
-      if (!localStorage.getItem("token")) {
+      if (!sessionStorage.getItem("token")) {
         Swal.fire({
           title: 'You are not logged In!',
           text: 'Login First to continue.',
@@ -118,16 +118,16 @@ export default {
     },
     // Method to check login status and set the user role
     checkLoginStatus() {
-      const token = localStorage.getItem("token");
+      const token = sessionStorage.getItem("token");
       if (token) {
-        const testlogid = this.decryptlogID(localStorage.getItem("logId"));
+        const testlogid = this.decryptlogID(sessionStorage.getItem("logId"));
         globalLogId = testlogid;
         const decryptedToken = this.decryptToken(token);
         if (decryptedToken) {
           const decodedToken = VueJwtDecode.decode(decryptedToken);
           this.userRole = decodedToken["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"] || '';
         } else {
-          localStorage.removeItem('token');
+          sessionStorage.removeItem('token');
         }
       }
     },

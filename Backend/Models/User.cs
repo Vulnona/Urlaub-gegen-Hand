@@ -36,6 +36,9 @@ namespace UGHModels
         public string Country { get; set; }
 
         [Required]
+        public string State { get; set; }
+
+        [Required]
         public string Email_Address { get; set; }
 
         [Required]
@@ -51,13 +54,15 @@ namespace UGHModels
         [Required]
         public UGH_Enums.VerificationState VerificationState { get; set; }
 
-        public Membership? CurrentMembership { get; set; }
+        public Membership CurrentMembership { get; set; }
 
         public User()
         {
         }
 
-        public User(string firstName, string lastName, DateOnly dateOfBirth, string gender, string street, string houseNumber, string postCode, string city, string country, string emailAddress, bool isEmailVerified, string password, string saltKey, string facebook_link, string link_RS, string link_VS)
+        public User(string firstName, string lastName, DateOnly dateOfBirth, string gender, string street, string houseNumber,
+            string postCode, string city, string country, string emailAddress, bool isEmailVerified, string password,
+            string saltKey, string facebook_link, string link_RS, string link_VS, string state)
         {
             FirstName = firstName;
             LastName = lastName;
@@ -76,6 +81,7 @@ namespace UGHModels
             Facebook_link = facebook_link;
             Link_RS = link_RS;
             Link_VS = link_VS;
+            State = state;
         }
 
     }

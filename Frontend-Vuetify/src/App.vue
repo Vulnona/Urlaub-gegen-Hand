@@ -50,7 +50,7 @@ const decryptToken = (encryptedToken: string) => {
   }
 };
 
-const decryptedToken = decryptToken(localStorage.getItem('token') || ''); // Decrypt token stored in localStorage
+const decryptedToken = decryptToken(sessionStorage.getItem('token') || ''); // Decrypt token stored in sessionStorage
 </script>
 
 <style lang="scss" scoped>

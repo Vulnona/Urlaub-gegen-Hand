@@ -55,7 +55,7 @@ export default {
   methods: {
     // Method to check login status and redirect if not logged in
     Securitybot() {
-      if (!localStorage.getItem("token")) { // If token is not present in localStorage
+      if (!sessionStorage.getItem("token")) { // If token is not present in sessionStorage
         Swal.fire({ // Show SweetAlert2 modal
           title: 'You are not logged In!', // Modal title
           text: 'Login First to continue.', // Modal message
@@ -69,7 +69,7 @@ export default {
     // Method to fetch post reviews from the server
     async fetchPostReviews() {
       try {
-        const testlogid = this.decryptlogID(localStorage.getItem("logId")); // Decrypt log ID from localStorage
+        const testlogid = this.decryptlogID(sessionStorage.getItem("logId")); // Decrypt log ID from sessionStorage
         globalLogid = testlogid; // Assign decrypted log ID to global variable
         const response = await axios.get(`${process.env.baseURL}post-review/${globalLogid}`); // HTTP GET request to fetch reviews
         const reviews = response.data; // Assign fetched reviews to a variable

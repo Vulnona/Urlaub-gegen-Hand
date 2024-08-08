@@ -22,10 +22,10 @@
                     </div>
                     <div class="form-group">
                       <div class="headingSecondary">
-                      <h5 class="d-flex gap-x-2 heading5 align-items-center">
-                        <i class="ri-tools-line"></i> Title for Offer<b style="color: red;">*</b>
-                      </h5>
-                    </div>
+                        <h5 class="d-flex gap-x-2 heading5 align-items-center">
+                          <i class="ri-tools-line"></i> Title for Offer<b style="color: red;">*</b>
+                        </h5>
+                      </div>
                       <div class="titleBox">
                         <input v-model="offer.title" type="text" class="form-control"
                           placeholder="Offer 1 for Urlaub Gegen Hand">
@@ -33,12 +33,55 @@
                     </div>
                     <div class="form-group">
                       <div class="headingSecondary">
-                      <h5 class="d-flex gap-x-2 heading5 align-items-center">
-                        <i class="ri-tools-line"></i> Description
-                      </h5>
-                    </div>
+                        <h5 class="d-flex gap-x-2 heading5 align-items-center">
+                          <i class="ri-tools-line"></i> Description
+                        </h5>
+                      </div>
                       <textarea v-model="offer.description" class="form-control descriptiontextarea"
                         placeholder="Detailed description about the offer"></textarea>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div class="headingSecondary">
+                      <h5 class="d-flex gap-x-2 heading5">
+                        <i class="ri-information-line fa-blue"></i> Country<b style="color: red;">*</b>
+                      </h5>
+                    </div>
+                    <div class="form-group">
+                      <select id="country" v-model="countryId" @change="loadStates" class="form-control">
+                        <option v-for="c in countries" :key="c.country_ID" :value="c.country_ID">
+                          {{ c.countryName }}
+                        </option>
+                      </select>
+                    </div>
+                  </div>
+                  <div>
+                    <div class="headingSecondary">
+                      <h5 class="d-flex gap-x-2 heading5">
+                        <i class="ri-information-line fa-blue"></i> Region<b style="color: red;">*</b>
+                      </h5>
+                    </div>
+                    <div class="form-group">
+                      <select id="state" v-model="stateId" @change="loadCities" class="form-control">
+                        <option v-for="s in states" :key="s.id" :value="s.id">
+                          {{ s.name }}
+                        </option>
+                      </select>
+                    </div>
+                  </div>
+                  <div>
+                    <div class="headingSecondary">
+                      <h5 class="d-flex gap-x-2 heading5">
+                        <i class="ri-information-line fa-blue"></i> City<b style="color: red;">*</b>
+                      </h5>
+                    </div>
+                    <div class="form-group">
+                      <select id="city" v-model="cityId" @change="updateCityName" class="form-control">
+                        <option v-for="c in cities" :key="c.id" :value="c.id">
+                          {{ c.name }}
+                        </option>
+                      </select>
                     </div>
                   </div>
                   <div>
@@ -51,9 +94,10 @@
                       <input v-model="offer.location" type="text" class="form-control" placeholder="Stadt">
                     </div>
                   </div>
-                  <div>
-
-                  </div>
+                </div>
+              </div>
+              <div class="card general_info_box rightSide">
+                <div class="general_infoContent">
                   <div>
                     <div class="headingSecondary">
                       <h5 class="d-flex gap-x-2 heading5 align-items-center">
@@ -65,25 +109,6 @@
                         label="skillDescrition" track-by="skill_ID" multiple></multiselect>
                     </div>
                   </div>
-                  <div>
-                    <div class="headingSecondary">
-                      <h5 class="d-flex gap-x-2 heading5">
-                        <i class="ri-information-line fa-blue"></i> Region<b style="color: red;">*</b>
-                      </h5>
-                    </div>
-                    <div class="form-group">
-                      <select v-model="offer.region_ID" class="form-control">
-                        <option v-for="region in regions" :key="region.region_ID" :value="region.region_ID">
-                          {{ region.regionName }}
-                        </option>
-                      </select>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class="card general_info_box rightSide">
-                <div class="general_infoContent">
-
                   <div>
                     <div class="headingSecondary">
                       <h5 class="d-flex gap-x-2 heading5 align-items-center">
@@ -125,7 +150,6 @@
                       </ul>
                     </div>
                   </div>
-                  
                   <div>
                     <div class="headingSecondary">
                       <h5 class="d-flex gap-x-2 heading5 align-items-center">
@@ -153,6 +177,8 @@ import Swal from 'sweetalert2'; // Importing SweetAlert2 for notifications
 import Multiselect from 'vue-multiselect'; // Importing Multiselect component
 import 'vue-multiselect/dist/vue-multiselect.css'; // Importing Multiselect CSS
 import CryptoJS from 'crypto-js'; // Importing CryptoJS for encryption
+import { createToastInterface } from "vue-toastification";
+import "vue-toastification/dist/index.css";
 
 let globalLogid = ''; // Variable to store decrypted user ID
 
@@ -162,6 +188,7 @@ export default {
   },
   data() {
     return {
+      toast: null,
       offer: {
         title: '',
         description: '',
@@ -170,14 +197,43 @@ export default {
         accomodationSuitable: [], // Array to store selected suitable accommodations
         skills: [], // Array to store selected skills
         user_Id: globalLogid, // User ID fetched after decryption
-        region_ID: null,
+        // region_ID: null,
         image: null, // Variable to store selected image file
+        city: '',
+        state: '',
+        country: '',
       },
       skills: [], // Array to store fetched skills
-      regions: [], // Array to store fetched regions
+      // regions: [], // Array to store fetched regions
       accommodations: [], // Array to store fetched accommodations
-      suitableAccommodations: [] // Array to store fetched suitable accommodations
+      suitableAccommodations: [], // Array to store fetched suitable accommodations
+      countries: [],
+      states: [],
+      cities: [],
+      countryId: '', // For selecting the country in the dropdown
+      stateId: '', // For selecting the state in the dropdown
+      cityId: '', // For selecting the city in the dropdown
+      countryName: '', // To store the country name
+      stateName: '', // To store the state name
+      cityName: '', // To store the city name
     };
+  },
+  created() {
+    this.toast = createToastInterface({
+      // You can add options here if needed
+      position: "top-right",
+      timeout: 3000,
+      closeOnClick: true,
+      pauseOnFocusLoss: true,
+      pauseOnHover: true,
+      draggable: true,
+      draggablePercent: 0.6,
+      showCloseButtonOnHover: false,
+      hideProgressBar: false,
+      closeButton: "button",
+      icon: true,
+      rtl: false
+    });
   },
   mounted() {
     this.Securitybot(); // Checking user authentication on component mount
@@ -185,11 +241,12 @@ export default {
     this.fetchRegions(); // Fetching regions data
     this.fetchAccommodations(); // Fetching accommodations data
     this.fetchSuitableAccommodations(); // Fetching suitable accommodations data
+    this.loadCountries();
   },
   methods: {
     Securitybot() {
       // Method to check user authentication
-      if (!localStorage.getItem("token")) {
+      if (!sessionStorage.getItem("token")) {
         Swal.fire({
           title: 'You are not logged In !',
           text: 'Login First to continue.',
@@ -200,7 +257,7 @@ export default {
       }
     },
     decryptlogID(encryptedItem) {
-      // Method to decrypt user ID from localStorage
+      // Method to decrypt user ID from sessionStorage
       try {
         const bytes = CryptoJS.AES.decrypt(encryptedItem, process.env.SECRET_KEY);
         const decryptedString = bytes.toString(CryptoJS.enc.Utf8);
@@ -213,7 +270,7 @@ export default {
     async fetchAccommodations() {
       // Method to fetch accommodations data
       try {
-        const testlogid = this.decryptlogID(localStorage.getItem("logId")); // Decrypting user ID
+        const testlogid = this.decryptlogID(sessionStorage.getItem("logId")); // Decrypting user ID
         globalLogid = testlogid; // Storing decrypted user ID globally
         const response = await axios.get(`${process.env.baseURL}accomodation/get-all-accomodations`); // Fetching accommodations from API
         this.accommodations = response.data; // Assigning fetched accommodations to data property
@@ -248,24 +305,91 @@ export default {
         console.error('Error fetching regions:', error);
       }
     },
+    loadCountries() {
+      axios.get(`${process.env.baseURL}region/getall-country`)
+        .then(response => {
+          this.countries = response.data;
+        })
+        .catch(error => {
+          console.error('Error loading countries:', error);
+        });
+    },
+    loadStates() {
+      if (this.countryId) {
+        this.countryName = this.countries.find(c => c.country_ID === this.countryId).countryName;
+        axios.get(`${process.env.baseURL}region/get-state-bycountryId/${this.countryId}`)
+          .then(response => {
+            this.states = response.data;
+            this.stateId = ''; // Reset state selection
+            this.stateName = ''; // Reset state name
+            this.cityId = ''; // Reset city selection
+            this.cityName = ''; // Reset city name
+            this.cities = []; // Clear cities list
+          })
+          .catch(error => {
+            console.error('Error loading states:', error);
+          });
+      } else {
+        this.countryName = '';
+        this.states = [];
+        this.stateId = '';
+        this.stateName = '';
+        this.cityId = '';
+        this.cityName = '';
+        this.cities = [];
+      }
+    },
+
+    loadCities() {
+      if (this.stateId) {
+        this.stateName = this.states.find(s => s.id === this.stateId).name;
+        axios.get(`${process.env.baseURL}region/get-city-bystateId/${this.stateId}`)
+          .then(response => {
+            this.cities = response.data;
+            this.cityId = ''; // Reset city selection
+            this.cityName = ''; // Reset city name
+          })
+          .catch(error => {
+            console.error('Error loading cities:', error);
+          });
+      } else {
+        this.stateName = '';
+        this.cities = [];
+        this.cityId = '';
+        this.cityName = '';
+      }
+    },
+    updateCityName() {
+      if (this.cityId) {
+        this.cityName = this.cities.find(c => c.id === this.cityId).name;
+      } else {
+        this.cityName = '';
+      }
+    },
     async createOffer() {
       // Method to create a new offer
       if (this.offer.image && this.offer.image.size > 3.5 * 1024 * 1024) {
         // Checking image size limit
-        Swal.fire(
-          'Warning!',
-          'Image size cannot be greater than 3.5 MB.',
-          'warning'
-        );
+        // Swal.fire(
+        //   'File Too Big!',
+        //   'Image size cannot be greater than 3.5 MB.',
+        //   'warning'
+        // );
+        this.toast.warning("Image size cannot be greater than 3.5 MB.");
         return;
       }
-      if (!this.offer.title || !this.offer.skills.length || !this.offer.region_ID || !this.offer.image) {
+      if (!this.offer.title || !this.offer.skills.length || !this.offer.image) {
         // Validating required fields
-        Swal.fire(
-          'Warning!',
-          'Please fill in all required fields marked with *',
-          'warning'
-        );
+        // Swal.fire(
+        //   '',
+        //   'Please fill all the required fields marked with *',
+        //   'warning'
+        // );
+        this.toast.info("Please fill all the required fields marked with *");
+        return;
+      }
+      if (!this.countryName || !this.stateName || !this.cityName) {
+        this.toast.info("Please select country, state, and city.");
         return;
       }
       const offerData = new FormData(); // Creating FormData object to send form data
@@ -277,18 +401,22 @@ export default {
       offerData.append('accomodationSuitable', this.offer.accomodationSuitable.join(', ')); // Appending selected suitable accommodations
       offerData.append('skills', this.offer.skills.map(skill => skill.skillDescrition).join(', ')); // Appending selected skills
       offerData.append('user_Id', globalLogid); // Appending decrypted user ID
-      offerData.append('region_ID', this.offer.region_ID); // Appending selected region ID
-      offerData.append('skill_ID', this.offer.skill_ID); // Appending selected skill ID
-
+      // offerData.append('region_ID', this.offer.region_ID); // Appending selected region ID
+      offerData.append('country', this.countryName); // Appending selected country
+      offerData.append('state', this.stateName);
+      offerData.append('city', this.cityName);
+      // offerData.append('skill_ID', this.offer.skill_ID); // Appending selected skill ID
+     
       if (this.offer.image) {
         offerData.append('image', this.offer.image); // Appending selected image
       }
-
+      
+     
       try {
-        let email = localStorage.getItem('logEmail'); // Fetching encrypted email from localStorage
+        let email = sessionStorage.getItem('logEmail'); // Fetching encrypted email from sessionStorage
         const decEmail = this.decryptEmail(email); // Decrypting email
         email = decEmail; // Storing decrypted email
-        
+
         const response = await axios.post(
           `${process.env.baseURL}offer/add-new-offer?email=${email}`, // Sending POST request to create new offer
           offerData,
@@ -298,23 +426,27 @@ export default {
             }
           }
         ).then(() => {
-          Swal.fire(
-            'Success!',
-            'Your offer has been created.',
-            'success'
-          );
+          // Swal.fire(
+          //   'Success!',
+          //   'Your offer has been created.',
+          //   'success'
+          // );
+          this.toast.success("Your offer has been created.");
           router.push('/home'); // Redirecting to home page on success
         });
         this.resetForm(); // Resetting form fields
       } catch (error) {
-        Swal.fire(
-          'Warning!',
-          "You Don't have active Membership subscription!",
-          'warning'
-        );
+        // Swal.fire(
+        //   'Subscription Required!',
+        //   "You Don't have active Membership subscription!",
+        //   'warning'
+        // );
+        this.toast.info("Unable To Create Offer!");
         this.resetForm(); // Resetting form fields
       }
     },
+
+
     decryptEmail(encryptedToken) {
       // Method to decrypt email
       try {
@@ -326,7 +458,6 @@ export default {
       }
     },
     resetForm() {
-      // Method to reset form fields
       this.offer.title = '';
       this.offer.description = '';
       this.offer.location = '';
@@ -334,7 +465,12 @@ export default {
       this.offer.accomodationSuitable = [];
       this.offer.skills = [];
       this.offer.image = null;
-      this.offer.region = [];
+      this.countryId = '';
+      this.stateId = '';
+      this.cityId = '';
+      this.countryName = '';
+      this.stateName = '';
+      this.cityName = '';
     },
     onFileChange(event) {
       // Method to handle file change (image selection)

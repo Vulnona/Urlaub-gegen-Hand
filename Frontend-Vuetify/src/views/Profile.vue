@@ -8,16 +8,17 @@
           <h5 class="card-title">{{ user.firstName }} {{ user.lastName }}
           </h5>
           <div v-if="user.verificationState === 3">
-            <h5 class="card-title">  <span class="verState">
+            <h5 class="card-title"> <span class="verState">
                 <i class="ri-shield-star-line" style="color: green;">Verified</i>
-              </span>  </h5>
+              </span> </h5>
           </div>
           <div v-else style="display: flex;justify-content: center;">
-            <a class="btn col-3 mb-2" style="background-color:rgb(0, 189, 214);color: white;" @click="upload_id">Upload ID</a>
+            <a class="btn col-3 mb-2" style="background-color:rgb(0, 189, 214);color: white;" @click="upload_id">Upload
+              ID</a>
           </div>
         </div>
 
-    
+
         <div class="card-text-group ">
           <p v-if="userRole != 'Admin'" class="card-text text-center "><strong>Ratings: </strong>
             <span v-for="(star, index) in stars" :key="index" class="star" :class="starClass(star)"></span>
@@ -29,6 +30,7 @@
           <p class="card-text"><strong>Gender:</strong> {{ user.gender }}</p>
           <p class="card-text"><strong>Country:</strong> {{ user.country }}</p>
           <p class="card-text"><strong>City:</strong> {{ user.city }}</p>
+          <p class="card-text"><strong>State/Region:</strong> {{ user.state }}</p>
           <p class="card-text"><strong>Postal Code:</strong> {{ user.postCode }}</p>
           <p class="card-text"><strong>Street Address:</strong> {{ user.street }}</p>
           <p class="card-text"><strong>House No:</strong> {{ user.houseNumber }}</p>
@@ -44,31 +46,30 @@
             <button class="btn-primary col-5 rounded" style="height: 38px;" @click="editProfile">Edit Profile</button>
             <button class="btn-primary col-5 rounded" style="height: 38px;" @click="shareProfile">Copy Link</button>
           </div>
-
         </div>
       </div>
     </div>
   </div>
 </template>
 <script>
-import router from "@/router"; // Importing Vue router instance
-import axios from "axios"; // HTTP client library for making requests
-import Swal from 'sweetalert2'; // SweetAlert library for displaying alerts
-import CryptoJS from 'crypto-js'; // Library for cryptographic functions
-import VueJwtDecode from 'vue-jwt-decode'; // Library for decoding JWT tokens
+import router from "@/router"; 
+import axios from "axios"; 
+import Swal from 'sweetalert2'; 
+import CryptoJS from 'crypto-js'; 
+import VueJwtDecode from 'vue-jwt-decode'; 
 
 const axiosInstance = axios.create(); // Creating axios instance for API requests
 
 axiosInstance.interceptors.request.use(
   config => {
     // Interceptor to modify outgoing request headers
-    const token = localStorage.getItem('token'); // Retrieve JWT token from localStorage
+    const token = sessionStorage.getItem('token'); // Retrieve JWT token from sessionStorage
     if (token) {
       const decryptedToken = decryptToken(token); // Decrypt JWT token
       if (decryptedToken) {
         config.headers['Authorization'] = `Bearer ${decryptedToken}`; // Set Authorization header
       } else {
-        localStorage.removeItem('token'); // Remove token from localStorage if decryption fails
+        sessionStorage.removeItem('token'); // Remove token from sessionStorage if decryption fails
       }
     }
     return config;
@@ -80,7 +81,7 @@ axiosInstance.interceptors.request.use(
 // Function to navigate to the upload ID page
 const upload_id = () => {
   router.push("/uploadID").then(() => {
-    
+
   });
 };
 // Function to decrypt JWT token
@@ -126,7 +127,7 @@ export default {
   methods: {
     // Function to check if user is logged in; if not, show alert and redirect to login page
     Securitybot() {
-      if (!localStorage.getItem("token")) {
+      if (!sessionStorage.getItem("token")) {
         Swal.fire({
           title: 'You are not logged In!',
           text: 'Login First to continue.',
@@ -138,10 +139,10 @@ export default {
     },
     // Function to check user login status and retrieve user role from JWT token
     checkLoginStatus() {
-      const token = localStorage.getItem("token"); // Retrieve JWT token from localStorage
+      const token = sessionStorage.getItem("token"); // Retrieve JWT token from sessionStorage
       const decryptToken = this.decryptToken(token);
       globalToken = decryptToken;
-      const testlogid = this.decryptlogID(localStorage.getItem("logId")); // Decrypt log ID from localStorage
+      const testlogid = this.decryptlogID(sessionStorage.getItem("logId")); // Decrypt log ID from sessionStorage
       globalLogId = testlogid; // Set global log ID
       if (token) {
         const decryptedToken = this.decryptToken(token); // Decrypt JWT token
@@ -150,15 +151,15 @@ export default {
           this.userRole = decodedToken["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"] || '';
           // Set user role from decoded JWT token
         } else {
-          localStorage.removeItem('token'); // Remove token from localStorage if decryption fails
+          sessionStorage.removeItem('token'); // Remove token from sessionStorage if decryption fails
         }
       }
     },
     // Function to navigate to the upload ID page
- upload_id() {
-  router.push("/uploadID").then(() => {
-  });
-},
+    upload_id() {
+      router.push("/uploadID").then(() => {
+      });
+    },
 
     // Function to decrypt encrypted token using AES decryption
     decryptToken(encryptedToken) {
@@ -192,7 +193,7 @@ export default {
       } catch (error) {
         if (error.response && error.response.status === 500) {
           Swal.fire('Session Expired', 'Your session has expired. Please log in again.', 'error'); // Show session expired alert
-          localStorage.clear();
+          sessionStorage.clear();
           router.push('/'); // Redirect to login page using Vue router
         } else {
           console.error("Error Fetching User data:", error); // Log error if fetching user data fails
@@ -215,14 +216,15 @@ export default {
     },
     // Function to share user profile and generate shortened link
     async shareProfile() {
-      const uniqueLink = `${process.env.baseURL_Frontend}display-profile/${globalLogId}`; // Construct unique profile link
+
+      const uniqueLink = `${process.env.baseURL_Frontend}display-profile/?token=${globalToken}`; // Construct unique profile link
       try {
         const response = await axios.post('https://api.shorten.rest/aliases', {
           aliasName: `a257/@rnd`,
           destinations: [{ url: uniqueLink }],
         }, {
           headers: {
-            'x-api-key':'79ea7130-21a6-11ef-9447-bb18dd052b84', // API key for short link generation
+            'x-api-key': '79ea7130-21a6-11ef-9447-bb18dd052b84', // API key for short link generation
             'Content-Type': 'application/json', // Specify content type as JSON
           },
         });
@@ -259,7 +261,7 @@ export default {
         this.user.averageRating = response.data.averageRating; // Set average rating
         this.user.ratingsCount = response.data.ratingsCount; // Set ratings count
       } catch (error) {
-        console.error("Error Fetching User Rating:", error); // Log error if fetching user rating fails
+        // console.error("Error Fetching User Rating:", error); // Log error if fetching user rating fails
       }
     },
     // Function to dynamically set star class based on rating

@@ -21,9 +21,9 @@ namespace UGHApi.Controllers
                 if (!string.IsNullOrEmpty(searchTerm))
                 {
                     var searchResult = _context.offers
-                        .Include(o => o.Region)
+                        
                         .Include(o => o.User)
-                        .Where(o => o.Title.Contains(searchTerm) || o.skills.Contains(searchTerm) || o.Location.Contains(searchTerm) || o.Region.RegionName.Contains(searchTerm))
+                        .Where(o => o.Title.Contains(searchTerm) || o.skills.Contains(searchTerm) || o.Location.Contains(searchTerm) ||o.state.Contains(searchTerm))
                         .ToList();
 
                     return Ok(searchResult);
@@ -31,12 +31,9 @@ namespace UGHApi.Controllers
                 else
                 {
                     var alloffers = _context.offers
-
-
-                         .Include(o => o.Region)
+                        
                          .Include(o => o.User)
                         .ToList();
-
                     return Ok(alloffers);
                 }
             }
@@ -53,7 +50,7 @@ namespace UGHApi.Controllers
             try
             {
                 var offer = _context.offers
-                    .Include(o => o.Region)
+                   
                     .Include(o => o.User)
                     .FirstOrDefault(o => o.Id == OfferId);
 
@@ -98,8 +95,11 @@ namespace UGHApi.Controllers
                     Accomodation = offerViewModel.Accomodation,
                     accomodationsuitable = offerViewModel.accomodationsuitable,
                     skills=offerViewModel.skills,
-                    Region_ID = offerViewModel.Region_ID,
-                    User_Id = offerViewModel.User_Id
+                    //Region_ID = offerViewModel.Region_ID,
+                    User_Id = offerViewModel.User_Id,
+                    country=offerViewModel.country,
+                    state=offerViewModel.state,
+                    city=offerViewModel.city,
                 };
 
                 if (offerViewModel.Image != null && offerViewModel.Image.Length > 0)

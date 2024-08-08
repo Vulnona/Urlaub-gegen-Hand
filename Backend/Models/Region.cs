@@ -5,7 +5,7 @@ namespace UGHApi.Models
     {   [Key]
         public int Region_ID {get;set;}
 
-        public string? RegionName {get;set;}
+        public string RegionName {get;set;}
       
     }
 }

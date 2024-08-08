@@ -50,7 +50,6 @@ namespace UGHApi.Controllers
 
                 if (!ModelState.IsValid)
                     return BadRequest(ModelState);
-
                 _context.accomodationsuitables.Add(accomodationsuitable);
                 _context.SaveChanges();
 
@@ -71,7 +70,6 @@ namespace UGHApi.Controllers
                 _context.accomodationsuitables.Update(accomodationsuitable);
                 _context.SaveChanges();
                 return Ok(accomodationsuitable);
-
             }
             catch (Exception ex)
             {

@@ -37,11 +37,11 @@ onMounted(fetchOfferDetail);
         <p><strong>Location:</strong> {{ offer.location }}</p>
         <p><strong>Skills:</strong> {{ offer.skills }}</p>
         <p><strong>Accommodation:</strong> {{ offer.accomodation }}</p>
-        <p><strong>Suitable for:</strong> {{ offer.accomodationSuitable }}</p>
-        <p><strong>Region:</strong> {{ offer.region.regionName }}</p>
+        <p><strong>Suitable for:</strong> {{ offer.accomodationsuitable }}</p>
+        <p><strong>Region:</strong> {{ offer.state }}</p>
       </div>
 
-      <button @click="backtooffers()" class="btn btn-primary" style="background-color: cornflowerblue;">Back To
+      <button @click="backtooffers()" class="btn btn-primary" style="background-color: #0062cc;color: #fff">Back To
         Offers</button>
     </div>
   </div>

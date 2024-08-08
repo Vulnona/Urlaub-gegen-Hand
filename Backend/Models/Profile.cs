@@ -9,9 +9,9 @@ namespace UGHApi.Models
         [Key]
         public int Profile_ID{get;set;}
         public DateTime MembershipFirstActivation{get;}
-        public User? UghUser {get;}
-        public string? NickName {get;set;}
-        public string? Idcard { get;set;}
+        public User UghUser {get;}
+        public string NickName {get;set;}
+        public string Idcard { get;set;}
         [NotMapped]
         public object backImage { get;set;}
         [NotMapped]

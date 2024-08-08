@@ -36,6 +36,10 @@
             <input type="text" id="city" v-model="profile.user.city" class="form-control">
           </div>
           <div class="form-group">
+            <label for="state">State/Region</label>
+            <input type="text" id="state" v-model="profile.user.state" class="form-control">
+          </div>
+          <div class="form-group">
             <label for="country">Country</label>
             <input type="text" id="country" v-model="profile.user.country" class="form-control">
           </div>
@@ -111,6 +115,7 @@
             houseNumber: '',
             postCode: '',
             city: '',
+            state:'',
             country: '',
             email_Address: '',
             password: '',
@@ -138,7 +143,7 @@
     },
     mounted() {
       
-      const decryptedtoken=this.decryptToken(localStorage.getItem("token"));
+      const decryptedtoken=this.decryptToken(sessionStorage.getItem("token"));
       globalToken=decryptedtoken;
       // Fetch user profile using decrypted log ID
       const token = decryptedtoken;
@@ -159,7 +164,7 @@
       },
       // Security check to verify user login status
       Securitybot() {
-        if (!localStorage.getItem("token")) {
+        if (!sessionStorage.getItem("token")) {
           Swal.fire({
             title: 'You are not logged In!',
             text: 'Login First to continue.',
@@ -200,6 +205,7 @@
                 houseNumber: profile.user.houseNumber,
                 postCode: profile.user.postCode,
                 city: profile.user.city,
+                state: profile.user.state,
                 country: profile.user.country,
                 email_Address: profile.user.email_Address,
                 password: profile.user.password,
@@ -225,7 +231,7 @@
           }
         } catch (error) {
           console.error('Error fetching user profile:', error);
-          Swal.fire('Error', 'Failed to fetch user profile', 'error');
+          Swal.fire('Error', 'Failed to fetch user profile');
         }
       },
       decryptToken(encryptedToken) {
@@ -258,7 +264,7 @@
           }
         } catch (error) {
           console.error('Error saving user profile:', error);
-          Swal.fire('Error', 'Failed to save profile: ' + error.message, 'error');
+          Swal.fire('Error', 'Failed to save profile');
         }
       },
       // Method to compute bitmask value from profileOptions
@@ -284,7 +290,7 @@
     }
   };
 </script>
-  <style scoped>
+<style scoped>
   .v-container {
     display: flex;
     justify-content: center;

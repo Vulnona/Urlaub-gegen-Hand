@@ -10,8 +10,11 @@
         public string accomodationsuitable { get; set; }
         public string skills { get; set; }
         public int Skill_ID { get; set; }
-        public int Region_ID { get; set; }
+        //public int Region_ID { get; set; }
+        public string country { get; set; }
+        public string state { get; set; }
+        public string city { get; set; }
         public int User_Id { get; set; }
-        public IFormFile? Image { get; set; }
+        public IFormFile Image { get; set; }
     }
 }

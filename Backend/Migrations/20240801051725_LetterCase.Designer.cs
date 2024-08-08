@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace UGHApi.Migrations
 {
     [DbContext(typeof(UghContext))]
-    [Migration("20240611125245_testingmig")]
-    partial class testingmig
+    [Migration("20240801051725_LetterCase")]
+    partial class LetterCase
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -55,7 +55,7 @@ namespace UGHApi.Migrations
                     b.ToTable("accomodations");
                 });
 
-            modelBuilder.Entity("UGHApi.Models.accomodationsuitable", b =>
+            modelBuilder.Entity("UGHApi.Models.City", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -64,9 +64,12 @@ namespace UGHApi.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("longtext");
 
+                    b.Property<int>("StateId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
-                    b.ToTable("accomodationsuitables");
+                    b.ToTable("cities");
                 });
 
             modelBuilder.Entity("UGHApi.Models.Continent", b =>
@@ -154,9 +157,6 @@ namespace UGHApi.Migrations
                     b.Property<string>("Accomodation")
                         .HasColumnType("longtext");
 
-                    b.Property<string>("accomodationsuitable")
-                        .HasColumnType("longtext");
-
                     b.Property<string>("Contact")
                         .HasColumnType("longtext");
 
@@ -175,14 +175,17 @@ namespace UGHApi.Migrations
                     b.Property<int>("Region_ID")
                         .HasColumnType("int");
 
-                    b.Property<string>("skills")
-                        .HasColumnType("longtext");
-
                     b.Property<string>("Title")
                         .HasColumnType("longtext");
 
                     b.Property<int>("User_Id")
                         .HasColumnType("int");
+
+                    b.Property<string>("accomodationsuitable")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("skills")
+                        .HasColumnType("longtext");
 
                     b.HasKey("Id");
 
@@ -245,33 +248,6 @@ namespace UGHApi.Migrations
                     b.HasIndex("User_Id");
 
                     b.ToTable("ratinguserlogins");
-                });
-
-            modelBuilder.Entity("UGHApi.Models.ratings", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<int>("OfferId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Rating")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("SubmissionDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<int>("User_Id")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("OfferId");
-
-                    b.HasIndex("User_Id");
-
-                    b.ToTable("ratings");
                 });
 
             modelBuilder.Entity("UGHApi.Models.Redemption", b =>
@@ -435,6 +411,23 @@ namespace UGHApi.Migrations
                     b.ToTable("skills");
                 });
 
+            modelBuilder.Entity("UGHApi.Models.State", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<int>("CountryId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("states");
+                });
+
             modelBuilder.Entity("UGHApi.Models.UserProfile", b =>
                 {
                     b.Property<int>("Id")
@@ -498,6 +491,47 @@ namespace UGHApi.Migrations
                     b.ToTable("userrolesmapping");
                 });
 
+            modelBuilder.Entity("UGHApi.Models.accomodationsuitable", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("accomodationsuitables");
+                });
+
+            modelBuilder.Entity("UGHApi.Models.ratings", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<int>("OfferId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Rating")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("SubmissionDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int>("User_Id")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OfferId");
+
+                    b.HasIndex("User_Id");
+
+                    b.ToTable("ratings");
+                });
+
             modelBuilder.Entity("UGHModels.User", b =>
                 {
                     b.Property<int>("User_Id")
@@ -543,7 +577,10 @@ namespace UGHApi.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<string>("Link")
+                    b.Property<string>("Link_RS")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Link_VS")
                         .HasColumnType("longtext");
 
                     b.Property<string>("Password")
@@ -555,6 +592,10 @@ namespace UGHApi.Migrations
                         .HasColumnType("longtext");
 
                     b.Property<string>("SaltKey")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("State")
+                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<string>("Street")
@@ -610,25 +651,6 @@ namespace UGHApi.Migrations
                 });
 
             modelBuilder.Entity("UGHApi.Models.RatingUserLogin", b =>
-                {
-                    b.HasOne("UGHApi.Models.Offer", "Offer")
-                        .WithMany()
-                        .HasForeignKey("OfferId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("UGHModels.User", "User")
-                        .WithMany()
-                        .HasForeignKey("User_Id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Offer");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("UGHApi.Models.ratings", b =>
                 {
                     b.HasOne("UGHApi.Models.Offer", "Offer")
                         .WithMany()
@@ -760,6 +782,25 @@ namespace UGHApi.Migrations
                         .IsRequired();
 
                     b.Navigation("Role");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("UGHApi.Models.ratings", b =>
+                {
+                    b.HasOne("UGHApi.Models.Offer", "Offer")
+                        .WithMany()
+                        .HasForeignKey("OfferId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("UGHModels.User", "User")
+                        .WithMany()
+                        .HasForeignKey("User_Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Offer");
 
                     b.Navigation("User");
                 });

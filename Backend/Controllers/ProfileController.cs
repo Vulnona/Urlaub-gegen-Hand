@@ -100,6 +100,7 @@ namespace UGHApi.Controllers
                     existingProfile.User.HouseNumber = profile.User.HouseNumber;
                     existingProfile.User.PostCode = profile.User.PostCode;
                     existingProfile.User.City = profile.User.City;
+                    existingProfile.User.State = profile.User.State;
                     existingProfile.User.Country = profile.User.Country;
                     existingProfile.User.Facebook_link = profile.User.Facebook_link;
                     existingProfile.User.Link_RS = profile.User.Link_RS;

@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Azure;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using RestSharp;
 using UGHApi.Models;
 using UGHApi.Services;
 
@@ -22,6 +24,9 @@ namespace UGHApi.Controllers
         }
 
         #region Coupon
+
+       
+
         [HttpPost("admin/add-coupon")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> AddCoupon(Coupon coupon)
@@ -38,7 +43,7 @@ namespace UGHApi.Controllers
                 await _couponservice.AddCoupon(coupon);
                 return Ok("Coupon inserted successfully.");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // Log the exception if needed
                 return BadRequest("An error occurred while processing the request.");
@@ -59,7 +64,7 @@ namespace UGHApi.Controllers
             {
                 return NotFound("Coupon not found.");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // Log the exception or handle it appropriately
                 return StatusCode(500, "An error occurred while updating the coupon.");
@@ -87,7 +92,7 @@ namespace UGHApi.Controllers
             {
                 return NotFound("Coupon not found.");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // Log the exception or handle it appropriately
                 return StatusCode(500, "An error occurred while deleting the coupon.");
@@ -111,7 +116,7 @@ namespace UGHApi.Controllers
             {
                 return BadRequest(ex.Message);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // Log the exception or handle it appropriately
                 return StatusCode(500, "An error occurred while redeeming the coupon.");

@@ -4,7 +4,7 @@
       <div class="row">
         <div class="col-sm-12">
           <nav class="navbar navbar-expand-lg navbar-white bg-white">
-            <a class="navbar-brand" href="#"> <img src="@/assets/images/logo/logo-desktop.svg" class="logo"
+            <a class="navbar-brand" href="/home"> <img src="@/assets/images/logo/logo-desktop.svg" class="logo"
                 alt="Logo"></a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
               aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -54,18 +54,18 @@ import router from "@/router"; // Import the Vue router for navigation
 
 // Declare reactive variables using ref
 const isLoggedIn = ref(false); // Reactive variable to track login status
-const username = ref(localStorage.getItem("firstName")); // Reactive variable to store the username from local storage
+const username = ref(sessionStorage.getItem("firstName")); // Reactive variable to store the username from local storage
 
 // Function to check login status
 const checkLoginStatus = () => {
   // Update isLoggedIn based on whether a token exists in local storage
-  isLoggedIn.value = !!localStorage.getItem("token");
+  isLoggedIn.value = !!sessionStorage.getItem("token");
 };
 
 // Function to handle logout
 const doLogout = () => {
   // Clear local storage
-  localStorage.clear();
+  sessionStorage.clear();
   // Update isLoggedIn to false
   isLoggedIn.value = false;
   // Navigate to the login page and reload the window

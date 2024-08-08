@@ -59,7 +59,8 @@ namespace UGHApi.Controllers
                     salt,
                     request.Facebook_link,
                     request.Link_RS,
-                    request.Link_VS
+                    request.Link_VS,
+                    request.State
                 );
 
                 newUser.VerificationState = UGH_Enums.VerificationState.isNew;

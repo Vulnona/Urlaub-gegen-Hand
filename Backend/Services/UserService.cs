@@ -40,7 +40,7 @@ namespace UGHApi.Services
             }
         }
 
-        public async Task<User?> GetUserByEmailAsync(string email)
+        public async Task<User> GetUserByEmailAsync(string email)
         {
             try
             {
@@ -88,7 +88,8 @@ namespace UGHApi.Services
                     salt,
                     request.Facebook_link,
                     request.Link_RS,
-                    request.Link_VS
+                    request.Link_VS,
+                    request.State
                 );
                 newUser.VerificationState = UGH_Enums.VerificationState.verified;
                 _context.users.Add(newUser);

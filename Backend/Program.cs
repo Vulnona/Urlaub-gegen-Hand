@@ -43,14 +43,19 @@ namespace UGHApi
 
         private static void ConfigureWebHost(WebApplicationBuilder builder)
         {
+            // Configure Kestrel to listen on a specific port
             builder.WebHost.ConfigureKestrel(serverOptions =>
             {
                 serverOptions.ListenAnyIP(8080); // Set the desired port
             });
 
-          
+            // Load the configuration from appsettings.json
             builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+
+            // Load the configuration from secrets.json
+            builder.Configuration.AddUserSecrets<Program>(optional: true, reloadOnChange: true);
         }
+
 
         private static void ConfigureServices(WebApplicationBuilder builder)
         {
@@ -73,9 +78,19 @@ namespace UGHApi
             ConfigureSwagger(builder);
             RegisterServices(builder.Services);
 
-            SeedDefaultRoles(builder.Services);
-            CreateAutoAdminUser(builder.Services.BuildServiceProvider().GetService<userservice>());
+            //SeedDefaultRoles(builder.Services);
+            //CreateAutoAdminUser(builder.Services.BuildServiceProvider().GetService<userservice>());
         }
+        //public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        //{
+        //    // Other configuration code...
+
+        //    using (var serviceScope = app.ApplicationServices.CreateScope())
+        //    {
+        //        var context = serviceScope.ServiceProvider.GetRequiredService<UghContext>();
+        //        context.SeedDataIfEmpty();
+        //    }
+        //}
 
         private static void ConfigureAuthentication(WebApplicationBuilder builder)
         {
@@ -123,6 +138,7 @@ namespace UGHApi
         private static void ConfigureMailSettings(WebApplicationBuilder builder)
         {
             builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("MailSettings"));
+            builder.Services.Configure<TemplateSettings>(builder.Configuration.GetSection("TemplateSettings"));
         }
 
         private static void ConfigureSwagger(WebApplicationBuilder builder)
@@ -235,6 +251,7 @@ namespace UGHApi
                     PostCode = "12345",
                     City = "Admin City",
                     Country = "Admin Country",
+                    State = "Admin State",
                     Email_Address = "admin@example.com",
                     Password = "admin@123"
                 };

@@ -47,17 +47,17 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue'; 
-import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3'; // AWS SDK imports for S3 operations
-import Swal from 'sweetalert2'; // SweetAlert library for alerts
-import router from '@/router'; // Vue router instance
-import CryptoJS from 'crypto-js'; // CryptoJS library for encryption
+import { onMounted, ref } from 'vue';
+import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import Swal from 'sweetalert2';
+import router from '@/router';
+import CryptoJS from 'crypto-js';
 
 // AWS S3 credentials and configuration
 const secretAccessKey = process.env.SecretAccessKey;
 const accessKeyId = process.env.AccessKeyId;
-const bucket = process.env.S3_BUCKET_NAME; // S3 bucket name
-const region = process.env.Aws_region; // AWS region
+const bucket = process.env.S3_BUCKET_NAME;
+const region = process.env.Aws_region;
 const client = new S3Client({
   region,
   credentials: {
@@ -81,80 +81,90 @@ const convertToJpeg = (file: File): Promise<File> => {
         canvas.toBlob((blob) => {
           if (blob) {
             const jpegFile = new File([blob], file.name.replace(/\..+$/, ".jpg"), { type: "image/jpeg" });
-            resolve(jpegFile); // Resolve with converted JPEG file
+            resolve(jpegFile);
           } else {
-            reject(new Error('Conversion to JPEG failed')); // Reject if conversion fails
+            reject(new Error('Conversion to JPEG failed'));
           }
-        }, 'image/jpeg', 0.8); // Convert canvas to JPEG blob with quality 0.8
+        }, 'image/jpeg', 0.8);
       };
-      img.src = event.target.result as string; // Set image source
+      img.src = event.target.result as string;
     };
-    reader.onerror = reject; // Handle error in case of FileReader error
-    reader.readAsDataURL(file); // Read uploaded file as data URL
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
   });
+};
+
+// Security check function to ensure user authentication
+const Securitybot = () => {
+  if (!sessionStorage.getItem("logId")) {
+    Swal.fire({
+      title: 'You are not logged In!',
+      text: 'Login First to continue.',
+      icon: 'info',
+      confirmButtonText: 'OK'
+    });
+    router.push('/login');
+  }
 };
 
 // Function to upload image file to AWS S3 bucket
 const uploadImage = async (file: File, fileName: string) => {
   try {
-    const jpegFile = await convertToJpeg(file); // Convert uploaded file to JPEG format
+    const jpegFile = await convertToJpeg(file);
     const command = new PutObjectCommand({
       Bucket: bucket,
       Key: fileName,
       Body: jpegFile,
     });
-    await client.send(command); // Send PutObjectCommand to upload file to S3 bucket
-
+    await client.send(command);
   } catch (err) {
-    console.error(err); // Log error if upload fails
-    Swal.fire('Error', 'Failed to upload image', 'error'); // Show error alert using Swal
-    throw err; // Throw error to handle further in calling function
+    console.error(err);
+    Swal.fire('Error', 'Failed to upload image', 'error');
+    throw err;
   }
 };
 
 // Function to encrypt a link using AES encryption
 const encryptLink = (link: string) => {
-  return CryptoJS.AES.encrypt(link, process.env.SECRET_KEY).toString(); // Encrypt link using SECRET_KEY from environment variables
+  return CryptoJS.AES.encrypt(link, process.env.SECRET_KEY).toString();
 };
 
 // Function to update user links with encrypted URLs
 const updateUserLinks = async (userId: string, linkVS: string, linkRS: string) => {
   try {
-    const encryptedLinkVS = encryptLink(linkVS); // Encrypt linkVS
-    const encryptedLinkRS = encryptLink(linkRS); // Encrypt linkRS
+    const encryptedLinkVS = encryptLink(linkVS);
+    const encryptedLinkRS = encryptLink(linkRS);
     const apiUrl = `${process.env.baseURL}user/upload-id/${userId}?link_vs=${encodeURIComponent(encryptedLinkVS)}&link_rs=${encodeURIComponent(encryptedLinkRS)}`;
-    // Construct API URL with encrypted links
     const response = await fetch(apiUrl, {
-      method: 'PUT', // HTTP PUT method for updating user links
+      method: 'PUT',
     });
 
     if (!response.ok) {
-      throw new Error('Failed to update user links'); // Throw error if API request fails
+      throw new Error('Failed to update');
     }
 
-    // Show success message and redirect on successful update
-    Swal.fire('Success', 'User links updated successfully', 'success').then(() => {
-      localStorage.clear(); // Clear localStorage
-      router.push('/'); // Redirect to home page using Vue router
+    Swal.fire('Success', 'Uploaded Successfully!', 'success').then(() => {
+      sessionStorage.clear();
+      router.push('/');
     });
   } catch (err) {
-    console.error(err); // Log error if update fails
-    Swal.fire('Error', 'Failed to update user links', 'error'); // Show error alert using Swal
+    console.error(err);
+    Swal.fire('Error', 'Failed to upload', 'error');
   }
 };
 
 // Event handler for front ID image file change
 const onFrontIdChange = (event: any) => {
   const file = event.target.files[0];
-  frontIdFile.value = file; // Update frontIdFile ref with selected file
-  frontIdPreview.value = URL.createObjectURL(file); // Create preview URL for front ID image
+  frontIdFile.value = file;
+  frontIdPreview.value = URL.createObjectURL(file);
 };
 
 // Event handler for back ID image file change
 const onBackIdChange = (event: any) => {
   const file = event.target.files[0];
-  backIdFile.value = file; // Update backIdFile ref with selected file
-  backIdPreview.value = URL.createObjectURL(file); // Create preview URL for back ID image
+  backIdFile.value = file;
+  backIdPreview.value = URL.createObjectURL(file);
 };
 
 // Reactive variables for front and back ID image files and previews
@@ -166,11 +176,10 @@ const backIdPreview = ref<string | null>(null);
 // Function to initiate image upload process
 const uploadImages = () => {
   if (!frontIdFile.value || !backIdFile.value) {
-    Swal.fire('Error', 'Please select both front and back ID card images', 'error'); // Show error if both files are not selected
+    Swal.fire('Error', 'Please select both front and back ID card images', 'error');
     return;
   }
 
-  // Confirm upload with user
   Swal.fire({
     title: 'Are you sure?',
     text: 'Do you want to upload these images?',
@@ -181,25 +190,24 @@ const uploadImages = () => {
     confirmButtonText: 'Yes, upload it!',
   }).then((result) => {
     if (result.isConfirmed) {
-      const userId = decryptlogID(localStorage.getItem("logId")); // Decrypt user log ID
-      const frontFileName = `${userId}VS.jpg`; // Construct front ID file name
-      const backFileName = `${userId}RS.jpg`; // Construct back ID file name
+      const userId = decryptlogID(sessionStorage.getItem("logId"));
+      const frontFileName = `${userId}VS.jpg`;
+      const backFileName = `${userId}RS.jpg`;
 
       const uploadPromises = [
-        uploadImage(frontIdFile.value, frontFileName), // Upload front ID image
-        uploadImage(backIdFile.value, backFileName), // Upload back ID image
+        uploadImage(frontIdFile.value, frontFileName),
+        uploadImage(backIdFile.value, backFileName),
       ];
 
-      // Execute all upload promises
       Promise.all(uploadPromises)
         .then(() => {
-          const linkVS = `https://${bucket}.s3.${region}.amazonaws.com/${frontFileName}`; // Construct S3 URL for front ID image
-          const linkRS = `https://${bucket}.s3.${region}.amazonaws.com/${backFileName}`; // Construct S3 URL for back ID image
-          updateUserLinks(userId, linkVS, linkRS); // Update user links with encrypted URLs
+          const linkVS = `https://${bucket}.s3.${region}.amazonaws.com/${frontFileName}`;
+          const linkRS = `https://${bucket}.s3.${region}.amazonaws.com/${backFileName}`;
+          updateUserLinks(userId, linkVS, linkRS);
         })
         .catch(err => {
-          console.error(err); // Log error if upload promises fail
-          Swal.fire('Error', 'Failed to upload images', 'error'); // Show error alert using Swal
+          console.error(err);
+          Swal.fire('Error', 'Failed to upload images', 'error');
         });
     }
   });
@@ -207,25 +215,28 @@ const uploadImages = () => {
 
 // Function to navigate back using Vue router
 const back = () => {
-  router.push('/'); // Navigate back to home page
+  router.push('/');
 }
 
-// Function to decrypt log ID stored in localStorage
+// Function to decrypt log ID stored in sessionStorage
 const decryptlogID = (encryptedItem: string | null) => {
   if (!encryptedItem) {
-    return null; // Return null if encrypted item is not present
+    return null;
   }
   try {
-    const bytes = CryptoJS.AES.decrypt(encryptedItem, process.env.SECRET_KEY); // Decrypt encrypted item
-    const decryptedString = bytes.toString(CryptoJS.enc.Utf8); // Convert decrypted bytes to UTF-8 string
-    return parseInt(decryptedString, 10).toString(); // Parse decrypted string as integer and return
+    const bytes = CryptoJS.AES.decrypt(encryptedItem, process.env.SECRET_KEY);
+    const decryptedString = bytes.toString(CryptoJS.enc.Utf8);
+    return parseInt(decryptedString, 10).toString();
   } catch (e) {
-    console.error('Error decrypting item:', e); // Log error if decryption fails
-    return null; // Return null if decryption fails
+    console.error('Error decrypting item:', e);
+    return null;
   }
 };
 
-
+// Ensure security check on mount
+onMounted(() => {
+   Securitybot();
+});
 </script>
 
 <style scoped>

@@ -569,7 +569,8 @@ Backend/obj/project.nuget.cache
 Backend/obj/UGHApi.csproj.nuget.dgspec.json
 Backend/obj/UGHApi.csproj.nuget.g.props
 Backend/obj/UGHApi.csproj.nuget.g.targets
-
+Backend/appsettings.json
+Frontend-Vuetify/.env
 # IntelliJ Config
 /.idea/
 

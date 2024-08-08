@@ -270,10 +270,9 @@
                     <div class="login-right-content-heading form-act">
                         <div class="signin-tabs">
                             <ul>
-                                <li id="login" class="active-login active"><a href="/login" previewlistener="true">Log
-                                        In </a></li>
+                                <li id="login" class="active-login active"><a href="/login" previewlistener="true">Anmelden</a></li>
                                 <li id="register" class="active-register"><a href="/register"
-                                        previewlistener="true">Register</a></li>
+                                        previewlistener="true">Registrieren</a></li>
                             </ul>
                         </div>
                         <div class="login-form-section" id="login-content">
@@ -302,7 +301,7 @@
                             </form>
                             <div class="login-footer">
                                 <ul>
-                                    <li><a href="#" previewlistener="true">Forget password</a> </li>
+                                    <li><a href="#" previewlistener="true">Forget password?</a> </li>
 
                                     <li><a href="/verify-email" previewlistener="true">Verify Email</a> </li>
                                 </ul>
@@ -341,7 +340,9 @@ export default {
                 const response = await axios.post(`${process.env.baseURL}auth/login`, {
                     email: this.email,
                     password: this.password
+                    
                 });
+                console.log(response.data);
                 // Extracting necessary data from the response
                 const token = response.data.accessToken;
                 const logId = response.data.user_Id;
@@ -354,10 +355,11 @@ export default {
                 const encryptedEmail = this.encryptItem(logEmail);
 
                 // Storing encrypted data in local storage
-                localStorage.setItem('token', encryptedToken);
-                localStorage.setItem('logId', encryptedLogId);
-                localStorage.setItem('logEmail', encryptedEmail);
-                localStorage.setItem('firstName', firstName);
+                sessionStorage.setItem('token', encryptedToken);
+                sessionStorage.setItem('logId', encryptedLogId);
+                sessionStorage.setItem('logEmail', encryptedEmail);
+                sessionStorage.setItem('firstName', firstName);
+                
 
                 // Redirecting to the home page and reloading the window
                 router.push('/home').then(() => {
@@ -370,7 +372,7 @@ export default {
                     Swal.fire({
                         icon: 'error',
                         title: 'Login Failed',
-                        text: 'Invalid email or password',
+                        text: 'Invalid email or password or Verify Your Email First',
                     });
                 } else {
                     // Other server errors

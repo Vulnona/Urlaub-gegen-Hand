@@ -60,7 +60,6 @@ namespace UGHApi.Controllers
             try
             {
                 var user = await _context.users.FindAsync(userId);
-
                 if (user == null)
                 {
                     return NotFound("User not found.");
@@ -69,45 +68,92 @@ namespace UGHApi.Controllers
                 user.VerificationState = verificationState;
                 await _context.SaveChangesAsync();
 
-                if (verificationState == UGH_Enums.VerificationState.verificationFailed)
+                if (verificationState == UGH_Enums.VerificationState.verificationFailed ||
+                    verificationState == UGH_Enums.VerificationState.verified)
                 {
                     _userservice.DeleteUserInfo(userId);
-                    await Task.Delay(TimeSpan.FromMinutes(5));
+
+                    if (verificationState == UGH_Enums.VerificationState.verificationFailed)
+                    {
+                        await Task.Delay(TimeSpan.FromMinutes(5));
+                    }
 
                     var request = new ConfirmationReq
                     {
                         toEmail = user.Email_Address,
-                        userName = user.FirstName + " " + user.LastName,
-                        status = "verification failed"
+                        userName = $"{user.FirstName} {user.LastName}",
+                        status = verificationState == UGH_Enums.VerificationState.verificationFailed
+                            ? "verification failed"
+                            : "verified"
                     };
-                    _mailService.SendConfirmationEmailAsync(request);
-                }
-                else if (verificationState == UGH_Enums.VerificationState.verified)
-                {
-                    _userservice.DeleteUserInfo(userId);
 
-                    var request = new ConfirmationReq
-                    {
-                        toEmail = user.Email_Address,
-                        userName = user.FirstName + " " + user.LastName,
-                        status = "verified"
-                    };
                     _mailService.SendConfirmationEmailAsync(request);
                 }
 
                 return Ok("Successfully updated verification state of user.");
             }
             catch (DbUpdateException ex)
-            {
-                // Log the exception 
+            {   
                 return StatusCode(500, $"Database error occurred while updating verification state: {ex.Message}");
             }
             catch (Exception ex)
             {
-                // Log the exception
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+        //public async Task<IActionResult> UpdateVerifyState(int userId, UGH_Enums.VerificationState verificationState)
+        //{
+        //    try
+        //    {
+        //        var user = await _context.users.FindAsync(userId);
+
+        //        if (user == null)
+        //        {
+        //            return NotFound("User not found.");
+        //        }
+
+        //        user.VerificationState = verificationState;
+        //        await _context.SaveChangesAsync();
+
+        //        if (verificationState == UGH_Enums.VerificationState.verificationFailed)
+        //        {
+        //            _userservice.DeleteUserInfo(userId);
+        //            await Task.Delay(TimeSpan.FromMinutes(5));
+
+        //            var request = new ConfirmationReq
+        //            {
+        //                toEmail = user.Email_Address,
+        //                userName = user.FirstName + " " + user.LastName,
+        //                status = "verification failed"
+        //            };
+        //            _mailService.SendConfirmationEmailAsync(request);
+        //        }
+        //        else if (verificationState == UGH_Enums.VerificationState.verified)
+        //        {
+        //            _userservice.DeleteUserInfo(userId);
+
+        //            var request = new ConfirmationReq
+        //            {
+        //                toEmail = user.Email_Address,
+        //                userName = user.FirstName + " " + user.LastName,
+        //                status = "verified"
+        //            };
+        //            _mailService.SendConfirmationEmailAsync(request);
+        //        }
+
+        //        return Ok("Successfully updated verification state of user.");
+        //    }
+        //    catch (DbUpdateException ex)
+        //    {
+        //        // Log the exception 
+        //        return StatusCode(500, $"Database error occurred while updating verification state: {ex.Message}");
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        // Log the exception
+        //        return StatusCode(500, $"Internal server error: {ex.Message}");
+        //    }
+        //}
 
         [HttpGet("admin/get-all-users")]
         [Authorize(Roles = "Admin")]
@@ -115,7 +161,7 @@ namespace UGHApi.Controllers
         {
             try
             {
-                var users = await _context.users.OrderBy(u => u.VerificationState).ToListAsync();
+                var users = await _context.users.Include(u => u.CurrentMembership).OrderBy(u => u.VerificationState).ToListAsync();
                 return users;
             }
             catch (Exception ex)

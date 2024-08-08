@@ -4,6 +4,9 @@ WORKDIR /app
 # Copy Backend source code
 COPY ./Backend /app/Backend/
 
+# Copy Template folder
+COPY ./Backend/Template /app/Template/
+
 # Publish the Backend project
 RUN dotnet publish /app/Backend/UGHApi.csproj --use-current-runtime --self-contained false -o /app/binaries
 RUN rm -r /app/Backend
@@ -26,6 +29,13 @@ RUN apk add --no-cache nginx iputils procps
 
 # Copy the published binaries and chromedriver
 COPY --from=backend-build /app/binaries /app/binaries
+
+# Copy Template folder
+COPY --from=backend-build /app/Template /app/Template
+
+# Set environment variables for template paths
+ENV TemplateSettings__SuccessTemplate=/app/Template/confirmation.html
+ENV TemplateSettings__FailedTemplate=/app/Template/DeclinedConfirmation.html
 
 # Expose port 80
 EXPOSE 80

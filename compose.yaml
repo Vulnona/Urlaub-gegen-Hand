@@ -5,7 +5,7 @@ services:
     image: "nginx:alpine"
     restart: unless-stopped
     ports:
-      - '80:80'
+      - '81:81'
     volumes:
       - ./.docker/webserver/config/vhost.dev.conf:/etc/nginx/templates/default.conf.template
 

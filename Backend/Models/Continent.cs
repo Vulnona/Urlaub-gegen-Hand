@@ -6,6 +6,6 @@ namespace UGHApi.Models
     {
         [Key]
         public int Continent_ID{get;set;}
-        public string? ContinentName{get;}
+        public string ContinentName{get;}
     }
 }

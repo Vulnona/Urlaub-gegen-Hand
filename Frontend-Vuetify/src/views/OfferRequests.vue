@@ -90,11 +90,11 @@ window.FontAwesomeConfig = { autoReplaceSvg: false }; // Configure FontAwesome t
 import CryptoJS from 'crypto-js'; // Import CryptoJS for encryption
 
 let globalLogid = ''; // Variable to store decrypted log ID
-
+let globalratingId='';
 export default {
   data() {
     return {
-      email: localStorage.getItem("logEmail"), // Retrieve email from localStorage
+      email: sessionStorage.getItem("logEmail"), // Retrieve email from sessionStorage
       loading: true, // Loading state for async operations
       offers: [], // Array to store user offers
       showModal: false, // Modal visibility state
@@ -103,13 +103,13 @@ export default {
     };
   },
   mounted() {
-    this.fetchUserOffers(globalLogid); // Fetch user offers on component mount
+    this.fetchUserOffers(); // Fetch user offers on component mount
     this.Securitybot(); // Check login status on component mount
   },
   methods: {
     // Method to check login status and redirect if not logged in
     Securitybot() {
-      if (!localStorage.getItem("token")) { // If token is not present in localStorage
+      if (!sessionStorage.getItem("token")) { // If token is not present in sessionStorage
         Swal.fire({ // Show SweetAlert2 modal
           title: 'You are not logged In !', // Modal title
           text: 'Login First to continue.', // Modal message
@@ -136,9 +136,9 @@ export default {
       }
     },
     // Method to fetch user offers from the server
-    async fetchUserOffers(userId) {
+    async fetchUserOffers() {
       try {
-        const testlogid = this.decryptlogID(localStorage.getItem("logId")); // Decrypt log ID from localStorage
+        const testlogid = this.decryptlogID(sessionStorage.getItem("logId")); // Decrypt log ID from sessionStorage
         globalLogid = testlogid; // Assign decrypted log ID to global variable
         const response = await axios.get(`${process.env.baseURL}review/get-reviews-for-user-offers/${globalLogid}`); // HTTP GET request to fetch user offers
         this.offers = response.data; // Assign fetched user offers to component data
@@ -162,7 +162,7 @@ export default {
     // Method to approve an offer
     async approveOffer(reviewId) {
       try {
-        const response = await axios.put(`${process.env.baseURL}review/update-review-status?reviewId=${reviewId}&newStatus=1`); // PUT request to approve offer
+        const response = await axios.put(`${process.env.baseURL}review/update-review-status?reviewId=${reviewId}&newStatus=1`); // HTTP PUT request to approve offer
         const index = this.offers.findIndex(item => item.id === reviewId); // Find index of offer in array
         if (index !== -1) {
           this.offers[index].status = 1; // Update status of the approved offer
@@ -180,7 +180,7 @@ export default {
           this.offers[index].status = 2; // Update status of the rejected offer
         }
       } catch (error) {
-        console.error('Error rejecting offer:', error); //Log error if rejecting offer fails
+        console.error('Error rejecting offer:', error); // Log error if rejecting offer fails
       }
     },
     // Method to view details of a review
@@ -214,7 +214,7 @@ export default {
       if (review !== undefined) { // If review is defined (not cancelled)
         await this.addReview(offerId, predefinedReview); // Add the review
       } else if (dismissAction === Swal.DismissReason.cancel) { // If modal was cancelled
-        Swal.fire('Cancelled', 'Review submission cancelled.', 'info'); // Show info message for cancelled review submission
+      //  Swal.fire('Cancelled', 'Review submission cancelled.', 'info'); // Show info message for cancelled review submission
       }
     },
     // Method to add a review
@@ -231,7 +231,7 @@ export default {
           Swal.fire('Error', 'Failed to add review.', 'error'); // Show error message for failed review addition
         }
       } catch (error) {
-        Swal.fire('Error', 'Failed to add review: Review Already Added'); // Show error message for failed review addition
+        Swal.fire('Already Added', 'You Have Already Added Review'); // Show error message for failed review addition
       }
     },
     // Method to show modal for adding a rating
@@ -239,7 +239,7 @@ export default {
       this.selectedRating = 0; // Reset selected rating
       this.showModal = true; // Show modal
       this.currentOfferId = offerId; // Set current offer ID
-      globalLogid = userId; // Set global log ID
+      globalratingId=userId; // Set global log ID
     },
     // Method to select a star rating
     selectStar(rating) {
@@ -248,7 +248,7 @@ export default {
     // Method to submit a rating
     async submitRating() {
       if (this.selectedRating > 0) { // If a rating is selected
-        await this.addRating(this.currentOfferId, globalLogid, this.selectedRating); // Add the rating
+        await this.addRating(this.currentOfferId, globalratingId, this.selectedRating); // Add the rating
         this.showModal = false; // Hide the modal
       } else {
         Swal.fire('Error', 'Please select a rating.', 'error'); // Show error message for no selected rating
@@ -274,7 +274,7 @@ export default {
           Swal.fire('Error', 'Failed to add rating.', 'error');
         }
       } catch (error) {
-        Swal.fire('Error', 'Failed to add rating: You have already added rating!' , 'error');
+        Swal.fire('Already Added', 'You Have Already Added Rating!' , '');
       }
     }
   },

@@ -112,9 +112,14 @@
           <textarea id="body" rows="5" v-model="emailBody"></textarea>
         </div>
         <div class="modal-buttons">
-          <button class="btn-primary" @click="sendEmail">Send</button>
-          <button class="btn-secondary" @click="closeModal">Close</button>
+          <button class="btn-primary" @click="sendEmail" :disabled="isSending">
+            Send
+          </button>
+          <button class="btn-secondary" @click="closeModal" :disabled="isSending">
+            Close
+          </button>
         </div>
+        <div v-if="isSending" class="loader"></div>
       </div>
     </div>
   </div>
@@ -136,13 +141,13 @@ let test = "danger"; // Placeholder variable (possibly for debugging)
 // Add an interceptor to include Authorization header with Bearer token in requests
 axiosInstance.interceptors.request.use(
   config => {
-    const token = localStorage.getItem('token');
+    const token = sessionStorage.getItem('token');
     if (token) {
       const decryptedToken = decryptToken(token);
       if (decryptedToken) {
         config.headers['Authorization'] = `Bearer ${decryptedToken}`;
       } else {
-        localStorage.removeItem('token');
+        sessionStorage.removeItem('token');
       }
     }
     return config;
@@ -152,7 +157,7 @@ axiosInstance.interceptors.request.use(
   }
 );
 
-// Function to decrypt token using CryptoJS
+// Function to decrypt token using CryptoJS.
 const decryptToken = (encryptedToken) => {
   try {
     const bytes = CryptoJS.AES.decrypt(encryptedToken, process.env.SECRET_KEY);
@@ -162,7 +167,6 @@ const decryptToken = (encryptedToken) => {
     return null;
   }
 };
-
 export default {
   name: "admin",
   data() {
@@ -174,6 +178,7 @@ export default {
       emailSubject: "", // Email subject for sending emails
       userRole: '', // User role for authorization checks
       imageUrlToShow: null, // Image URL to show in modal
+      isSending: false
     };
   },
   mounted() {
@@ -184,7 +189,7 @@ export default {
   methods: {
     // Security check to ensure the user is authorized
     Securitybot() {
-      if (!localStorage.getItem("token")) {
+      if (!sessionStorage.getItem("token")) {
         Swal.fire({
           title: 'You are not authorized!',
           text: 'Login as admin to continue.',
@@ -215,14 +220,14 @@ export default {
     },
     // Method to check the login status of the user
     checkLoginStatus() {
-      const token = localStorage.getItem("token");
+      const token = sessionStorage.getItem("token");
       if (token) {
         const decryptedToken = this.decryptToken(token);
         if (decryptedToken) {
           const decodedToken = VueJwtDecode.decode(decryptedToken);
           this.userRole = decodedToken["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"] || '';
         } else {
-          localStorage.removeItem('token');
+          sessionStorage.removeItem('token');
         }
       }
     },
@@ -259,7 +264,7 @@ export default {
     // Method to fetch a user's profile
     getProfile(uid) {
       axiosInstance.get(`${process.env.baseURL}admin/user/${uid}`).then((res) => {
-        localStorage.setItem("UserId", res.data.user_Id);
+        sessionStorage.setItem("UserId", res.data.user_Id);
         router.push("/account");
       }).catch((error) => {
         this.handleAxiosError(error);
@@ -291,7 +296,6 @@ export default {
         }
       });
     },
-
     // Method to delete images from S3
     deleteImagesFromS3(linkVS, linkRS) {
       if (linkVS) {
@@ -377,19 +381,25 @@ export default {
     },
     // Method to send an email to the selected user
     sendEmail() {
+      this.isSending = true;
       axiosInstance.post(`${process.env.baseURL}custom-mail/send`, {
         to: this.selectedUser.email_Address,
         subject: this.emailSubject,
         body: this.emailBody
-      }).then(response => {
+      })
+      .then(response => {
         Swal.fire({
           icon: "success",
           title: "Success",
           text: "Email sent successfully!"
         });
         this.closeModal();
-      }).catch(error => {
+      })
+      .catch(error => {
         this.handleAxiosError(error);
+      })
+      .finally(() => {
+        this.isSending = false;
       });
     },
     // Method to handle Axios errors
@@ -401,7 +411,7 @@ export default {
             title: 'Session Expired',
             text: 'Your session has expired. Please log in again.',
           }).then(() => {
-            localStorage.clear();
+            sessionStorage.clear();
             router.push('/');
           });
         } else {
@@ -431,31 +441,31 @@ export default {
 };
 </script>
 
- 
+
 <style scoped>
 .user-list {
   width: 100%;
- 
+
   table {
     width: 100%;
     border-collapse: collapse;
   }
- 
+
   th,
   td {
     padding: 8px;
     border: 1px solid #ddd;
   }
- 
+
   th {
     text-align: left;
   }
- 
+
   button {
     margin-right: 5px;
   }
 }
- 
+
 .btn {
   padding: 4px 12px;
   font-size: 14px;
@@ -464,23 +474,23 @@ export default {
   color: #fff;
   box-shadow: 0px 0px 2px rgb(0 0 0 / 36%);
 }
- 
+
 .btn-danger {
   background: #b0061d;
   border-color: #b0061d;
 }
- 
+
 .btn-success {
   background: #4daf4c;
   border-color: #4daf4c;
 }
- 
+
 .cross_icon,
 .tick_icon {
   position: relative;
   top: 2px;
 }
- 
+
 .modal-container {
   position: fixed;
   top: 0;
@@ -492,7 +502,7 @@ export default {
   align-items: center;
   z-index: 1000;
 }
- 
+
 .modal-overlay {
   position: absolute;
   top: 0;
@@ -501,7 +511,7 @@ export default {
   height: 100%;
   background: rgba(0, 0, 0, 0.5);
 }
- 
+
 .modal-content {
   position: relative;
   background: white;
@@ -512,14 +522,16 @@ export default {
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   z-index: 1001;
 }
+
 .modal-content[data-v-3ca9c9bd] {
-    background: white;
-    padding: 30px;
-    border-radius: 5px;
-    position: relative;
-    z-index: 1000;
-    width: 700px;
+  background: white;
+  padding: 30px;
+  border-radius: 5px;
+  position: relative;
+  z-index: 1000;
+  width: 700px;
 }
+
 .close {
   position: absolute;
   top: 10px;
@@ -528,21 +540,21 @@ export default {
   font-weight: bold;
   cursor: pointer;
 }
- 
+
 h2 {
   margin-top: 0;
   margin-bottom: 20px;
 }
- 
+
 .form-group {
   margin-bottom: 15px;
 }
- 
+
 .form-group label {
   display: block;
   margin-bottom: 5px;
 }
- 
+
 .form-group input,
 .form-group textarea {
   width: 100%;
@@ -551,13 +563,13 @@ h2 {
   border: 1px solid #ccc;
   border-radius: 4px;
 }
- 
+
 .modal-buttons {
   display: flex;
   justify-content: flex-end;
   gap: 10px;
 }
- 
+
 .btn-primary {
   background-color: #007bff;
   color: white;
@@ -566,11 +578,11 @@ h2 {
   border-radius: 4px;
   cursor: pointer;
 }
- 
+
 .btn-primary:hover {
   background-color: #0056b3;
 }
- 
+
 .btn-secondary {
   background-color: #6c757d;
   color: white;
@@ -579,22 +591,22 @@ h2 {
   border-radius: 4px;
   cursor: pointer;
 }
- 
+
 .btn-secondary:hover {
   background-color: #817d7d;
 }
- 
+
 .clickable {
   cursor: pointer;
   color: black;
   transition: color 0.3s ease;
 }
- 
+
 .clickable:hover {
   background-color: #e8e1e1;
   color: #000;
 }
- 
+
 .modal-container {
   position: fixed;
   top: 0;
@@ -606,7 +618,7 @@ h2 {
   align-items: center;
   justify-content: center;
 }
- 
+
 .modal-overlay {
   position: absolute;
   top: 0;
@@ -615,7 +627,7 @@ h2 {
   bottom: 0;
   background: rgba(0, 0, 0, 0.5);
 }
- 
+
 .modal-content {
   background: white;
   padding: 20px;
@@ -624,18 +636,18 @@ h2 {
   z-index: 1000;
   width: 400px;
 }
- 
+
 .modal-content .close {
   position: absolute;
   top: 10px;
   right: 10px;
   cursor: pointer;
 }
- 
+
 .modal-buttons {
   margin-top: 20px;
 }
- 
+
 .modal-buttons .btn-primary {
   background-color: #007bff;
   color: white;
@@ -644,7 +656,7 @@ h2 {
   cursor: pointer;
   border-radius: 5px;
 }
- 
+
 .modal-buttons .btn-secondary {
   background-color: #6c757d;
   color: white;
@@ -654,53 +666,77 @@ h2 {
   border-radius: 5px;
   margin-left: 10px;
 }
- 
+
 .newState {
- 
+
   color: #052fed;
   font-weight: 600;
 }
- 
+
 .penState {
   font-weight: 600;
   color: #f67119;
 }
- 
+
 .failState {
   font-weight: 600;
   color: #d90c0c;
 }
- 
+
 .verState {
- 
+
   color: #0eec3a;
 }
-.page_404{ padding:40px 0; background:#fff; font-family: 'Arvo', serif;
+
+.page_404 {
+  padding: 40px 0;
+  background: #fff;
+  font-family: 'Arvo', serif;
 }
- 
-.page_404  img{ width:100%;}
- 
-.four_zero_four_bg{
- 
- background-image: url(https://cdn.dribbble.com/users/285475/screenshots/2083086/dribbble_1.gif);
-    height: 400px;
-    background-position: center;
- }
- 
- 
- .four_zero_four_bg h1{
- font-size:80px;
- }
- 
-  .four_zero_four_bg h3{
-             font-size:80px;
-             }
-             
-             .link_404{          
-    color: #fff!important;
-    padding: 10px 20px;
-    background: #39ac31;
-    margin: 20px 0;
-    display: inline-block;}
-    .contant_box_404{ margin-top:-50px;}
+
+.page_404 img {
+  width: 100%;
+}
+
+.four_zero_four_bg {
+
+  background-image: url(https://cdn.dribbble.com/users/285475/screenshots/2083086/dribbble_1.gif);
+  height: 400px;
+  background-position: center;
+}
+
+
+.four_zero_four_bg h1 {
+  font-size: 80px;
+}
+
+.four_zero_four_bg h3 {
+  font-size: 80px;
+}
+
+.link_404 {
+  color: #fff !important;
+  padding: 10px 20px;
+  background: #39ac31;
+  margin: 20px 0;
+  display: inline-block;
+}
+
+.contant_box_404 {
+  margin-top: -50px;
+}
+.loader {
+  border: 4px solid #f3f3f3;
+  border-radius: 50%;
+  border-top: 4px solid #3498db;
+  width: 24px;
+  height: 24px;
+  animation: spin 2s linear infinite;
+  margin: 20px auto;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
 </style>
