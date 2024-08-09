@@ -3,7 +3,7 @@ using UGHApi.Models;
 
 namespace UGHApi.Controllers
 {
-    [Route("api/")]
+    [Route("api/custom-mail")]
     [ApiController]
     public class CustomMailController : ControllerBase
     {
@@ -12,7 +12,7 @@ namespace UGHApi.Controllers
         {
             _emailService = emailService;   
         }
-        [HttpPost("custom-mail/send")]
+        [HttpPost("send")]
         public IActionResult CustomSendEmail([FromBody] CustomMailBody mailBody)
         {
             try

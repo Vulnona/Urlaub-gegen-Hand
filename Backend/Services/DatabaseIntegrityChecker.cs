@@ -1,14 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-
-using Microsoft.Extensions.Logging;
-
-using System.Linq;
-
-using System.Threading.Tasks;
-
-using UGHApi.Models;
- 
-namespace UGHApi.Services;
+﻿namespace UGHApi.Services;
 
 public class DatabaseIntegrityChecker
 
@@ -35,11 +25,8 @@ public class DatabaseIntegrityChecker
         if (!dbContext.userroles.Any())
 
         {
-
             _logger.LogError("Critical Error: Default roles are missing in the database.");
-
             return Task.FromResult(false);
-
         }
 
         return Task.FromResult(true);

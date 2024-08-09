@@ -5,7 +5,7 @@ using UGHApi.Services;
 
 namespace UGHApi.Controllers
 {
-    [Route("api/")]
+    [Route("api/profile")]
     [ApiController]
     public class ProfileController : ControllerBase
     {
@@ -18,47 +18,50 @@ namespace UGHApi.Controllers
             _tokenService = tokenService;
         }
 
-        [HttpGet("profile/get-profile")]
+        [HttpGet("get-user-profile")]
         public async Task<IActionResult> GetProfile(string token)
         {
             try
             {
-                var accessUserId = await _tokenService.GetUserIdFromToken(token);
+                var userAccessId = await _tokenService.GetUserIdFromToken(token);
 
-                if (accessUserId == null)
+                if (userAccessId == null)
                 {
                     return Unauthorized("Invalid token");
                 }
-                var userId = accessUserId.Value;
+                var userId = userAccessId.Value;
 
-                var profile = await _context.userprofiles.Include(u => u.User).FirstOrDefaultAsync(p => p.User_Id == userId);
-                if (profile == null)
+                var userProfile = await _context.userprofiles.Include(u => u.User).FirstOrDefaultAsync(p => p.User_Id == userId);
+                if (userProfile == null)
                 {
-                    var newProfile = new UserProfile
+                    var newUserProfile = new UserProfile
                     {
                         User_Id = userId,
                     };
 
-                    _context.userprofiles.Add(newProfile);
+                    _context.userprofiles.Add(newUserProfile);
                     await _context.SaveChangesAsync();
 
-                    profile = await _context.userprofiles.Include(u => u.User).FirstOrDefaultAsync(p => p.User_Id == userId);
+                    userProfile = await _context.userprofiles.Include(u => u.User).FirstOrDefaultAsync(p => p.User_Id == userId);
                 }
 
-                return Ok(new { Profile = profile });
+                return Ok(new { Profile = userProfile });
             }
             catch (Exception ex)
             {
-                // Log the exception 
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
 
-        [HttpPut("profile/update-profile")]
+        [HttpPut("add-or-update-profile")]
         public async Task<IActionResult> UpdateProfile(string token, [FromBody] UserProfile profile)
         {
             try
             {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
                 var accessUserId = await _tokenService.GetUserIdFromToken(token);
 
                 if (accessUserId == null)
@@ -70,7 +73,7 @@ namespace UGHApi.Controllers
 
                 if (profile == null || profile.User_Id != userId)
                 {
-                    return BadRequest("Profile object is null or User ID mismatch");
+                    return BadRequest("Profile object is null");
                 }
 
                 var existingProfile = await _context.userprofiles.Include(p => p.User).FirstOrDefaultAsync(p => p.User_Id == userId);
@@ -81,7 +84,6 @@ namespace UGHApi.Controllers
                     return Ok(profile);
                 }
 
-                // Update profile fields
                 existingProfile.Hobbies = profile.Hobbies;
                 existingProfile.Options = profile.Options;
                 if (profile.UserPic != null)
@@ -89,7 +91,6 @@ namespace UGHApi.Controllers
                     existingProfile.UserPic = profile.UserPic;
                 }
 
-                // Update user fields if provided in the profile
                 if (profile.User != null)
                 {
                     existingProfile.User.FirstName = profile.User.FirstName;
@@ -107,7 +108,6 @@ namespace UGHApi.Controllers
                     existingProfile.User.Link_VS = profile.User.Link_VS;
                 }
 
-                // Update the database
                 _context.userprofiles.Update(existingProfile);
                 _context.users.Update(existingProfile.User);
                 await _context.SaveChangesAsync();

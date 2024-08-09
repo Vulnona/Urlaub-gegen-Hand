@@ -89,7 +89,7 @@ try:
 
     for offer in offers:
         try:
-            offer_id, title, description, imageData, location, accommodation, accommodationSuitable, skills = offer
+            offer_id, title, description, imageData, location, accomodation, accommodationSuitable, skills = offer
             if imageData:
                 base64_image = base64.b64encode(imageData).decode('utf-8')
                 print(f"\tBase64 representation: {base64_image[:50]}...")
@@ -111,7 +111,7 @@ try:
                 f"Offer Title: {title}\n"
                 f"Description: {description}\n"
                 f"Location: {location}\n"
-                f"Amenities: {accommodation}\n"
+                f"Amenities: {accomodation}\n"
                 f"Accommodation Suitability: {accommodationSuitable}\n"
                 f"skills: {skills}\n"
             )

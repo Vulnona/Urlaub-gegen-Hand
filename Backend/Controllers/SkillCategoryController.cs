@@ -17,9 +17,13 @@ namespace UGHApi.Controllers
 
         // GET: api/SkillCategory
         [HttpGet("skill-category")]
-        public async Task<ActionResult<IEnumerable<Skill>>> Getskills()
+        public async Task<ActionResult<IEnumerable<Skill>>> GetSkills()
         {
-          if (_context.skills == null)
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            if (_context.skills == null)
           {
               return NoContent();
           }

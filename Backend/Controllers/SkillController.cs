@@ -17,8 +17,12 @@ namespace UGHApi.Controllers
 
         // GET: api/Skill/5
         [HttpGet("skill/{category_id}")]
-        public async Task<ActionResult<IEnumerable<Skill>>> Getskills(int Category_id)
+        public async Task<ActionResult<IEnumerable<Skill>>> GetSkills(int Category_id)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
             if (_context.skills == null)
             {
                 return NotFound();
@@ -42,12 +46,12 @@ namespace UGHApi.Controllers
         }
 
         [HttpGet("get-all-skills")]
-        public async Task<ActionResult> GetAllskills()
+        public async Task<ActionResult> GetAllSkills()
         {
             try
             {
-                var allskills = await _context.skills.ToListAsync();
-                return Ok(allskills);
+                var allSkills = await _context.skills.ToListAsync();
+                return Ok(allSkills);
             }
             catch (Exception ex)
             {

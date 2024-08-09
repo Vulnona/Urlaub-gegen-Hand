@@ -68,10 +68,8 @@ namespace UGHApi
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
-
             //builder.Services.AddHostedService<PythonScriptRunner>();
             builder.Services.AddTransient<DatabaseIntegrityChecker>();
-
             ConfigureAuthentication(builder);
             ConfigureCors(builder);
             ConfigureMailSettings(builder);
@@ -91,7 +89,6 @@ namespace UGHApi
         //        context.SeedDataIfEmpty();
         //    }
         //}
-
         private static void ConfigureAuthentication(WebApplicationBuilder builder)
         {
             var config = builder.Configuration;
@@ -119,7 +116,6 @@ namespace UGHApi
                     };
                 });
         }
-
         private static void ConfigureCors(WebApplicationBuilder builder)
         {
             builder.Services.AddCors(options =>
@@ -134,7 +130,6 @@ namespace UGHApi
                     });
             });
         }
-
         private static void ConfigureMailSettings(WebApplicationBuilder builder)
         {
             builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("MailSettings"));
@@ -186,11 +181,11 @@ namespace UGHApi
         private static void RegisterServices(IServiceCollection services)
         {
             services.AddSingleton<EmailService>();
-            services.AddTransient<userservice>();
+            services.AddTransient<UserService>();
             services.AddScoped<PasswordService>();
             services.AddMemoryCache();
             services.AddScoped<TokenService>();
-            services.AddTransient<couponservice>();
+            services.AddTransient<CouponService>();
             services.AddTransient<AdminVerificationMailService>();
             services.AddHostedService<ReviewUserHostedService>();
         }
@@ -235,7 +230,7 @@ namespace UGHApi
             }
         }
 
-        private static async void CreateAutoAdminUser(userservice userservice)
+        private static async void CreateAutoAdminUser(UserService userservice)
         {
             var user = await userservice.GetUserByEmailAsync("admin@example.com");
             if (user == null)

@@ -9,7 +9,7 @@ using UGHModels;
 
 namespace UGHApi.Controllers
 {
-    [Route("api")]
+    [Route("api/membership")]
     [ApiController]
     public class MembershipController : ControllerBase
     {
@@ -19,15 +19,14 @@ namespace UGHApi.Controllers
         {
             _context = context;
         }
-        [HttpGet("membership/validate-subscriptionId")]
+        [HttpGet("validate-subscriptionId")]
         public async Task<IActionResult> ValidateSubscriptionId([FromQuery]int sid)
         {
             try
             {
-                var storeId = "106078763";
+                var storeId = "";
                 var productId = sid; 
-                var token = "secret_MdRTZzpz65Cpp9KHxj3pvKvyPP1k3z3L"; 
-
+                var token = ""; 
                 var options = new RestClientOptions($"https://app.ecwid.com/api/v3/{storeId}/products/{productId}");
                 var client = new RestClient(options);
                 var request = new RestRequest("");
@@ -71,7 +70,7 @@ namespace UGHApi.Controllers
             public string Name { get; set; }
             // Add other properties as needed
         }
-        [HttpPost("membership/check-active-membership/{subId}")] //This api is created to check the active membership of the user by subscripitonId as input
+        [HttpPost("check-active-membership/{subId}")] //This api is created to check the active membership of the user by subscripitonId as input
         public async Task<IActionResult> CheckActiveMembership(int subId)
         {
             var membership = await _context.memberships.FindAsync(subId);
@@ -80,13 +79,12 @@ namespace UGHApi.Controllers
             {
                 return NotFound("Membership not found");
             }
-
             bool isActive = membership.Expiration > DateTime.UtcNow;
 
             return Ok(new { IsActive = isActive });
         }
         
-        [HttpGet("membership/check-active-membership-byuserId/{userId}")]    //This api is created to check the active  membership of the user by userId as input
+        [HttpGet("check-active-membership-by-userId/{userId}")]    //This api is created to check the active  membership of the user by userId as input
         public async Task<IActionResult> CheckActiveMembershipByUserId(int userId)
         {
             // Find the user
@@ -117,8 +115,8 @@ namespace UGHApi.Controllers
             return Ok(new { IsActive = isActive });
         }
         // GET: api/Membership
-        [HttpGet("membership/get-membership")]
-        public async Task<ActionResult<IEnumerable<Membership>>> Getmemberships()
+        [HttpGet("get-membership")]
+        public async Task<ActionResult<IEnumerable<Membership>>> GetMemberships()
         {
           if (_context.memberships == null)
           {
@@ -128,7 +126,7 @@ namespace UGHApi.Controllers
         }
 
         // GET: api/Membership/5
-        [HttpGet("membership/{id}")]
+        [HttpGet("{id}")]
         public async Task<ActionResult<Membership>> GetMembership(int id)
         {
           if (_context.memberships == null)
@@ -147,7 +145,7 @@ namespace UGHApi.Controllers
 
         // PUT: api/Membership/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("membership/update-membership/{id}")]
+        [HttpPut("update-membership/{id}")]
         public async Task<IActionResult> PutMembership(int id, Membership membership)
         {
             if (id != membership.MembershipID)
@@ -178,7 +176,7 @@ namespace UGHApi.Controllers
 
         // POST: api/Membership
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost("membership/add-new-membership")]
+        [HttpPost("add-new-membership")]
         public async Task<ActionResult<Membership>> PostMembership(Membership membership)
         {
           if (_context.memberships == null)
@@ -192,7 +190,7 @@ namespace UGHApi.Controllers
         }
 
         // DELETE: api/Membership/5
-        [HttpDelete("membership/delete-membership/{id}")]
+        [HttpDelete("mdelete-membership/{id}")]
         public async Task<IActionResult> DeleteMembership(int id)
         {
             if (_context.memberships == null)

@@ -23,9 +23,9 @@ public class UghContext : DbContext
     public DbSet<Coupon> coupons { get; set; }
     public DbSet<Redemption> redemptions { get; set; }
     public DbSet<Offer> offers { get; set; }
-    public DbSet<Accomodation> accomodations { get; set; }
-    public DbSet<accomodationsuitable> accomodationsuitables { get; set; }
-    public DbSet<ratings> ratings { get; set; }
+    public DbSet<Accommodation> accomodations { get; set; }
+    public DbSet<SuitableAccommodation> accommodationsuitables { get; set; }
+    public DbSet<Ratings> ratings { get; set; }
     public DbSet<Review> reviews { get; set; }
     public DbSet<ReviewOfferUser> reviewofferusers { get; set; }
     public DbSet<ReviewLoginUser> reviewloginusers { get; set; }

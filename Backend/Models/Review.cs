@@ -16,10 +16,10 @@ namespace UGHApi.Models
         [ForeignKey("UserId")]
         public User User { get; set; }
 
-        public reviewstatus Status { get; set; }  
+        public reviewStatus Status { get; set; }  
     }
 
-    public enum reviewstatus
+    public enum reviewStatus
     {
         Pending,
         Approved,

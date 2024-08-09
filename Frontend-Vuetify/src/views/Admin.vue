@@ -263,7 +263,7 @@ export default {
     },
     // Method to fetch a user's profile
     getProfile(uid) {
-      axiosInstance.get(`${process.env.baseURL}admin/user/${uid}`).then((res) => {
+      axiosInstance.get(`${process.env.baseURL}admin/get-user-by-id/${uid}`).then((res) => {
         sessionStorage.setItem("UserId", res.data.user_Id);
         router.push("/account");
       }).catch((error) => {

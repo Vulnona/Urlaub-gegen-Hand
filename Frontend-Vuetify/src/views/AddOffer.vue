@@ -120,9 +120,9 @@
                         <li v-for="accommodation in accommodations" :key="accommodation.id">
                           <div class="flexBox gap-x-2 image-withCheckbox">
 
-                            <label class="checkbox_container">{{ accommodation.nameAccomodationType }}
-                              <input type="checkbox" :value="accommodation.nameAccomodationType"
-                                v-model="offer.accomodation">
+                            <label class="checkbox_container">{{ accommodation.nameAccommodationType }}
+                              <input type="checkbox" :value="accommodation.nameAccommodationType"
+                                v-model="offer.accommodation">
                               <span class="checkmark"></span>
                             </label>
                           </div>
@@ -142,7 +142,7 @@
                           <div class="flexBox gap-x-2 image-withCheckbox">
 
                             <label class="checkbox_container">{{ suitable.name }}
-                              <input type="checkbox" :value="suitable.name" v-model="offer.accomodationSuitable">
+                              <input type="checkbox" :value="suitable.name" v-model="offer.accommodationSuitable">
                               <span class="checkmark"></span>
                             </label>
                           </div>
@@ -193,8 +193,8 @@ export default {
         title: '',
         description: '',
         location: '',
-        accomodation: [], // Array to store selected accommodations
-        accomodationSuitable: [], // Array to store selected suitable accommodations
+        accommodation: [], // Array to store selected accommodations
+        accommodationSuitable: [], // Array to store selected suitable accommodations
         skills: [], // Array to store selected skills
         user_Id: globalLogid, // User ID fetched after decryption
         // region_ID: null,
@@ -272,7 +272,7 @@ export default {
       try {
         const testlogid = this.decryptlogID(sessionStorage.getItem("logId")); // Decrypting user ID
         globalLogid = testlogid; // Storing decrypted user ID globally
-        const response = await axios.get(`${process.env.baseURL}accomodation/get-all-accomodations`); // Fetching accommodations from API
+        const response = await axios.get(`${process.env.baseURL}accommodation/get-all-accommodation`); // Fetching accommodations from API
         this.accommodations = response.data; // Assigning fetched accommodations to data property
       } catch (error) {
         console.error('Error fetching accommodations:', error);
@@ -281,7 +281,7 @@ export default {
     async fetchSuitableAccommodations() {
       // Method to fetch suitable accommodations data
       try {
-        const response = await axios.get(`${process.env.baseURL}suitable-accomodation/get-all-suitable-accomodation`); // Fetching suitable accommodations from API
+        const response = await axios.get(`${process.env.baseURL}accommodation-suitability/get-all-suitable-accommodations`); // Fetching suitable accommodations from API
         this.suitableAccommodations = response.data; // Assigning fetched suitable accommodations to data property
       } catch (error) {
         console.error('Error fetching suitable accommodations:', error);
@@ -299,14 +299,14 @@ export default {
     async fetchRegions() {
       // Method to fetch regions data
       try {
-        const response = await axios.get(`${process.env.baseURL}region/getall-region`); // Fetching regions from API
+        const response = await axios.get(`${process.env.baseURL}region/get-all-region`); // Fetching regions from API
         this.regions = response.data; // Assigning fetched regions to data property
       } catch (error) {
         console.error('Error fetching regions:', error);
       }
     },
     loadCountries() {
-      axios.get(`${process.env.baseURL}region/getall-country`)
+      axios.get(`${process.env.baseURL}region/get-all-country`)
         .then(response => {
           this.countries = response.data;
         })
@@ -317,7 +317,7 @@ export default {
     loadStates() {
       if (this.countryId) {
         this.countryName = this.countries.find(c => c.country_ID === this.countryId).countryName;
-        axios.get(`${process.env.baseURL}region/get-state-bycountryId/${this.countryId}`)
+        axios.get(`${process.env.baseURL}region/get-state-by-countryId/${this.countryId}`)
           .then(response => {
             this.states = response.data;
             this.stateId = ''; // Reset state selection
@@ -343,7 +343,7 @@ export default {
     loadCities() {
       if (this.stateId) {
         this.stateName = this.states.find(s => s.id === this.stateId).name;
-        axios.get(`${process.env.baseURL}region/get-city-bystateId/${this.stateId}`)
+        axios.get(`${process.env.baseURL}region/get-city-by-stateId/${this.stateId}`)
           .then(response => {
             this.cities = response.data;
             this.cityId = ''; // Reset city selection
@@ -397,8 +397,8 @@ export default {
       offerData.append('description', this.offer.description); // Appending offer description
       offerData.append('location', this.offer.location); // Appending offer location
       offerData.append('contact', this.offer.contact); // Appending offer contact
-      offerData.append('accomodation', this.offer.accomodation.join(', ')); // Appending selected accommodations
-      offerData.append('accomodationSuitable', this.offer.accomodationSuitable.join(', ')); // Appending selected suitable accommodations
+      offerData.append('accommodation', this.offer.accommodation.join(', ')); // Appending selected accommodations
+      offerData.append('accommodationSuitable', this.offer.accommodationSuitable.join(', ')); // Appending selected suitable accommodations
       offerData.append('skills', this.offer.skills.map(skill => skill.skillDescrition).join(', ')); // Appending selected skills
       offerData.append('user_Id', globalLogid); // Appending decrypted user ID
       // offerData.append('region_ID', this.offer.region_ID); // Appending selected region ID

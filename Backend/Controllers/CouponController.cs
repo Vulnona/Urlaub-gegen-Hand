@@ -14,13 +14,13 @@ namespace UGHApi.Controllers
     public class CouponController : ControllerBase
     {
         private readonly UghContext _context;
-        private readonly couponservice _couponservice;
+        private readonly CouponService _couponService;
 
 
-        public CouponController(UghContext context, couponservice couponservice)
+        public CouponController(UghContext context, CouponService couponService)
         {
             _context = context;
-            _couponservice = couponservice;
+            _couponService = couponService;
         }
 
         #region Coupon
@@ -40,7 +40,7 @@ namespace UGHApi.Controllers
                     return Conflict("Coupon code already exists.");
                 }
 
-                await _couponservice.AddCoupon(coupon);
+                await _couponService.AddCoupon(coupon);
                 return Ok("Coupon inserted successfully.");
             }
             catch (Exception)
@@ -57,7 +57,7 @@ namespace UGHApi.Controllers
         {
             try
             {
-                await _couponservice.UpdateCoupon(updatedCoupon);
+                await _couponService.UpdateCoupon(updatedCoupon);
                 return Ok("Coupon updated successfully.");
             }
             catch (CouponNotFoundException)
@@ -75,7 +75,7 @@ namespace UGHApi.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetAllCoupon()
         {
-            var coupons = await _couponservice.GetAllcoupons();
+            var coupons = await _couponService.GetAllcoupons();
             return Ok(coupons);
         }
 
@@ -85,7 +85,7 @@ namespace UGHApi.Controllers
         {
             try
             {
-                await _couponservice.DeleteCoupon(couponId);
+                await _couponService.DeleteCoupon(couponId);
                 return Ok("Coupon deleted successfully.");
             }
             catch (CouponNotFoundException)
@@ -105,7 +105,7 @@ namespace UGHApi.Controllers
         {
             try
             {
-                var result = await _couponservice.RedeemCoupon(couponCode, User);
+                var result = await _couponService.RedeemCoupon(couponCode, User);
                 return Ok(result);
             }
             catch (CouponNotFoundException)

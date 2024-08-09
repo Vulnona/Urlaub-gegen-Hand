@@ -4,7 +4,7 @@ using UGHApi.Models;
 
 namespace UGHApi.Controllers
 {
-    [Route("api/")]
+    [Route("api/review-offer-user")]
     [ApiController]
     public class ReviewOfferUserController : ControllerBase
     {
@@ -16,8 +16,8 @@ namespace UGHApi.Controllers
         }
 
         // GET: api/ReviewOfferUser
-        [HttpGet("review-offer-user/get-review")]
-        public IActionResult Getreviewofferusers()
+        [HttpGet("get-review")]
+        public IActionResult GetReviewOfferUsers()
         {
             try
             {
@@ -33,7 +33,7 @@ namespace UGHApi.Controllers
         }
 
         // GET: api/ReviewOfferUser/5
-        [HttpGet("review-offer-user/get-review-offer-user/{id}")]
+        [HttpGet("get-review-offer-user/{id}")]
         public IActionResult GetReviewOfferUser(int id)
         {
             try
@@ -52,9 +52,13 @@ namespace UGHApi.Controllers
             }
         }
 
-        [HttpPost("review-offer-user/create-review-offer-user")]
+        [HttpPost("create-review-offer-user")]
         public async Task<IActionResult> CreateReviewOfferUser([FromBody] ReviewOfferUser reviewOfferUser)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
             if (reviewOfferUser == null)
                 return BadRequest("ReviewOfferUser object is null");
 
@@ -124,9 +128,13 @@ namespace UGHApi.Controllers
             }
         }
 
-        [HttpPut("review-offer-user/update-review-offer-user/{id}")]
+        [HttpPut("update-review-offer-user/{id}")]
         public IActionResult UpdateReviewOfferUser(int id, [FromBody] ReviewOfferUser reviewOfferUser)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
             if (reviewOfferUser == null)
                 return BadRequest("ReviewOfferUser object is null");
 
@@ -153,7 +161,7 @@ namespace UGHApi.Controllers
             }
         }
 
-        [HttpDelete("review-offer-user/delete-review-offer-user/{id}")]
+        [HttpDelete("delete-review-offer-user/{id}")]
         public IActionResult DeleteReviewOfferUser(int id)
         {
             try

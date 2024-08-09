@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using UGHApi.Models;
 namespace UGHApi.Controllers
 {
-    [Route("api/")]
+    [Route("api/review")]
     [ApiController]
     public class ReviewController : ControllerBase
     {
@@ -12,9 +12,13 @@ namespace UGHApi.Controllers
         {
             _context = context;
         }
-        [HttpPost("review/adding-review")]
+        [HttpPost("adding-review")]
         public IActionResult AddReview(Review review, string email)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
             if (review == null || string.IsNullOrEmpty(email))
             {
                 return BadRequest("Review or email is null.");
@@ -43,8 +47,8 @@ namespace UGHApi.Controllers
                 return StatusCode(StatusCodes.Status304NotModified, ex.Message);
             }
         }
-        [HttpPut("review/update-review-status")]
-        public IActionResult Updatereviewstatus(int reviewId, reviewstatus newStatus)
+        [HttpPut("update-review-status")]
+        public IActionResult UpdateReviewStatus(int reviewId, reviewStatus newStatus)
         {
             try
             {
@@ -62,8 +66,8 @@ namespace UGHApi.Controllers
                 return StatusCode(StatusCodes.Status304NotModified, ex.Message);
             }
         }
-        [HttpGet("review/get-all-reviews")]
-        public IActionResult GetAllreviews()
+        [HttpGet("get-all-reviews")]
+        public IActionResult GetAllReviews()
         {
             try
             {
@@ -78,7 +82,7 @@ namespace UGHApi.Controllers
                 return StatusCode(StatusCodes.Status204NoContent, ex.Message);
             }
         }
-        [HttpGet("review/get-user-by-offerId/{offerId}")]
+        [HttpGet("get-user-by-offerId/{offerId}")]
         public IActionResult GetUserByOfferId(int offerId)
         {
             try
@@ -102,7 +106,7 @@ namespace UGHApi.Controllers
                 return StatusCode(StatusCodes.Status204NoContent, ex.Message);
             }
         }
-        [HttpGet("review/get-user-by-review-id/{reviewId}")]
+        [HttpGet("get-user-by-review-id/{reviewId}")]
         public IActionResult GetUserByReviewId(int reviewId)
         {
             try
@@ -126,8 +130,8 @@ namespace UGHApi.Controllers
                 return StatusCode(StatusCodes.Status204NoContent, ex.Message);
             }
         }
-        [HttpGet("review/check-review-status")]
-        public IActionResult Checkreviewstatus(int userId, int offerId)
+        [HttpGet("check-review-status")]
+        public IActionResult CheckReviewStatus(int userId, int offerId)
         {
             try
             {
@@ -139,9 +143,9 @@ namespace UGHApi.Controllers
                 }
                 switch (review.Status)
                 {
-                    case reviewstatus.Pending:
+                    case reviewStatus.Pending:
                         return Ok(new { Status = "Applied" });
-                    case reviewstatus.Approved:
+                    case reviewStatus.Approved:
                         return Ok(new { Status = "ViewDetails" });    // after Approved host can see the detailed of userB  (Call==>  API GetusersByOfferId )
                     default:
                         return Ok(new { Status = "Apply" });
@@ -152,8 +156,8 @@ namespace UGHApi.Controllers
                 return StatusCode(StatusCodes.Status204NoContent, ex.Message);
             }
         }
-        [HttpGet("review/get-reviews-for-user-offers/{userId}")]
-        public IActionResult GetreviewsForUseroffers(int userId)
+        [HttpGet("get-reviews-for-user-offers/{userId}")]
+        public IActionResult GetReviewsForUserOffers(int userId)
         {
             try
             {

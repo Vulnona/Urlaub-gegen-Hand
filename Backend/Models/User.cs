@@ -17,7 +17,7 @@ namespace UGHModels
 
         [Required]
         public DateOnly DateOfBirth { get; set; }
-
+        [Required]
         public string Gender { get; set; }
 
         [Required]
@@ -77,7 +77,7 @@ namespace UGHModels
             IsEmailVerified = isEmailVerified;
             Password = password;
             SaltKey = saltKey;
-            VerificationState = UGH_Enums.VerificationState.isNew;
+            VerificationState = UGH_Enums.VerificationState.IsNew;
             Facebook_link = facebook_link;
             Link_RS = link_RS;
             Link_VS = link_VS;

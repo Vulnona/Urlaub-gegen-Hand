@@ -16,7 +16,7 @@ public class ReviewUserHostedService : IHostedService, IDisposable
     public Task StartAsync(CancellationToken cancellationToken)
     {
         _logger.LogInformation("Review User Hosted Service running.");
-        _timer = new Timer(DoWork, null, TimeSpan.Zero, TimeSpan.FromSeconds(20));
+        _timer = new Timer(DoWork, null, TimeSpan.Zero, TimeSpan.FromDays(14));
         return Task.CompletedTask;
     }
 
@@ -29,8 +29,8 @@ public class ReviewUserHostedService : IHostedService, IDisposable
             var context = scope.ServiceProvider.GetRequiredService<UghContext>();
             try
             {
-                AddPostReviewEntriesForLoginusers(context);
-                AddPostReviewEntriesForOfferusers(context);
+                AddPostReviewEntriesForLoginUsers(context);
+                AddPostReviewEntriesForOfferUsers(context);
             }
             catch (Exception ex)
             {
@@ -39,13 +39,13 @@ public class ReviewUserHostedService : IHostedService, IDisposable
         }
     }
 
-    private void AddPostReviewEntriesForLoginusers(UghContext context)
+    private void AddPostReviewEntriesForLoginUsers(UghContext context)
     {
         try
         {
-            var reviewloginusers = context.reviewloginusers.ToList();
+            var reviewLoginUsers = context.reviewloginusers.ToList();
 
-            foreach (var reviewLoginUser in reviewloginusers)
+            foreach (var reviewLoginUser in reviewLoginUsers)
             {
                 if (reviewLoginUser.CreatedAt.HasValue && reviewLoginUser.CreatedAt.Value.AddDays(14) <= DateTime.Now)
                 {
@@ -57,19 +57,19 @@ public class ReviewUserHostedService : IHostedService, IDisposable
 
                     if (reviewOfferUser == null)
                     {
-                        var reviewboth = context.reviews
+                        var reviewBoth = context.reviews
                             .Include(o => o.Offer)
                             .Where(o => o.OfferId == offerId && o.UserId == reviewLoginUser.UserId)
                             .FirstOrDefault();
 
-                        if (reviewboth != null)
+                        if (reviewBoth != null)
                         {
-                            var hostId = reviewboth.Offer.User_Id;
+                            var hostId = reviewBoth.Offer.User_Id;
                             var nullReviewOfOfferUser = new ReviewOfferUser
                             {
                                 OfferId = offerId,
                                 UserId = hostId,
-                                AddReviewForOfferUser = "Host does not add Review",
+                                AddReviewForOfferUser = "Host does not add review",
                                 CreatedAt = DateTime.Now
                             };
 
@@ -110,13 +110,13 @@ public class ReviewUserHostedService : IHostedService, IDisposable
         }
     }
 
-    private void AddPostReviewEntriesForOfferusers(UghContext context)
+    private void AddPostReviewEntriesForOfferUsers(UghContext context)
     {
         try
         {
-            var reviewofferusers = context.reviewofferusers.ToList();
+            var reviewOfferUsers = context.reviewofferusers.ToList();
 
-            foreach (var reviewOfferUser in reviewofferusers)
+            foreach (var reviewOfferUser in reviewOfferUsers)
             {
                 if (reviewOfferUser.CreatedAt.HasValue && reviewOfferUser.CreatedAt.Value.AddMinutes(1.1) <= DateTime.Now)
                 {
@@ -128,19 +128,19 @@ public class ReviewUserHostedService : IHostedService, IDisposable
 
                     if (reviewLoginUser == null)
                     {
-                        var reviewboth = context.reviews
+                        var reviewBoth = context.reviews
                             .Include(o => o.Offer)
                             .Where(o => o.OfferId == offerId && o.Offer.User_Id == reviewOfferUser.UserId)
                             .FirstOrDefault();
 
-                        if (reviewboth != null)
+                        if (reviewBoth != null)
                         {
-                            var loginUserId = reviewboth.UserId;
+                            var loginUserId = reviewBoth.UserId;
                             var nullReviewOfLoginUser = new ReviewLoginUser
                             {
                                 OfferId = offerId,
                                 UserId = loginUserId,
-                                AddReviewForLoginUser = "User does not add Review",
+                                AddReviewForLoginUser = "User does not add review",
                                 CreatedAt = DateTime.Now
                             };
 

@@ -4,12 +4,12 @@ using UGHModels;
 
 namespace UGHApi.Services
 {
-    public class userservice
+    public class UserService
     {
         private readonly UghContext _context;
         private readonly PasswordService _passwordService;
 
-        public userservice(UghContext context, PasswordService passwordService)
+        public UserService(UghContext context, PasswordService passwordService)
         {
             _context = context;
             _passwordService = passwordService;
@@ -91,7 +91,7 @@ namespace UGHApi.Services
                     request.Link_VS,
                     request.State
                 );
-                newUser.VerificationState = UGH_Enums.VerificationState.verified;
+                newUser.VerificationState = UGH_Enums.VerificationState.Verified;
                 _context.users.Add(newUser);
                 _context.SaveChanges();
 
@@ -115,7 +115,7 @@ namespace UGHApi.Services
             }
         }
 
-        public async Task<IEnumerable<string>> GetuserrolesByUserEmail(string userEmail)
+        public async Task<IEnumerable<string>> GetUserRolesByUserEmail(string userEmail)
         {
             try
             {

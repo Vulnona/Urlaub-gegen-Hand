@@ -127,18 +127,18 @@ namespace UGHApi.Controllers
                                     userRating.OfferId,
                                     Offer = offer
                                 };
-                    var hostratings = await query.ToListAsync();
-                    if (!hostratings.Any())
+                    var hostRatings = await query.ToListAsync();
+                    if (!hostRatings.Any())
                     {
                         return NotFound("No ratings found for the specified host ID");
                     }
-                    var averageratings = hostratings.Average(r => r.HostRating);
-                    var ratingsCounts = hostratings.Count();
+                    var averageRatings = hostRatings.Average(r => r.HostRating);
+                    var ratingsCounts = hostRatings.Count();
                     return Ok(new
                     {
-                        AverageRating = averageratings,
+                        AverageRating = averageRatings,
                         ratingsCount = ratingsCounts,
-                        ratings = hostratings
+                        ratings = hostRatings
                     });
                 }
                 var averageRating = ratings.Average(r => r.UserRating);

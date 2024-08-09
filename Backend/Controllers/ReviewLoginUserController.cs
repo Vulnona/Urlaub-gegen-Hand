@@ -3,7 +3,7 @@ using UGHApi.Models;
 
 namespace UGHApi.Controllers
 {
-    [Route("api/")]
+    [Route("api/review-login-user")]
     [ApiController]
     public class ReviewLoginUserController : ControllerBase
     {
@@ -14,8 +14,8 @@ namespace UGHApi.Controllers
             _context = context;
         }
 
-        [HttpGet("review-login-user/get-review-login-users")]
-        public IActionResult Getreviewloginusers()
+        [HttpGet("get-review-login-users")]
+        public IActionResult GetReviewLoginUsers()
         {
             try
             {
@@ -28,7 +28,7 @@ namespace UGHApi.Controllers
             }
         }
 
-        [HttpGet("review-login-user/get-review/{id}")]
+        [HttpGet("get-review/{id}")]
         public IActionResult GetReviewLoginUser(int id)
         {
             try
@@ -44,7 +44,7 @@ namespace UGHApi.Controllers
             }
         }
 
-        [HttpPost("review-login-user/create-review-login-user")]
+        [HttpPost("create-review-login-user")]
         public async Task<IActionResult> CreateReviewLoginUser([FromBody] ReviewLoginUser reviewLoginUser)
         {
             if (reviewLoginUser == null)
@@ -114,9 +114,13 @@ namespace UGHApi.Controllers
             }
         }
 
-        [HttpPut("review-login-user/update-review-login-user/{id}")]
+        [HttpPut("update-review-login-user/{id}")]
         public IActionResult UpdateReviewLoginUser(int id, [FromBody] ReviewLoginUser reviewLoginUser)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
             if (id != reviewLoginUser.Id) return BadRequest();
 
             try
@@ -138,7 +142,7 @@ namespace UGHApi.Controllers
             }
         }
 
-        [HttpDelete("review-login-user/delete/{id}")]
+        [HttpDelete("delete/{id}")]
         public IActionResult DeleteReviewLoginUser(int id)
         {
             try

@@ -488,8 +488,7 @@ export default {
             }
          }).then((result) => {
             if (result.isConfirmed) {
-             console.log('User consented to cookies.');
-             //    this.showSubscriptionIDPopup();
+                // this.showSubscriptionIDPopup();
              } else {
                  console.log('User did not consent to cookies. Redirecting...');
                 router.push('/');
@@ -543,7 +542,7 @@ export default {
     });
 },
         loadCountries() {
-            axios.get(`${process.env.baseURL}region/getall-country`)
+            axios.get(`${process.env.baseURL}region/get-all-country`)
                 .then(response => {
                     this.countries = response.data;
                    
@@ -556,7 +555,7 @@ export default {
         loadStates() {
             if (this.countryId) {
                 this.countryName = this.countries.find(c => c.country_ID === this.countryId).countryName;
-                axios.get(`${process.env.baseURL}region/get-state-bycountryId/${this.countryId}`)
+                axios.get(`${process.env.baseURL}region/get-state-by-countryId/${this.countryId}`)
                     .then(response => {
                         this.states = response.data;
                         this.stateId = ''; // Reset state selection
@@ -582,7 +581,7 @@ export default {
         loadCities() {
             if (this.stateId) {
                 this.stateName = this.states.find(s => s.id === this.stateId).name;
-                axios.get(`${process.env.baseURL}region/get-city-bystateId/${this.stateId}`)
+                axios.get(`${process.env.baseURL}region/get-city-by-stateId/${this.stateId}`)
                     .then(response => {
                         this.cities = response.data;
                         this.cityId = ''; // Reset city selection

@@ -11,7 +11,7 @@ namespace UGHApi.Controllers
         {
             _context = context;
         }
-        [HttpGet("getall-region")]
+        [HttpGet("get-all-region")]
         public IActionResult GetRegion()
         {
             try
@@ -25,7 +25,7 @@ namespace UGHApi.Controllers
             }
         }
 
-        [HttpGet("getall-country")]
+        [HttpGet("get-all-country")]
         public IActionResult GetCountry()
         {
             try
@@ -38,7 +38,7 @@ namespace UGHApi.Controllers
                 return StatusCode(StatusCodes.Status204NoContent, ex.Message);
             }
         }
-        [HttpGet("get-state-bycountryId/{countryId}")]
+        [HttpGet("get-state-by-countryId/{countryId}")]
         public IActionResult GetState(int countryId)
         {
             try
@@ -53,7 +53,7 @@ namespace UGHApi.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
             }
         }
-        [HttpGet("get-city-bystateId/{stateId}")]
+        [HttpGet("get-city-by-stateId/{stateId}")]
         public IActionResult GetCity(int stateId)
         {
             try

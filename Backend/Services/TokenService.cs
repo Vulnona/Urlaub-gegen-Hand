@@ -13,28 +13,28 @@ namespace UGHApi.Services
         private readonly IConfiguration _configuration;
         private readonly IMemoryCache _cache;
         private readonly UghContext _context;
-        private readonly userservice _userservice;
+        private readonly UserService _userService;
 
-        public TokenService(IConfiguration configuration, IMemoryCache cache, UghContext context, userservice userservice)
+        public TokenService(IConfiguration configuration, IMemoryCache cache, UghContext context, UserService userservice)
         {
             _configuration = configuration;
             _cache = cache;
             _context = context;
-            _userservice = userservice;
+            _userService = userservice;
         }
 
-        public async Task<string> GenerateJwtToken(string username, string userId)
+        public async Task<string> GenerateJwtToken(string userName, string userId)
         {
             try
             {
                 var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
                 var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
-                var roles = await _userservice.GetuserrolesByUserEmail(username);
+                var roles = await _userService.GetUserRolesByUserEmail(userName);
 
                 var claims = new List<Claim>
                 {
-                    new Claim(ClaimTypes.NameIdentifier, userId), // Use ClaimTypes.NameIdentifier for user ID
-                    new Claim(JwtRegisteredClaimNames.Sub, username),
+                    new Claim(ClaimTypes.NameIdentifier, userId),
+                    new Claim(JwtRegisteredClaimNames.Sub, userName),
                     new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
                 };
 

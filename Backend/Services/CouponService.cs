@@ -6,11 +6,11 @@ using UGHApi.Models;
 using UGHModels;
 namespace UGHApi.Services
 {
-    public class couponservice
+    public class CouponService
     {
         private readonly UghContext _context;
 
-        public couponservice(UghContext context)
+        public CouponService(UghContext context)
         {
             _context = context;
         }

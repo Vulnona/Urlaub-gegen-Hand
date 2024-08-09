@@ -4,7 +4,7 @@ using UGHApi.Models;
 
 namespace UGHApi.Controllers
 {
-    [Route("api/")]
+    [Route("api/post-review")]
     [ApiController]
     public class ReviewPostController : ControllerBase
     {
@@ -15,23 +15,27 @@ namespace UGHApi.Controllers
             _context = context;
         }
 
-        [HttpGet("post-review/{userId}")]
-        public async Task<ActionResult<IEnumerable<ReviewPost>>> GetPostreviewsByUserId(int userId)
+        [HttpGet("{userId}")]
+        public async Task<ActionResult<IEnumerable<ReviewPost>>> GetPostReviewsByUserId(int userId)
         {
             try
             {
-                var postreviews = await _context.reviewposts
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+                var postReviews = await _context.reviewposts
                     .Include(r => r.ReviewLoginUser)
                     .Include(r => r.ReviewLoginUser.Offer)
                     .Where(r => r.ReviewOfferUser.Offer.User_Id == userId || r.ReviewLoginUser.UserId == userId)
                     .ToListAsync();
 
-                if (!postreviews.Any())
+                if (!postReviews.Any())
                 {
                     return NotFound();
                 }
 
-                return Ok(postreviews);
+                return Ok(postReviews);
             }
             catch (Exception ex)
             {
@@ -40,13 +44,13 @@ namespace UGHApi.Controllers
             }
         }
 
-        [HttpGet("post-review/get-all-post")]
+        [HttpGet("get-all-post")]
         public IActionResult GetAllPost()
         {
             try
             {
-                var getall = _context.reviewposts.ToList();
-                return Ok(getall);
+                var getAll = _context.reviewposts.ToList();
+                return Ok(getAll);
             }
             catch (Exception ex)
             {

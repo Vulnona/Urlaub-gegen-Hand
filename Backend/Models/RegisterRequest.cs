@@ -39,6 +39,7 @@ public class RegisterRequest
 
     [Required]
     public string Country { get; set; }
+    [Required]
     public string State { get; set; }
     public string Facebook_link { get; set; }
     public string Link_RS { get; set; }

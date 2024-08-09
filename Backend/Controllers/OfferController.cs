@@ -4,7 +4,7 @@ using UGHApi.Models;
 
 namespace UGHApi.Controllers
 {
-    [Route("api/")]
+    [Route("api/offer")]
     [ApiController]
     public class OfferController : ControllerBase
     {
@@ -13,8 +13,8 @@ namespace UGHApi.Controllers
         {
             _context = context;
         }
-        [HttpGet("offer/get-all-offers")]
-        public IActionResult Getoffers(string searchTerm)
+        [HttpGet("get-all-offers")]
+        public IActionResult GetOffers(string searchTerm)
         {
             try
             {
@@ -30,11 +30,11 @@ namespace UGHApi.Controllers
                 }
                 else
                 {
-                    var alloffers = _context.offers
+                    var allOffers = _context.offers
                         
                          .Include(o => o.User)
                         .ToList();
-                    return Ok(alloffers);
+                    return Ok(allOffers);
                 }
             }
             catch (Exception ex)
@@ -44,7 +44,7 @@ namespace UGHApi.Controllers
         }
 
 
-        [HttpGet("offer/get-offer-by-id/{OfferId:int}")]
+        [HttpGet("get-offer-by-id/{OfferId:int}")]
         public IActionResult GetOffer(int OfferId)
         {
             try
@@ -65,13 +65,16 @@ namespace UGHApi.Controllers
             }
         }
 
-        [HttpPost("offer/add-new-offer")]
+        [HttpPost("add-new-offer")]
         public async Task<IActionResult> AddOffer([FromForm] OfferViewModel offerViewModel, string email)
         {
             try
             {
-                if (offerViewModel == null)
-                    return BadRequest("Offer data is null.");
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+              
 
                 if (!ModelState.IsValid)
                     return BadRequest(ModelState);
@@ -92,14 +95,14 @@ namespace UGHApi.Controllers
                     Description = offerViewModel.Description,
                     Location = offerViewModel.Location,
                     Contact = offerViewModel.Contact,
-                    Accomodation = offerViewModel.Accomodation,
-                    accomodationsuitable = offerViewModel.accomodationsuitable,
-                    skills=offerViewModel.skills,
+                    Accomodation = offerViewModel.Accommodation,
+                    accomodationsuitable = offerViewModel.AccommodationSuitable,
+                    skills=offerViewModel.Skills,
                     //Region_ID = offerViewModel.Region_ID,
                     User_Id = offerViewModel.User_Id,
-                    country=offerViewModel.country,
-                    state=offerViewModel.state,
-                    city=offerViewModel.city,
+                    country=offerViewModel.Country,
+                    state=offerViewModel.State,
+                    city=offerViewModel.City,
                 };
 
                 if (offerViewModel.Image != null && offerViewModel.Image.Length > 0)
@@ -121,11 +124,15 @@ namespace UGHApi.Controllers
             }
         }
 
-        [HttpPut("offer/update-offer")]
+        [HttpPut("update-offer")]
         public IActionResult UpdateOffer([FromBody] Offer offer)
         {
             try
             {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
                 if (offer == null) return NotFound();
                 if (!ModelState.IsValid) return BadRequest(ModelState);
                 _context.offers.Update(offer);
@@ -140,7 +147,7 @@ namespace UGHApi.Controllers
             }
         }
 
-        [HttpDelete("offer/delete-offer/{OfferId:int}")]
+        [HttpDelete("delete-offer/{OfferId:int}")]
         public IActionResult DeleteOffer(int OfferId)
         {
             try

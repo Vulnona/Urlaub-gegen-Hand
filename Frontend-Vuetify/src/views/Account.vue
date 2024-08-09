@@ -19,6 +19,7 @@
           <p class="card-text"><strong>Date of Birth:</strong> {{ user.dateOfBirth }}</p>
           <p class="card-text"><strong>Gender:</strong> {{ user.gender }}</p>
           <p class="card-text"><strong>Country:</strong> {{ user.country }}</p>
+          <p class="card-text"><strong>Region/State:</strong> {{ user.state }}</p>
           <p class="card-text"><strong>City:</strong> {{ user.city }}</p>
           <p class="card-text"><strong>Postal Code:</strong> {{ user.postCode }}</p>
           <p class="card-text"><strong>Street Address:</strong> {{ user.street }}</p>
@@ -155,7 +156,7 @@ export default {
     // Method to fetch user data
     async fetchUserData(id) {
       try {
-        const response = await axiosInstance.get(`${process.env.baseURL}profile/get-profile-for-admin/${id}`);
+        const response = await axiosInstance.get(`${process.env.baseURL}admin/get-profile-for-admin/${id}`);
         this.user = response.data.profile.user;
         this.profileImgSrc = `data:image/jpeg;base64,${response.data.profile.userPic}`;
         this.options = this.processOptions(response.data.profile.options);

@@ -4,7 +4,7 @@ using UGHModels;
 
 namespace UGHApi.Controllers
 {
-    [Route("api")]
+    [Route("api/user")]
     [ApiController]
     public class UserController : ControllerBase
     {
@@ -16,9 +16,13 @@ namespace UGHApi.Controllers
         }
 
         // GET: api/User
-        [HttpGet("user/get-all-users")]
-        public async Task<ActionResult<IEnumerable<User>>> Getusers()
+        [HttpGet("get-all-users")]
+        public async Task<ActionResult<IEnumerable<User>>> GetUsers()
         {
+            if(!ModelState.IsValid)
+            {
+            return BadRequest(ModelState); 
+            }
             if (_context.users == null)
             {
                 return NotFound();
@@ -34,9 +38,13 @@ namespace UGHApi.Controllers
         }
 
         // GET: api/User/5
-        [HttpGet("user/get-user/{id}")]
+        [HttpGet("get-user/{id}")]
         public async Task<ActionResult<User>> GetUser(int id)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
             if (_context.users == null)
             {
                 return NotFound();
@@ -56,9 +64,10 @@ namespace UGHApi.Controllers
             }
         }
 
-        [HttpPut("user/upload-id/{id}")]
+        [HttpPut("upload-id/{id}")]
         public async Task<IActionResult> UploadID(int id, string link_vs, string link_rs)
         {
+
             if (string.IsNullOrEmpty(link_vs) || string.IsNullOrEmpty(link_rs))
             {
                 return BadRequest("Link_VS or Link_RS is null or empty.");
@@ -83,7 +92,7 @@ namespace UGHApi.Controllers
         }
 
         // DELETE: api/User/5
-        [HttpDelete("user/delete-user/{id}")]
+        [HttpDelete("delete-user/{id}")]
         public async Task<IActionResult> DeleteUser(int id)
         {
             if (_context.users == null)

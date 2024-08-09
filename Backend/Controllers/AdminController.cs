@@ -7,24 +7,24 @@ using UGHModels;
 
 namespace UGHApi.Controllers
 {
-    [Route("api")]
+    [Route("api/admin")]
     [ApiController]
+    [Authorize(Roles = "Admin")]
     public class AdminController : ControllerBase
     {
         private readonly UghContext _context;
-        private readonly userservice _userservice;
+        private readonly UserService _userService;
         private readonly AdminVerificationMailService _mailService;
 
-        public AdminController(UghContext context, userservice userservice, AdminVerificationMailService mailService)
+        public AdminController(UghContext context, UserService userService, AdminVerificationMailService mailService)
         {
             _context = context;
-            _userservice = userservice;
+            _userService = userService;
             _mailService = mailService;
         }
 
         #region verifyuserstate
-        [HttpGet("admin/verify-user/{userId}")]
-        [Authorize(Roles = "Admin")]
+        [HttpPut("verify-user/{userId}")]
         public IActionResult VerifyUser(int userId)
         {
             try
@@ -36,14 +36,13 @@ namespace UGHApi.Controllers
                     return NotFound("User not found.");
                 }
 
-                if (user.VerificationState == UGH_Enums.VerificationState.verified)
+                if (user.VerificationState == UGH_Enums.VerificationState.Verified)
                 {
-                    return BadRequest("User verification is already completed.");
+                    return BadRequest("User verification already completed.");
                 }
 
-                user.VerificationState = UGH_Enums.VerificationState.verified;
+                user.VerificationState = UGH_Enums.VerificationState.Verified;
                 _context.SaveChanges();
-
                 return Ok("User verification completed successfully.");
             }
             catch (Exception ex)
@@ -53,8 +52,7 @@ namespace UGHApi.Controllers
             }
         }
 
-        [HttpPost("admin/update-verify-state/{userId}/{verificationState}")]
-        [Authorize(Roles = "Admin")]
+        [HttpPost("update-verify-state/{userId}/{verificationState}")]
         public async Task<IActionResult> UpdateVerifyState(int userId, UGH_Enums.VerificationState verificationState)
         {
             try
@@ -68,12 +66,12 @@ namespace UGHApi.Controllers
                 user.VerificationState = verificationState;
                 await _context.SaveChangesAsync();
 
-                if (verificationState == UGH_Enums.VerificationState.verificationFailed ||
-                    verificationState == UGH_Enums.VerificationState.verified)
+                if (verificationState == UGH_Enums.VerificationState.VerificationFailed ||
+                    verificationState == UGH_Enums.VerificationState.Verified)
                 {
-                    _userservice.DeleteUserInfo(userId);
+                    _userService.DeleteUserInfo(userId);
 
-                    if (verificationState == UGH_Enums.VerificationState.verificationFailed)
+                    if (verificationState == UGH_Enums.VerificationState.VerificationFailed)
                     {
                         await Task.Delay(TimeSpan.FromMinutes(5));
                     }
@@ -82,9 +80,9 @@ namespace UGHApi.Controllers
                     {
                         toEmail = user.Email_Address,
                         userName = $"{user.FirstName} {user.LastName}",
-                        status = verificationState == UGH_Enums.VerificationState.verificationFailed
-                            ? "verification failed"
-                            : "verified"
+                        status = verificationState == UGH_Enums.VerificationState.VerificationFailed
+                            ? "Verification Failed"
+                            : "Verified"
                     };
 
                     _mailService.SendConfirmationEmailAsync(request);
@@ -155,9 +153,8 @@ namespace UGHApi.Controllers
         //    }
         //}
 
-        [HttpGet("admin/get-all-users")]
-        [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<IEnumerable<User>>> GetAllusersByAdmin()
+        [HttpGet("get-all-users")]
+        public async Task<ActionResult<IEnumerable<User>>> GetAllUsersByAdmin()
         {
             try
             {
@@ -171,8 +168,7 @@ namespace UGHApi.Controllers
             }
         }
 
-        [HttpGet("admin/user/{id}")]
-        [Authorize(Roles = "Admin")]
+        [HttpGet("get-user-by-id/{id}")]
         public async Task<ActionResult<User>> GetUserById(int id)
         {
             try
@@ -193,8 +189,7 @@ namespace UGHApi.Controllers
             }
         }
 
-        [HttpGet("profile/get-profile-for-admin/{userId}")]
-        [Authorize(Roles = "Admin")]
+        [HttpGet("get-profile-for-admin/{userId}")]
         public async Task<IActionResult> GetProfile(int userId)
         {
             try
@@ -233,7 +228,6 @@ namespace UGHApi.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
-
         #endregion
     }
 }
