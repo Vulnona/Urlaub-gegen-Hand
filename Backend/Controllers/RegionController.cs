@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 
 namespace UGHApi.Controllers
 {
@@ -11,63 +13,65 @@ namespace UGHApi.Controllers
         {
             _context = context;
         }
-        [HttpGet("get-all-region")]
-        public IActionResult GetRegion()
+        #region regions
+        [HttpGet("get-all-regions")]
+        public async Task<IActionResult> GetRegion()
         {
             try
             {
-            var region = _context.regions.ToList();
-            return Ok(region);
+                var regions = await _context.regions.ToListAsync();
+                if(!regions.Any()) return NotFound("No Regions found.");
+                return Ok(regions);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return StatusCode(StatusCodes.Status204NoContent, ex.Message);
+                return StatusCode(StatusCodes.Status204NoContent,"An error occurred while fetching the Regions.");
             }
         }
 
-        [HttpGet("get-all-country")]
-        public IActionResult GetCountry()
+        [HttpGet("get-all-countries")]
+        public async Task<IActionResult> GetCountry()
         {
             try
             {
-                var country = _context.countries.ToList();
-                return Ok(country);
+                var countries = await _context.countries.ToListAsync();
+                if(!countries.Any()) return NotFound("No countries found.");
+                return Ok(countries);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return StatusCode(StatusCodes.Status204NoContent, ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError,"An error occurred while fetching the countries.");
             }
         }
         [HttpGet("get-state-by-countryId/{countryId}")]
-        public IActionResult GetState(int countryId)
+        public async Task<IActionResult> GetState([FromQuery][Required]int countryId)
         {
             try
             {
-                var states = _context.states
-                    .Where(s => s.CountryId == countryId)
-                    .ToList();
+                var states = await _context.states.Where(s => s.CountryId == countryId).ToListAsync();
+                if(!states.Any()) return NotFound("No states found.");
                 return Ok(states);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while fetching the states.");
             }
         }
         [HttpGet("get-city-by-stateId/{stateId}")]
-        public IActionResult GetCity(int stateId)
+        public async Task<IActionResult> GetCity([FromQuery][Required]int stateId)
         {
             try
             {
-                var cities = _context.cities
-                    .Where(s => s.StateId == stateId)
-                    .ToList();
+                var cities = await _context.cities.Where(c => c.StateId == stateId).ToListAsync();
+                if(!cities.Any()) return NotFound("No cities found.");
                 return Ok(cities);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while fetching the cities.");
             }
         }
-    }
 
- }
+    }
+    #endregion
+}

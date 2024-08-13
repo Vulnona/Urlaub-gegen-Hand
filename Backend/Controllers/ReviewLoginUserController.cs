@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 using UGHApi.Models;
 
 namespace UGHApi.Controllers
@@ -13,85 +15,84 @@ namespace UGHApi.Controllers
         {
             _context = context;
         }
-
-        [HttpGet("get-review-login-users")]
-        public IActionResult GetReviewLoginUsers()
+        #region login-user-review
+        [HttpGet("get-all-reviews")]
+        public async Task<IActionResult> GetReviewLoginUsers()
         {
             try
             {
-                var reviews = _context.reviewloginusers.ToList();
+                var reviews = await _context.reviewloginusers.ToListAsync();
+                if (!reviews.Any()) return BadRequest(ModelState); 
                 return Ok(reviews);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return StatusCode(StatusCodes.Status204NoContent, ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError,"No reviews found.");
             }
         }
 
-        [HttpGet("get-review/{id}")]
-        public IActionResult GetReviewLoginUser(int id)
+        [HttpGet("get-review-by-userId/{id}")]
+        public async Task<IActionResult> GetReviewLoginUser([FromQuery][Required] int id)
         {
             try
             {
-                var review = _context.reviewloginusers.Find(id);
-                if (review == null) return NotFound();
+                var review = await _context.reviewloginusers.FindAsync(id);
+                if (review == null) return NotFound("No reviews found.");
 
                 return Ok(review);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return StatusCode(StatusCodes.Status204NoContent, ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while fetching the reviews by the entered user id.");
             }
         }
 
-        [HttpPost("create-review-login-user")]
+        [HttpPost("create-review")]
         public async Task<IActionResult> CreateReviewLoginUser([FromBody] ReviewLoginUser reviewLoginUser)
         {
-            if (reviewLoginUser == null)
-                return BadRequest("ReviewLoginUser object is null");
-
             try
             {
-                var offer = _context.offers.FirstOrDefault(o => o.Id == reviewLoginUser.OfferId);
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+                var offer = await _context.offers.FirstOrDefaultAsync(o => o.Id == reviewLoginUser.OfferId);
                 if (offer == null)
-                    return NotFound("Offer not found");
+                    return NotFound("Offer not found.");
 
-                var existingReview = _context.reviewloginusers
-                    .FirstOrDefault(r => r.OfferId == reviewLoginUser.OfferId && r.UserId == reviewLoginUser.UserId);
+                var existingReview = await _context.reviewloginusers
+                    .FirstOrDefaultAsync(r => r.OfferId == reviewLoginUser.OfferId && r.UserId == reviewLoginUser.UserId);
                 if (existingReview != null)
-                    return Conflict("Duplicate review");
+                    return Conflict();
 
-                var reviewOfferUser = _context.reviewofferusers
-                    .FirstOrDefault(r => r.OfferId == reviewLoginUser.OfferId);
+                var reviewOfferUser = await _context.reviewofferusers
+                    .FirstOrDefaultAsync(r => r.OfferId == reviewLoginUser.OfferId);
                 if (reviewOfferUser != null && reviewOfferUser.IsReviewPeriodOver)
-                    return BadRequest("You cannot add a review before the other user has finished their review period.");
+                    return BadRequest();
 
                 _context.reviewloginusers.Add(reviewLoginUser);
                 await _context.SaveChangesAsync();
 
-                AddPostReviewEntry(offer.Id);
+               await AddPostReviewEntry(offer.Id);
 
-                return Ok();
+                return Ok("Review created successfully for the offer.");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return StatusCode(StatusCodes.Status304NotModified, ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError,"An error occurred while creating the review.");
             }
         }
 
-        private void AddPostReviewEntry(int offerId)
+        private async Task AddPostReviewEntry([Required] int offerId)
         {
             try
             {
-                var reviewOfferUser = _context.reviewofferusers
+                var reviewOfferUser = await _context.reviewofferusers
                     .Where(r => r.OfferId == offerId)
                     .OrderByDescending(r => r.CreatedAt)
-                    .FirstOrDefault();
+                    .FirstOrDefaultAsync();
 
-                var reviewLoginUser = _context.reviewloginusers
+                var reviewLoginUser = await _context.reviewloginusers
                     .Where(r => r.OfferId == offerId)
                     .OrderByDescending(r => r.CreatedAt)
-                    .FirstOrDefault();
+                    .FirstOrDefaultAsync();
 
                 if (reviewOfferUser != null && reviewLoginUser != null)
                 {
@@ -105,17 +106,17 @@ namespace UGHApi.Controllers
                     };
 
                     _context.reviewposts.Add(postReview);
-                    _context.SaveChanges();
+                    await _context.SaveChangesAsync();
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                 StatusCode(StatusCodes.Status304NotModified, ex.Message);
+                throw new Exception("An error occurred while adding the post review entry.");
             }
         }
 
-        [HttpPut("update-review-login-user/{id}")]
-        public IActionResult UpdateReviewLoginUser(int id, [FromBody] ReviewLoginUser reviewLoginUser)
+        [HttpPut("update-review-by-id/{id}")]
+        public async Task<IActionResult> UpdateReviewLoginUser([FromQuery][Required] int id, [FromBody] ReviewLoginUser reviewLoginUser)
         {
             if (!ModelState.IsValid)
             {
@@ -125,40 +126,41 @@ namespace UGHApi.Controllers
 
             try
             {
-                var existingReview = _context.reviewloginusers.Find(id);
-                if (existingReview == null) return NotFound();
+                var existingReview = await _context.reviewloginusers.FindAsync(id);
+                if (existingReview == null)
+                    return NotFound("No review found.");
 
                 existingReview.AddReviewForLoginUser = reviewLoginUser.AddReviewForLoginUser;
                 existingReview.CreatedAt = reviewLoginUser.CreatedAt;
 
                 _context.reviewloginusers.Update(existingReview);
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
 
-                return NoContent();
+                return Ok("Review updated successfully.");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return StatusCode(StatusCodes.Status304NotModified, ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while updating the review.");
             }
         }
 
-        [HttpDelete("delete/{id}")]
-        public IActionResult DeleteReviewLoginUser(int id)
+        [HttpDelete("delete-review/{id}")]
+        public async Task<IActionResult> DeleteReviewLoginUser([FromQuery][Required] int id)
         {
             try
             {
-                var review = _context.reviewloginusers.Find(id);
-                if (review == null) return NotFound();
+                var review = await _context.reviewloginusers.FindAsync(id);
+                if (review == null) return NotFound("No review found.");
 
                 _context.reviewloginusers.Remove(review);
-                _context.SaveChanges();
-
-                return NoContent();
+                await _context.SaveChangesAsync();
+                return Ok("Review deleted successfully.");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return StatusCode(StatusCodes.Status501NotImplemented, ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while deleting the review.");
             }
         }
     }
+    #endregion
 }

@@ -1,4 +1,3 @@
-[12:45 PM] Sombir Redhu
 <template>
   <div class="user-profile">
     <div class="card">
@@ -26,7 +25,6 @@
     </div>
   </div>
 </template>
- 
 <script>
 import axios from 'axios';
  
@@ -43,14 +41,11 @@ export default {
     async fetchUserProfile() {
       try {
         const sentToken = this.$route.query.token;
-        console.log('Retrieved token from URL:', sentToken); // Debugging log
         if (!sentToken) {
           throw new Error('No token provided');
         }
         console.log("sent token dis : ", sentToken);
         const response = await axios.get(`${process.env.baseURL}profile/display-profile?token=${sentToken}`);
-        console.log('API response:', response); // Debugging log
- 
         this.user = response.data;
         this.user.profileImgSrc = `data:image/jpeg;base64,${response.data.userPic}`;
       } catch (error) {
@@ -63,7 +58,6 @@ export default {
   },
 };
 </script>
- 
 <style scoped>
 .user-profile {
   display: flex;

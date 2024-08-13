@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 using UGHApi.Models;
 
 namespace UGHApi.Controllers
@@ -8,32 +10,34 @@ namespace UGHApi.Controllers
     public class AccommodationController : ControllerBase
     {
         private readonly UghContext _context;
+
         public AccommodationController(UghContext context)
         {
             _context = context;
         }
-        [HttpGet("accommodation/get-all-accommodations")]
-        public IActionResult GetAccommodations()
+        #region Accommodations
+        [HttpGet("get-all-accommodations")]
+        public async Task<IActionResult> GetAccommodations()
         {
             try
             {
-                var getAllAccommodations = _context.accomodations.ToList();
+                var getAllAccommodations = await _context.accomodations.ToListAsync();
+                if(!getAllAccommodations.Any()) return NotFound();
                 return Ok(getAllAccommodations);
             }
             catch (Exception ex)
             {
                 return StatusCode(StatusCodes.Status204NoContent, ex.Message);
-
             }
         }
-        [HttpGet("accommodation/get-accommodation-by-id/{accommodationId:int}")]
-        public IActionResult GetAccommodation(int accommodationId)
+
+        [HttpGet("get-accommodation-by-id/{accommodationId:int}")]
+        public async Task<IActionResult> GetAccommodation([Required] int accommodationId)
         {
             try
             {
-                var getAccommodation = _context.accomodations.Find(accommodationId);
-                if (getAccommodation == null)
-                    return NotFound();
+                var getAccommodation = await _context.accomodations.FindAsync(accommodationId);
+                if (getAccommodation == null) return NotFound();
                 return Ok(getAccommodation);
             }
             catch (Exception ex)
@@ -41,49 +45,52 @@ namespace UGHApi.Controllers
                 return StatusCode(StatusCodes.Status204NoContent, ex.Message);
             }
         }
-        [HttpPost("accommodation/add-new-accommodation")]
-        public IActionResult AddAccommodation([FromBody] Accommodation accommodation)
+
+        [HttpPost("add-new-accommodation")]
+        public async Task<IActionResult> AddAccommodation([FromBody] Accommodation accommodation)
         {
             try
             {
                 if (accommodation == null || !ModelState.IsValid)
-                return BadRequest("Accommodation for the offer is null!");
-                _context.accomodations.Add(accommodation);
-                _context.SaveChanges();
+                    return BadRequest("Accommodation for the offer is null!");
+
+                await _context.accomodations.AddAsync(accommodation);
+                await _context.SaveChangesAsync();
                 return Ok();
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status304NotModified, ex.Message);
+                return StatusCode(StatusCodes.Status204NoContent, ex.Message);
             }
         }
-        [HttpPut("accommodation/update-accommodation")]
-        public IActionResult UpdateAccommodation([FromBody] Accommodation accommodation)
+
+        [HttpPut("update-accommodation")]
+        public async Task<IActionResult> UpdateAccommodation([FromBody] Accommodation accommodation)
         {
             try
             {
-                if (!ModelState.IsValid)
-                    return NotFound();
+                if (!ModelState.IsValid) return BadRequest(ModelState);
                 _context.accomodations.Update(accommodation);
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
                 return Ok(accommodation);
             }
             catch (Exception ex)
             {
                 return StatusCode(StatusCodes.Status304NotModified, ex.Message);
-
             }
         }
-        [HttpDelete("accommodation/delete-accommodation/{accommodationId:int}")]
-        public IActionResult DeleteAccommodation(int accommodationId)
+
+        [HttpDelete("delete-accommodation/{accommodationId:int}")]
+        public async Task<IActionResult> DeleteAccommodation([Required] int accommodationId)
         {
             try
             {
-                var findAccommodation = _context.accomodations.Find(accommodationId);
+                var findAccommodation = await _context.accomodations.FindAsync(accommodationId);
                 if (findAccommodation == null)
                     return NotFound("Accommodation not found.");
+
                 _context.accomodations.Remove(findAccommodation);
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
                 return Ok();
             }
             catch (Exception ex)
@@ -91,6 +98,6 @@ namespace UGHApi.Controllers
                 return StatusCode(StatusCodes.Status400BadRequest, ex.Message);
             }
         }
-
     }
+    #endregion
 }

@@ -95,50 +95,49 @@
       <div class="modal-content">
         <span class="close" @click="closeModal">&times;</span>
         <h2>Send Email</h2>
-        <div class="form-group">
-          <label for="from" class="text-left">From:</label>
-          <input id="from" type="text" value="info@alreco.de" disabled>
-        </div>
-        <div class="form-group">
-          <label for="to" class="text-left">To:</label>
-          <input id="to" type="text" :value="selectedUser.email_Address" disabled>
-        </div>
-        <div class="form-group">
-          <label for="subject" class="text-left">Subject:</label>
-          <input id="subject" v-model="emailSubject" type="text">
-        </div>
-        <div class="form-group">
-          <label for="body" class="text-left">Body:</label>
-          <textarea id="body" rows="5" v-model="emailBody"></textarea>
-        </div>
-        <div class="modal-buttons">
-          <button class="btn-primary" @click="sendEmail" :disabled="isSending">
-            Send
-          </button>
-          <button class="btn-secondary" @click="closeModal" :disabled="isSending">
-            Close
-          </button>
-        </div>
-        <div v-if="isSending" class="loader"></div>
+        <form @submit.prevent="sendEmail">
+          <div class="form-group">
+            <label for="from" class="text-left">From:</label>
+            <input id="from" type="text" value="info@alreco.de" disabled>
+          </div>
+          <div class="form-group">
+            <label for="to" class="text-left">To:</label>
+            <input id="to" type="text" :value="selectedUser.email_Address" disabled>
+          </div>
+          <div class="form-group">
+            <label for="subject" class="text-left">Subject:</label>
+            <input id="subject" v-model="emailSubject" type="text" required>
+          </div>
+          <div class="form-group">
+            <label for="body" class="text-left">Body:</label>
+            <textarea id="body" rows="5" v-model="emailBody" required></textarea>
+          </div>
+          <div class="modal-buttons">
+            <button class="btn-primary" type="submit" :disabled="isSending">
+              Send
+            </button>
+            <button class="btn-secondary" type="button" @click="closeModal" :disabled="isSending">
+              Close
+            </button>
+          </div>
+          <div v-if="isSending" class="loader"></div>
+        </form>
       </div>
     </div>
   </div>
 </template>
 <script>
-import axios from "axios"; // Import axios for making HTTP requests
-import Swal from "sweetalert2"; // Import SweetAlert2 for displaying alerts
-import router from '@/router'; // Import Vue router for navigation
-import 'bootstrap/dist/css/bootstrap.min.css'; // Import Bootstrap CSS for styling
-import "bootstrap/dist/js/bootstrap.min.js"; // Import Bootstrap JS for functionality
-import VueJwtDecode from 'vue-jwt-decode'; // Import Vue JWT Decode for decoding JWT tokens
-import { S3Client, DeleteObjectCommand } from '@aws-sdk/client-s3'; // Import AWS SDK for S3 operations
-import CryptoJS from 'crypto-js'; // Import CryptoJS for encryption and decryption
+import axios from "axios"; 
+import Swal from "sweetalert2";
+import router from '@/router'; 
+import 'bootstrap/dist/css/bootstrap.min.css'; 
+import "bootstrap/dist/js/bootstrap.min.js";
+import VueJwtDecode from 'vue-jwt-decode'; 
+import { S3Client, DeleteObjectCommand } from '@aws-sdk/client-s3'; 
+import CryptoJS from 'crypto-js'; 
 
 // Create an Axios instance for making HTTP requests
 const axiosInstance = axios.create();
-let test = "danger"; // Placeholder variable (possibly for debugging)
-
-// Add an interceptor to include Authorization header with Bearer token in requests
 axiosInstance.interceptors.request.use(
   config => {
     const token = sessionStorage.getItem('token');
@@ -171,20 +170,20 @@ export default {
   name: "admin",
   data() {
     return {
-      admin: [], // List of admin users
-      customMessage: "", // Custom message to display
-      selectedUser: null, // Selected user for operations
-      emailBody: "", // Email body for sending emails
-      emailSubject: "", // Email subject for sending emails
-      userRole: '', // User role for authorization checks
-      imageUrlToShow: null, // Image URL to show in modal
+      admin: [], 
+      customMessage: "", 
+      selectedUser: null,
+      emailBody: "", 
+      emailSubject: "", 
+      userRole: '',
+      imageUrlToShow: null, 
       isSending: false
     };
   },
   mounted() {
-    this.getdata(); // Fetch data
-    this.Securitybot(); // Check security
-    this.checkLoginStatus(); // Check login status
+    this.getdata(); 
+    this.Securitybot(); 
+    this.checkLoginStatus(); 
   },
   methods: {
     // Security check to ensure the user is authorized
@@ -196,10 +195,9 @@ export default {
           icon: 'info',
           confirmButtonText: 'OK'
         });
-        router.push('/login'); // Redirect to login if not authorized
+        router.push('/login');
       }
     },
-
     // Method to show an image modal
     showImageModal(imageUrl) {
       this.imageUrlToShow = imageUrl;
@@ -225,7 +223,7 @@ export default {
         const decryptedToken = this.decryptToken(token);
         if (decryptedToken) {
           const decodedToken = VueJwtDecode.decode(decryptedToken);
-          this.userRole = decodedToken["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"] || '';
+          this.userRole = decodedToken[`${process.env.claims_Url}`] || '';
         } else {
           sessionStorage.removeItem('token');
         }
@@ -255,7 +253,7 @@ export default {
     },
     // Method to update the verification status of a user
     statusUpdate(uid, staid) {
-      axiosInstance.post(`${process.env.baseURL}admin/update-verify-state/${uid}/${staid}`).then((res) => {
+      axiosInstance.post(`${process.env.baseURL}admin/update-verification-state/${uid}/${staid}`).then((res) => {
         this.admin = res.data;
       }).catch((error) => {
         this.handleAxiosError(error);
@@ -305,7 +303,6 @@ export default {
         this.deleteImageFromS3(linkRS);
       }
     },
-
     // Method to delete an image from S3
     async deleteImageFromS3(encryptedLink) {
       try {
@@ -322,7 +319,7 @@ export default {
 
         const command = new DeleteObjectCommand({
           Bucket: process.env.S3_BUCKET_NAME,
-          Key: decryptedLink.split(`https://urlaub-gegen-hand.s3.eu-north-1.amazonaws.com/`)[1],
+          Key: decryptedLink.split(`${Aws_Url}`)[1],
         });
 
         await s3Client.send(command);
@@ -375,13 +372,13 @@ export default {
       this.emailBody = "";
       this.emailSubject = "";
     },
-    // Method to close the email modal
     closeModal() {
       this.selectedUser = null;
     },
     // Method to send an email to the selected user
     sendEmail() {
       this.isSending = true;
+
       axiosInstance.post(`${process.env.baseURL}custom-mail/send`, {
         to: this.selectedUser.email_Address,
         subject: this.emailSubject,
@@ -389,9 +386,9 @@ export default {
       })
       .then(response => {
         Swal.fire({
-          icon: "success",
-          title: "Success",
-          text: "Email sent successfully!"
+          icon: 'success',
+          title: 'Success',
+          text: 'Email sent successfully!'
         });
         this.closeModal();
       })
@@ -440,8 +437,6 @@ export default {
   }
 };
 </script>
-
-
 <style scoped>
 .user-list {
   width: 100%;

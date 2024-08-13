@@ -9,7 +9,6 @@
 }
 </style>
 <template>
-
   <div class="bg-ltgrey pt-40 pb-40">
     <div class="container">
       <div class="row">
@@ -65,8 +64,6 @@
         </div>
       </div>
     </div>
-
-
     <div id="rating-modal" v-if="showModal">
       <div class="modal-content">
         <h3>Add Rating</h3>
@@ -80,50 +77,48 @@
     </div>
   </div>
 </template>
-
-
 <script>
-import axios from 'axios'; // Import Axios for HTTP requests
-import Swal from 'sweetalert2'; // Import SweetAlert2 for alerts
-import router from '@/router'; // Import Vue router for navigation
-window.FontAwesomeConfig = { autoReplaceSvg: false }; // Configure FontAwesome to not automatically replace SVG icons
-import CryptoJS from 'crypto-js'; // Import CryptoJS for encryption
+import axios from 'axios';
+import Swal from 'sweetalert2';
+import router from '@/router';
+window.FontAwesomeConfig = { autoReplaceSvg: false };
+import CryptoJS from 'crypto-js';
 
-let globalLogid = ''; // Variable to store decrypted log ID
-let globalratingId='';
+let globalLogid = '';
+let globalratingId = '';
 export default {
   data() {
     return {
-      email: sessionStorage.getItem("logEmail"), // Retrieve email from sessionStorage
-      loading: true, // Loading state for async operations
-      offers: [], // Array to store user offers
-      showModal: false, // Modal visibility state
-      selectedRating: 0, // Selected rating for review
-      currentOfferId: null, // ID of the current offer being reviewed
+      email: sessionStorage.getItem("logEmail"),
+      loading: true,
+      offers: [],
+      showModal: false,
+      selectedRating: 0,
+      currentOfferId: null,
     };
   },
   mounted() {
-    this.fetchUserOffers(); // Fetch user offers on component mount
-    this.Securitybot(); // Check login status on component mount
+    this.fetchUserOffers();
+    this.Securitybot();
   },
   methods: {
     // Method to check login status and redirect if not logged in
     Securitybot() {
-      if (!sessionStorage.getItem("token")) { // If token is not present in sessionStorage
-        Swal.fire({ // Show SweetAlert2 modal
-          title: 'You are not logged In !', // Modal title
-          text: 'Login First to continue.', // Modal message
-          icon: 'info', // Info icon
-          confirmButtonText: 'OK' // Confirmation button text
+      if (!sessionStorage.getItem("token")) {
+        Swal.fire({
+          title: 'You are not logged In !',
+          text: 'Login First to continue.',
+          icon: 'info',
+          confirmButtonText: 'OK'
         }).then(() => {
-          router.push('/login'); // Redirect to login page using Vue router
+          router.push('/login');
         });
       }
     },
     // Method to check if user can add a rating
     async checkRatings() {
       try {
-        const response = await axios.post(`${process.env.baseURL}add-rating-to-user`, {
+        const response = await axios.post(`${process.env.baseURL}user-rating/add-rating-to-user`, {
           user_Id: toUserId,
           offerId: offerId,
           userRating: userRating,
@@ -138,169 +133,162 @@ export default {
     // Method to fetch user offers from the server
     async fetchUserOffers() {
       try {
-        const testlogid = this.decryptlogID(sessionStorage.getItem("logId")); // Decrypt log ID from sessionStorage
-        globalLogid = testlogid; // Assign decrypted log ID to global variable
-        const response = await axios.get(`${process.env.baseURL}review/get-reviews-for-user-offers/${globalLogid}`); // HTTP GET request to fetch user offers
-        this.offers = response.data; // Assign fetched user offers to component data
+        const testlogid = this.decryptlogID(sessionStorage.getItem("logId"));
+        globalLogid = testlogid;
+        const response = await axios.get(`${process.env.baseURL}review/get-reviews-for-user-offers/${globalLogid}`);
+        this.offers = response.data;
       } catch (error) {
-        console.error('Error fetching user offers:', error); // Log error if fetching user offers fails
+        console.error('Error fetching user offers:', error);
       } finally {
-        this.loading = false; // Set loading state to false after fetch completes
+        this.loading = false;
       }
     },
     // Method to decrypt an encrypted item
     decryptlogID(encryptedItem) {
       try {
-        const bytes = CryptoJS.AES.decrypt(encryptedItem, process.env.SECRET_KEY); // Decrypt encrypted item
-        const decryptedString = bytes.toString(CryptoJS.enc.Utf8); // Convert decrypted bytes to UTF-8 string
-        return parseInt(decryptedString, 10).toString(); // Parse decrypted string as integer and return
+        const bytes = CryptoJS.AES.decrypt(encryptedItem, process.env.SECRET_KEY);
+        const decryptedString = bytes.toString(CryptoJS.enc.Utf8);
+        return parseInt(decryptedString, 10).toString();
       } catch (e) {
-        console.error('Error decrypting item:', e); // Log error if decryption fails
-        return null; // Return null if decryption fails
+        console.error('Error decrypting item:', e);
+        return null;
       }
     },
     // Method to approve an offer
     async approveOffer(reviewId) {
       try {
-        const response = await axios.put(`${process.env.baseURL}review/update-review-status?reviewId=${reviewId}&newStatus=1`); // HTTP PUT request to approve offer
-        const index = this.offers.findIndex(item => item.id === reviewId); // Find index of offer in array
+        const response = await axios.put(`${process.env.baseURL}review/update-review?reviewId=${reviewId}&newStatus=1`);
+        const index = this.offers.findIndex(item => item.id === reviewId);
         if (index !== -1) {
-          this.offers[index].status = 1; // Update status of the approved offer
+          this.offers[index].status = 1;
         }
       } catch (error) {
-        console.error('Error approving offer:', error); // Log error if approving offer fails
+        console.error('Error approving offer:', error);
       }
     },
     // Method to reject an offer
     async rejectOffer(reviewId) {
       try {
-        const response = await axios.put(`${process.env.baseURL}review/update-review-status?reviewId=${reviewId}&newStatus=2`); // HTTP PUT request to reject offer
-        const index = this.offers.findIndex(item => item.id === reviewId); // Find index of offer in array
+        const response = await axios.put(`${process.env.baseURL}review/update-review?reviewId=${reviewId}&newStatus=2`);
+        const index = this.offers.findIndex(item => item.id === reviewId);
         if (index !== -1) {
-          this.offers[index].status = 2; // Update status of the rejected offer
+          this.offers[index].status = 2;
         }
       } catch (error) {
-        console.error('Error rejecting offer:', error); // Log error if rejecting offer fails
+        console.error('Error rejecting offer:', error);
       }
     },
     // Method to view details of a review
     async viewDetail(reviewId) {
       try {
-        const response = await axios.get(`${process.env.baseURL}review/get-user-by-review-id/${reviewId}`); // HTTP GET request to fetch review details
-        await Swal.fire({ // Show SweetAlert2 modal with review details
-          title: "Review Details", // Modal title
-          html: `<p>User: ${response.data.firstName} ${response.data.lastName}</p>` + // Display user details in modal
+        const response = await axios.get(`${process.env.baseURL}review/get-user-by-review-id/${reviewId}`);
+        await Swal.fire({
+          title: "Review Details",
+          html: `<p>User: ${response.data.firstName} ${response.data.lastName}</p>` +
             `<p>Email: ${response.data.email_Address}</p>` +
             `<p>Facebook Link: <a href="${response.data.facebook_link}">${response.data.facebook_link}</a></p>`,
-          icon: "info", 
-          confirmButtonText: "Close" // Confirmation button text
+          icon: "info",
+          confirmButtonText: "Close"
         });
       } catch (error) {
-        console.error('Error fetching review details:', error); // Log error if fetching review details fails
-        await Swal.fire("Error", "Failed to fetch review details.", "error"); // Show error modal for failed fetch
+        console.error('Error fetching review details:', error);
+        await Swal.fire("Error", "Failed to fetch review details.", "error");
       }
     },
     // Method to show modal for adding a review
     async showAddReviewModal(offerId) {
-      const predefinedReview = "Bitte gebt die gegenseitige Bewertung erst ab, nachdem diese terminlich abgeschlossen ist."; // Predefined review text
-      const { value: review, dismiss: dismissAction } = await Swal.fire({ // Show SweetAlert2 modal for adding review
-        title: 'Add Review', // Modal title
-        html: `<textarea id="reviewTextArea" class="swal2-textarea" readonly>${predefinedReview}</textarea>`, // Textarea with predefined review text
-        focusConfirm: false, // Do not focus on confirm button initially
-        showCancelButton: true, // Show cancel button
-        cancelButtonText: 'Cancel', // Cancel button text
-        confirmButtonText: 'Submit', // Confirm button text
+      const predefinedReview = "Bitte gebt die gegenseitige Bewertung erst ab, nachdem diese terminlich abgeschlossen ist.";
+      const { value: review, dismiss: dismissAction } = await Swal.fire({
+        title: 'Add Review',
+        html: `<textarea id="reviewTextArea" class="swal2-textarea" readonly>${predefinedReview}</textarea>`,
+        focusConfirm: false,
+        showCancelButton: true,
+        cancelButtonText: 'Cancel',
+        confirmButtonText: 'Submit',
       });
-      if (review !== undefined) { // If review is defined (not cancelled)
-        await this.addReview(offerId, predefinedReview); // Add the review
-      } else if (dismissAction === Swal.DismissReason.cancel) { // If modal was cancelled
-      //  Swal.fire('Cancelled', 'Review submission cancelled.', 'info'); // Show info message for cancelled review submission
+      if (review !== undefined) {
+        await this.addReview(offerId, predefinedReview);
+      } else if (dismissAction === Swal.DismissReason.cancel) {
       }
     },
     // Method to add a review
     async addReview(offerId, reviewText) {
       try {
-        const response = await axios.post(`${process.env.baseURL}review-offer-user/create-review-offer-user`, { // HTTP POST request to add review
+        const response = await axios.post(`${process.env.baseURL}review-user-offer/create-review`, {
           offerId,
           userId: globalLogid,
           addReviewForOfferUser: reviewText,
         });
-        if (response.status === 200) {
-          Swal.fire('Review Added', 'Your review has been successfully added.', 'success'); // Show success message for added review
-        } else {
-          Swal.fire('Error', 'Failed to add review.', 'error'); // Show error message for failed review addition
-        }
-      } catch (error) {
-        Swal.fire('Already Added', 'You Have Already Added Review'); // Show error message for failed review addition
-      }
-    },
-    // Method to show modal for adding a rating
-    async showAddRatingModal(offerId, userId) {
-      this.selectedRating = 0; // Reset selected rating
-      this.showModal = true; // Show modal
-      this.currentOfferId = offerId; // Set current offer ID
-      globalratingId=userId; // Set global log ID
-    },
-    // Method to select a star rating
-    selectStar(rating) {
-      this.selectedRating = rating; // Set selected rating
-    },
-    // Method to submit a rating
-    async submitRating() {
-      if (this.selectedRating > 0) { // If a rating is selected
-        await this.addRating(this.currentOfferId, globalratingId, this.selectedRating); // Add the rating
-        this.showModal = false; // Hide the modal
-      } else {
-        Swal.fire('Error', 'Please select a rating.', 'error'); // Show error message for no selected rating
-      }
-    },
-    // Method to cancel rating submission
-    cancelRating() {
-      this.showModal = false; // Hide the modal
-    },
-    // Method to add a rating
-    async addRating(offerId, toUserId, userRating) {
-      try {
-        const response = await axios.post(`${process.env.baseURL}add-rating-to-user`, { // HTTP POST request to add rating
-          user_Id: toUserId,
-          offerId: offerId,
-          userRating: userRating,
-          submissionDate: new Date().toISOString
-        });
-
-        if (response.status === 200) {
-          Swal.fire('Rating Added', 'Your rating has been successfully added.', 'success');
-        } else {
-          Swal.fire('Error', 'Failed to add rating.', 'error');
-        }
-      } catch (error) {
-        Swal.fire('Already Added', 'You Have Already Added Rating!' , '');
-      }
-    }
-  },
-  async addReview(offerId, reviewText) {
-      try {
-        const response = await axios.post(`${process.env.baseURL}review-offer-user/create-review-offer-user`, {
-          offerId,
-          userId: globalLogid,
-          addReviewForOfferUser: reviewText,
-        });
- 
         if (response.status === 200) {
           Swal.fire('Review Added', 'Your review has been successfully added.', 'success');
         } else {
           Swal.fire('Error', 'Failed to add review.', 'error');
         }
       } catch (error) {
-        Swal.fire('Error', 'Failed to add review: ' + error.message, 'error');
+        Swal.fire('Already Added', 'You Have Already Added Review');
       }
     },
- 
- 
+    // Method to show modal for adding a rating
+    async showAddRatingModal(offerId, userId) {
+      this.selectedRating = 0;
+      this.showModal = true;
+      this.currentOfferId = offerId;
+      globalratingId = userId;
+    },
+    // Method to select a star rating
+    selectStar(rating) {
+      this.selectedRating = rating;
+    },
+    // Method to submit a rating
+    async submitRating() {
+      if (this.selectedRating > 0) {
+        await this.addRating(this.currentOfferId, globalratingId, this.selectedRating);
+        this.showModal = false;
+      } else {
+        Swal.fire('Error', 'Please select a rating.', 'error');
+      }
+    },
+    cancelRating() {
+      this.showModal = false;
+    },
+    // Method to add a rating
+    async addRating(offerId, toUserId, userRating) {
+      try {
+        const response = await axios.post(`${process.env.baseURL}user-rating/add-rating-to-user`, {
+          user_Id: toUserId,
+          offerId: offerId,
+          userRating: userRating,
+          submissionDate: new Date().toISOString
+        });
+        if (response.status === 200) {
+          Swal.fire('Rating Added', 'Your rating has been successfully added.', 'success');
+        } else {
+          Swal.fire('Error', 'Failed to add rating.', 'error');
+        }
+      } catch (error) {
+        Swal.fire('Already Added', 'You Have Already Added Rating!', '');
+      }
+    }
+  },
+  async addReview(offerId, reviewText) {
+    try {
+      const response = await axios.post(`${process.env.baseURL}review-user-offer/create-review`, {
+        offerId,
+        userId: globalLogid,
+        addReviewForOfferUser: reviewText,
+      });
+
+      if (response.status === 200) {
+        Swal.fire('Review Added', 'Your review has been successfully added.', 'success');
+      } else {
+        Swal.fire('Error', 'Failed to add review.', 'error');
+      }
+    } catch (error) {
+      Swal.fire('Error', 'Failed to add review: ' + error.message, 'error');
+    }
+  },
 };
 </script>
-
-
 <style scoped>
 .container {
   padding: 20px;

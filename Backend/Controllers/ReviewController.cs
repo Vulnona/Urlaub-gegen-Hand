@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 using UGHApi.Models;
 namespace UGHApi.Controllers
 {
@@ -12,172 +13,173 @@ namespace UGHApi.Controllers
         {
             _context = context;
         }
-        [HttpPost("adding-review")]
-        public IActionResult AddReview(Review review, string email)
+        #region review
+        [HttpPost("add-review")]
+        public async Task<IActionResult> AddReview(Review review,[Required] string email)
         {
-            if (!ModelState.IsValid)
+            if (!ModelState.IsValid || review == null || string.IsNullOrEmpty(email))
             {
                 return BadRequest(ModelState);
             }
-            if (review == null || string.IsNullOrEmpty(email))
-            {
-                return BadRequest("Review or email is null.");
-            }
+
             try
             {
-                var user = _context.users.FirstOrDefault(u => u.Email_Address == email);
+                var user = await _context.users.FirstOrDefaultAsync(u => u.Email_Address == email);
                 if (user == null)
                 {
                     return NotFound("User with the provided email does not exist.");
                 }
 
-                var existingReview = _context.reviews.Include(r => r.User)
-                    .FirstOrDefault(r => r.User.Email_Address == email && r.OfferId == review.OfferId);
+                var existingReview = await _context.reviews
+                    .Include(r => r.User)
+                    .FirstOrDefaultAsync(r => r.User.Email_Address == email && r.OfferId == review.OfferId);
+
                 if (existingReview != null)
                 {
-                    return Conflict("A review by this user for this offer already exists.");
+                    return Conflict("A review by this user for this offer already exists");
                 }
+
                 review.UserId = user.User_Id;
-                _context.reviews.Add(review);
-                _context.SaveChanges();
+                await _context.reviews.AddAsync(review);
+                await _context.SaveChangesAsync();
+
                 return Ok("Review added successfully.");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return StatusCode(StatusCodes.Status304NotModified, ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError,"An error occurred while adding review.");
             }
         }
-        [HttpPut("update-review-status")]
-        public IActionResult UpdateReviewStatus(int reviewId, reviewStatus newStatus)
+        [HttpPut("update-review")]
+        public async Task<IActionResult> UpdateReviewStatus([Required]int reviewId, reviewStatus newStatus)
         {
             try
             {
-                var review = _context.reviews.FirstOrDefault(r => r.Id == reviewId);
+                if(!ModelState.IsValid ) return BadRequest(ModelState);
+                var review = await _context.reviews.FirstOrDefaultAsync(r => r.Id == reviewId);
                 if (review == null)
                 {
-                    return NotFound("Review not found.");
+                    return NotFound();
                 }
                 review.Status = newStatus;
-                _context.SaveChanges();
-                return Ok("Review status updated successfully.");
+                await _context.SaveChangesAsync();
+                return Ok();
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status304NotModified, ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
             }
         }
         [HttpGet("get-all-reviews")]
-        public IActionResult GetAllReviews()
+        public async Task<IActionResult> GetAllReviews()
         {
             try
             {
-                var reviews = _context.reviews
-                    .Include(r => r.User)
-                    .Include(r => r.Offer)
-                    .ToList();
+                var reviews = await _context.reviews.Include(r => r.User).Include(r => r.Offer).ToListAsync();
+                if (!reviews.Any()) return NotFound("Review for the entered ID not found."); 
                 return Ok(reviews);
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status204NoContent, ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
             }
         }
         [HttpGet("get-user-by-offerId/{offerId}")]
-        public IActionResult GetUserByOfferId(int offerId)
+        public async Task<IActionResult> GetUserByOfferId([FromQuery][Required]int offerId)
         {
             try
             {
-                var offer = _context.offers
-                    .Include(o => o.User)
-                    .FirstOrDefault(o => o.Id == offerId);
+                var offer = await _context.offers.Include(o => o.User).FirstOrDefaultAsync(o => o.Id == offerId);
                 if (offer == null)
                 {
                     return NotFound("Offer not found.");
                 }
+
                 var user = offer.User;
                 if (user == null)
                 {
                     return NotFound("User not found for the provided offer ID.");
                 }
+
                 return Ok(user);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return StatusCode(StatusCodes.Status204NoContent, ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while fetching the user details for the given offer id.");
             }
         }
         [HttpGet("get-user-by-review-id/{reviewId}")]
-        public IActionResult GetUserByReviewId(int reviewId)
+        public async Task<IActionResult> GetUserByReviewId([FromQuery][Required] int reviewId)
         {
             try
             {
-                var review = _context.reviews
-                    .Include(r => r.User)
-                    .FirstOrDefault(r => r.Id == reviewId);
+                var review = await _context.reviews.Include(r => r.User).FirstOrDefaultAsync(r => r.Id == reviewId);
+
                 if (review == null)
                 {
                     return NotFound("Review not found.");
                 }
+
                 var user = review.User;
                 if (user == null)
                 {
                     return NotFound("User not found for the given review.");
                 }
+
                 return Ok(user);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return StatusCode(StatusCodes.Status204NoContent, ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError,"An error occurred while fetching the user for the entered review id.");
             }
         }
         [HttpGet("check-review-status")]
-        public IActionResult CheckReviewStatus(int userId, int offerId)
+        public async Task<IActionResult> CheckReviewStatus([Required] int userId,[Required] int offerId)
         {
             try
             {
-                var review = _context.reviews
-                    .FirstOrDefault(r => r.UserId == userId && r.OfferId == offerId);
+                var review = await _context.reviews
+                    .FirstOrDefaultAsync(r => r.UserId == userId && r.OfferId == offerId);
+
                 if (review == null)
                 {
                     return Ok(new { Status = "Apply" });
                 }
+
                 switch (review.Status)
                 {
                     case reviewStatus.Pending:
                         return Ok(new { Status = "Applied" });
                     case reviewStatus.Approved:
-                        return Ok(new { Status = "ViewDetails" });    // after Approved host can see the detailed of userB  (Call==>  API GetusersByOfferId )
+                        return Ok(new { Status = "ViewDetails" }); 
                     default:
                         return Ok(new { Status = "Apply" });
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return StatusCode(StatusCodes.Status204NoContent, ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while fetching the review status.");
             }
         }
         [HttpGet("get-reviews-for-user-offers/{userId}")]
-        public IActionResult GetReviewsForUserOffers(int userId)
+        public async Task<IActionResult> GetReviewsForUserOffers([FromQuery][Required] int userId)
         {
             try
             {
-                var reviews = _context.reviews
-                    .Include(r => r.User)
-                    .Include(r => r.Offer)
-                    .Where(r => r.Offer.User_Id == userId)
-                    .ToList();
+                var reviews = await _context.reviews.Include(r => r.User).Include(r => r.Offer).Where(r => r.Offer.User_Id == userId).ToListAsync();
+
                 if (!reviews.Any())
                 {
                     return NotFound("No reviews found for offers created by the specified user.");
                 }
+
                 return Ok(reviews);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return StatusCode(StatusCodes.Status204NoContent, ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError,"An error occurred while fetching the reviews for the entered user offer.");
             }
         }
-
     }
-
+    #endregion
 }

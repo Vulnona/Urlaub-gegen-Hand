@@ -11,48 +11,37 @@
     <router-view />
   </v-app>
 </template>
-
 <script lang="ts" setup>
 import { onMounted, ref } from 'vue';
 import VueJwtDecode from 'vue-jwt-decode';
 import CryptoJS from 'crypto-js';
-
-// Importing components
 import HeaderMetaNav from './components/HeaderMetaNav.vue';
 import HeaderMetaNavUser from './components/HeaderMetaNavUser.vue';
-
-// Reactive variables
-const isLoggedIn = ref(false); // Reactive variable to track login status
-const userRole = ref(''); // Reactive variable to store user role
-
+const isLoggedIn = ref(false);
+const userRole = ref('');
 onMounted(() => {
   checkLoginStatus();
 });
-
 // Function to check login status based on decrypted token
 const checkLoginStatus = () => {
   if (decryptedToken) {
-    isLoggedIn.value = true; // User is logged in
+    isLoggedIn.value = true;
     const decodedToken = VueJwtDecode.decode(decryptedToken) as Record<string, any>;
-    userRole.value = decodedToken["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"] || '';
-    // Extract and store user role from decoded JWT token
+    userRole.value = decodedToken[`${process.env.claims_Url}`] || '';
   }
 };
-
 // Function to decrypt token using AES encryption
 const decryptToken = (encryptedToken: string) => {
   try {
-    const bytes = CryptoJS.AES.decrypt(encryptedToken, process.env.SECRET_KEY); 
-    return bytes.toString(CryptoJS.enc.Utf8); // Convert decrypted bytes to UTF-8 string
+    const bytes = CryptoJS.AES.decrypt(encryptedToken, process.env.SECRET_KEY);
+    return bytes.toString(CryptoJS.enc.Utf8);
   } catch (e) {
-    console.error('Error decrypting token:', e); // Log error if decryption fails
-    return null; // Return null if decryption fails
+    console.error('Error decrypting token:', e);
+    return null;
   }
 };
-
-const decryptedToken = decryptToken(sessionStorage.getItem('token') || ''); // Decrypt token stored in sessionStorage
+const decryptedToken = decryptToken(sessionStorage.getItem('token') || ''); 
 </script>
-
 <style lang="scss" scoped>
 header {
   @media (max-width: 768px) {

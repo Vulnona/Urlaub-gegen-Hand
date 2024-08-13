@@ -4,7 +4,7 @@ using UGHApi.Models;
 
 namespace UGHApi.Controllers
 {
-    [Route("api")]
+    [Route("api/skill-category")]
     [ApiController]
     public class SkillCategoryController : ControllerBase
     {
@@ -14,21 +14,22 @@ namespace UGHApi.Controllers
         {
             _context = context;
         }
+        #region parent-skills
 
-        // GET: api/SkillCategory
-        [HttpGet("skill-category")]
+        [HttpGet("get-all-skills")]
         public async Task<ActionResult<IEnumerable<Skill>>> GetSkills()
         {
-            if (!ModelState.IsValid)
+            try
             {
-                return BadRequest(ModelState);
+                var skillCategories = await _context.skills.Where(b => b.ParentSkill_ID == null).ToListAsync();
+                if(!skillCategories.Any()) return NotFound();
+                return Ok(skillCategories);
             }
-            if (_context.skills == null)
-          {
-              return NoContent();
-          }
-            var skillCategories = _context.skills.Where ( b=> b.ParentSkill_ID == null);
-            return await skillCategories.ToListAsync();
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while fetching the parent skills.");
+            }
         }
+        #endregion
     }
 }

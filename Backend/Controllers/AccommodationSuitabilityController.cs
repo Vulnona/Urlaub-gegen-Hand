@@ -1,5 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using UGHApi.Models;
+using System.Threading.Tasks;
+using System.ComponentModel.DataAnnotations;
 
 namespace UGHApi.Controllers
 {
@@ -8,90 +11,100 @@ namespace UGHApi.Controllers
     public class AccommodationSuitabilityController : ControllerBase
     {
         private readonly UghContext _context;
+
         public AccommodationSuitabilityController(UghContext context)
         {
             _context = context;
         }
+
+        #region accommodation-suitablity
         [HttpGet("get-all-suitable-accommodations")]
-        public IActionResult GetAllAccommodationSuitability ()
+        public async Task<IActionResult> GetAllAccommodationSuitability()
         {
             try
             {
-                var result = _context.accommodationsuitables.ToList();
+                var result = await _context.accommodationsuitables.ToListAsync();
+                if (!result.Any()) return NotFound();
                 return Ok(result);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return StatusCode(StatusCodes.Status204NoContent, ex.Message);
+                return StatusCode(StatusCodes.Status204NoContent,"Suitable Accommodations not found!");
             }
         }
+
         [HttpGet("get-suitable-accommodation-by-id/{suitableAccommodationId:int}")]
-        public IActionResult GetSuitableAccommodationById(int suitableAccommodationId)
+        public async Task<IActionResult> GetSuitableAccommodationById([FromQuery][Required] int suitableAccommodationId)
         {
             try
             {
-                var suitableAccommodation = _context.accommodationsuitables.Find(suitableAccommodationId);
-                if (suitableAccommodation == null) 
-                    return NotFound();
+                var suitableAccommodation = await _context.accommodationsuitables.FindAsync(suitableAccommodationId);
+                if (suitableAccommodation == null)
+                    return NotFound("Suitable Accommodation can not be null");
                 return Ok(suitableAccommodation);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return StatusCode(StatusCodes.Status204NoContent, ex.Message);
+                return StatusCode(StatusCodes.Status204NoContent,"Suitable Accomodation not found");
             }
         }
+
         [HttpPost("add-new-accommodation")]
-        public IActionResult AddSuitableAccommodation([FromBody] SuitableAccommodation suitableAccommodation)
+        public async Task<IActionResult> AddSuitableAccommodation([FromBody] SuitableAccommodation suitableAccommodation)
         {
             try
             {
                 if (!ModelState.IsValid)
                     return BadRequest("Suitable accommodation is null.");
-                _context.accommodationsuitables.Add(suitableAccommodation);
-                _context.SaveChanges();
 
-                return Ok();
+                await _context.accommodationsuitables.AddAsync(suitableAccommodation);
+                await _context.SaveChangesAsync();
+
+                return Ok("Suitable Accommodation added successfully");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return StatusCode(StatusCodes.Status304NotModified, ex.Message);
+                return StatusCode(StatusCodes.Status304NotModified, "An error occurred while adding the suitable accommodation");
             }
         }
+
         [HttpPut("update-accommodation-by-id")]
-        public IActionResult UpdateSuitableAccommodation([FromBody] SuitableAccommodation suitableAccommodation)
+        public async Task<IActionResult> UpdateSuitableAccommodation([FromBody] SuitableAccommodation suitableAccommodation)
         {
             try
             {
-                if (!ModelState.IsValid) 
-                    return NotFound();
-                _context.accommodationsuitables.Update(suitableAccommodation);
-                _context.SaveChanges();
-                return Ok(suitableAccommodation);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status304NotModified, ex.Message);
+                if (!ModelState.IsValid)
+                    return BadRequest(ModelState);
 
+                _context.accommodationsuitables.Update(suitableAccommodation);
+                await _context.SaveChangesAsync();
+                return Ok("Suitable Accommodation updated successfully");
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status304NotModified,"Error occurred while updating the suitable accommodation");
             }
         }
+
         [HttpDelete("delete-accommodation/{suitableAccommodationId:int}")]
-        public IActionResult DeleteSuitableAccommodation(int accommodationSuitableId)
+        public async Task<IActionResult> DeleteSuitableAccommodation([Required] int accommodationSuitableId)
         {
             try
             {
-                var findAccommodationSuitable = _context.accommodationsuitables.Find(accommodationSuitableId);
+                var findAccommodationSuitable = await _context.accommodationsuitables.FindAsync(accommodationSuitableId);
                 if (findAccommodationSuitable == null)
                     return NotFound("Accommodation not found.");
 
                 _context.accommodationsuitables.Remove(findAccommodationSuitable);
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
 
-                return Ok();
+                return Ok("Suitabl Accommodation deleted successfully!");
             }
-            catch (Exception ex)
+            catch (Exception )
             {
-                return StatusCode(StatusCodes.Status400BadRequest, ex.Message);
+                return StatusCode(StatusCodes.Status400BadRequest, "An error occurred while deleting the Suitable Accommodation");
             }
         }
+        #endregion
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using UGHApi.Models;
 using UGHModels;
 
@@ -14,18 +15,16 @@ namespace UGHApi.Services
             _context = context;
             _passwordService = passwordService;
         }
-
-        public User GetUserByToken(string token)
+        #region user-services
+        public async Task<User> GetUserByTokenAsync(string token)
         {
             try
             {
-                var userId = _context.emailverificators
-                                     .Where(x => x.verificationToken.ToString().Equals(token))
-                                     .Select(x => x.user_Id)
-                                     .FirstOrDefault();
+                var userId = await _context.emailverificators.Where(x => x.verificationToken.ToString().Equals(token)).Select(x => x.user_Id).FirstOrDefaultAsync();
+
                 if (userId > 0)
                 {
-                    var user = _context.users.FirstOrDefault(x => x.User_Id == userId);
+                    var user = await _context.users.FirstOrDefaultAsync(x => x.User_Id == userId);
                     if (user != null)
                     {
                         return user;
@@ -35,10 +34,10 @@ namespace UGHApi.Services
             }
             catch (Exception ex)
             {
-                // Log the exception or handle as needed
-                throw new InvalidOperationException("An error occurred while getting user by token.", ex);
+                throw new InvalidOperationException( ex.Message);
             }
         }
+
 
         public async Task<User> GetUserByEmailAsync(string email)
         {
@@ -53,8 +52,7 @@ namespace UGHApi.Services
             }
             catch (Exception ex)
             {
-                // Log the exception or handle as needed
-                throw new InvalidOperationException("An error occurred while getting user by email asynchronously.", ex);
+                throw new InvalidOperationException(ex.Message);
             }
         }
 
@@ -64,7 +62,7 @@ namespace UGHApi.Services
             {
                 if (_context.users.Any(u => u.Email_Address.ToLower().Equals(request.Email_Address.ToLower())))
                 {
-                    return false; // User already exists
+                    return false;
                 }
 
                 DateTime parsedDateOfBirth = DateTime.Parse(request.DateOfBirth);
@@ -110,8 +108,7 @@ namespace UGHApi.Services
             }
             catch (Exception ex)
             {
-                // Log the exception or handle as needed
-                throw new InvalidOperationException("An error occurred while creating admin.", ex);
+                throw new InvalidOperationException(ex.Message);
             }
         }
 
@@ -119,7 +116,7 @@ namespace UGHApi.Services
         {
             try
             {
-                var userroles = await _context.users
+                var userRoles = await _context.users
                     .Where(ur => ur.Email_Address == userEmail)
                     .SelectMany(ur => _context.userrolesmapping
                         .Where(urm => urm.UserId == ur.User_Id)
@@ -128,12 +125,12 @@ namespace UGHApi.Services
                             role => role.RoleId,
                             (urm, role) => role.RoleName))
                     .ToListAsync();
-                return userroles;
+                if (userRoles.Count == 0) return null;
+                return userRoles;
             }
             catch (Exception ex)
             {
-                // Log the exception or handle as needed
-                throw new InvalidOperationException("An error occurred while getting user roles by user email asynchronously.", ex);
+                throw new InvalidOperationException(ex.Message);
             }
         }
 
@@ -164,8 +161,7 @@ namespace UGHApi.Services
             }
             catch (Exception ex)
             {
-                // Log the exception or handle as needed
-                throw new InvalidOperationException("An error occurred while validating user.", ex);
+                throw new InvalidOperationException( ex.Message);
             }
         }
 
@@ -184,9 +180,9 @@ namespace UGHApi.Services
             }
             catch (Exception ex)
             {
-                // Log the exception or handle as needed
-                throw new InvalidOperationException("An error occurred while deleting user information.", ex);
+                throw new InvalidOperationException( ex.Message);
             }
         }
+        #endregion
     }
 }

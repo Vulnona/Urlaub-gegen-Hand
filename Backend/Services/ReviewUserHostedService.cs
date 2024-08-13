@@ -15,15 +15,12 @@ public class ReviewUserHostedService : IHostedService, IDisposable
 
     public Task StartAsync(CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Review User Hosted Service running.");
         _timer = new Timer(DoWork, null, TimeSpan.Zero, TimeSpan.FromDays(14));
         return Task.CompletedTask;
     }
-
+    #region host-review-service
     private void DoWork(object state)
     {
-        _logger.LogInformation("Review User Hosted Service is working.");
-
         using (var scope = _services.CreateScope())
         {
             var context = scope.ServiceProvider.GetRequiredService<UghContext>();
@@ -34,7 +31,7 @@ public class ReviewUserHostedService : IHostedService, IDisposable
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "An error occurred while processing reviews.");
+                _logger.LogError(ex.Message);
             }
         }
     }
@@ -69,7 +66,7 @@ public class ReviewUserHostedService : IHostedService, IDisposable
                             {
                                 OfferId = offerId,
                                 UserId = hostId,
-                                AddReviewForOfferUser = "Host does not add review",
+                                AddReviewForOfferUser = "Host did not added the review",
                                 CreatedAt = DateTime.Now
                             };
 
@@ -106,7 +103,7 @@ public class ReviewUserHostedService : IHostedService, IDisposable
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An error occurred while adding post review entries for login users.");
+            _logger.LogError(ex.Message);
         }
     }
 
@@ -140,7 +137,7 @@ public class ReviewUserHostedService : IHostedService, IDisposable
                             {
                                 OfferId = offerId,
                                 UserId = loginUserId,
-                                AddReviewForLoginUser = "User does not add review",
+                                AddReviewForLoginUser = "User did not added the review",
                                 CreatedAt = DateTime.Now
                             };
 
@@ -177,13 +174,12 @@ public class ReviewUserHostedService : IHostedService, IDisposable
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An error occurred while adding post review entries for offer users.");
+            _logger.LogError(ex.Message);
         }
     }
 
     public Task StopAsync(CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Review User Hosted Service is stopping.");
         _timer?.Change(Timeout.Infinite, 0);
         return Task.CompletedTask;
     }
@@ -192,4 +188,5 @@ public class ReviewUserHostedService : IHostedService, IDisposable
     {
         _timer?.Dispose();
     }
+    #endregion
 }

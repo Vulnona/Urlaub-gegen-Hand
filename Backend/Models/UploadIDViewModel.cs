@@ -2,13 +2,14 @@
 
 namespace UGHApi.Models
 {
-    public class City
+    public class UploadIDViewModel
     {
         [Required]
         public int Id { get; set; }
         [Required]
-        public string Name { get; set; }
+        public string Link_VS { get; set; }
+
         [Required]
-        public int StateId { get; set; }
+        public string Link_RS { get; set; }
     }
 }

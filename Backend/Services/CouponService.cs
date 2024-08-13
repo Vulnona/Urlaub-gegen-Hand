@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Security.Claims;
@@ -14,6 +15,7 @@ namespace UGHApi.Services
         {
             _context = context;
         }
+        #region coupons
         public async Task AddCoupon(Coupon coupon)
         {
             coupon.CreatedDate = DateTime.Now;
@@ -112,4 +114,5 @@ namespace UGHApi.Services
     {
         public CouponRedeemException(string message) : base(message) { }
     }
+    #endregion
 }

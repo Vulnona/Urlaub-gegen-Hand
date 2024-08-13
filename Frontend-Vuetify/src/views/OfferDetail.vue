@@ -1,30 +1,3 @@
-<script setup lang="ts">
-import { ref, onMounted } from 'vue';
-import { useRoute } from 'vue-router';
-import axios from 'axios';
-
-const { params } = useRoute();
-const offer = ref(null);
-const loading = ref(true);
-
-const fetchOfferDetail = async () => {
-  try {
-    const response = await axios.get(`${process.env.baseURL}offer/get-offer-by-id/${params.id}`);
-    offer.value = response.data;
-  } catch (error) {
-    console.error('Error fetching offer detail:', error);
-  } finally {
-    loading.value = false;
-  }
-};
-
-const backtooffers = () => {
-  window.location.href = '/home';
-};
-
-onMounted(fetchOfferDetail);
-</script>
-
 <template>
   <div class="offer-detail-container" v-if="!loading">
     <div class="offer-image" v-if="offer.imageData">
@@ -40,7 +13,6 @@ onMounted(fetchOfferDetail);
         <p><strong>Suitable for:</strong> {{ offer.accomodationsuitable }}</p>
         <p><strong>Region:</strong> {{ offer.state }}</p>
       </div>
-
       <button @click="backtooffers()" class="btn btn-primary" style="background-color: #0062cc;color: #fff">Back To
         Offers</button>
     </div>
@@ -49,7 +21,28 @@ onMounted(fetchOfferDetail);
     Loading...
   </div>
 </template>
-
+<script setup lang="ts">
+import { ref, onMounted } from 'vue';
+import { useRoute } from 'vue-router';
+import axios from 'axios';
+const { params } = useRoute();
+const offer = ref(null);
+const loading = ref(true);
+const fetchOfferDetail = async () => {
+  try {
+    const response = await axios.get(`${process.env.baseURL}offer/get-offer-by-id/${params.id}`);
+    offer.value = response.data;
+  } catch (error) {
+    console.error('Error fetching offer detail:', error);
+  } finally {
+    loading.value = false;
+  }
+};
+const backtooffers = () => {
+  window.location.href = '/home';
+};
+onMounted(fetchOfferDetail);
+</script>
 <style scoped lang="scss">
 .offer-detail-container {
   display: flex;

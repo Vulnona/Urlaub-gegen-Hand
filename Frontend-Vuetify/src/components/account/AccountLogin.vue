@@ -270,7 +270,8 @@
                     <div class="login-right-content-heading form-act">
                         <div class="signin-tabs">
                             <ul>
-                                <li id="login" class="active-login active"><a href="/login" previewlistener="true">Anmelden</a></li>
+                                <li id="login" class="active-login active"><a href="/login"
+                                        previewlistener="true">Anmelden</a></li>
                                 <li id="register" class="active-register"><a href="/register"
                                         previewlistener="true">Registrieren</a></li>
                             </ul>
@@ -318,17 +319,17 @@
 
 </template>
 <script>
-import axios from 'axios'; // Importing axios for HTTP requests
-import router from '@/router'; // Importing the Vue router for navigation
-import CryptoJS from 'crypto-js'; // Importing CryptoJS for encryption
+import axios from 'axios';
+import router from '@/router';
+import CryptoJS from 'crypto-js';
 import Swal from 'sweetalert2';
 
 export default {
     data() {
         return {
-            email: '', // User email input
-            password: '', // User password input
-            errorMessage: '' // Error message to display in case of login failure
+            email: '',
+            password: '',
+            errorMessage: ''
         };
     },
 
@@ -337,10 +338,9 @@ export default {
         async login() {
             try {
                 // Sending a POST request to the login endpoint with the email and password
-                const response = await axios.post(`${process.env.baseURL}auth/login`, {
+                const response = await axios.post(`${process.env.baseURL}authenticate/login`, {
                     email: this.email,
                     password: this.password
-                    
                 });
                 console.log(response.data);
                 // Extracting necessary data from the response
@@ -354,14 +354,13 @@ export default {
                 const encryptedLogId = this.encryptItem(this.padString(logId.toString()));
                 const encryptedEmail = this.encryptItem(logEmail);
 
-                // Storing encrypted data in local storage
+                // Storing encrypted data in session storage
                 sessionStorage.setItem('token', encryptedToken);
                 sessionStorage.setItem('logId', encryptedLogId);
                 sessionStorage.setItem('logEmail', encryptedEmail);
                 sessionStorage.setItem('firstName', firstName);
-                
 
-                // Redirecting to the home page and reloading the window
+                // Redirecting to the home page 
                 router.push('/home').then(() => {
                     window.location.reload();
                 });
@@ -375,7 +374,7 @@ export default {
                         text: 'Invalid email or password or Verify Your Email First',
                     });
                 } else {
-                    // Other server errors
+                    //Server errors
                     Swal.fire({
                         icon: 'error',
                         title: 'Oops...',
@@ -383,7 +382,6 @@ export default {
                     });
                 }
             }
-
         },
         // Method to encrypt a given item using AES encryption
         encryptItem(item) {
@@ -396,7 +394,6 @@ export default {
     }
 };
 </script>
-
 <style>
 .v-container {
     display: none !important;

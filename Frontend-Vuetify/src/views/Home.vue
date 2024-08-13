@@ -1,13 +1,3 @@
-<style scoped>
-.rating-star {
-  font-family: var(--fa-style-family, "Font Awesome 6 Free");
-  font-weight: var(--fa-style, 900);
-}
-
-.rating-star:before {
-  content: "\f005";
-}
-</style>
 <template>
   <div class="bg-ltgrey pt-40 pb-40">
     <div class="container">
@@ -26,7 +16,6 @@
           </div>
         </div>
       </div>
-
       <div v-if="offers">
         <div v-if="loading" class="text-center">Loading...</div>
         <div v-else class="row">
@@ -39,19 +28,16 @@
                 <div @click="redirectToOfferDetail(offer.id)">
                   <h3 class="card-title">{{ offer.title }}</h3>
                   <p class="card-text">{{ truncateDescription(offer.description) }}</p>
-                  <p class="card-text"><strong>Location:</strong> {{ offer.location }}</p>
                   <p class="card-text"><strong>Skills:</strong> {{ offer.skills }}</p>
                   <p class="card-text"><strong>Accommodation:</strong> {{ offer.accomodation }}</p>
                   <p class="card-text"><strong>Suitable for:</strong> {{ offer.accomodationsuitable }}</p>
                   <p class="card-text"><strong>Region:</strong> {{ offer.state }}</p>
                 </div>
                 <div v-if="offer.user.user_Id != logId">
-
                   <div class="button-container" v-if="userRole != 'Admin'">
                     <button :class="['btn', getButtonColor(offer.id)]" @click.stop="handleButtonClick(offer)">
                       {{ getStatusText(offer) }}
                     </button>
-
                     <button v-if="getStatus(offer.id) === 'ViewDetails'" class="btn btn-secondary"
                       @click.stop="showAddReviewModal(offer)">
                       Add Review
@@ -70,7 +56,6 @@
         <h2 class="text-center">No Offers Found!</h2>
       </div>
     </div>
-
     <div id="rating-modal" v-if="showModal">
       <div class="modal-content">
         <h3>Add Rating</h3>
@@ -84,19 +69,14 @@
     </div>
   </div>
 </template>
-
 <script>
-
 import router from '@/router';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 import VueJwtDecode from 'vue-jwt-decode';
 import CryptoJS from 'crypto-js';
 
-// Configuration for Font Awesome SVG replacement
 window.FontAwesomeConfig = { autoReplaceSvg: false };
-
-// Global variable to store decrypted logId
 let globalLogid = '';
 let globalEmail = '';
 let globalrating = '';
@@ -117,27 +97,24 @@ export default {
     };
   },
   mounted() {
-
-    this.checkLoginStatus(); // Check login status and decrypt necessary data
-    this.fetchOffers(); // Fetch offers for display
-    this.Securitybot(); // Ensure user is authenticated
-  //  this.isActiveMembership();
+    this.checkLoginStatus(); 
+    this.fetchOffers(); 
+    this.Securitybot(); 
+    //  this.isActiveMembership();
   },
   methods: {
     // Method to check login status and decrypt relevant data
     checkLoginStatus() {
       const token = sessionStorage.getItem("token");
       if (token) {
-        // Decrypt logId and user role from sessionStorage
         const testlogid = this.decryptlogID(sessionStorage.getItem("logId"));
         globalLogid = testlogid;
         this.logId = testlogid;
         globalEmail = this.decryptToken(sessionStorage.getItem("logEmail"));
-        // Decrypt JWT token to retrieve user role
         const decryptedToken = this.decryptToken(token);
         if (decryptedToken) {
           const decodedToken = VueJwtDecode.decode(decryptedToken);
-          this.userRole = decodedToken["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"] || '';
+          this.userRole = decodedToken[`${process.env.claims_Url}`] || '';
           globalRole = this.userRole;
         } else {
           sessionStorage.removeItem('token');
@@ -174,7 +151,7 @@ export default {
           icon: 'info',
           confirmButtonText: 'OK'
         });
-        router.push('/login'); // Redirect to login page if not authenticated
+        router.push('/login'); 
       }
     },
 
@@ -199,23 +176,20 @@ export default {
                 confirmButtonText: 'Submit',
                 confirmButtonText: 'OK'
               }).then(() => {
-                // This code will run after the user clicks 'OK'
-                router.push('/login'); // Make sure 'router' is properly imported/defined
+                router.push('/login'); 
                 sessionStorage.clear();
                 setTimeout(() => {
                   window.location.reload();
                 }, 500);
               });
             }, 500);
-            router.push('/login'); // Redirect to membership page if membership expired
+            router.push('/login'); 
           } else {
             // console.log("Active membership");
           }
 
         } catch (error) {
           if (error.response) {
-            // The request was made and the server responded with a status code
-            // that falls out of the range of 2xx
             console.error("Error response:", error.response.data);
             Swal.fire({
               title: 'No Membership Found!',
@@ -228,19 +202,15 @@ export default {
               icon: 'error',
               confirmButtonText: 'OK'
             }).then(() => {
-              // This code will run after the user clicks 'OK'
               sessionStorage.clear();
-              router.push('/login'); // Make sure 'router' is properly imported/defined
+              router.push('/login'); 
               window.location.reload();
             });
           } else if (error.request) {
-            // The request was made but no response was received
             console.error("No response received:", error.request);
           } else {
-            // Something happened in setting up the request that triggered an Error
             console.error("Error:", error.message);
           }
-
         }
       }
     },
@@ -252,12 +222,12 @@ export default {
             searchTerm: this.searchTerm
           }
         });
-        this.offers = response.data; // Update offers array with fetched data
-        await this.checkAllReviewStatuses(); // Check review statuses for all fetched offers
+        this.offers = response.data; 
+        await this.checkAllReviewStatuses(); 
       } catch (error) {
         console.error('Error fetching offers:', error);
       } finally {
-        this.loading = false; // Set loading state to false after fetching
+        this.loading = false; 
       }
     },
     // Method to check review status for all offers asynchronously
@@ -274,7 +244,7 @@ export default {
             offerId: offerId
           }
         });
-        this.statusMap[offerId] = response.data.status; // Update status map with offerId and its status
+        this.statusMap[offerId] = response.data.status; 
       } catch (error) {
         console.error(`Error checking review status for offer ${offerId}:`, error);
       }
@@ -313,11 +283,10 @@ export default {
     async handleButtonClick(offer) {
       const status = this.getStatus(offer.id);
       if (status === 'Apply') {
-        await this.sendRequest(offer.id, globalLogid); // Send request if status is 'Apply'
+        await this.sendRequest(offer.id, globalLogid); 
       } else if (status === 'ViewDetails') {
-        await this.fetchUsersByOfferId(offer.id); // Fetch users if status is 'ViewDetails'
+        await this.fetchUsersByOfferId(offer.id);
       } else {
-
       }
     },
     // Method to send request for offer application
@@ -333,16 +302,15 @@ export default {
       });
       if (result.isConfirmed) {
         try {
-          // Send POST request to add review with email as parameter
-          await axios.post(`${process.env.baseURL}review/adding-review?email=${globalEmail}`, {
+          await axios.post(`${process.env.baseURL}review/add-review?email=${globalEmail}`, {
             offerId,
             userId,
             status: 0,
           });
           Swal.fire('Success!', 'Your request has been sent.', 'success');
-          await this.checkReviewStatus(offerId); // Update review status after request is sent
+          await this.checkReviewStatus(offerId); 
         } catch (error) {
-          Swal.fire('Error!', 'Failed to send request: Your Request was rejected!', 'error');
+          Swal.fire('Sorry', 'Failed to send request: Your Request was rejected!', '');
           console.error(error);
         }
       }
@@ -356,7 +324,6 @@ export default {
           users = [users];
         }
         if (users.length > 0) {
-          // Generate user details HTML and display using Swal (SweetAlert)
           let userDetails = users.map(user => {
             return `
           <div class="user-detail">
@@ -378,8 +345,6 @@ export default {
           </div>
         `;
           }).join('<br>');
-
-          // Display user details using Swal modal
           Swal.fire({
             title: 'User Details',
             html: `<div class="user-details-container">${userDetails}</div>`,
@@ -417,23 +382,20 @@ export default {
           return document.getElementById('reviewTextArea').value;
         },
       });
-
       if (review !== undefined) {
         const reviewText = "Bitte gebt die gegenseitige Bewertung erst ab, nachdem diese terminlich abgeschlossen ist.";
-        this.addReview(offer.id, reviewText); // Call method to add review
+        this.addReview(offer.id, reviewText); 
       } else if (dismissAction === Swal.DismissReason.cancel) {
-        Swal.fire('Cancelled', 'Review submission cancelled.', 'info');
       }
     },
     // Method to add review for a specific offer
     async addReview(offerId, reviewText) {
       try {
-        const response = await axios.post(`${process.env.baseURL}review-login-user/create-review-login-user`, {
+        const response = await axios.post(`${process.env.baseURL}review-login-user/create-review`, {
           offerId,
           userId: globalLogid,
           addReviewForLoginUser: reviewText,
         });
-
         if (response.status === 200) {
           Swal.fire('Review Added', 'Your review has been successfully added.', 'success');
         } else {
@@ -446,13 +408,12 @@ export default {
     // Method to search offers based on the searchTerm
     searchOffers() {
       this.loading = true;
-      this.fetchOffers(); // Fetch offers based on updated searchTerm
+      this.fetchOffers(); 
     },
     // Method to redirect to offer detail page
     redirectToOfferDetail(offerId) {
       this.$router.push({ name: 'OfferDetail', params: { id: offerId } });
     },
-    // Method to truncate description to limit characters for display
     truncateDescription(description) {
       if (!description) return '';
       const words = description.split(' ');
@@ -472,47 +433,40 @@ export default {
     // Method to submit rating
     async submitRating() {
       if (this.selectedRating > 0) {
-        await this.addRating(this.currentOfferId, globalLogid, this.selectedRating); // Call method to add rating
+        await this.addRating(this.currentOfferId, globalLogid, this.selectedRating); 
         this.showModal = false;
       } else {
         Swal.fire('Error', 'Please select a rating.', 'error');
       }
     },
-    // Method to cancel rating submission
     cancelRating() {
       this.showModal = false;
     },
     // Method to add rating for a specific offer
     async addRating(offerId, toUserId, userRating) {
       try {
-        const response = await axios.post(`${process.env.baseURL}add-rating-to-host`, {
+        const response = await axios.post(`${process.env.baseURL}user-rating/add-rating-to-host`, {
           user_Id: toUserId,
           offerId: offerId,
           hostRating: userRating,
           submissionDate: new Date().toISOString()
         });
-
         if (response.status === 200) {
           Swal.fire('Rating Added', 'Your rating has been successfully added.', 'success');
         } else {
           Swal.fire('Something Went Wrong', 'Unable To Add Rating.', 'error');
         }
       } catch (error) {
-
         Swal.fire('Already Added Rating', 'You have already added rating!', '');
       }
     },
   },
   computed: {
-    // Computed property to filter offers based on searchTerm
     filteredOffers() {
       return this.offers.filter(offer => {
         const title = offer.title ? offer.title.toLowerCase() : '';
         const description = offer.description ? offer.description.toLowerCase() : '';
         const skills = offer.skills ? offer.skills.toLowerCase() : '';
-        const location = offer.location ? offer.location.toLowerCase() : '';
-        const accomodation = offer.accomodation ? offer.accomodation.toLowerCase() : '';
-        const accomodationSuitable = offer.accomodationSuitable ? offer.accomodationSuitable.toLowerCase() : '';
         const region = offer.state ? offer.state.toLowerCase() : '';
         return title.includes(this.searchTerm.toLowerCase()) || region.includes(this.searchTerm.toLowerCase()) || description.includes(this.searchTerm.toLowerCase()) || skills.includes(this.searchTerm.toLowerCase());
       });
@@ -520,8 +474,6 @@ export default {
   }
 };
 </script>
-
-
 <style lang="scss" scoped>
 .offers-title {
   font-size: 2.5rem;
@@ -766,5 +718,13 @@ export default {
 
 button {
   margin: 5px;
+}
+.rating-star {
+  font-family: var(--fa-style-family, "Font Awesome 6 Free");
+  font-weight: var(--fa-style, 900);
+}
+
+.rating-star:before {
+  content: "\f005";
 }
 </style>

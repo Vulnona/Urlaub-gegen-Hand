@@ -45,7 +45,6 @@
     </div>
   </div>
 </template>
-
 <script lang="ts" setup>
 import { onMounted, ref } from 'vue';
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
@@ -53,7 +52,7 @@ import Swal from 'sweetalert2';
 import router from '@/router';
 import CryptoJS from 'crypto-js';
 
-// AWS S3 credentials and configuration
+// AWS S3 configuration
 const secretAccessKey = process.env.SecretAccessKey;
 const accessKeyId = process.env.AccessKeyId;
 const bucket = process.env.S3_BUCKET_NAME;
@@ -93,7 +92,6 @@ const convertToJpeg = (file: File): Promise<File> => {
     reader.readAsDataURL(file);
   });
 };
-
 // Security check function to ensure user authentication
 const Securitybot = () => {
   if (!sessionStorage.getItem("logId")) {
@@ -106,7 +104,6 @@ const Securitybot = () => {
     router.push('/login');
   }
 };
-
 // Function to upload image file to AWS S3 bucket
 const uploadImage = async (file: File, fileName: string) => {
   try {
@@ -123,26 +120,33 @@ const uploadImage = async (file: File, fileName: string) => {
     throw err;
   }
 };
-
 // Function to encrypt a link using AES encryption
 const encryptLink = (link: string) => {
   return CryptoJS.AES.encrypt(link, process.env.SECRET_KEY).toString();
 };
-
 // Function to update user links with encrypted URLs
 const updateUserLinks = async (userId: string, linkVS: string, linkRS: string) => {
   try {
     const encryptedLinkVS = encryptLink(linkVS);
     const encryptedLinkRS = encryptLink(linkRS);
-    const apiUrl = `${process.env.baseURL}user/upload-id/${userId}?link_vs=${encodeURIComponent(encryptedLinkVS)}&link_rs=${encodeURIComponent(encryptedLinkRS)}`;
+    const apiUrl = `${process.env.baseURL}user/upload-id`;
+    
     const response = await fetch(apiUrl, {
       method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        id:userId,
+        link_VS: encryptedLinkVS,
+        link_RS: encryptedLinkRS,
+      }),
     });
 
     if (!response.ok) {
       throw new Error('Failed to update');
     }
-
+    
     Swal.fire('Success', 'Uploaded Successfully!', 'success').then(() => {
       sessionStorage.clear();
       router.push('/');
@@ -159,27 +163,22 @@ const onFrontIdChange = (event: any) => {
   frontIdFile.value = file;
   frontIdPreview.value = URL.createObjectURL(file);
 };
-
 // Event handler for back ID image file change
 const onBackIdChange = (event: any) => {
   const file = event.target.files[0];
   backIdFile.value = file;
   backIdPreview.value = URL.createObjectURL(file);
 };
-
-// Reactive variables for front and back ID image files and previews
 const frontIdFile = ref<File | null>(null);
 const backIdFile = ref<File | null>(null);
 const frontIdPreview = ref<string | null>(null);
 const backIdPreview = ref<string | null>(null);
-
 // Function to initiate image upload process
 const uploadImages = () => {
   if (!frontIdFile.value || !backIdFile.value) {
-    Swal.fire('Error', 'Please select both front and back ID card images', 'error');
+    Swal.fire('', 'Please select both front and back ID card images', 'warning');
     return;
   }
-
   Swal.fire({
     title: 'Are you sure?',
     text: 'Do you want to upload these images?',
@@ -193,12 +192,10 @@ const uploadImages = () => {
       const userId = decryptlogID(sessionStorage.getItem("logId"));
       const frontFileName = `${userId}VS.jpg`;
       const backFileName = `${userId}RS.jpg`;
-
       const uploadPromises = [
         uploadImage(frontIdFile.value, frontFileName),
         uploadImage(backIdFile.value, backFileName),
       ];
-
       Promise.all(uploadPromises)
         .then(() => {
           const linkVS = `https://${bucket}.s3.${region}.amazonaws.com/${frontFileName}`;
@@ -212,13 +209,9 @@ const uploadImages = () => {
     }
   });
 };
-
-// Function to navigate back using Vue router
 const back = () => {
   router.push('/');
 }
-
-// Function to decrypt log ID stored in sessionStorage
 const decryptlogID = (encryptedItem: string | null) => {
   if (!encryptedItem) {
     return null;
@@ -232,13 +225,10 @@ const decryptlogID = (encryptedItem: string | null) => {
     return null;
   }
 };
-
-// Ensure security check on mount
 onMounted(() => {
-   Securitybot();
+  Securitybot();
 });
 </script>
-
 <style scoped>
 .card {
   margin-bottom: 20px;

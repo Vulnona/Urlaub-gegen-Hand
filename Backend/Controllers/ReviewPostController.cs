@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 using UGHApi.Models;
 
 namespace UGHApi.Controllers
@@ -14,9 +15,10 @@ namespace UGHApi.Controllers
         {
             _context = context;
         }
+        #region post-user-review
 
-        [HttpGet("{userId}")]
-        public async Task<ActionResult<IEnumerable<ReviewPost>>> GetPostReviewsByUserId(int userId)
+        [HttpGet("get-posted-review-by-user-id/{userId}")]
+        public async Task<ActionResult<IEnumerable<ReviewPost>>> GetPostReviewsByUserId([FromQuery][Required] int userId)
         {
             try
             {
@@ -24,11 +26,7 @@ namespace UGHApi.Controllers
                 {
                     return BadRequest(ModelState);
                 }
-                var postReviews = await _context.reviewposts
-                    .Include(r => r.ReviewLoginUser)
-                    .Include(r => r.ReviewLoginUser.Offer)
-                    .Where(r => r.ReviewOfferUser.Offer.User_Id == userId || r.ReviewLoginUser.UserId == userId)
-                    .ToListAsync();
+                var postReviews = await _context.reviewposts.Include(r => r.ReviewLoginUser).Include(r => r.ReviewLoginUser.Offer).Where(r => r.ReviewOfferUser.Offer.User_Id == userId || r.ReviewLoginUser.UserId == userId).ToListAsync();
 
                 if (!postReviews.Any())
                 {
@@ -39,27 +37,28 @@ namespace UGHApi.Controllers
             }
             catch (Exception ex)
             {
-                Console.Error.WriteLine(ex);
                 return StatusCode(StatusCodes.Status204NoContent, ex.Message);
             }
         }
 
-        [HttpGet("get-all-post")]
-        public IActionResult GetAllPost()
+        [HttpGet("get-all-posts")]
+        public async Task<ActionResult<List<ReviewPost>>> GetAllPost()
         {
             try
             {
-                var getAll = _context.reviewposts.ToList();
+                var getAll = await _context.reviewposts.ToListAsync();
+
+                if (getAll == null || !getAll.Any())
+                {
+                    return BadRequest();
+                }
                 return Ok(getAll);
             }
             catch (Exception ex)
             {
-                // Log the exception 
-                Console.Error.WriteLine("No posts found! Please ensure to have posts in d");
-
-                // Return a generic error message to the client
-                return StatusCode(StatusCodes.Status204NoContent, ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
             }
         }
+        #endregion
     }
 }

@@ -10,8 +10,10 @@ public class DatabaseIntegrityChecker
 
     public DatabaseIntegrityChecker(IServiceScopeFactory scopeFactory, ILogger<DatabaseIntegrityChecker> logger)
 
-    { _scopeFactory = scopeFactory; _logger = logger; }
+    { _scopeFactory = scopeFactory;
+        _logger = logger; }
 
+    #region database-integrity
     public Task<bool> CheckIntegrityAsync()
 
     {
@@ -19,8 +21,6 @@ public class DatabaseIntegrityChecker
         using var scope = _scopeFactory.CreateScope();
 
         var dbContext = scope.ServiceProvider.GetRequiredService<UghContext>();
-
-        // Check if roles exist, if not, log an error and return false
 
         if (!dbContext.userroles.Any())
 
@@ -32,5 +32,5 @@ public class DatabaseIntegrityChecker
         return Task.FromResult(true);
 
     }
-
+    #endregion
 }

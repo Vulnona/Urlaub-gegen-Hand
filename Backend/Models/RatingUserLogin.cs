@@ -6,6 +6,7 @@ namespace UGHApi.Models
 {
     public class RatingUserLogin
     {
+        [Required]
         public int Id { get; set; }
         [Range(0, 5, ErrorMessage = "Please select  number between 1 to 5")]
         public int HostRating { get; set; }

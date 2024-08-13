@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using RestSharp;
 using UGHApi.Models;
 using UGHApi.Services;
@@ -23,10 +24,7 @@ namespace UGHApi.Controllers
             _couponService = couponService;
         }
 
-        #region Coupon
-
-       
-
+        #region Coupon-generation-by-admin
         [HttpPost("admin/add-coupon")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> AddCoupon(Coupon coupon)
@@ -43,10 +41,9 @@ namespace UGHApi.Controllers
                 await _couponService.AddCoupon(coupon);
                 return Ok("Coupon inserted successfully.");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // Log the exception if needed
-                return BadRequest("An error occurred while processing the request.");
+                return StatusCode(500,ex.Message);
             }
         }
 
@@ -57,6 +54,7 @@ namespace UGHApi.Controllers
         {
             try
             {
+                if (!ModelState.IsValid) return BadRequest(ModelState);
                 await _couponService.UpdateCoupon(updatedCoupon);
                 return Ok("Coupon updated successfully.");
             }
@@ -64,10 +62,9 @@ namespace UGHApi.Controllers
             {
                 return NotFound("Coupon not found.");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // Log the exception or handle it appropriately
-                return StatusCode(500, "An error occurred while updating the coupon.");
+                return StatusCode(500, ex.Message);
             }
         }
 
@@ -75,8 +72,16 @@ namespace UGHApi.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetAllCoupon()
         {
+            try
+            {
             var coupons = await _couponService.GetAllcoupons();
+            if (coupons.IsNullOrEmpty()) return NotFound();
             return Ok(coupons);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
 
         [HttpDelete("admin/delete-coupon/{couponId}")]
@@ -92,10 +97,9 @@ namespace UGHApi.Controllers
             {
                 return NotFound("Coupon not found.");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // Log the exception or handle it appropriately
-                return StatusCode(500, "An error occurred while deleting the coupon.");
+                return StatusCode(500, ex.Message);
             }
         }
 
@@ -116,10 +120,9 @@ namespace UGHApi.Controllers
             {
                 return BadRequest(ex.Message);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // Log the exception or handle it appropriately
-                return StatusCode(500, "An error occurred while redeeming the coupon.");
+                return StatusCode(500, ex.Message);
             }
         }
         #endregion

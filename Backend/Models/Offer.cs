@@ -14,6 +14,7 @@ namespace UGHApi.Models
         public string Description { get; set; }
         [Required]
         public string Location { get; set; }
+        [Required]
         public byte[] ImageData { get; set; }
         public string ImageMimeType { get; set; }
         public string Contact { get; set; }
@@ -23,9 +24,6 @@ namespace UGHApi.Models
         public string country { get; set; }
         public string state { get; set; }
         public string city { get; set; }
-        //public int Region_ID { get; set; }
-        //[ForeignKey("Region_ID")]
-        //public Region Region { get; set; }
         public int User_Id { get; set; }
         [ForeignKey("User_Id")]
         public User User { get; set; }

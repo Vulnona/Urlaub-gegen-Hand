@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 using UGHApi.Models;
 using UGHApi.Services;
 
@@ -17,20 +18,18 @@ namespace UGHApi.Controllers
             _context = context;
             _tokenService = tokenService;
         }
-
+        #region user-profile
         [HttpGet("get-user-profile")]
-        public async Task<IActionResult> GetProfile(string token)
+        public async Task<IActionResult> GetProfile([Required]string token)
         {
             try
             {
                 var userAccessId = await _tokenService.GetUserIdFromToken(token);
-
                 if (userAccessId == null)
                 {
-                    return Unauthorized("Invalid token");
+                    return Unauthorized();
                 }
                 var userId = userAccessId.Value;
-
                 var userProfile = await _context.userprofiles.Include(u => u.User).FirstOrDefaultAsync(p => p.User_Id == userId);
                 if (userProfile == null)
                 {
@@ -41,20 +40,19 @@ namespace UGHApi.Controllers
 
                     _context.userprofiles.Add(newUserProfile);
                     await _context.SaveChangesAsync();
-
                     userProfile = await _context.userprofiles.Include(u => u.User).FirstOrDefaultAsync(p => p.User_Id == userId);
                 }
 
                 return Ok(new { Profile = userProfile });
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while fetching the user profiles.");
             }
         }
 
         [HttpPut("add-or-update-profile")]
-        public async Task<IActionResult> UpdateProfile(string token, [FromBody] UserProfile profile)
+        public async Task<IActionResult> UpdateProfile([Required]string token, [FromBody] UserProfile profile)
         {
             try
             {
@@ -66,14 +64,14 @@ namespace UGHApi.Controllers
 
                 if (accessUserId == null)
                 {
-                    return Unauthorized("Invalid token");
+                    return Unauthorized();
                 }
 
                 var userId = accessUserId.Value;
 
                 if (profile == null || profile.User_Id != userId)
                 {
-                    return BadRequest("Profile object is null");
+                    return BadRequest();
                 }
 
                 var existingProfile = await _context.userprofiles.Include(p => p.User).FirstOrDefaultAsync(p => p.User_Id == userId);
@@ -116,9 +114,9 @@ namespace UGHApi.Controllers
             }
             catch (Exception ex)
             {
-                // Log the exception (use your preferred logging mechanism)
-                return StatusCode(500, $"Internal server error: {ex.Message}");
+                return StatusCode(StatusCodes.Status500InternalServerError,"An error occurred while updating the user profile.");
             }
         }
+        #endregion
     }
 }

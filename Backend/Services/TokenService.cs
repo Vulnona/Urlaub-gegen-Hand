@@ -15,14 +15,14 @@ namespace UGHApi.Services
         private readonly UghContext _context;
         private readonly UserService _userService;
 
-        public TokenService(IConfiguration configuration, IMemoryCache cache, UghContext context, UserService userservice)
+        public TokenService(IConfiguration configuration, IMemoryCache cache, UghContext context, UserService userService)
         {
             _configuration = configuration;
             _cache = cache;
             _context = context;
-            _userService = userservice;
+            _userService = userService;
         }
-
+        #region token-generation-service
         public async Task<string> GenerateJwtToken(string userName, string userId)
         {
             try
@@ -54,12 +54,11 @@ namespace UGHApi.Services
             }
             catch (Exception ex)
             {
-                // Log the exception or handle as needed
-                throw new InvalidOperationException("An error occurred while generating the JWT token.", ex);
+                throw new InvalidOperationException( ex.Message);
             }
         }
 
-        public async Task<int?> GetUserIdFromToken(string token)
+        public Task<int?> GetUserIdFromToken(string token)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]);
@@ -80,19 +79,19 @@ namespace UGHApi.Services
 
                 if (userIdClaim != null && int.TryParse(userIdClaim.Value, out int userId))
                 {
-                    return userId;
+                    return Task.FromResult<int?>(userId);
                 }
                 else
                 {
-                    throw new FormatException("User ID claim could not be parsed as an integer.");
+                    throw new FormatException();
                 }
             }
             catch (Exception ex)
             {
-                // Log the exception or handle as needed
-                throw new ArgumentException("Invalid token", ex);
+                throw new ArgumentException( ex.Message);
             }
         }
+
 
         public string GenerateRefreshToken()
         {
@@ -105,8 +104,7 @@ namespace UGHApi.Services
             }
             catch (Exception ex)
             {
-                // Log the exception or handle as needed
-                throw new InvalidOperationException("An error occurred while generating the refresh token.", ex);
+                throw new InvalidOperationException(ex.Message);
             }
         }
 
@@ -118,8 +116,7 @@ namespace UGHApi.Services
             }
             catch (Exception ex)
             {
-                // Log the exception or handle as needed
-                throw new InvalidOperationException("An error occurred while storing the refresh token.", ex);
+                throw new InvalidOperationException(ex.Message);
             }
         }
 
@@ -131,8 +128,7 @@ namespace UGHApi.Services
             }
             catch (Exception ex)
             {
-                // Log the exception or handle as needed
-                throw new InvalidOperationException("An error occurred while retrieving the user email from the cache.", ex);
+                throw new InvalidOperationException(ex.Message);
             }
         }
 
@@ -144,8 +140,7 @@ namespace UGHApi.Services
             }
             catch (Exception ex)
             {
-                // Log the exception or handle as needed
-                throw new InvalidOperationException("An error occurred while removing the refresh token from the cache.", ex);
+                throw new InvalidOperationException(ex.Message);
             }
         }
 
@@ -166,9 +161,9 @@ namespace UGHApi.Services
             }
             catch (Exception ex)
             {
-                // Log the exception or handle as needed
-                throw new InvalidOperationException("An error occurred while generating the email verificator.", ex);
+                throw new InvalidOperationException(ex.Message);
             }
         }
     }
+    #endregion
 }

@@ -31,80 +31,76 @@
     </div>
   </div>
 </template>
-
 <script>
-import axios from 'axios'; // Import Axios for HTTP requests
-import Swal from 'sweetalert2'; // Import SweetAlert2 for alerts
-import router from '@/router'; // Import Vue router for navigation
-import CryptoJS from 'crypto-js'; // Import CryptoJS for encryption
+import axios from 'axios';
+import Swal from 'sweetalert2';
+import router from '@/router';
+import CryptoJS from 'crypto-js';
 
-let globalLogid = ''; // Variable to store decrypted log ID
-
+let globalLogid = '';
 export default {
   data() {
     return {
-      activeTab: 'host', // Active tab state for reviews (default: 'host')
-      hostReviews: [], // Array to store host reviews
-      userReviews: [] // Array to store user reviews
+      activeTab: 'host',
+      hostReviews: [],
+      userReviews: []
     };
   },
   mounted() {
-    this.fetchPostReviews(); // Fetch post reviews on component mount
-    this.Securitybot(); // Check login status on component mount
+    this.fetchPostReviews();
+    this.Securitybot();
   },
   methods: {
     // Method to check login status and redirect if not logged in
     Securitybot() {
-      if (!sessionStorage.getItem("token")) { // If token is not present in sessionStorage
-        Swal.fire({ // Show SweetAlert2 modal
-          title: 'You are not logged In!', // Modal title
-          text: 'Login First to continue.', // Modal message
-          icon: 'info', // Info icon
-          confirmButtonText: 'OK' // Confirmation button text
+      if (!sessionStorage.getItem("token")) {
+        Swal.fire({
+          title: 'You are not logged In!',
+          text: 'Login First to continue.',
+          icon: 'info',
+          confirmButtonText: 'OK'
         }).then(() => {
-          router.push('/login'); // Redirect to login page using Vue router
+          router.push('/login');
         });
       }
     },
     // Method to fetch post reviews from the server
     async fetchPostReviews() {
       try {
-        const testlogid = this.decryptlogID(sessionStorage.getItem("logId")); // Decrypt log ID from sessionStorage
-        globalLogid = testlogid; // Assign decrypted log ID to global variable
-        const response = await axios.get(`${process.env.baseURL}post-review/${globalLogid}`); // HTTP GET request to fetch reviews
-        const reviews = response.data; // Assign fetched reviews to a variable
+        const testlogid = this.decryptlogID(sessionStorage.getItem("logId"));
+        globalLogid = testlogid;
+        const response = await axios.get(`${process.env.baseURL}post-review/get-posted-review-by-user-id/${globalLogid}`);
+        const reviews = response.data;
         // Separate host reviews and user reviews based on conditions
-        this.hostReviews = reviews.filter(review => review.reviewOfferUsersID !== null); // Filter host reviews
-        this.userReviews = reviews.filter(review => review.reviewLoginUsersID !== null); // Filter user reviews
+        this.hostReviews = reviews.filter(review => review.reviewOfferUsersID !== null);
+        this.userReviews = reviews.filter(review => review.reviewLoginUsersID !== null);
       } catch (error) {
-        console.error('Error fetching post review data:', error); // Log error if fetching reviews fails
+        console.error('Error fetching post review data:', error);
       }
     },
     // Method to decrypt an encrypted item
     decryptlogID(encryptedItem) {
       try {
-        const bytes = CryptoJS.AES.decrypt(encryptedItem, process.env.SECRET_KEY); // Decrypt encrypted item
-        const decryptedString = bytes.toString(CryptoJS.enc.Utf8); // Convert decrypted bytes to UTF-8 string
-        return parseInt(decryptedString, 10).toString(); // Parse decrypted string as integer and return
+        const bytes = CryptoJS.AES.decrypt(encryptedItem, process.env.SECRET_KEY);
+        const decryptedString = bytes.toString(CryptoJS.enc.Utf8);
+        return parseInt(decryptedString, 10).toString();
       } catch (e) {
-        console.error('Error decrypting item:', e); // Log error if decryption fails
-        return null; // Return null if decryption fails
+        console.error('Error decrypting item:', e);
+        return null;
       }
     },
     // Method to format a date into a readable string
     formatDate(date) {
-      return new Date(date).toLocaleDateString('en-US', { // Format date in US English locale
-        weekday: 'long', // Full weekday name (e.g., "Monday")
-        year: 'numeric', // Full numeric year (e.g., "2024")
-        month: 'long', // Full month name (e.g., "January")
-        day: 'numeric' // Day of the month (e.g., "1")
+      return new Date(date).toLocaleDateString('en-US', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
       });
     }
   }
 };
 </script>
-
-
 <style scoped>
 .container {
   margin-top: 20px;

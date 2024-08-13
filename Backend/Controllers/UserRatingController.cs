@@ -1,11 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 using UGHApi.Models;
 
 
 namespace UGHApi.Controllers
 {
-    [Route("api/")]
+    [Route("api/user-rating")]
     [ApiController]
     public class UserRatingController : ControllerBase
     {
@@ -14,45 +15,49 @@ namespace UGHApi.Controllers
         {
             _context = context;
         }
+        #region user-ratings
         [HttpPost("add-rating-to-host")]
         public async Task<IActionResult> AddRatingToHost([FromBody] RatingUserLogin ratingUserLogin)
         {
             try
             {
+                if (ratingUserLogin == null)
+                {
+                    return BadRequest("No ratings found for the logged in user.");
+                }
 
-            if (ratingUserLogin == null)
-            {
-                return BadRequest("RatingUserLogin object is null");
+                var offer = await _context.offers.FindAsync(ratingUserLogin.OfferId);
+                if (offer == null)
+                {
+                    return NotFound("No offer found for the logged in user.");
+                }
+                else if (offer.User_Id == ratingUserLogin.User_Id)
+                {
+                    return BadRequest();
+                }
+
+                var existingRating = await _context.ratinguserlogins.FirstOrDefaultAsync(r => r.User_Id == ratingUserLogin.User_Id && r.OfferId == ratingUserLogin.OfferId);
+                if (existingRating != null)
+                {
+                    return BadRequest("No existing rating found.");
+                }
+
+                var rating = new RatingUserLogin
+                {
+                    HostRating = ratingUserLogin.HostRating,
+                    SubmissionDate = DateTime.UtcNow,
+                    User_Id = ratingUserLogin.User_Id,
+                    OfferId = ratingUserLogin.OfferId
+                };
+
+                _context.ratinguserlogins.Add(rating);
+                await _context.SaveChangesAsync();
+
+                return Ok("User rating added successfully.");
             }
-            var offer = await _context.offers.FindAsync(ratingUserLogin.OfferId);
-            if (offer == null)
+            catch (Exception)
             {
-                return NotFound("Offer not found");
-            }
-            if (offer.User_Id == ratingUserLogin.User_Id)
-            {
-                return BadRequest("The user ID associated with the offer matches the user ID in the rating");
-            }
-            var existingRating = await _context.ratinguserlogins
-                .FirstOrDefaultAsync(r => r.User_Id == ratingUserLogin.User_Id && r.OfferId == ratingUserLogin.OfferId);
-            if (existingRating != null)
-            {
-                return BadRequest("A rating for this user and offer already exists");
-            }
-            var rating = new RatingUserLogin
-            {
-                HostRating = ratingUserLogin.HostRating,
-                SubmissionDate = DateTime.UtcNow,
-                User_Id = ratingUserLogin.User_Id,
-                OfferId = ratingUserLogin.OfferId
-            };
-            _context.ratinguserlogins.Add(rating);
-            await _context.SaveChangesAsync();
-            return Ok("Rating submitted successfully");
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status204NoContent, ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while adding the rating to the host.");
             }
         }
 
@@ -63,17 +68,16 @@ namespace UGHApi.Controllers
             {
                 if (ratingHostLogin == null)
                 {
-                    return Unauthorized("RatingHostLogin object is null");
+                    return Unauthorized();
                 }
                 var offer = await _context.offers.FindAsync(ratingHostLogin.OfferId);
                 if (offer == null)
                 {
-                    return NotFound("Offer not found");
+                    return NotFound("No offer found.");
                 }
                 if (offer.User_Id != ratingHostLogin.User_Id)
                 {
-                    var existingRating = await _context.ratinghostlogins
-                        .FirstOrDefaultAsync(r => r.User_Id == ratingHostLogin.User_Id && r.OfferId == ratingHostLogin.OfferId);
+                    var existingRating = await _context.ratinghostlogins.FirstOrDefaultAsync(r => r.User_Id == ratingHostLogin.User_Id && r.OfferId == ratingHostLogin.OfferId);
                     if (existingRating == null)
                     {
                         var rating = new RatingHostLogin
@@ -85,33 +89,30 @@ namespace UGHApi.Controllers
                         };
                         _context.ratinghostlogins.Add(rating);
                         await _context.SaveChangesAsync();
-                        return Ok("Rating submitted successfully");
+                        return Ok("User rating added successfully.");
                     }
                     else
                     {
-                        return BadRequest("A rating for this user and offer already exists");
+                        return BadRequest();
                     }
                 }
                 else
                 {
-                    return BadRequest("The user ID associated with the offer matches the user ID in the rating");
+                    return BadRequest();
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return StatusCode(StatusCodes.Status304NotModified, ex.Message);
+                return StatusCode(StatusCodes.Status304NotModified, "An error occurred while posting rating to the user.");
             }
         }
 
-        [HttpGet("get-rating-by-user-id/{userId}")] //for all
-        public async Task<IActionResult> GetRatingByUserId(int userId)
+        [HttpGet("get-rating-by-user-id/{userId}")]
+        public async Task<IActionResult> GetRatingByUserId([FromQuery][Required]int userId)
         {
             try
             {
-                var ratings = await _context.ratinghostlogins
-                    .Include(r => r.Offer)
-                    .Where(r => r.User_Id == userId)
-                    .ToListAsync();
+                var ratings = await _context.ratinghostlogins.Include(r => r.Offer).Where(r => r.User_Id == userId).ToListAsync();
                 if (!ratings.Any())
                 {
                     var query = from offer in _context.offers
@@ -130,7 +131,7 @@ namespace UGHApi.Controllers
                     var hostRatings = await query.ToListAsync();
                     if (!hostRatings.Any())
                     {
-                        return NotFound("No ratings found for the specified host ID");
+                        return BadRequest("No ratings found.");
                     }
                     var averageRatings = hostRatings.Average(r => r.HostRating);
                     var ratingsCounts = hostRatings.Count();
@@ -146,15 +147,15 @@ namespace UGHApi.Controllers
                 return Ok(new
                 {
                     AverageRating = averageRating,
-                    ratingsCount = ratingsCount,
-                    ratings = ratings
+                    RatingsCount = ratingsCount,
+                    Ratings = ratings
                 });
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return StatusCode(StatusCodes.Status204NoContent, ex.Message);
+                return StatusCode(StatusCodes.Status204NoContent, "An error occurred while fetching ratings by user id.");
             }
         }
+        #endregion
     }
-
 }

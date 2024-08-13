@@ -7,6 +7,7 @@ namespace UGHApi.Models
 {
     public class ReviewOfferUser
     {
+        [Required]
         public int Id { get; set; }
 
         [Required]

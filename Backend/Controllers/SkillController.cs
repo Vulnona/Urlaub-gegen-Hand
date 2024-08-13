@@ -1,10 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 using UGHApi.Models;
 
 namespace UGHApi.Controllers
 {
-    [Route("api")]
+    [Route("api/skills")]
     [ApiController]
     public class SkillController : ControllerBase
     {
@@ -14,34 +15,29 @@ namespace UGHApi.Controllers
         {
             _context = context;
         }
-
-        // GET: api/Skill/5
-        [HttpGet("skill/{category_id}")]
-        public async Task<ActionResult<IEnumerable<Skill>>> GetSkills(int Category_id)
+        #region skills
+        [HttpGet("get-skill-by-category-id/{category_id}")]
+        public async Task<ActionResult<IEnumerable<Skill>>> GetSkills([FromQuery][Required]int Category_id)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-            if (_context.skills == null)
-            {
-                return NotFound();
-            }
-
+            
             try
             {
                 var skills = _context.skills.Where(b => b.ParentSkill_ID == Category_id);
 
                 if (!skills.Any())
                 {
-                    return NotFound();
+                    return NotFound("No skill found.");
                 }
 
                 return await skills.ToListAsync();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while fetching the skill");
             }
         }
 
@@ -51,12 +47,14 @@ namespace UGHApi.Controllers
             try
             {
                 var allSkills = await _context.skills.ToListAsync();
+                if (!allSkills.Any()) return NotFound("Skills not found."); 
                 return Ok(allSkills);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while fetching the skills.");
             }
         }
+        #endregion
     }
 }

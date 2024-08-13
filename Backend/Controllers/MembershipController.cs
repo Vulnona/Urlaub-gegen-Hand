@@ -19,6 +19,7 @@ namespace UGHApi.Controllers
         {
             _context = context;
         }
+        #region user-membership-using-ecwid
         [HttpGet("validate-subscriptionId")]
         public async Task<IActionResult> ValidateSubscriptionId([FromQuery]int sid)
         {
@@ -59,18 +60,17 @@ namespace UGHApi.Controllers
                     return StatusCode((int)response.StatusCode, errorDetails);
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return StatusCode(500, new { error = "An error occurred while processing your request.", message = ex.Message });
+                return StatusCode(500, "An error occurred while fetching the valid subscription id.");
             }
         }
         public class SubscriptionResponse
         {
             public string Id { get; set; }
             public string Name { get; set; }
-            // Add other properties as needed
         }
-        [HttpPost("check-active-membership/{subId}")] //This api is created to check the active membership of the user by subscripitonId as input
+        [HttpPost("check-active-membership/{subId}")] //API to check the active membership of the user by subscripitonId
         public async Task<IActionResult> CheckActiveMembership(int subId)
         {
             var membership = await _context.memberships.FindAsync(subId);
@@ -84,14 +84,10 @@ namespace UGHApi.Controllers
             return Ok(new { IsActive = isActive });
         }
         
-        [HttpGet("check-active-membership-by-userId/{userId}")]    //This api is created to check the active  membership of the user by userId as input
-        public async Task<IActionResult> CheckActiveMembershipByUserId(int userId)
+        [HttpGet("check-active-membership-by-userId/{userId}")]    //API to check the active  membership of the user by userId
+        public async Task<IActionResult> CheckActiveMembershipByUserId([FromQuery]int userId)
         {
-            // Find the user
-            var user = await _context.users
-                .Include(u => u.CurrentMembership)
-                .FirstOrDefaultAsync(u => u.User_Id == userId);
-
+            var user = await _context.users.Include(u => u.CurrentMembership).FirstOrDefaultAsync(u => u.User_Id == userId);
             if (user == null)
             {
                 return NotFound("User not found");
@@ -101,8 +97,6 @@ namespace UGHApi.Controllers
             {
                 return NotFound("User does not have an active membership");
             }
-
-            // Get the membership
             var membership = await _context.memberships.FindAsync(user.CurrentMembership.MembershipID);
 
             if (membership == null)
@@ -114,104 +108,11 @@ namespace UGHApi.Controllers
 
             return Ok(new { IsActive = isActive });
         }
-        // GET: api/Membership
-        [HttpGet("get-membership")]
-        public async Task<ActionResult<IEnumerable<Membership>>> GetMemberships()
-        {
-          if (_context.memberships == null)
-          {
-              return NotFound();
-          }
-            return await _context.memberships.ToListAsync();
-        }
-
-        // GET: api/Membership/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Membership>> GetMembership(int id)
-        {
-          if (_context.memberships == null)
-          {
-              return NotFound();
-          }
-            var membership = await _context.memberships.FindAsync(id);
-
-            if (membership == null)
-            {
-                return NotFound();
-            }
-
-            return membership;
-        }
-
-        // PUT: api/Membership/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("update-membership/{id}")]
-        public async Task<IActionResult> PutMembership(int id, Membership membership)
-        {
-            if (id != membership.MembershipID)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(membership).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!MembershipExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
-        }
-
-        // POST: api/Membership
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost("add-new-membership")]
-        public async Task<ActionResult<Membership>> PostMembership(Membership membership)
-        {
-          if (_context.memberships == null)
-          {
-              return Problem("Entity set 'UghContext.memberships'  is null.");
-          }
-            _context.memberships.Add(membership);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetMembership", new { id = membership.MembershipID }, membership);
-        }
-
-        // DELETE: api/Membership/5
-        [HttpDelete("mdelete-membership/{id}")]
-        public async Task<IActionResult> DeleteMembership(int id)
-        {
-            if (_context.memberships == null)
-            {
-                return NotFound();
-            }
-            var membership = await _context.memberships.FindAsync(id);
-            if (membership == null)
-            {
-                return NotFound();
-            }
-
-            _context.memberships.Remove(membership);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
 
         private bool MembershipExists(int id)
         {
             return (_context.memberships?.Any(e => e.MembershipID == id)).GetValueOrDefault();
         }
+        #endregion
     }
 }

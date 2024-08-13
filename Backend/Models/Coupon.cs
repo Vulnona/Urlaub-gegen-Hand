@@ -11,8 +11,8 @@ namespace UGHApi.Models
         [Required(ErrorMessage = "Coupon name is required.")]
         public string Name { get; set; }
         public decimal DiscountAmount { get; set; }
-        public DateTime StartDate { get; set; } // Start date of coupon validity
-        public DateTime EndDate { get; set; }   // End date of coupon validity
+        public DateTime StartDate { get; set; } 
+        public DateTime EndDate { get; set; }   
         public string Description { get; set; }
         public DateTime CreatedDate { get; set; } = DateTime.Now;
     }

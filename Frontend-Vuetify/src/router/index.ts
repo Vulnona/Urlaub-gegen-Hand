@@ -79,10 +79,10 @@ const routes = [
     component: () => import('@/views/EditProfile.vue'),
   },
   {
-     path: '/display-profile',
-     name: 'display-profile',
-     component: () => import('@/views/DisplayProfile.vue'),
-   },
+    path: '/display-profile',
+    name: 'display-profile',
+    component: () => import('@/views/DisplayProfile.vue'),
+  },
   {
     path: '/uploadID',
     name: 'UploadID',

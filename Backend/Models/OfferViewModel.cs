@@ -11,9 +11,8 @@ namespace UGHApi.Models
         public string Contact { get; set; }
         public string Accommodation { get; set; }
         public string AccommodationSuitable { get; set; }
+        [Required]
         public string Skills { get; set; }
-        public int Skill_ID { get; set; }
-        //public int Region_ID { get; set; }
         [Required]
         public string Country { get; set; }
         [Required]

@@ -12,18 +12,20 @@ namespace UGHApi.Controllers
         {
             _emailService = emailService;   
         }
+        #region send-custom-verification-email
         [HttpPost("send")]
-        public IActionResult CustomSendEmail([FromBody] CustomMailBody mailBody)
+        public async Task<IActionResult> CustomSendEmail([FromBody] CustomMailBody mailBody)
         {
             try
             {
-                _emailService.SendEmail(mailBody.to, mailBody.subject, mailBody.body);
-                return Ok("Email sent successfully.");
+                await _emailService.SendEmailAsync(mailBody.To, mailBody.Subject, mailBody.Body);
+                return Ok();
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Failed to send email: {ex.Message}");
+                return StatusCode(500,ex.Message);
             }
         }
+        #endregion
     }
 }
