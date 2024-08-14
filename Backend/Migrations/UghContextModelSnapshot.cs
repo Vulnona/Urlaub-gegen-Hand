@@ -20,7 +20,7 @@ namespace UGHApi.Migrations
 
             modelBuilder.Entity("Backend.Models.EmailVerificator", b =>
                 {
-                    b.Property<int>("verivicationID")
+                    b.Property<int>("verificationId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
@@ -33,7 +33,7 @@ namespace UGHApi.Migrations
                     b.Property<Guid>("verificationToken")
                         .HasColumnType("char(36)");
 
-                    b.HasKey("verivicationID");
+                    b.HasKey("verificationId");
 
                     b.ToTable("emailverificators");
                 });
@@ -59,6 +59,7 @@ namespace UGHApi.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Name")
+                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<int>("StateId")

@@ -10,6 +10,7 @@ namespace UGHApi.Services
     public class CouponService
     {
         private readonly UghContext _context;
+       
 
         public CouponService(UghContext context)
         {

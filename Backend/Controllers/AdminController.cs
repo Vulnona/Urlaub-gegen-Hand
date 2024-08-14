@@ -17,12 +17,13 @@ namespace UGHApi.Controllers
         private readonly UghContext _context;
         private readonly UserService _userService;
         private readonly AdminVerificationMailService _mailService;
-
-        public AdminController(UghContext context, UserService userService, AdminVerificationMailService mailService)
+        private readonly ILogger<AdminController> _logger;
+        public AdminController(UghContext context, UserService userService, AdminVerificationMailService mailService, ILogger<AdminController> logger)
         {
             _context = context;
             _userService = userService;
             _mailService = mailService;
+            _logger = logger;
         }
 
         #region verifyuserstate
@@ -48,11 +49,13 @@ namespace UGHApi.Controllers
 
                 return Ok("User verification completed successfully.");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return StatusCode(500, $"Internal server error");
+               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+
 
         [HttpPost("update-verification-state/{userId}/{verificationState}")]
         public async Task<IActionResult> UpdateVerifyState([Required]int userId,[Required] UGH_Enums.VerificationState verificationState)
@@ -92,13 +95,15 @@ namespace UGHApi.Controllers
 
                 return Ok("Successfully updated verification state of user.");
             }
-            catch (DbUpdateException )
-            {   
-                return StatusCode(500, "Database error occurred while updating verification state");
-            }
-            catch (Exception )
+            catch (DbUpdateException ex)
             {
-                return StatusCode(500, "Internal server error");
+                _logger.LogInformation(ex.Message,$"{ex.StackTrace}");
+                return StatusCode(500, $"Database error occurred while updating verification state: {ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
 
@@ -118,14 +123,15 @@ namespace UGHApi.Controllers
 
                 return Ok(users);
             }
-            catch (Exception) 
-            { 
-                return StatusCode(500, $"Internal server error"); 
+            catch (Exception ex)
+            {
+                _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
 
         [HttpGet("get-user-by-id/{id}")]
-        public async Task<ActionResult<User>> GetUserById([FromQuery][Required]int id)
+        public async Task<ActionResult<User>> GetUserById([Required]int id)
         {
             try
             {
@@ -138,9 +144,10 @@ namespace UGHApi.Controllers
 
                 return user;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return StatusCode(500, $"Internal server error");
+                _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
 
@@ -177,9 +184,10 @@ namespace UGHApi.Controllers
                 }
                 return NotFound("Profile not found.");
             }
-            catch (Exception) 
+            catch (Exception ex)
             {
-                return StatusCode(500, $"Internal server error");
+               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
         #endregion

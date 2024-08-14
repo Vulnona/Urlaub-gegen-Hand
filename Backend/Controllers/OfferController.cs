@@ -11,9 +11,11 @@ namespace UGHApi.Controllers
     public class OfferController : ControllerBase
     {
         private readonly UghContext _context;
-        public OfferController(UghContext context)
+        private readonly ILogger<OfferController> _logger;
+        public OfferController(UghContext context, ILogger<OfferController> logger)
         {
             _context = context;
+            _logger = logger;
         }
         #region offers
         [HttpGet("get-all-offers")]
@@ -32,13 +34,14 @@ namespace UGHApi.Controllers
                 if(result.IsNullOrEmpty()) return NotFound();
                 return Ok(result);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError,"An error occurred while fetching the offers.");
+               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
         [HttpGet("get-offer-by-id/{OfferId:int}")]
-        public async Task<IActionResult> GetOfferAsync([FromQuery][Required]int OfferId)
+        public async Task<IActionResult> GetOfferAsync([Required]int OfferId)
         {
             try
             {
@@ -49,9 +52,10 @@ namespace UGHApi.Controllers
 
                 return Ok(offer);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while fetching the required offer.");
+               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
         [HttpPost("add-new-offer")]
@@ -94,12 +98,13 @@ namespace UGHApi.Controllers
 
                 _context.offers.Add(offer);
                 await _context.SaveChangesAsync();
-
-                return Ok("Offer added successfully.");
+                _logger.LogInformation("New Offer Added Successfully!");
+                return Ok();
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status406NotAcceptable, ex.Message);
+               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
         [HttpDelete("delete-offer/{OfferId:int}")]
@@ -115,11 +120,12 @@ namespace UGHApi.Controllers
 
                 _context.offers.Remove(offer);
                 await _context.SaveChangesAsync();
-                return Ok("Offer deleted successfully!");
+                return Ok(offer);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError,"An error occurred while deleting the offer.");
+               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
         #endregion

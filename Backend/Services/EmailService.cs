@@ -6,10 +6,12 @@ using UGHApi.Models;
 public class EmailService
 {
     private readonly IConfiguration _configuration;
+    private readonly ILogger<EmailService> _logger;
 
-    public EmailService(IConfiguration configuration)
+    public EmailService(IConfiguration configuration, ILogger<EmailService> logger)
     {
         _configuration = configuration;
+        _logger = logger;
     }
     #region email-services
     public async Task SendEmailAsync(string recipientEmail, string subject, string body)
@@ -32,6 +34,7 @@ public class EmailService
         }
         catch (Exception ex)
         {
+           _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
             throw new Exception(ex.Message);
         }
     }
@@ -45,7 +48,7 @@ public class EmailService
             message.Subject = "Verify your email address";
             var bodyBuilder = new BodyBuilder
             {
-                HtmlBody = $"<h2>Please <a href='{_configuration["BaseUrl"]}/api/authenticate/verify-email?token={verificationToken}'>click here</h2> to verify your email address.</p>"
+                HtmlBody = $"<h2>Please <a href='{_configuration["BaseUrl"]}/api/authenticate/verify-email?token={verificationToken}'>click here</h2> </a>to verify your email address.</p>"
             };
             message.Body = bodyBuilder.ToMessageBody();
             using (var client = new SmtpClient())
@@ -55,10 +58,12 @@ public class EmailService
                 await client.SendAsync(message);
                 await client.DisconnectAsync(true);
             }
+            _logger.LogInformation("Verification Email Sent Successfully To The User: {email}",email);
             return true;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+           _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
             return false;
         }
     }

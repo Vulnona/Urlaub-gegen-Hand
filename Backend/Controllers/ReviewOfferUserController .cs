@@ -10,10 +10,12 @@ namespace UGHApi.Controllers
     public class ReviewOfferUserController : ControllerBase
     {
         private readonly UghContext _context;
+        private readonly ILogger<ReviewOfferUserController> _logger;
 
-        public ReviewOfferUserController(UghContext context)
+        public ReviewOfferUserController(UghContext context,ILogger<ReviewOfferUserController> logger)
         {
             _context = context;
+            _logger = logger;
         }
         #region review-offers
         [HttpGet("get-all-reviews")]
@@ -25,19 +27,20 @@ namespace UGHApi.Controllers
                     .Include(r => r.Offer)
                     .ToListAsync();
                 if (!reviews.Any())
-                    return NotFound("No reviews found.");
+                    return NotFound();
 
                 return Ok(reviews);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError,"An error occurred while fetching the reviews.");
+               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
 
 
         [HttpGet("get-review-by-offerId/{id}")]
-        public async Task<IActionResult> GetReviewOfferUser([FromQuery][Required] int id)
+        public async Task<IActionResult> GetReviewOfferUser([Required] int id)
         {
             try
             {
@@ -46,13 +49,14 @@ namespace UGHApi.Controllers
                     .FirstOrDefaultAsync(r => r.Id == id);
 
                 if (review == null)
-                    return NotFound("No review found.");
+                    return NotFound();
 
                 return Ok(review);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while fetching the review.");
+               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
 
@@ -71,7 +75,7 @@ namespace UGHApi.Controllers
             {
                 var offer = await _context.offers.FirstOrDefaultAsync(o => o.Id == reviewOfferUser.OfferId);
                 if (offer == null)
-                    return NotFound("Offer not found.");
+                    return NotFound();
 
                 var existingReview = await _context.reviewofferusers
                     .FirstOrDefaultAsync(r => r.OfferId == reviewOfferUser.OfferId && r.UserId == reviewOfferUser.UserId);
@@ -90,11 +94,12 @@ namespace UGHApi.Controllers
 
                 await AddPostReviewEntry(offer.Id);
 
-                return Ok("Review created successfully.");
+                return Ok();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while creating the review");
+               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
 
@@ -151,7 +156,7 @@ namespace UGHApi.Controllers
                 var existingReview = await _context.reviewofferusers.FindAsync(id);
                 if (existingReview == null)
                 {
-                    return NotFound("No existing review found.");
+                    return NotFound();
                 }
 
                 existingReview.AddReviewForOfferUser = reviewOfferUser.AddReviewForOfferUser;
@@ -161,9 +166,10 @@ namespace UGHApi.Controllers
 
                 return NoContent();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while updating the review.");
+               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
 
@@ -175,7 +181,7 @@ namespace UGHApi.Controllers
                 var review = await _context.reviewofferusers.FindAsync(id);
                 if (review == null)
                 {
-                    return NotFound("No review found.");
+                    return NotFound();
                 }
 
                 _context.reviewofferusers.Remove(review);
@@ -183,9 +189,10 @@ namespace UGHApi.Controllers
 
                 return NoContent();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while deleting the review.");
+               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
 

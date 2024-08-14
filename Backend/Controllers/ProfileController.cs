@@ -12,11 +12,13 @@ namespace UGHApi.Controllers
     {
         private readonly UghContext _context;
         private readonly TokenService _tokenService;
+        private readonly ILogger<ProfileController> _logger;
 
-        public ProfileController(UghContext context, TokenService tokenService)
+        public ProfileController(UghContext context, TokenService tokenService, ILogger<ProfileController> logger)
         {
             _context = context;
             _tokenService = tokenService;
+            _logger = logger;
         }
         #region user-profile
         [HttpGet("get-user-profile")]
@@ -45,9 +47,10 @@ namespace UGHApi.Controllers
 
                 return Ok(new { Profile = userProfile });
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while fetching the user profiles.");
+               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
 
@@ -114,7 +117,8 @@ namespace UGHApi.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError,"An error occurred while updating the user profile.");
+               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
         #endregion

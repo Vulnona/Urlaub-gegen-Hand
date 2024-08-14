@@ -16,12 +16,14 @@ namespace UGHApi.Controllers
     {
         private readonly UghContext _context;
         private readonly CouponService _couponService;
+        private readonly ILogger<CouponController> _logger;
 
 
-        public CouponController(UghContext context, CouponService couponService)
+        public CouponController(UghContext context, CouponService couponService, ILogger<CouponController> logger)
         {
             _context = context;
             _couponService = couponService;
+            _logger = logger;
         }
 
         #region Coupon-generation-by-admin
@@ -43,7 +45,8 @@ namespace UGHApi.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500,ex.Message);
+               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
 
@@ -64,7 +67,8 @@ namespace UGHApi.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message);
+               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
 
@@ -80,7 +84,8 @@ namespace UGHApi.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message);
+               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
 
@@ -99,7 +104,8 @@ namespace UGHApi.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message);
+               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
 
@@ -122,7 +128,8 @@ namespace UGHApi.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message);
+               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
         #endregion

@@ -14,13 +14,15 @@ namespace UGHApi.Services
         private readonly IMemoryCache _cache;
         private readonly UghContext _context;
         private readonly UserService _userService;
+        private readonly ILogger<TokenService> _logger;
 
-        public TokenService(IConfiguration configuration, IMemoryCache cache, UghContext context, UserService userService)
+        public TokenService(IConfiguration configuration, IMemoryCache cache, UghContext context, UserService userService, ILogger<TokenService> logger)
         {
             _configuration = configuration;
             _cache = cache;
             _context = context;
             _userService = userService;
+            _logger = logger;
         }
         #region token-generation-service
         public async Task<string> GenerateJwtToken(string userName, string userId)
@@ -54,6 +56,7 @@ namespace UGHApi.Services
             }
             catch (Exception ex)
             {
+                _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
                 throw new InvalidOperationException( ex.Message);
             }
         }
@@ -88,6 +91,7 @@ namespace UGHApi.Services
             }
             catch (Exception ex)
             {
+                _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
                 throw new ArgumentException( ex.Message);
             }
         }
@@ -104,6 +108,7 @@ namespace UGHApi.Services
             }
             catch (Exception ex)
             {
+                _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
                 throw new InvalidOperationException(ex.Message);
             }
         }
@@ -116,6 +121,7 @@ namespace UGHApi.Services
             }
             catch (Exception ex)
             {
+                _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
                 throw new InvalidOperationException(ex.Message);
             }
         }
@@ -128,6 +134,7 @@ namespace UGHApi.Services
             }
             catch (Exception ex)
             {
+                _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
                 throw new InvalidOperationException(ex.Message);
             }
         }
@@ -161,6 +168,7 @@ namespace UGHApi.Services
             }
             catch (Exception ex)
             {
+                _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
                 throw new InvalidOperationException(ex.Message);
             }
         }

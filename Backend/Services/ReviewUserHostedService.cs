@@ -31,7 +31,7 @@ public class ReviewUserHostedService : IHostedService, IDisposable
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.Message);
+                _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
             }
         }
     }
@@ -103,7 +103,7 @@ public class ReviewUserHostedService : IHostedService, IDisposable
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex.Message);
+            _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
         }
     }
 
@@ -174,7 +174,7 @@ public class ReviewUserHostedService : IHostedService, IDisposable
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex.Message);
+            _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
         }
     }
 

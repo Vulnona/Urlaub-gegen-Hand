@@ -17,8 +17,9 @@ namespace UGHApi.Controllers
         private readonly PasswordService _passwordService;
         private readonly IConfiguration _configuration;
         private readonly TokenService _tokenService;
+        private readonly ILogger<AuthController> _logger;
 
-        public AuthController(UghContext context, EmailService emailService, UserService userService, PasswordService passwordService, IConfiguration configuration, TokenService tokenService)
+        public AuthController(UghContext context, EmailService emailService, UserService userService, PasswordService passwordService, IConfiguration configuration, TokenService tokenService, ILogger<AuthController> logger)
         {
             _context = context;
             _emailService = emailService;
@@ -26,6 +27,7 @@ namespace UGHApi.Controllers
             _passwordService = passwordService;
             _configuration = configuration;
             _tokenService = tokenService;
+            _logger = logger;
         }
         #region user-authorization
         [HttpPost("register")]
@@ -73,9 +75,8 @@ namespace UGHApi.Controllers
 
                 await _context.users.AddAsync(newUser);
                 await _context.SaveChangesAsync();
-
+                _logger.LogInformation("New user registered successfully. UserName:{Email}", newUser.Email_Address);
                 var getRegisteredUser = await _context.users.FirstOrDefaultAsync(u => u.Email_Address == request.Email_Address);
-
                 var newUserProfile = new UserProfile
                 {
                     User_Id = getRegisteredUser.User_Id,
@@ -101,9 +102,11 @@ namespace UGHApi.Controllers
 
                 return Ok(newUser);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return StatusCode(400, "Bad Request ");
+                _logger.LogInformation("Errors while registering UserName:{Email}", request.Email_Address);
+                _logger.LogInformation(ex.Message,$"{ex.StackTrace}");
+                return StatusCode(400, $"Bad Request {ex.Message}");
             }
         }
 
@@ -122,12 +125,12 @@ namespace UGHApi.Controllers
                 await _context.SaveChangesAsync();
                 return Ok("Email verified successfully");
             }
-            catch (Exception )
+            catch (Exception ex)
             {
-                return StatusCode(500, "Internal server error");
+               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
-
 
         [HttpPost("login")]
         public async Task<IActionResult> Login(LoginModel model)
@@ -154,9 +157,10 @@ namespace UGHApi.Controllers
                     return Unauthorized(new { errorMessage = userValid.ErrorMessage });
                 }
             }
-            catch (Exception )
+            catch (Exception ex)
             {
-                return StatusCode(500, "Internal server error");
+               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
 
             }
         }
@@ -174,9 +178,10 @@ namespace UGHApi.Controllers
                 var accessToken = await _tokenService.GenerateJwtToken(Email, string.Empty); 
                 return Ok(new { accessToken });
             }
-            catch (Exception )
+            catch (Exception ex)
             {
-                return StatusCode(500, "Internal server error");
+               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
 
@@ -209,9 +214,10 @@ namespace UGHApi.Controllers
 
                 return Ok("Verification email sent successfully.");
             }
-            catch (Exception)
-            { 
-                return StatusCode(500, "Internal server error");
+            catch (Exception ex)
+            {
+               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
         #endregion

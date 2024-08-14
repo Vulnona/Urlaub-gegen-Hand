@@ -10,14 +10,16 @@ namespace UGHApi.Controllers
     public class SkillController : ControllerBase
     {
         private readonly UghContext _context;
+        private readonly ILogger<SkillController> _logger;
 
-        public SkillController(UghContext context)
+        public SkillController(UghContext context, ILogger<SkillController> logger)
         {
             _context = context;
+            _logger = logger;
         }
         #region skills
         [HttpGet("get-skill-by-category-id/{category_id}")]
-        public async Task<ActionResult<IEnumerable<Skill>>> GetSkills([FromQuery][Required]int Category_id)
+        public async Task<ActionResult<IEnumerable<Skill>>> GetSkills([Required]int Category_id)
         {
             if (!ModelState.IsValid)
             {
@@ -30,14 +32,15 @@ namespace UGHApi.Controllers
 
                 if (!skills.Any())
                 {
-                    return NotFound("No skill found.");
+                    return NotFound();
                 }
 
                 return await skills.ToListAsync();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while fetching the skill");
+               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
 
@@ -47,12 +50,13 @@ namespace UGHApi.Controllers
             try
             {
                 var allSkills = await _context.skills.ToListAsync();
-                if (!allSkills.Any()) return NotFound("Skills not found."); 
+                if (!allSkills.Any()) return NotFound(); 
                 return Ok(allSkills);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while fetching the skills.");
+               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
         #endregion

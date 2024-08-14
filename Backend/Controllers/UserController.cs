@@ -11,10 +11,12 @@ namespace UGHApi.Controllers
     public class UserController : ControllerBase
     {
         private readonly UghContext _context;
+        private readonly ILogger<UserController> _logger;
 
-        public UserController(UghContext context)
+        public UserController(UghContext context, ILogger<UserController> logger)
         {
             _context = context;
+            _logger = logger;
         }
         #region users-info
         [HttpGet("get-all-users")]
@@ -23,12 +25,13 @@ namespace UGHApi.Controllers
             try
             {
                 var users = await _context.users.ToListAsync();
-                if (!users.Any()) NotFound("Users not found.");
+                if (!users.Any()) NotFound();
                 return Ok(users);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while fetching the users.");
+               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
 
@@ -47,7 +50,8 @@ namespace UGHApi.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError,ex.Message);
+               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
 
@@ -70,11 +74,13 @@ namespace UGHApi.Controllers
                 existUser.Link_VS = model.Link_VS;
                 existUser.Link_RS = model.Link_RS;
                 await _context.SaveChangesAsync();
-                return Ok();
+                _logger.LogInformation("ID Uploaded Successfully");
+                return Ok("ID Uploaded Successfully");
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
 
@@ -96,7 +102,8 @@ namespace UGHApi.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
 

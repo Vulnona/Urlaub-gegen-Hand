@@ -6,6 +6,8 @@ using Microsoft.OpenApi.Models;
 using UGHApi.Models;
 using UGHApi.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Serilog;
+using Serilog.Events;
 
 namespace UGHApi
 {
@@ -27,11 +29,21 @@ namespace UGHApi
             ConfigureEndpoints(app);
             app.Run();
         }
+       
         private static void ConfigureLogging(WebApplicationBuilder builder)
         {
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Information()  
+                .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+                .MinimumLevel.Override("Microsoft.EntityFrameworkCore", LogEventLevel.Warning)
+                .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
+                .Enrich.FromLogContext()
+                .WriteTo.Console()
+                .WriteTo.File("D:/UGH Docker/UGH/Backend/logs/UghApi-20240814.log", rollingInterval: RollingInterval.Day)
+                .CreateLogger();
+
             builder.Logging.ClearProviders();
-            builder.Logging.AddConsole();
-            builder.Logging.SetMinimumLevel(LogLevel.Debug);
+            builder.Host.UseSerilog(Log.Logger);
         }
         private static void ConfigureWebHost(WebApplicationBuilder builder)
         {
@@ -94,7 +106,7 @@ namespace UGHApi
                 options.AddPolicy("MyPolicy",
                     policy =>
                     {
-                        policy.WithOrigins("http://localhost:3000")
+                        policy.WithOrigins("http://localhost:3000", "http://localhost:3001")
                               .AllowAnyMethod()
                               .AllowAnyHeader()
                               .AllowCredentials();

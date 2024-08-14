@@ -10,15 +10,17 @@ namespace UGHApi.Controllers
     public class ReviewPostController : ControllerBase
     {
         private readonly UghContext _context;
+        private readonly ILogger<ReviewPostController> _logger;
 
-        public ReviewPostController(UghContext context)
+        public ReviewPostController(UghContext context, ILogger<ReviewPostController> logger)
         {
             _context = context;
+            _logger = logger;
         }
         #region post-user-review
 
         [HttpGet("get-posted-review-by-user-id/{userId}")]
-        public async Task<ActionResult<IEnumerable<ReviewPost>>> GetPostReviewsByUserId([FromQuery][Required] int userId)
+        public async Task<ActionResult<IEnumerable<ReviewPost>>> GetPostReviewsByUserId([Required] int userId)
         {
             try
             {
@@ -37,7 +39,8 @@ namespace UGHApi.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status204NoContent, ex.Message);
+               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
 
@@ -56,7 +59,8 @@ namespace UGHApi.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
         #endregion

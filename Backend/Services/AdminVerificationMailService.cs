@@ -10,13 +10,16 @@ namespace UGHApi.Services
     {
         private readonly MailSettings _mailSettings;
         private readonly TemplateSettings _templateSettings;
+        private readonly ILogger<AdminVerificationMailService> _logger;
 
         public AdminVerificationMailService(
             IOptions<MailSettings> mailSettings,
-            IOptions<TemplateSettings> templateSettings)
+            IOptions<TemplateSettings> templateSettings,
+            ILogger<AdminVerificationMailService> logger)
         {
             _mailSettings = mailSettings.Value;
             _templateSettings = templateSettings.Value;
+            _logger = logger;
         }
         #region user-verification-by-admin
         public async Task SendConfirmationEmailAsync(ConfirmationReq request)
@@ -48,6 +51,7 @@ namespace UGHApi.Services
             }
             catch (Exception ex)
             {
+                _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
                 throw new Exception(ex.Message);
             }
         }

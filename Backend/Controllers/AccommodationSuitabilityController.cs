@@ -11,10 +11,12 @@ namespace UGHApi.Controllers
     public class AccommodationSuitabilityController : ControllerBase
     {
         private readonly UghContext _context;
+        private readonly ILogger<AccommodationSuitabilityController> _logger;
 
-        public AccommodationSuitabilityController(UghContext context)
+        public AccommodationSuitabilityController(UghContext context, ILogger<AccommodationSuitabilityController> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         #region accommodation-suitablity
@@ -27,25 +29,27 @@ namespace UGHApi.Controllers
                 if (!result.Any()) return NotFound();
                 return Ok(result);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status204NoContent,"Suitable Accommodations not found!");
+               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
 
         [HttpGet("get-suitable-accommodation-by-id/{suitableAccommodationId:int}")]
-        public async Task<IActionResult> GetSuitableAccommodationById([FromQuery][Required] int suitableAccommodationId)
+        public async Task<IActionResult> GetSuitableAccommodationById([Required] int suitableAccommodationId)
         {
             try
             {
                 var suitableAccommodation = await _context.accommodationsuitables.FindAsync(suitableAccommodationId);
                 if (suitableAccommodation == null)
-                    return NotFound("Suitable Accommodation can not be null");
+                    return NotFound();
                 return Ok(suitableAccommodation);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status204NoContent,"Suitable Accomodation not found");
+               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
 
@@ -60,11 +64,11 @@ namespace UGHApi.Controllers
                 await _context.accommodationsuitables.AddAsync(suitableAccommodation);
                 await _context.SaveChangesAsync();
 
-                return Ok("Suitable Accommodation added successfully");
+                return Ok();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status304NotModified, "An error occurred while adding the suitable accommodation");
+                return StatusCode(StatusCodes.Status304NotModified, ex.Message);
             }
         }
 
@@ -78,11 +82,12 @@ namespace UGHApi.Controllers
 
                 _context.accommodationsuitables.Update(suitableAccommodation);
                 await _context.SaveChangesAsync();
-                return Ok("Suitable Accommodation updated successfully");
+                return Ok(suitableAccommodation);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status304NotModified,"Error occurred while updating the suitable accommodation");
+               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
 
@@ -98,11 +103,12 @@ namespace UGHApi.Controllers
                 _context.accommodationsuitables.Remove(findAccommodationSuitable);
                 await _context.SaveChangesAsync();
 
-                return Ok("Suitabl Accommodation deleted successfully!");
+                return Ok();
             }
-            catch (Exception )
+            catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status400BadRequest, "An error occurred while deleting the Suitable Accommodation");
+               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
         #endregion

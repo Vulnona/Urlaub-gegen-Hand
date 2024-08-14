@@ -27,6 +27,9 @@ COPY Backend/appsettings.json /app
 # Install nginx, network tools, and procps
 RUN apk add --no-cache nginx iputils procps
 
+# Install Python
+RUN apk add --no-cache python3
+
 # Copy the published binaries and chromedriver
 COPY --from=backend-build /app/binaries /app/binaries
 
@@ -36,6 +39,10 @@ COPY --from=backend-build /app/Template /app/Template
 # Set environment variables for template paths
 ENV TemplateSettings__SuccessTemplate=/app/Template/confirmation.html
 ENV TemplateSettings__FailedTemplate=/app/Template/DeclinedConfirmation.html
+
+# Set environment variables for chromedriver.exe and facebookcrawler.py paths
+ENV ChromeDriverPath=/app/Template/chromedriver.exe
+ENV FacebookCrawlerScriptPath=/app/Template/facebookcrawler.py
 
 # Expose port 80
 EXPOSE 80

@@ -9,9 +9,11 @@ namespace UGHApi.Controllers
     public class ReviewController : ControllerBase
     {
         private readonly UghContext _context;
-        public ReviewController(UghContext context)
+        private readonly ILogger<ReviewController> _logger;
+        public ReviewController(UghContext context, ILogger<ReviewController> logger)
         {
             _context = context;
+            _logger = logger;
         }
         #region review
         [HttpPost("add-review")]
@@ -45,9 +47,10 @@ namespace UGHApi.Controllers
 
                 return Ok("Review added successfully.");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError,"An error occurred while adding review.");
+               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
         [HttpPut("update-review")]
@@ -67,7 +70,8 @@ namespace UGHApi.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
         [HttpGet("get-all-reviews")]
@@ -76,16 +80,17 @@ namespace UGHApi.Controllers
             try
             {
                 var reviews = await _context.reviews.Include(r => r.User).Include(r => r.Offer).ToListAsync();
-                if (!reviews.Any()) return NotFound("Review for the entered ID not found."); 
+                if (!reviews.Any()) return NotFound(); 
                 return Ok(reviews);
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
         [HttpGet("get-user-by-offerId/{offerId}")]
-        public async Task<IActionResult> GetUserByOfferId([FromQuery][Required]int offerId)
+        public async Task<IActionResult> GetUserByOfferId([Required]int offerId)
         {
             try
             {
@@ -103,13 +108,14 @@ namespace UGHApi.Controllers
 
                 return Ok(user);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while fetching the user details for the given offer id.");
+               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
         [HttpGet("get-user-by-review-id/{reviewId}")]
-        public async Task<IActionResult> GetUserByReviewId([FromQuery][Required] int reviewId)
+        public async Task<IActionResult> GetUserByReviewId([Required] int reviewId)
         {
             try
             {
@@ -128,9 +134,10 @@ namespace UGHApi.Controllers
 
                 return Ok(user);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError,"An error occurred while fetching the user for the entered review id.");
+               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
         [HttpGet("check-review-status")]
@@ -156,13 +163,14 @@ namespace UGHApi.Controllers
                         return Ok(new { Status = "Apply" });
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while fetching the review status.");
+               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
         [HttpGet("get-reviews-for-user-offers/{userId}")]
-        public async Task<IActionResult> GetReviewsForUserOffers([FromQuery][Required] int userId)
+        public async Task<IActionResult> GetReviewsForUserOffers([Required] int userId)
         {
             try
             {
@@ -175,9 +183,10 @@ namespace UGHApi.Controllers
 
                 return Ok(reviews);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError,"An error occurred while fetching the reviews for the entered user offer.");
+               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
     }

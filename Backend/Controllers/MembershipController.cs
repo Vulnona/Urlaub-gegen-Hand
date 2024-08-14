@@ -14,10 +14,12 @@ namespace UGHApi.Controllers
     public class MembershipController : ControllerBase
     {
         private readonly UghContext _context;
+        private readonly ILogger<MembershipController> _logger;
 
-        public MembershipController(UghContext context)
+        public MembershipController(UghContext context, ILogger<MembershipController> logger)
         {
             _context = context;
+            _logger = logger;
         }
         #region user-membership-using-ecwid
         [HttpGet("validate-subscriptionId")]
@@ -60,9 +62,10 @@ namespace UGHApi.Controllers
                     return StatusCode((int)response.StatusCode, errorDetails);
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return StatusCode(500, "An error occurred while fetching the valid subscription id.");
+               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
         public class SubscriptionResponse
@@ -85,7 +88,7 @@ namespace UGHApi.Controllers
         }
         
         [HttpGet("check-active-membership-by-userId/{userId}")]    //API to check the active  membership of the user by userId
-        public async Task<IActionResult> CheckActiveMembershipByUserId([FromQuery]int userId)
+        public async Task<IActionResult> CheckActiveMembershipByUserId(int userId)
         {
             var user = await _context.users.Include(u => u.CurrentMembership).FirstOrDefaultAsync(u => u.User_Id == userId);
             if (user == null)

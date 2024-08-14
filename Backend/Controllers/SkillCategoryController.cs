@@ -9,10 +9,11 @@ namespace UGHApi.Controllers
     public class SkillCategoryController : ControllerBase
     {
         private readonly UghContext _context;
-
-        public SkillCategoryController(UghContext context)
+        private readonly ILogger<SkillCategoryController> _logger;
+        public SkillCategoryController(UghContext context, ILogger<SkillCategoryController> logger)
         {
             _context = context;
+            _logger = logger;
         }
         #region parent-skills
 
@@ -25,9 +26,10 @@ namespace UGHApi.Controllers
                 if(!skillCategories.Any()) return NotFound();
                 return Ok(skillCategories);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while fetching the parent skills.");
+               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
         #endregion

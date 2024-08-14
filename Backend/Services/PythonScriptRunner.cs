@@ -1,5 +1,6 @@
-﻿using System.Diagnostics;
-
+﻿using Microsoft.Extensions.Options;
+using System.Diagnostics;
+using UGHApi.Models;
 
 namespace UGHApi.Services
 {
@@ -8,41 +9,71 @@ namespace UGHApi.Services
         private readonly ILogger<PythonScriptRunner> _logger;
         private Timer _timer;
         private Process _chromeDriverProcess;
+        private readonly TemplateSettings _templateSettings;
 
-        public PythonScriptRunner(ILogger<PythonScriptRunner> logger)
+        public PythonScriptRunner(ILogger<PythonScriptRunner> logger, IOptions<TemplateSettings> templateSettings)
         {
             _logger = logger;
+            _templateSettings = templateSettings.Value;
         }
-        #region start-facebook-crawling
+
         public Task StartAsync(CancellationToken cancellationToken)
         {
             _logger.LogInformation("PythonScriptRunner is starting.");
             _timer = new Timer(RunScript, null, TimeSpan.Zero, TimeSpan.FromMinutes(2));
             return Task.CompletedTask;
         }
+
         private void RunScript(object state)
         {
             try
             {
                 _logger.LogInformation("Starting ChromeDriver...");
-                _chromeDriverProcess = new Process();
-                _chromeDriverProcess.StartInfo.FileName = @"/home/azureuser/migration-fix/chromedriver.exe";
-                _chromeDriverProcess.StartInfo.UseShellExecute = false;
-                _chromeDriverProcess.StartInfo.RedirectStandardOutput = true;
-                _chromeDriverProcess.StartInfo.RedirectStandardError = true;
+
+                string chromeDriverPath = Environment.GetEnvironmentVariable("ChromeDriverPath") ?? _templateSettings.ChromeDriverPath;
+                if (string.IsNullOrEmpty(chromeDriverPath))
+                {
+                    _logger.LogError("ChromeDriver path is not set.");
+                    return;
+                }
+
+                _chromeDriverProcess = new Process
+                {
+                    StartInfo = new ProcessStartInfo
+                    {
+                        FileName = chromeDriverPath,
+                        UseShellExecute = false,
+                        RedirectStandardOutput = true,
+                        RedirectStandardError = true
+                    }
+                };
                 _chromeDriverProcess.Start();
+
                 _logger.LogInformation("Running Python script...");
-                ProcessStartInfo start = new ProcessStartInfo();
-                start.FileName = "python";
-                start.Arguments = @"/home/azureuser/migration-fix/facebookcrawler.py";
-                start.UseShellExecute = false;
-                start.RedirectStandardOutput = true;
-                start.RedirectStandardError = true;
+
+                string pythonScriptPath = Environment.GetEnvironmentVariable("FacebookCrawlerScriptPath") ?? _templateSettings.FacebookCrawlerScriptPath;
+                if (string.IsNullOrEmpty(pythonScriptPath))
+                {
+                    _logger.LogError("Python script path is not set.");
+                    return;
+                }
+
+                ProcessStartInfo start = new ProcessStartInfo
+                {
+                    FileName = "python3", 
+                    Arguments = pythonScriptPath,
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true
+                };
+
+
                 using (Process process = Process.Start(start))
                 {
                     process.WaitForExit();
                     string result = process.StandardOutput.ReadToEnd();
                     string error = process.StandardError.ReadToEnd();
+
                     _logger.LogInformation(result);
                     if (!string.IsNullOrEmpty(error))
                     {
@@ -52,7 +83,7 @@ namespace UGHApi.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error running Python script");
+                _logger.LogError(ex, "Error running Python script!");
             }
             finally
             {
@@ -64,12 +95,14 @@ namespace UGHApi.Services
                 }
             }
         }
+
         public Task StopAsync(CancellationToken cancellationToken)
         {
             _logger.LogInformation("PythonScriptRunner is stopping.");
             _timer?.Change(Timeout.Infinite, 0);
             return Task.CompletedTask;
         }
+
         public void Dispose()
         {
             _timer?.Dispose();
@@ -82,6 +115,5 @@ namespace UGHApi.Services
                 _chromeDriverProcess.Dispose();
             }
         }
-        #endregion
     }
 }

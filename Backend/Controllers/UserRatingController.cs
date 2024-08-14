@@ -11,9 +11,11 @@ namespace UGHApi.Controllers
     public class UserRatingController : ControllerBase
     {
         private readonly UghContext _context;
-        public UserRatingController(UghContext context)
+        private readonly ILogger<UserRatingController> _logger;
+        public UserRatingController(UghContext context, ILogger<UserRatingController> logger)
         {
             _context = context;
+            _logger = logger;
         }
         #region user-ratings
         [HttpPost("add-rating-to-host")]
@@ -23,13 +25,13 @@ namespace UGHApi.Controllers
             {
                 if (ratingUserLogin == null)
                 {
-                    return BadRequest("No ratings found for the logged in user.");
+                    return BadRequest();
                 }
 
                 var offer = await _context.offers.FindAsync(ratingUserLogin.OfferId);
                 if (offer == null)
                 {
-                    return NotFound("No offer found for the logged in user.");
+                    return NotFound();
                 }
                 else if (offer.User_Id == ratingUserLogin.User_Id)
                 {
@@ -39,7 +41,7 @@ namespace UGHApi.Controllers
                 var existingRating = await _context.ratinguserlogins.FirstOrDefaultAsync(r => r.User_Id == ratingUserLogin.User_Id && r.OfferId == ratingUserLogin.OfferId);
                 if (existingRating != null)
                 {
-                    return BadRequest("No existing rating found.");
+                    return BadRequest();
                 }
 
                 var rating = new RatingUserLogin
@@ -53,11 +55,12 @@ namespace UGHApi.Controllers
                 _context.ratinguserlogins.Add(rating);
                 await _context.SaveChangesAsync();
 
-                return Ok("User rating added successfully.");
+                return Ok();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while adding the rating to the host.");
+               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
 
@@ -73,7 +76,7 @@ namespace UGHApi.Controllers
                 var offer = await _context.offers.FindAsync(ratingHostLogin.OfferId);
                 if (offer == null)
                 {
-                    return NotFound("No offer found.");
+                    return NotFound();
                 }
                 if (offer.User_Id != ratingHostLogin.User_Id)
                 {
@@ -89,7 +92,7 @@ namespace UGHApi.Controllers
                         };
                         _context.ratinghostlogins.Add(rating);
                         await _context.SaveChangesAsync();
-                        return Ok("User rating added successfully.");
+                        return Ok();
                     }
                     else
                     {
@@ -101,14 +104,15 @@ namespace UGHApi.Controllers
                     return BadRequest();
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status304NotModified, "An error occurred while posting rating to the user.");
+               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
 
         [HttpGet("get-rating-by-user-id/{userId}")]
-        public async Task<IActionResult> GetRatingByUserId([FromQuery][Required]int userId)
+        public async Task<IActionResult> GetRatingByUserId([Required]int userId)
         {
             try
             {
@@ -131,7 +135,7 @@ namespace UGHApi.Controllers
                     var hostRatings = await query.ToListAsync();
                     if (!hostRatings.Any())
                     {
-                        return BadRequest("No ratings found.");
+                        return BadRequest();
                     }
                     var averageRatings = hostRatings.Average(r => r.HostRating);
                     var ratingsCounts = hostRatings.Count();
@@ -151,9 +155,10 @@ namespace UGHApi.Controllers
                     Ratings = ratings
                 });
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status204NoContent, "An error occurred while fetching ratings by user id.");
+               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
         #endregion
