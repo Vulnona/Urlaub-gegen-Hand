@@ -570,6 +570,10 @@ Backend/obj/UGHApi.csproj.nuget.dgspec.json
 Backend/obj/UGHApi.csproj.nuget.g.props
 Backend/obj/UGHApi.csproj.nuget.g.targets
 
+#Sec Stuff
+Backend/bin
+Backend/obj
+
 # IntelliJ Config
 /.idea/
 
