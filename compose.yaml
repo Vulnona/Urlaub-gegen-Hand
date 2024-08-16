@@ -37,6 +37,8 @@ services:
       - db__user_password
     depends_on:
       - db
+    volumes:
+    - D:/UGH Docker/UGH/Backend/logs:/app/logs
 
   db:
     image: mysql:5.7

@@ -29,17 +29,17 @@ namespace UGHApi
             ConfigureEndpoints(app);
             app.Run();
         }
-       
+
         private static void ConfigureLogging(WebApplicationBuilder builder)
         {
             Log.Logger = new LoggerConfiguration()
-                .MinimumLevel.Information()  
+                .MinimumLevel.Information()
                 .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
                 .MinimumLevel.Override("Microsoft.EntityFrameworkCore", LogEventLevel.Warning)
                 .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
                 .Enrich.FromLogContext()
                 .WriteTo.Console()
-                .WriteTo.File("D:/UGH Docker/UGH/Backend/logs/UghApi-20240814.log", rollingInterval: RollingInterval.Day)
+                .WriteTo.File("/app/logs/logfile.log", rollingInterval: RollingInterval.Day)
                 .CreateLogger();
 
             builder.Logging.ClearProviders();
