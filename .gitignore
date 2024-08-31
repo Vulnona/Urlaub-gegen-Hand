@@ -574,6 +574,10 @@ Frontend-Vuetify/.env
 Backend/obj/Release/net7.0/PubTmp/Out/appsettings.json
 Backend/bin
 
+#Sec Stuff
+Backend/bin
+Backend/obj
+
 # IntelliJ Config
 /.idea/
 
