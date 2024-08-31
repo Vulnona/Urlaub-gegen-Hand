@@ -1,46 +1,53 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 using UGHApi.Models;
 
 namespace UGHApi.Controllers
 {
-    [Route("api/")]
+    [Route("api/review-user-offer")]
     [ApiController]
     public class ReviewOfferUserController : ControllerBase
     {
         private readonly UghContext _context;
+        private readonly ILogger<ReviewOfferUserController> _logger;
 
-        public ReviewOfferUserController(UghContext context)
+        public ReviewOfferUserController(UghContext context,ILogger<ReviewOfferUserController> logger)
         {
             _context = context;
+            _logger = logger;
         }
-
-        // GET: api/ReviewOfferUser
-        [HttpGet("review-offer-user/get-review")]
-        public IActionResult Getreviewofferusers()
+        #region review-offers
+        [HttpGet("get-all-reviews")]
+        public async Task<IActionResult> GetReviewOfferUsers()
         {
             try
             {
-                var reviews = _context.reviewofferusers
+                var reviews = await _context.reviewofferusers
                     .Include(r => r.Offer)
-                    .ToList();
+                    .ToListAsync();
+                if (!reviews.Any())
+                    return NotFound();
+
                 return Ok(reviews);
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status204NoContent, ex.Message);
+               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
 
-        // GET: api/ReviewOfferUser/5
-        [HttpGet("review-offer-user/get-review-offer-user/{id}")]
-        public IActionResult GetReviewOfferUser(int id)
+
+        [HttpGet("get-review-by-offerId/{id}")]
+        public async Task<IActionResult> GetReviewOfferUser([Required] int id)
         {
             try
             {
-                var review = _context.reviewofferusers
+                var review = await _context.reviewofferusers
                     .Include(r => r.Offer)
-                    .FirstOrDefault(r => r.Id == id);
+                    .FirstOrDefaultAsync(r => r.Id == id);
+
                 if (review == null)
                     return NotFound();
 
@@ -48,60 +55,67 @@ namespace UGHApi.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status204NoContent, ex.Message);
+               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
 
-        [HttpPost("review-offer-user/create-review-offer-user")]
+        [HttpPost("create-review")]
         public async Task<IActionResult> CreateReviewOfferUser([FromBody] ReviewOfferUser reviewOfferUser)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
             if (reviewOfferUser == null)
-                return BadRequest("ReviewOfferUser object is null");
+                return BadRequest();
 
             try
             {
-                var offer = _context.offers.FirstOrDefault(o => o.Id == reviewOfferUser.OfferId);
+                var offer = await _context.offers.FirstOrDefaultAsync(o => o.Id == reviewOfferUser.OfferId);
                 if (offer == null)
-                    return NotFound("Offer not found");
+                    return NotFound();
 
-                var existingReview = _context.reviewofferusers
-                    .FirstOrDefault(r => r.OfferId == reviewOfferUser.OfferId && r.UserId == reviewOfferUser.UserId);
+                var existingReview = await _context.reviewofferusers
+                    .FirstOrDefaultAsync(r => r.OfferId == reviewOfferUser.OfferId && r.UserId == reviewOfferUser.UserId);
                 if (existingReview != null)
-                    return Conflict("Duplicate review");
+                    return Conflict();
 
-                var reviewLoginUser = _context.reviewloginusers
-                    .FirstOrDefault(r => r.OfferId == reviewOfferUser.OfferId);
+                var reviewLoginUser = await _context.reviewloginusers
+                    .FirstOrDefaultAsync(r => r.OfferId == reviewOfferUser.OfferId);
                 if (reviewLoginUser != null && reviewLoginUser.IsReviewPeriodOver)
-                    return BadRequest("You cannot add a review before the other user has finished their review period.");
+                    return BadRequest();
 
                 reviewOfferUser.UserId = offer.User_Id;
 
-                _context.reviewofferusers.Add(reviewOfferUser);
+                await _context.reviewofferusers.AddAsync(reviewOfferUser);
                 await _context.SaveChangesAsync();
 
-                AddPostReviewEntry(offer.Id);
+                await AddPostReviewEntry(offer.Id);
 
                 return Ok();
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status304NotModified, ex.Message);
+               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
 
-        private void AddPostReviewEntry(int offerId)
+        private async Task AddPostReviewEntry([Required]int offerId)
         {
             try
             {
-                var reviewOfferUser = _context.reviewofferusers
+                var reviewOfferUser = await _context.reviewofferusers
                     .Where(r => r.OfferId == offerId)
                     .OrderByDescending(r => r.CreatedAt)
-                    .FirstOrDefault();
+                    .FirstOrDefaultAsync();
 
-                var reviewLoginUser = _context.reviewloginusers
+                var reviewLoginUser = await _context.reviewloginusers
                     .Where(r => r.OfferId == offerId)
                     .OrderByDescending(r => r.CreatedAt)
-                    .FirstOrDefault();
+                    .FirstOrDefaultAsync();
 
                 if (reviewOfferUser != null && reviewLoginUser != null)
                 {
@@ -114,63 +128,74 @@ namespace UGHApi.Controllers
                         CreatedAt = DateTime.Now
                     };
 
-                    _context.reviewposts.Add(postReview);
-                    _context.SaveChanges();
+                    await _context.reviewposts.AddAsync(postReview);
+                    await _context.SaveChangesAsync();
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                StatusCode(StatusCodes.Status304NotModified, ex.Message);
+                throw;
             }
         }
 
-        [HttpPut("review-offer-user/update-review-offer-user/{id}")]
-        public IActionResult UpdateReviewOfferUser(int id, [FromBody] ReviewOfferUser reviewOfferUser)
+        [HttpPut("update-review-by-id/{id}")]
+        public async Task<IActionResult> UpdateReviewOfferUser([Required] int id, [FromBody] ReviewOfferUser reviewOfferUser)
         {
-            if (reviewOfferUser == null)
-                return BadRequest("ReviewOfferUser object is null");
+            if (!ModelState.IsValid || reviewOfferUser == null)
+            {
+                return BadRequest(ModelState);
+            }
 
             if (id != reviewOfferUser.Id)
-                return BadRequest("ID mismatch");
+            {
+                return BadRequest();
+            }
 
             try
             {
-                var existingReview = _context.reviewofferusers.Find(id);
+                var existingReview = await _context.reviewofferusers.FindAsync(id);
                 if (existingReview == null)
+                {
                     return NotFound();
+                }
 
                 existingReview.AddReviewForOfferUser = reviewOfferUser.AddReviewForOfferUser;
-                existingReview.CreatedAt = reviewOfferUser.CreatedAt;
+                existingReview.CreatedAt = reviewOfferUser.CreatedAt; 
 
-                _context.reviewofferusers.Update(existingReview);
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
 
                 return NoContent();
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status304NotModified, ex.Message);
+               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
 
-        [HttpDelete("review-offer-user/delete-review-offer-user/{id}")]
-        public IActionResult DeleteReviewOfferUser(int id)
+        [HttpDelete("delete-review/{id}")]
+        public async Task<IActionResult> DeleteReviewOfferUser([Required] int id)
         {
             try
             {
-                var review = _context.reviewofferusers.Find(id);
+                var review = await _context.reviewofferusers.FindAsync(id);
                 if (review == null)
+                {
                     return NotFound();
+                }
 
                 _context.reviewofferusers.Remove(review);
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
 
                 return NoContent();
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status501NotImplemented, ex.Message);
+               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+
     }
+    #endregion
 }

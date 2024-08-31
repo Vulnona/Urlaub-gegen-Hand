@@ -11,27 +11,27 @@ namespace UGHApi.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.CreateTable(
-                name: "skills",
-                columns: table => new
-                {
-                    SkillID = table.Column<int>(name: "Skill_ID", type: "int", nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    SkillDescrition = table.Column<string>(type: "longtext", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4")
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_skills", x => x.SkillID);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
+            //migrationBuilder.CreateTable(
+            //    name: "skills",
+            //    columns: table => new
+            //    {
+            //        SkillID = table.Column<int>(name: "Skill_ID", type: "int", nullable: false)
+            //            .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+            //        SkillDescrition = table.Column<string>(type: "longtext", nullable: false)
+            //            .Annotation("MySql:CharSet", "utf8mb4")
+            //    },
+            //    constraints: table =>
+            //    {
+            //        table.PrimaryKey("PK_skills", x => x.SkillID);
+            //    })
+            //    .Annotation("MySql:CharSet", "utf8mb4");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "skills");
+            //migrationBuilder.DropTable(
+            //    name: "skills");
         }
     }
 }

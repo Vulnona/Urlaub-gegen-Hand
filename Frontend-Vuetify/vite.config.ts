@@ -1,13 +1,9 @@
-// Plugins
-import vue from '@vitejs/plugin-vue'
-import vuetify, { transformAssetUrls } from 'vite-plugin-vuetify'
-import ViteFonts from 'unplugin-fonts/vite'
+import vue from '@vitejs/plugin-vue';
+import vuetify, { transformAssetUrls } from 'vite-plugin-vuetify';
+import ViteFonts from 'unplugin-fonts/vite';
+import { defineConfig, loadEnv } from 'vite';
+import { fileURLToPath, URL } from 'node:url';
 
-// Utilities
-import { defineConfig, loadEnv } from 'vite'
-import { fileURLToPath, URL } from 'node:url'
-
-// https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
   return {
@@ -15,14 +11,13 @@ export default defineConfig(({ mode }) => {
       host: '0.0.0.0',
       port: 3000,
       watch: {
-        usePolling: JSON.stringify(env.VITE_USE_POLLING) === 'true',
-      }
+        usePolling: env.VITE_USE_POLLING === 'true',
+      },
     },
     plugins: [
       vue({
         template: { transformAssetUrls },
       }),
-      // https://github.com/vuetifyjs/vuetify-loader/tree/master/packages/vite-plugin#readme
       vuetify({
         autoImport: true,
         styles: {
@@ -42,8 +37,17 @@ export default defineConfig(({ mode }) => {
     ],
     define: {
       'process.env': {
-        'SECRET_KEY': 'thisismytestsecretkey', 'baseURL': 'http://localhost:8080/api/', 'baseURL_Frontend': 'http://localhost:3000/'
-      }
+        SECRET_KEY: env.SECRET_KEY, 
+        baseURL: env.BASE_URL, 
+        baseURL_Frontend: env.BASE_URL_FRONTEND, 
+        SecretAccessKey: env.AWS_SECRET_ACCESS_KEY, 
+        AccessKeyId: env.AWS_ACCESS_KEY_ID,
+        Aws_region: env.AWS_REGION, 
+        Aws_Url:env.AWS_URL,
+        S3_BUCKET_NAME: env.S3_BUCKET_NAME, 
+        x_api_key: env.API_KEY, 
+        claims_Url:env.CLAIMS_URL,
+      },
     },
     resolve: {
       alias: {
@@ -52,5 +56,5 @@ export default defineConfig(({ mode }) => {
       extensions: ['.js', '.json', '.jsx', '.mjs', '.ts', '.tsx', '.vue'],
     },
     base: './',
-  }
-})
+  };
+});

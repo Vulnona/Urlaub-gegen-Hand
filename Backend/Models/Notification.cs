@@ -10,7 +10,7 @@ namespace UGHApi.Models
                 this.UserProfile = userProfile;
                
         }
-                public int Notification_ID{get;set;}
+        public int Notification_ID{get;set;}
         public string Title{get;set;}
         public string Caption{get;set;}
         public Profile UserProfile{get;set;}

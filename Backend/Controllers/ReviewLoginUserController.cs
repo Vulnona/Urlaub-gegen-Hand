@@ -1,97 +1,103 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 using UGHApi.Models;
 
 namespace UGHApi.Controllers
 {
-    [Route("api/")]
+    [Route("api/review-login-user")]
     [ApiController]
     public class ReviewLoginUserController : ControllerBase
     {
         private readonly UghContext _context;
+        private readonly ILogger<ReviewLoginUserController> _logger;
 
-        public ReviewLoginUserController(UghContext context)
+        public ReviewLoginUserController(UghContext context,ILogger<ReviewLoginUserController> logger)
         {
             _context = context;
+            _logger = logger;
         }
-
-        [HttpGet("review-login-user/get-review-login-users")]
-        public IActionResult Getreviewloginusers()
+        #region login-user-review
+        [HttpGet("get-all-reviews")]
+        public async Task<IActionResult> GetReviewLoginUsers()
         {
             try
             {
-                var reviews = _context.reviewloginusers.ToList();
+                var reviews = await _context.reviewloginusers.ToListAsync();
+                if (!reviews.Any()) return BadRequest(ModelState); 
                 return Ok(reviews);
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status204NoContent, ex.Message);
+               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
 
-        [HttpGet("review-login-user/get-review/{id}")]
-        public IActionResult GetReviewLoginUser(int id)
+        [HttpGet("get-review-by-userId/{id}")]
+        public async Task<IActionResult> GetReviewLoginUser([Required] int id)
         {
             try
             {
-                var review = _context.reviewloginusers.Find(id);
+                var review = await _context.reviewloginusers.FindAsync(id);
                 if (review == null) return NotFound();
 
                 return Ok(review);
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status204NoContent, ex.Message);
+               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
 
-        [HttpPost("review-login-user/create-review-login-user")]
+        [HttpPost("create-review")]
         public async Task<IActionResult> CreateReviewLoginUser([FromBody] ReviewLoginUser reviewLoginUser)
         {
-            if (reviewLoginUser == null)
-                return BadRequest("ReviewLoginUser object is null");
-
             try
             {
-                var offer = _context.offers.FirstOrDefault(o => o.Id == reviewLoginUser.OfferId);
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+                var offer = await _context.offers.FirstOrDefaultAsync(o => o.Id == reviewLoginUser.OfferId);
                 if (offer == null)
-                    return NotFound("Offer not found");
+                    return NotFound();
 
-                var existingReview = _context.reviewloginusers
-                    .FirstOrDefault(r => r.OfferId == reviewLoginUser.OfferId && r.UserId == reviewLoginUser.UserId);
+                var existingReview = await _context.reviewloginusers
+                    .FirstOrDefaultAsync(r => r.OfferId == reviewLoginUser.OfferId && r.UserId == reviewLoginUser.UserId);
                 if (existingReview != null)
-                    return Conflict("Duplicate review");
+                    return Conflict();
 
-                var reviewOfferUser = _context.reviewofferusers
-                    .FirstOrDefault(r => r.OfferId == reviewLoginUser.OfferId);
+                var reviewOfferUser = await _context.reviewofferusers
+                    .FirstOrDefaultAsync(r => r.OfferId == reviewLoginUser.OfferId);
                 if (reviewOfferUser != null && reviewOfferUser.IsReviewPeriodOver)
-                    return BadRequest("You cannot add a review before the other user has finished their review period.");
+                    return BadRequest();
 
                 _context.reviewloginusers.Add(reviewLoginUser);
                 await _context.SaveChangesAsync();
 
-                AddPostReviewEntry(offer.Id);
+               await AddPostReviewEntry(offer.Id);
 
                 return Ok();
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status304NotModified, ex.Message);
+               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
 
-        private void AddPostReviewEntry(int offerId)
+        private async Task AddPostReviewEntry([Required] int offerId)
         {
             try
             {
-                var reviewOfferUser = _context.reviewofferusers
+                var reviewOfferUser = await _context.reviewofferusers
                     .Where(r => r.OfferId == offerId)
                     .OrderByDescending(r => r.CreatedAt)
-                    .FirstOrDefault();
+                    .FirstOrDefaultAsync();
 
-                var reviewLoginUser = _context.reviewloginusers
+                var reviewLoginUser = await _context.reviewloginusers
                     .Where(r => r.OfferId == offerId)
                     .OrderByDescending(r => r.CreatedAt)
-                    .FirstOrDefault();
+                    .FirstOrDefaultAsync();
 
                 if (reviewOfferUser != null && reviewLoginUser != null)
                 {
@@ -105,56 +111,64 @@ namespace UGHApi.Controllers
                     };
 
                     _context.reviewposts.Add(postReview);
-                    _context.SaveChanges();
+                    await _context.SaveChangesAsync();
                 }
             }
             catch (Exception ex)
             {
-                 StatusCode(StatusCodes.Status304NotModified, ex.Message);
+                _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                throw new Exception("An error occurred while adding the post review entry.", ex);
             }
         }
 
-        [HttpPut("review-login-user/update-review-login-user/{id}")]
-        public IActionResult UpdateReviewLoginUser(int id, [FromBody] ReviewLoginUser reviewLoginUser)
+        [HttpPut("update-review-by-id/{id}")]
+        public async Task<IActionResult> UpdateReviewLoginUser([Required] int id, [FromBody] ReviewLoginUser reviewLoginUser)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
             if (id != reviewLoginUser.Id) return BadRequest();
 
             try
             {
-                var existingReview = _context.reviewloginusers.Find(id);
-                if (existingReview == null) return NotFound();
+                var existingReview = await _context.reviewloginusers.FindAsync(id);
+                if (existingReview == null)
+                    return NotFound();
 
                 existingReview.AddReviewForLoginUser = reviewLoginUser.AddReviewForLoginUser;
                 existingReview.CreatedAt = reviewLoginUser.CreatedAt;
 
                 _context.reviewloginusers.Update(existingReview);
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
 
-                return NoContent();
+                return Ok();
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status304NotModified, ex.Message);
+               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
 
-        [HttpDelete("review-login-user/delete/{id}")]
-        public IActionResult DeleteReviewLoginUser(int id)
+        [HttpDelete("delete-review/{id}")]
+        public async Task<IActionResult> DeleteReviewLoginUser([Required] int id)
         {
             try
             {
-                var review = _context.reviewloginusers.Find(id);
+                var review = await _context.reviewloginusers.FindAsync(id);
                 if (review == null) return NotFound();
 
                 _context.reviewloginusers.Remove(review);
-                _context.SaveChanges();
-
-                return NoContent();
+                await _context.SaveChangesAsync();
+                return Ok();
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status501NotImplemented, ex.Message);
+               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
     }
+    #endregion
 }

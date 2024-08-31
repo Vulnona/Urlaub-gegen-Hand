@@ -7,14 +7,15 @@ namespace UGHApi.Models
 {
     public class UserProfile
     {
+        [Required]
         public int Id { get; set; }
-
+        [Required]
         public int User_Id { get; set; }
 
         [ForeignKey("User_Id")]
         public User User { get; set; }
 
-        public byte[] UserPic { get; set; }
+        public byte[]? UserPic { get; set; }
 
         public ProfileOptions Options { get; set; }
 

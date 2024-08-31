@@ -1,105 +1,91 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.ComponentModel.DataAnnotations;
 using UGHApi.Models;
 
 namespace UGHApi.Controllers
 {
-    [Route("api/")]
+    [Route("api/offer")]
     [ApiController]
     public class OfferController : ControllerBase
     {
         private readonly UghContext _context;
-        public OfferController(UghContext context)
+        private readonly ILogger<OfferController> _logger;
+        public OfferController(UghContext context, ILogger<OfferController> logger)
         {
             _context = context;
+            _logger = logger;
         }
-        [HttpGet("offer/get-all-offers")]
-        public IActionResult Getoffers(string searchTerm)
+        #region offers
+        [HttpGet("get-all-offers")]
+        public async Task<IActionResult> GetOffersAsync(string searchTerm)
         {
             try
             {
+                IQueryable<Offer> query = _context.offers.Include(o => o.User);
+
                 if (!string.IsNullOrEmpty(searchTerm))
                 {
-                    var searchResult = _context.offers
-                        .Include(o => o.Region)
-                        .Include(o => o.User)
-                        .Where(o => o.Title.Contains(searchTerm) || o.skills.Contains(searchTerm) || o.Location.Contains(searchTerm) || o.Region.RegionName.Contains(searchTerm))
-                        .ToList();
-
-                    return Ok(searchResult);
+                    query = query.Where(o => o.Title.Contains(searchTerm) || o.skills.Contains(searchTerm) || o.Location.Contains(searchTerm) || o.state.Contains(searchTerm));
                 }
-                else
-                {
-                    var alloffers = _context.offers
 
-
-                         .Include(o => o.Region)
-                         .Include(o => o.User)
-                        .ToList();
-
-                    return Ok(alloffers);
-                }
+                var result = await query.ToListAsync();
+                if(result.IsNullOrEmpty()) return NotFound();
+                return Ok(result);
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status204NoContent, ex.Message);
+               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
-
-
-        [HttpGet("offer/get-offer-by-id/{OfferId:int}")]
-        public IActionResult GetOffer(int OfferId)
+        [HttpGet("get-offer-by-id/{OfferId:int}")]
+        public async Task<IActionResult> GetOfferAsync([Required]int OfferId)
         {
             try
             {
-                var offer = _context.offers
-                    .Include(o => o.Region)
-                    .Include(o => o.User)
-                    .FirstOrDefault(o => o.Id == OfferId);
+                var offer = await _context.offers.Include(o => o.User).FirstOrDefaultAsync(o => o.Id == OfferId);
 
                 if (offer == null)
-                    return NotFound("Offer not found.");
+                    return NotFound();
 
                 return Ok(offer);
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status204NoContent, ex.Message);
+               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
-
-        [HttpPost("offer/add-new-offer")]
-        public async Task<IActionResult> AddOffer([FromForm] OfferViewModel offerViewModel, string email)
+        [HttpPost("add-new-offer")]
+        public async Task<IActionResult> AddOffer([FromForm] OfferViewModel offerViewModel)
         {
             try
             {
-                if (offerViewModel == null)
-                    return BadRequest("Offer data is null.");
-
-                if (!ModelState.IsValid)
-                    return BadRequest(ModelState);
-                var user = _context.users.Include(u => u.CurrentMembership).FirstOrDefault(u => u.Email_Address == email);
+                if (!ModelState.IsValid) return BadRequest(ModelState);
+                var user = _context.users.Include(u => u.CurrentMembership).FirstOrDefault(u => u.User_Id == offerViewModel.User_Id);
 
                 if (user == null)
                     return BadRequest("User not found.");
 
-                // Check if CurrentMembership exists and its MembershipID is greater than 033
                 if (user.CurrentMembership == null)
                 {
                     return BadRequest("User is not authorized to add an offer.");
                 }
-                // Create a new Offer object
                 var offer = new Offer
                 {
                     Title = offerViewModel.Title,
                     Description = offerViewModel.Description,
                     Location = offerViewModel.Location,
                     Contact = offerViewModel.Contact,
-                    Accomodation = offerViewModel.Accomodation,
-                    accomodationsuitable = offerViewModel.accomodationsuitable,
-                    skills=offerViewModel.skills,
-                    Region_ID = offerViewModel.Region_ID,
-                    User_Id = offerViewModel.User_Id
+                    Accomodation = offerViewModel.Accommodation,
+                    accomodationsuitable = offerViewModel.AccommodationSuitable,
+                    skills=offerViewModel.Skills,
+                    User_Id = offerViewModel.User_Id,
+                    country=offerViewModel.Country,
+                    state=offerViewModel.State,
+                    city=offerViewModel.City,
                 };
 
                 if (offerViewModel.Image != null && offerViewModel.Image.Length > 0)
@@ -112,57 +98,36 @@ namespace UGHApi.Controllers
 
                 _context.offers.Add(offer);
                 await _context.SaveChangesAsync();
-
-                return Ok("Offer successfully posted");
+                _logger.LogInformation("New Offer Added Successfully!");
+                return Ok();
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status406NotAcceptable, ex.Message);
+               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
-
-        [HttpPut("offer/update-offer")]
-        public IActionResult UpdateOffer([FromBody] Offer offer)
+        [HttpDelete("delete-offer/{OfferId:int}")]
+        public async Task<IActionResult> DeleteOfferAsync([Required]int OfferId)
         {
             try
             {
-                if (offer == null) return NotFound();
-                if (!ModelState.IsValid) return BadRequest(ModelState);
-                _context.offers.Update(offer);
-                _context.SaveChanges();
-                return Ok(offer);
-
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status304NotModified, ex.Message);
-
-            }
-        }
-
-        [HttpDelete("offer/delete-offer/{OfferId:int}")]
-        public IActionResult DeleteOffer(int OfferId)
-        {
-            try
-            {
-                var offer = _context.offers.Find(OfferId);
+                var offer = await _context.offers.FindAsync(OfferId);
                 if (offer == null)
+                {
                     return NotFound("Offer not found.");
+                }
 
                 _context.offers.Remove(offer);
-                _context.SaveChanges();
-
+                await _context.SaveChangesAsync();
                 return Ok(offer);
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status400BadRequest, ex.Message);
+               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
-        public class OfferModel
-        {
-            public string Title { get; set; }
-            public string Description { get; set; }
-        }
+        #endregion
     }
 }

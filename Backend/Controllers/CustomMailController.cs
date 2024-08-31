@@ -3,27 +3,32 @@ using UGHApi.Models;
 
 namespace UGHApi.Controllers
 {
-    [Route("api/")]
+    [Route("api/custom-mail")]
     [ApiController]
     public class CustomMailController : ControllerBase
     {
         private readonly EmailService _emailService;
-        public CustomMailController(EmailService emailService)
+        private readonly ILogger<CustomMailController> _logger;
+        public CustomMailController(EmailService emailService,ILogger<CustomMailController> logger)
         {
             _emailService = emailService;   
+            _logger = logger;
         }
-        [HttpPost("custom-mail/send")]
-        public IActionResult CustomSendEmail([FromBody] CustomMailBody mailBody)
+        #region send-custom-verification-email
+        [HttpPost("send")]
+        public async Task<IActionResult> CustomSendEmail([FromBody] CustomMailBody mailBody)
         {
             try
             {
-                _emailService.SendEmail(mailBody.to, mailBody.subject, mailBody.body);
-                return Ok("Email sent successfully.");
+                await _emailService.SendEmailAsync(mailBody.To, mailBody.Subject, mailBody.Body);
+                return Ok();
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Failed to send email: {ex.Message}");
+               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+        #endregion
     }
 }

@@ -1,61 +1,34 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.ComponentModel.DataAnnotations;
 using UGHApi.Models;
 using UGHApi.Services;
 using UGHModels;
 
 namespace UGHApi.Controllers
 {
-    [Route("api")]
+    [Route("api/admin")]
     [ApiController]
+    [Authorize(Roles = "Admin")]
     public class AdminController : ControllerBase
     {
         private readonly UghContext _context;
-        private readonly userservice _userservice;
+        private readonly UserService _userService;
         private readonly AdminVerificationMailService _mailService;
-
-        public AdminController(UghContext context, userservice userservice, AdminVerificationMailService mailService)
+        private readonly ILogger<AdminController> _logger;
+        public AdminController(UghContext context, UserService userService, AdminVerificationMailService mailService, ILogger<AdminController> logger)
         {
             _context = context;
-            _userservice = userservice;
+            _userService = userService;
             _mailService = mailService;
+            _logger = logger;
         }
 
         #region verifyuserstate
-        [HttpGet("admin/verify-user/{userId}")]
-        [Authorize(Roles = "Admin")]
-        public IActionResult VerifyUser(int userId)
-        {
-            try
-            {
-                var user = _context.users.Find(userId);
-
-                if (user == null)
-                {
-                    return NotFound("User not found.");
-                }
-
-                if (user.VerificationState == UGH_Enums.VerificationState.verified)
-                {
-                    return BadRequest("User verification is already completed.");
-                }
-
-                user.VerificationState = UGH_Enums.VerificationState.verified;
-                _context.SaveChanges();
-
-                return Ok("User verification completed successfully.");
-            }
-            catch (Exception ex)
-            {
-                // Log the exception (use your preferred logging mechanism)
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
-        }
-
-        [HttpPost("admin/update-verify-state/{userId}/{verificationState}")]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> UpdateVerifyState(int userId, UGH_Enums.VerificationState verificationState)
+        [HttpPut("verify-user/{userId}")]
+        public async Task<IActionResult> VerifyUser([Required] int userId)
         {
             try
             {
@@ -66,68 +39,99 @@ namespace UGHApi.Controllers
                     return NotFound("User not found.");
                 }
 
+                if (user.VerificationState == UGH_Enums.VerificationState.Verified)
+                {
+                    return BadRequest("User verification already completed.");
+                }
+
+                user.VerificationState = UGH_Enums.VerificationState.Verified;
+                await _context.SaveChangesAsync();
+
+                return Ok("User verification completed successfully.");
+            }
+            catch (Exception ex)
+            {
+               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+
+        [HttpPost("update-verification-state/{userId}/{verificationState}")]
+        public async Task<IActionResult> UpdateVerifyState([Required]int userId,[Required] UGH_Enums.VerificationState verificationState)
+        {
+            try
+            {
+                var user = await _context.users.FindAsync(userId);
+                if (user == null)
+                {
+                    return NotFound("User not found.");
+                }
+
                 user.VerificationState = verificationState;
                 await _context.SaveChangesAsync();
 
-                if (verificationState == UGH_Enums.VerificationState.verificationFailed)
+                if (verificationState == UGH_Enums.VerificationState.VerificationFailed ||
+                    verificationState == UGH_Enums.VerificationState.Verified)
                 {
-                    _userservice.DeleteUserInfo(userId);
-                    await Task.Delay(TimeSpan.FromMinutes(5));
+                    _userService.DeleteUserInfo(userId);
+
+                    if (verificationState == UGH_Enums.VerificationState.VerificationFailed)
+                    {
+                        await Task.Delay(TimeSpan.FromMinutes(5));
+                    }
 
                     var request = new ConfirmationReq
                     {
                         toEmail = user.Email_Address,
-                        userName = user.FirstName + " " + user.LastName,
-                        status = "verification failed"
+                        userName = $"{user.FirstName} {user.LastName}",
+                        status = verificationState == UGH_Enums.VerificationState.VerificationFailed
+                            ? "Verification Failed"
+                            : "Verified"
                     };
-                    _mailService.SendConfirmationEmailAsync(request);
-                }
-                else if (verificationState == UGH_Enums.VerificationState.verified)
-                {
-                    _userservice.DeleteUserInfo(userId);
 
-                    var request = new ConfirmationReq
-                    {
-                        toEmail = user.Email_Address,
-                        userName = user.FirstName + " " + user.LastName,
-                        status = "verified"
-                    };
-                    _mailService.SendConfirmationEmailAsync(request);
+                    await _mailService.SendConfirmationEmailAsync(request);
                 }
 
                 return Ok("Successfully updated verification state of user.");
             }
             catch (DbUpdateException ex)
             {
-                // Log the exception 
+                _logger.LogInformation(ex.Message,$"{ex.StackTrace}");
                 return StatusCode(500, $"Database error occurred while updating verification state: {ex.Message}");
             }
             catch (Exception ex)
             {
-                // Log the exception
+                _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
 
-        [HttpGet("admin/get-all-users")]
-        [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<IEnumerable<User>>> GetAllusersByAdmin()
+        [HttpGet("get-all-users")]
+        public async Task<ActionResult<IEnumerable<User>>> GetAllUsersByAdmin()
         {
             try
             {
-                var users = await _context.users.OrderBy(u => u.VerificationState).ToListAsync();
-                return users;
+                var users = await _context.users.Include(u => u.CurrentMembership)
+                                                .OrderBy(u => u.VerificationState)
+                                                .ToListAsync();
+
+                if (users == null || !users.Any())
+                {
+                    return NotFound("No users found.");
+                }
+
+                return Ok(users);
             }
             catch (Exception ex)
             {
-                // Log the exception 
+                _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
 
-        [HttpGet("admin/user/{id}")]
-        [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<User>> GetUserById(int id)
+        [HttpGet("get-user-by-id/{id}")]
+        public async Task<ActionResult<User>> GetUserById([Required]int id)
         {
             try
             {
@@ -142,19 +146,18 @@ namespace UGHApi.Controllers
             }
             catch (Exception ex)
             {
-                // Log the exception 
+                _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
 
-        [HttpGet("profile/get-profile-for-admin/{userId}")]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> GetProfile(int userId)
+        [HttpGet("get-user-profile/{userId}")]
+        public async Task<IActionResult> GetProfile([Required]int userId)
         {
             try
             {
-                var checkPro = await _context.userprofiles.Include(u => u.User).FirstOrDefaultAsync(p => p.User_Id == userId);
-                if (checkPro == null)
+                var checkProfile = await _context.userprofiles.Include(u => u.User).FirstOrDefaultAsync(p => p.User_Id == userId);
+                if (checkProfile == null)
                 {
                     var newProfile = new UserProfile
                     {
@@ -183,11 +186,10 @@ namespace UGHApi.Controllers
             }
             catch (Exception ex)
             {
-                // Log the exception 
+               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
-
         #endregion
     }
 }

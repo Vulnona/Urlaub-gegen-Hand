@@ -2,9 +2,10 @@
 
 namespace UGHApi.Models
 {
-    public class accomodationsuitable
+    public class SuitableAccommodation
     {
         public int Id { get; set; }
+        [Required]
         public string Name { get; set; }
     }
 }

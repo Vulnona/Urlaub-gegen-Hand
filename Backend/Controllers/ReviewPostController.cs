@@ -1,61 +1,68 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 using UGHApi.Models;
 
 namespace UGHApi.Controllers
 {
-    [Route("api/")]
+    [Route("api/post-review")]
     [ApiController]
     public class ReviewPostController : ControllerBase
     {
         private readonly UghContext _context;
+        private readonly ILogger<ReviewPostController> _logger;
 
-        public ReviewPostController(UghContext context)
+        public ReviewPostController(UghContext context, ILogger<ReviewPostController> logger)
         {
             _context = context;
+            _logger = logger;
         }
+        #region post-user-review
 
-        [HttpGet("post-review/{userId}")]
-        public async Task<ActionResult<IEnumerable<ReviewPost>>> GetPostreviewsByUserId(int userId)
+        [HttpGet("get-posted-review-by-user-id/{userId}")]
+        public async Task<ActionResult<IEnumerable<ReviewPost>>> GetPostReviewsByUserId([Required] int userId)
         {
             try
             {
-                var postreviews = await _context.reviewposts
-                    .Include(r => r.ReviewLoginUser)
-                    .Include(r => r.ReviewLoginUser.Offer)
-                    .Where(r => r.ReviewOfferUser.Offer.User_Id == userId || r.ReviewLoginUser.UserId == userId)
-                    .ToListAsync();
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+                var postReviews = await _context.reviewposts.Include(r => r.ReviewLoginUser).Include(r => r.ReviewLoginUser.Offer).Where(r => r.ReviewOfferUser.Offer.User_Id == userId || r.ReviewLoginUser.UserId == userId).ToListAsync();
 
-                if (!postreviews.Any())
+                if (!postReviews.Any())
                 {
                     return NotFound();
                 }
 
-                return Ok(postreviews);
+                return Ok(postReviews);
             }
             catch (Exception ex)
             {
-                Console.Error.WriteLine(ex);
-                return StatusCode(StatusCodes.Status204NoContent, ex.Message);
+               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
 
-        [HttpGet("post-review/get-all-post")]
-        public IActionResult GetAllPost()
+        [HttpGet("get-all-posts")]
+        public async Task<ActionResult<List<ReviewPost>>> GetAllPost()
         {
             try
             {
-                var getall = _context.reviewposts.ToList();
-                return Ok(getall);
+                var getAll = await _context.reviewposts.ToListAsync();
+
+                if (getAll == null || !getAll.Any())
+                {
+                    return BadRequest();
+                }
+                return Ok(getAll);
             }
             catch (Exception ex)
             {
-                // Log the exception 
-                Console.Error.WriteLine("No posts found! Please ensure to have posts in d");
-
-                // Return a generic error message to the client
-                return StatusCode(StatusCodes.Status204NoContent, ex.Message);
+               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+        #endregion
     }
 }

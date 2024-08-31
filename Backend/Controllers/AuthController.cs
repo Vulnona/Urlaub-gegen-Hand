@@ -3,36 +3,44 @@ using UGHModels;
 using UGHApi.Services;
 using UGHApi.Models;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 
 namespace UGHApi.Controllers
 {
-    [Route("api")]
+    [Route("api/authenticate")]
     [ApiController]
     public class AuthController : ControllerBase
     {
         private readonly UghContext _context;
-        private readonly userservice _userservice;
+        private readonly UserService _userService;
         private readonly EmailService _emailService;
         private readonly PasswordService _passwordService;
         private readonly IConfiguration _configuration;
         private readonly TokenService _tokenService;
+        private readonly ILogger<AuthController> _logger;
 
-        public AuthController(UghContext context, EmailService emailService, userservice userservice, PasswordService passwordService, IConfiguration configuration, TokenService tokenService)
+        public AuthController(UghContext context, EmailService emailService, UserService userService, PasswordService passwordService, IConfiguration configuration, TokenService tokenService, ILogger<AuthController> logger)
         {
             _context = context;
             _emailService = emailService;
-            _userservice = userservice;
+            _userService = userService;
             _passwordService = passwordService;
             _configuration = configuration;
             _tokenService = tokenService;
+            _logger = logger;
         }
-
-        [HttpPost("auth/register")]
-        public ActionResult Register([FromBody] RegisterRequest request)
+        #region user-authorization
+        [HttpPost("register")]
+        public async Task<ActionResult> Register([FromBody] RegisterRequest request)
         {
             try
             {
-                if (_context.users.Any(u => u.Email_Address.ToLower().Equals(request.Email_Address.ToLower())))
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+
+                else if (await _context.users.AnyAsync(u => u.Email_Address.ToLower().Equals(request.Email_Address.ToLower())))
                 {
                     return Conflict("E-Mail Adresse existiert bereits");
                 }
@@ -59,27 +67,25 @@ namespace UGHApi.Controllers
                     salt,
                     request.Facebook_link,
                     request.Link_RS,
-                    request.Link_VS
+                    request.Link_VS,
+                    request.State
                 );
 
-                newUser.VerificationState = UGH_Enums.VerificationState.isNew;
+                newUser.VerificationState = UGH_Enums.VerificationState.IsNew;
 
-                _context.users.Add(newUser);
-                _context.SaveChanges();
-
-                // create profile automatic 
-                var getRegUser = _context.users.FirstOrDefault(u => u.Email_Address == request.Email_Address);
-
-                var newProfile = new UserProfile
+                await _context.users.AddAsync(newUser);
+                await _context.SaveChangesAsync();
+                _logger.LogInformation("New user registered successfully. UserName:{Email}", newUser.Email_Address);
+                var getRegisteredUser = await _context.users.FirstOrDefaultAsync(u => u.Email_Address == request.Email_Address);
+                var newUserProfile = new UserProfile
                 {
-                    User_Id = getRegUser.User_Id,
+                    User_Id = getRegisteredUser.User_Id,
                 };
 
-                _context.userprofiles.Add(newProfile);
-                _context.SaveChanges();
+                await _context.userprofiles.AddAsync(newUserProfile);
+                await _context.SaveChangesAsync();
 
-                // Add default role for the user (e.g., "User")
-                var defaultUserRole = _context.userroles.FirstOrDefault(r => r.RoleName == "User");
+                var defaultUserRole = await _context.userroles.FirstOrDefaultAsync(r => r.RoleName == "User");
                 if (defaultUserRole != null)
                 {
                     var userRoleMapping = new UserRoleMapping
@@ -87,53 +93,58 @@ namespace UGHApi.Controllers
                         UserId = newUser.User_Id,
                         RoleId = defaultUserRole.RoleId
                     };
-                    _context.userrolesmapping.Add(userRoleMapping);
-                    _context.SaveChanges();
+                    await _context.userrolesmapping.AddAsync(userRoleMapping);
+                    await _context.SaveChangesAsync();
                 }
 
                 var verificationToken = _tokenService.GenerateNewEmailVerificator(newUser.User_Id);
-                _emailService.SendVerificationEmail(newUser.Email_Address, verificationToken);
+                await _emailService.SendVerificationEmailAsync(newUser.Email_Address, verificationToken);
 
                 return Ok(newUser);
             }
             catch (Exception ex)
             {
-                // Log the exception 
-                return StatusCode(500, $"Internal server error: {ex.Message}");
+                _logger.LogInformation("Errors while registering UserName:{Email}", request.Email_Address);
+                _logger.LogInformation(ex.Message,$"{ex.StackTrace}");
+                return StatusCode(400, $"Bad Request {ex.Message}");
             }
         }
 
-        [HttpGet("auth/verify-email")]
-        public IActionResult Verify(string token)
+        [HttpGet("verify-email")]
+        public async Task<IActionResult> Verify([Required]string token)
         {
             try
             {
-                var user = _userservice.GetUserByToken(token);
+                var user = await _userService.GetUserByTokenAsync(token);
                 if (user == null)
                 {
                     return NotFound("Invalid token");
                 }
 
                 user.IsEmailVerified = true;
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
                 return Ok("Email verified successfully");
             }
             catch (Exception ex)
             {
-                // Log the exception 
+               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
 
-        [HttpPost("auth/login")]
+        [HttpPost("login")]
         public async Task<IActionResult> Login(LoginModel model)
         {
             try
             {
-                var validationResult = _userservice.ValidateUser(model.Email, model.Password);
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+                var userValid = _userService.ValidateUser(model.Email, model.Password);
 
                 var user = await _context.users.FirstOrDefaultAsync(u => u.Email_Address == model.Email);
-                if (validationResult.IsValid)
+                if (userValid.IsValid)
                 {
                     var accessToken = await _tokenService.GenerateJwtToken(model.Email, user.User_Id.ToString());
                     var refreshToken = _tokenService.GenerateRefreshToken();
@@ -143,19 +154,18 @@ namespace UGHApi.Controllers
                 }
                 else
                 {
-                    return Unauthorized(new { errorMessage = validationResult.ErrorMessage });
+                    return Unauthorized(new { errorMessage = userValid.ErrorMessage });
                 }
             }
             catch (Exception ex)
             {
-                // Log the exception 
-               //return StatusCode(500, $"Internal server error: {ex.Source+"***"+ ex.StackTrace}");
+               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
                 return StatusCode(500, $"Internal server error: {ex.Message}");
 
             }
         }
 
-        [HttpPost("auth/refresh")]
+        [HttpPost("refresh-request-token")]
         public async Task<IActionResult> Refresh(RefreshTokenRequest request)
         {
             try
@@ -165,40 +175,38 @@ namespace UGHApi.Controllers
                     return Unauthorized();
                 }
 
-                var accessToken = await _tokenService.GenerateJwtToken(Email, string.Empty); // Assuming you have a method that generates the token
-
+                var accessToken = await _tokenService.GenerateJwtToken(Email, string.Empty); 
                 return Ok(new { accessToken });
             }
             catch (Exception ex)
             {
-                // Log the exception
+               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
 
-        [HttpPost("auth/resend-email-verification")]
+        [HttpPost("resend-email-verification")]
         public async Task<IActionResult> ResendVerificationEmail([FromBody] ResendEmailVerification resentUrl)
         {
             try
             {
-                // Validate email address
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
                 if (string.IsNullOrEmpty(resentUrl.Email) || !_emailService.IsValidEmail(resentUrl.Email))
                 {
                     return BadRequest("Invalid email address.");
                 }
-
-                // Get user by email address
-                var user = await _userservice.GetUserByEmailAsync(resentUrl.Email);
+                var user = await _userService.GetUserByEmailAsync(resentUrl.Email);
                 if (user == null)
                 {
                     return NotFound("User not found.");
                 }
-
-                // Generate new verification token
                 var verificationToken = _tokenService.GenerateNewEmailVerificator(user.User_Id);
 
-                // Send verification email
-                var emailSent = _emailService.SendVerificationEmail(resentUrl.Email, verificationToken);
+                // Send verification email asynchronously
+                var emailSent = await _emailService.SendVerificationEmailAsync(resentUrl.Email, verificationToken);
                 if (!emailSent)
                 {
                     return StatusCode(500, "Failed to send verification email.");
@@ -208,9 +216,10 @@ namespace UGHApi.Controllers
             }
             catch (Exception ex)
             {
-                // Log the exception 
+               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+        #endregion
     }
 }

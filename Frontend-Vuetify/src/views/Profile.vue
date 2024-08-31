@@ -8,27 +8,26 @@
           <h5 class="card-title">{{ user.firstName }} {{ user.lastName }}
           </h5>
           <div v-if="user.verificationState === 3">
-            <h5 class="card-title">  <span class="verState">
+            <h5 class="card-title"> <span class="verState">
                 <i class="ri-shield-star-line" style="color: green;">Verified</i>
-              </span>  </h5>
+              </span> </h5>
           </div>
           <div v-else style="display: flex;justify-content: center;">
-            <a class="btn col-3 mb-2" style="background-color:rgb(0, 189, 214);color: white;" @click="upload_id">Upload ID</a>
+            <a class="btn col-3 mb-2" style="background-color:rgb(0, 189, 214);color: white;" @click="upload_id">Upload
+              ID</a>
           </div>
         </div>
-
-    
         <div class="card-text-group ">
           <p v-if="userRole != 'Admin'" class="card-text text-center "><strong>Ratings: </strong>
             <span v-for="(star, index) in stars" :key="index" class="star" :class="starClass(star)"></span>
             <span class="average-rating">({{ rate.averageRating }}/5) - {{ rate.ratingsCount }} votes</span>
           </p>
-
           <p class="card-text "><strong>Email:</strong> {{ user.email_Address }}</p>
           <p class="card-text"><strong>Date of Birth:</strong> {{ user.dateOfBirth }}</p>
           <p class="card-text"><strong>Gender:</strong> {{ user.gender }}</p>
           <p class="card-text"><strong>Country:</strong> {{ user.country }}</p>
           <p class="card-text"><strong>City:</strong> {{ user.city }}</p>
+          <p class="card-text"><strong>State/Region:</strong> {{ user.state }}</p>
           <p class="card-text"><strong>Postal Code:</strong> {{ user.postCode }}</p>
           <p class="card-text"><strong>Street Address:</strong> {{ user.street }}</p>
           <p class="card-text"><strong>House No:</strong> {{ user.houseNumber }}</p>
@@ -37,38 +36,34 @@
             <a :href="user.facebook_link" target="_blank">{{ user.facebook_link }}</a>&nbsp;
             <button class="btn btn-dark border" @click="copyToClipboard(user.facebook_link)">Copy</button>
           </p>
-          <p class="card-text"><strong>Options:</strong><br /> {{ options.join(', ') }}</p>
-          <p class="card-text"><strong>Hobbies:</strong><br /> {{ hobbies }}</p>
 
+          <p class="card-text"><strong>Hobbies:</strong><br /> {{ hobbies }}</p>
           <div class="d-flex" style="justify-content: space-around;" v-if="user.verificationState === 3">
             <button class="btn-primary col-5 rounded" style="height: 38px;" @click="editProfile">Edit Profile</button>
             <button class="btn-primary col-5 rounded" style="height: 38px;" @click="shareProfile">Copy Link</button>
           </div>
-
         </div>
       </div>
     </div>
   </div>
 </template>
 <script>
-import router from "@/router"; // Importing Vue router instance
-import axios from "axios"; // HTTP client library for making requests
-import Swal from 'sweetalert2'; // SweetAlert library for displaying alerts
-import CryptoJS from 'crypto-js'; // Library for cryptographic functions
-import VueJwtDecode from 'vue-jwt-decode'; // Library for decoding JWT tokens
+import router from "@/router";
+import axios from "axios";
+import Swal from 'sweetalert2';
+import CryptoJS from 'crypto-js';
+import VueJwtDecode from 'vue-jwt-decode';
 
-const axiosInstance = axios.create(); // Creating axios instance for API requests
-
+const axiosInstance = axios.create();
 axiosInstance.interceptors.request.use(
   config => {
-    // Interceptor to modify outgoing request headers
-    const token = localStorage.getItem('token'); // Retrieve JWT token from localStorage
+    const token = sessionStorage.getItem('token');
     if (token) {
-      const decryptedToken = decryptToken(token); // Decrypt JWT token
+      const decryptedToken = decryptToken(token);
       if (decryptedToken) {
         config.headers['Authorization'] = `Bearer ${decryptedToken}`; // Set Authorization header
       } else {
-        localStorage.removeItem('token'); // Remove token from localStorage if decryption fails
+        sessionStorage.removeItem('token');
       }
     }
     return config;
@@ -80,20 +75,18 @@ axiosInstance.interceptors.request.use(
 // Function to navigate to the upload ID page
 const upload_id = () => {
   router.push("/uploadID").then(() => {
-    
   });
 };
 // Function to decrypt JWT token
 const decryptToken = (encryptedToken) => {
   try {
-    const bytes = CryptoJS.AES.decrypt(encryptedToken, process.env.SECRET_KEY); // Decrypt token using AES
-    return bytes.toString(CryptoJS.enc.Utf8); // Convert decrypted bytes to UTF-8 string
+    const bytes = CryptoJS.AES.decrypt(encryptedToken, process.env.SECRET_KEY);
+    return bytes.toString(CryptoJS.enc.Utf8);
   } catch (e) {
-    console.error('Error decrypting token:', e); // Log error if decryption fails
+    console.error('Error decrypting token:', e);
     return null;
   }
 };
-
 // Profile options bitmask enumeration
 const ProfileOptions = {
   None: 0,
@@ -101,72 +94,68 @@ const ProfileOptions = {
   PetOwner: 1 << 1,
   HaveLiabilityInsurance: 1 << 2
 };
-
 // Global variable for storing log ID
 let globalLogId = '';
 let globalToken = '';
 export default {
-  name: "UserCard", // Vue component name
+  name: "UserCard",
   data() {
     return {
-      user: {}, // Object to store user data
-      profileImgSrc: '', // String to store profile image source
-      options: [], // Array to store user profile options
-      hobbies: '', // String to store user hobbies
-      rate: {}, // Object to store user rating data
-      userRole: '', // String to store user role
+      user: {},
+      profileImgSrc: '',
+      options: [],
+      hobbies: '',
+      rate: {},
+      userRole: '',
     };
   },
   mounted() {
-    this.Securitybot(); // Function to check login status and redirect if not logged in
-    this.checkLoginStatus(); // Function to check and set user login status
-    this.fetchUserData(globalToken); // Function to fetch user data using global log ID
-    this.fetchUserRating(globalLogId); // Function to fetch user rating using global log ID
+    this.Securitybot();
+    this.checkLoginStatus();
+    this.fetchUserData(globalToken);
+    this.fetchUserRating(globalLogId);
   },
   methods: {
-    // Function to check if user is logged in; if not, show alert and redirect to login page
+    // Function to check if user is logged in
     Securitybot() {
-      if (!localStorage.getItem("token")) {
+      if (!sessionStorage.getItem("token")) {
         Swal.fire({
           title: 'You are not logged In!',
           text: 'Login First to continue.',
           icon: 'info',
           confirmButtonText: 'OK'
         });
-        router.push('/login'); // Redirect to login page using Vue router
+        router.push('/login');
       }
     },
     // Function to check user login status and retrieve user role from JWT token
     checkLoginStatus() {
-      const token = localStorage.getItem("token"); // Retrieve JWT token from localStorage
+      const token = sessionStorage.getItem("token");
       const decryptToken = this.decryptToken(token);
       globalToken = decryptToken;
-      const testlogid = this.decryptlogID(localStorage.getItem("logId")); // Decrypt log ID from localStorage
-      globalLogId = testlogid; // Set global log ID
+      const testlogid = this.decryptlogID(sessionStorage.getItem("logId"));
+      globalLogId = testlogid;
       if (token) {
-        const decryptedToken = this.decryptToken(token); // Decrypt JWT token
+        const decryptedToken = this.decryptToken(token);
         if (decryptedToken) {
-          const decodedToken = VueJwtDecode.decode(decryptedToken); // Decode JWT token
-          this.userRole = decodedToken["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"] || '';
-          // Set user role from decoded JWT token
+          const decodedToken = VueJwtDecode.decode(decryptedToken);
+          this.userRole = decodedToken[`${process.env.claims_Url}`] || '';
         } else {
-          localStorage.removeItem('token'); // Remove token from localStorage if decryption fails
+          sessionStorage.removeItem('token');
         }
       }
     },
-    // Function to navigate to the upload ID page
- upload_id() {
-  router.push("/uploadID").then(() => {
-  });
-},
-
+    upload_id() {
+      router.push("/uploadID").then(() => {
+      });
+    },
     // Function to decrypt encrypted token using AES decryption
     decryptToken(encryptedToken) {
       try {
         const bytes = CryptoJS.AES.decrypt(encryptedToken, process.env.SECRET_KEY);
-        return bytes.toString(CryptoJS.enc.Utf8); // Convert decrypted bytes to UTF-8 string
+        return bytes.toString(CryptoJS.enc.Utf8);
       } catch (e) {
-        console.error('Error decrypting token:', e); // Log error if decryption fails
+        console.error('Error decrypting token:', e);
         return null;
       }
     },
@@ -175,99 +164,99 @@ export default {
       try {
         const bytes = CryptoJS.AES.decrypt(encryptedItem, process.env.SECRET_KEY);
         const decryptedString = bytes.toString(CryptoJS.enc.Utf8);
-        return parseInt(decryptedString, 10).toString(); // Parse decrypted string as integer
+        return parseInt(decryptedString, 10).toString();
       } catch (e) {
-        console.error('Error decrypting item:', e); // Log error if decryption fails
+        console.error('Error decrypting item:', e);
         return null;
       }
     },
     // Function to fetch user data using API request
     async fetchUserData(id) {
       try {
-        const response = await axiosInstance.get(`${process.env.baseURL}profile/get-profile?token=${id}`);
-        this.user = response.data.profile.user; // Set user data from API response
-        this.profileImgSrc = `data:image/jpeg;base64,${response.data.profile.userPic}`; // Set profile image source
-        this.options = this.processOptions(response.data.profile.options); // Process user profile options
-        this.hobbies = response.data.profile.hobbies; // Set user hobbies
+        const response = await axiosInstance.get(`${process.env.baseURL}profile/get-user-profile?token=${id}`);
+        this.user = response.data.profile.user;
+        this.profileImgSrc = `data:image/jpeg;base64,${response.data.profile.userPic}`;
+        this.options = this.processOptions(response.data.profile.options);
+        this.hobbies = response.data.profile.hobbies;
       } catch (error) {
         if (error.response && error.response.status === 500) {
-          Swal.fire('Session Expired', 'Your session has expired. Please log in again.', 'error'); // Show session expired alert
-          localStorage.clear();
-          router.push('/'); // Redirect to login page using Vue router
+          Swal.fire('Session Expired', 'Your session has expired. Please log in again.', 'error');
+          sessionStorage.clear();
+          router.push('/');
         } else {
-          console.error("Error Fetching User data:", error); // Log error if fetching user data fails
-          Swal.fire('Error', 'Failed to fetch user data', 'error'); // Show alert for other errors
+          console.error("Error Fetching User data:", error);
+          Swal.fire('Error', 'Failed to fetch user data', 'error');
         }
       }
     },
-
     // Function to process user profile options bitmask and return corresponding array
     processOptions(options) {
       const result = [];
-      if (options & ProfileOptions.Smoker) result.push('Smoker'); // Check if user is a smoker
-      if (options & ProfileOptions.PetOwner) result.push('Pet Owner'); // Check if user is a pet owner
-      if (options & ProfileOptions.HaveLiabilityInsurance) result.push('Have Liability Insurance'); // Check if user has liability insurance
-      return result; // Return processed options array
+      if (options & ProfileOptions.Smoker) result.push('Smoker');
+      if (options & ProfileOptions.PetOwner) result.push('Pet Owner');
+      if (options & ProfileOptions.HaveLiabilityInsurance) result.push('Have Liability Insurance');
+      return result;
     },
-    // Function to navigate to edit profile page
     editProfile() {
-      router.push('/editprofile'); // Redirect to edit profile page using Vue router
+      router.push('/editprofile');
     },
     // Function to share user profile and generate shortened link
     async shareProfile() {
-      const uniqueLink = `${process.env.baseURL_Frontend}display-profile/${globalLogId}`; // Construct unique profile link
+      const uniqueLink = `${process.env.baseURL_Frontend}display-profile/?token=${globalToken}`;
       try {
         const response = await axios.post('https://api.shorten.rest/aliases', {
           aliasName: `a257/@rnd`,
           destinations: [{ url: uniqueLink }],
         }, {
           headers: {
-            'x-api-key':'79ea7130-21a6-11ef-9447-bb18dd052b84', // API key for short link generation
-            'Content-Type': 'application/json', // Specify content type as JSON
+            'x-api-key': '79ea7130-21a6-11ef-9447-bb18dd052b84',
+            'Content-Type': 'application/json',
           },
         });
-
-        const shortLink = response.data.shortUrl; // Extract shortened URL from API response
-        navigator.clipboard.writeText(shortLink) // Copy shortened link to clipboard
+        const shortLink = response.data.shortUrl;
+        navigator.clipboard.writeText(shortLink)
           .then(() => {
-            Swal.fire('Link Copied ✔✔', `Shortened link copied to clipboard! ${shortLink}`, 'success'); // Show success alert
+            Swal.fire('Link Copied ✔✔', `Shortened link copied to clipboard! ${shortLink}`, 'success');
           })
           .catch(() => {
-            Swal.fire('Error', 'Failed to copy shortened link to clipboard', 'error'); // Show error alert if copying fails
+            Swal.fire('Error', 'Failed to copy shortened link to clipboard', 'error');
           });
       } catch (error) {
-        console.error('Error generating short link:', error); // Log error if short link generation fails
-        Swal.fire('Error', 'Failed to generate short link', 'error'); // Show error alert
+        console.error('Error generating short link:', error);
+        Swal.fire('Error', 'Failed to generate short link', 'error');
       }
     },
     // Function to copy text to clipboard
     copyToClipboard(text) {
-      navigator.clipboard.writeText(text) // Copy text to clipboard
+      navigator.clipboard.writeText(text)
         .then(() => {
-          Swal.fire('Copied', 'The URL has been copied to the clipboard', 'success'); // Show success alert
+          Swal.fire('Copied', 'The URL has been copied to the clipboard', 'success');
         })
         .catch(err => {
-          console.error('Could not copy text: ', err); // Log error if copying fails
-          Swal.fire('Error', 'Failed to copy the URL', 'error'); // Show error alert
+          console.error('Could not copy text: ', err);
+          Swal.fire('Error', 'Failed to copy the URL', 'error');
         });
     },
     // Function to fetch user rating using API request
     async fetchUserRating(id) {
       try {
-        const response = await axiosInstance.get(`${process.env.baseURL}get-rating-by-user-id/${id}`);
-        this.rate = response.data; // Set user rating data from API response
-        this.user.averageRating = response.data.averageRating; // Set average rating
-        this.user.ratingsCount = response.data.ratingsCount; // Set ratings count
+        const response = await axiosInstance.get(`${process.env.baseURL}user-rating/get-rating-by-user-id/${id}`);
+        this.rate = response.data;
+        if (this.rate.averageRating != null) {
+          this.rate.averageRating = parseFloat(response.data.averageRating).toFixed(1);
+          this.user.averageRating = parseFloat(response.data.averageRating).toFixed(1);
+          this.user.ratingsCount = response.data.ratingsCount;
+        }
       } catch (error) {
-        console.error("Error Fetching User Rating:", error); // Log error if fetching user rating fails
+        console.error("Error Fetching User Rating:", error);
       }
     },
     // Function to dynamically set star class based on rating
     starClass(star) {
       return {
-        'ri-star-fill gold': star === 'full', // Filled star class
-        'ri-star-half-s-line gold': star === 'half', // Half-filled star class
-        'ri-star-line': star === 'empty' // Empty star class
+        'ri-star-fill gold': star === 'full',
+        'ri-star-half-s-line gold': star === 'half',
+        'ri-star-line': star === 'empty'
       };
     }
   },

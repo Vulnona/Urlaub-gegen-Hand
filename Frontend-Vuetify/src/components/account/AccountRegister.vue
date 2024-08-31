@@ -196,18 +196,32 @@
 .loginmain-form .login-left-content svg {
     width: 100%;
 }
+
 .swal2-confirm:disabled {
-    cursor: not-allowed; 
+    cursor: not-allowed;
     pointer-events: none;
 }
+
 .disabled-confirm-button:disabled {
-    cursor: not-allowed; 
-    pointer-events: none; 
+    cursor: not-allowed;
+    pointer-events: none;
 }
-input[type=checkbox], input[type=radio] {
+
+input[type=checkbox],
+input[type=radio] {
     box-sizing: border-box;
     padding: 0;
     cursor: pointer;
+}
+
+.has-error input,
+.has-error select {
+    border-color: red;
+}
+
+.error-message {
+    color: red;
+    font-size: 0.9em;
 }
 </style>
 <template>
@@ -285,183 +299,342 @@ input[type=checkbox], input[type=radio] {
                     <div class="login-right-content-heading form-act">
                         <div class="signin-tabs">
                             <ul>
-                                <li id="login" class="active-login active"><a href="login" previewlistener="true">Log In
+                                <li id="login" class="active-login "><a href="login" previewlistener="true">Anmelden
                                     </a></li>
-                                <li id="register" class="active-register"><a href="register"
-                                        previewlistener="true">Register</a></li>
+                                <li id="register" class="active-register active"><a href="register"
+                                        previewlistener="true">Registrieren</a></li>
                             </ul>
                         </div>
                         <div class="login-form-section" id="login-content">
                             <div class="login-heading">
-                                <h2>Register</h2>
+                                <h2>Registrieren</h2>
                             </div>
                             <form class="form-border" @submit.prevent="register">
-                                <div class="custom-form">
-                                    <label for="firstName">First Name</label>
-                                    <input type="text" placeholder="Enter Your First Name" id="firstName"
+                                <div class="custom-form" :class="{ 'has-error': !firstName && showError }">
+                                    <label for="firstName">Vorname</label>
+                                    <input type="text" placeholder="Vorname ist erforderlich" id="firstName"
                                         v-model="firstName" required>
+                                    <span v-if="!firstName && showError" class="error-message">Geben Sie Ihren Vornamen
+                                        ein</span>
                                 </div>
-                                <div class="custom-form">
-                                    <label for="lastName">Last Name</label>
-                                    <input type="text" placeholder="Enter Your Last Name" id="lastName"
+                                <div class="custom-form" :class="{ 'has-error': !lastName && showError }">
+                                    <label for="lastName">Nachname</label>
+                                    <input type="text" placeholder="Geben Sie Ihren Nachnamen ein" id="lastName"
                                         v-model="lastName">
+                                    <span v-if="!lastName && showError" class="error-message">Nachname ist
+                                        erforderlich</span>
                                 </div>
-                                <div class="custom-form">
-                                    <label for="email_Address">Email</label>
-                                    <input type="email" placeholder="Enter Your Email Address" id="email_Address"
-                                        v-model="email_Address" required>
+                                <div class="custom-form" :class="{ 'has-error': !email_Address && showError }">
+                                    <label for="email_Address">E-Mail</label>
+                                    <input type="email" placeholder="Geben Sie Ihre E-Mail-Adresse ein"
+                                        id="email_Address" v-model="email_Address" required>
+                                    <span v-if="!email_Address && showError" class="error-message">E-Mail ist
+                                        erforderlich</span>
                                 </div>
-                                <div class="custom-form">
-                                    <label>Gender</label>&nbsp;&nbsp;
-                                    <select class="form-group border p-2" v-model="gender" required>
-                                        <option disabled value="" class="">Please select your gender </option>
-                                        <option value="Male">Male</option>
-                                        <option value="Female">Female</option>
+                                <div class="custom-form" :class="{ 'has-error': !gender && showError }">
+                                    <label>Geschlecht</label>&nbsp;&nbsp;
+                                    <select class="form-group border p-2" style="width: 100%;" v-model="gender"
+                                        required>
+                                        <option disabled value="">Bitte wählen Sie Ihr Geschlecht</option>
+                                        <option value="Male">Männlich</option>
+                                        <option value="Female">Weiblich</option>
                                     </select>
+                                    <span v-if="!gender && showError" class="error-message">Geschlecht ist
+                                        erforderlich</span>
                                 </div>
-                                <div class="custom-form">
-                                    <label for="dateOfBirth">Date Of Birth</label>
+                                <div class="custom-form" :class="{ 'has-error': !dateOfBirth && showError }">
+                                    <label for="dateOfBirth">Geburtsdatum</label>
                                     <input type="date" id="dateOfBirth" v-model="dateOfBirth" required>
+                                    <span v-if="!dateOfBirth && showError" class="error-message">Geburtsdatum ist
+                                        erforderlich</span>
                                 </div>
-                                <div class="custom-form">
-                                    <label for="country">Country</label>
-                                    <input type="text" placeholder="Enter Your Country" id="country" v-model="country"
-                                        required>
+                                <div class="custom-form" :class="{ 'has-error': !countryName && showError }">
+                                    <label for="country">Land</label>
+                                    <select class="form-group border p-2" style="width: 100%;" id="country"
+                                        v-model="countryId" @change="loadStates" required>
+                                        <option value="">Bitte wählen Sie ein Land</option>
+                                        <option v-for="c in countries" :key="c.country_ID" :value="c.country_ID">{{
+                                            c.countryName }}</option>
+                                    </select>
+                                    <span v-if="!countryName && showError" class="error-message">Land ist
+                                        erforderlich</span>
                                 </div>
-                                <div class="custom-form">
-                                    <label for="city">City</label>
-                                    <input type="text" placeholder="Enter Your City" id="city" v-model="city" required>
+                                <div class="custom-form" :class="{ 'has-error': !name && showError }">
+                                    <label for="state">Region/Bundesland</label>
+                                    <select class="form-group border p-2" style="width: 100%;" id="state"
+                                        v-model="stateId" @change="loadCities" required>
+                                        <option value="">Bitte wählen Sie ein Bundesland</option>
+                                        <option v-for="s in states" :key="s.id" :value="s.id">{{ s.name
+                                            }}</option>
+                                    </select>
+                                    <span v-if="!name && showError" class="error-message">Bundesland ist
+                                        erforderlich</span>
                                 </div>
-                                <div class="custom-form">
-                                    <label for="street">Street</label>
-                                    <input type="text" placeholder="Enter Your Street" id="street" v-model="street"
-                                        required>
+                                <div class="custom-form" :class="{ 'has-error': !name && showError }">
+                                    <label for="city">Stadt</label>
+                                    <select class="form-group border p-2" style="width: 100%;" id="city"
+                                        v-model="cityId" @change="updateCityName" required>
+                                        <option value="">Bitte wählen Sie eine Stadt</option>
+                                        <option v-for="c in cities" :key="c.id" :value="c.id">{{ c.name }}
+                                        </option>
+                                    </select>
+                                    <span v-if="!name && showError" class="error-message">Stadt ist erforderlich</span>
                                 </div>
-                                <div class="custom-form">
-                                    <label for="houseNumber">House No.</label>
-                                    <input type="text" placeholder="Enter Your House Number" id="houseNumber"
+                                <div class="custom-form" :class="{ 'has-error': !street && showError }">
+                                    <label for="street">Straße</label>
+                                    <input type="text" placeholder="Geben Sie Ihre Straße ein" id="street"
+                                        v-model="street" required>
+                                    <span v-if="!street && showError" class="error-message">Straße ist
+                                        erforderlich</span>
+                                </div>
+                                <div class="custom-form" :class="{ 'has-error': !houseNumber && showError }">
+                                    <label for="houseNumber">Hausnummer</label>
+                                    <input type="text" placeholder="Geben Sie Ihre Hausnummer ein" id="houseNumber"
                                         v-model="houseNumber" required>
+                                    <span v-if="!houseNumber && showError" class="error-message">Hausnummer ist
+                                        erforderlich</span>
                                 </div>
-                                <div class="custom-form">
-                                    <label for="postCode">Postal Code</label>
-                                    <input type="text" placeholder="Enter Your Postal Code" id="postCode"
+                                <div class="custom-form" :class="{ 'has-error': !postCode && showError }">
+                                    <label for="postCode">Postleitzahl</label>
+                                    <input type="text" placeholder="Geben Sie Ihre Postleitzahl ein" id="postCode"
                                         v-model="postCode" required>
+                                    <span v-if="!postCode && showError" class="error-message">Postleitzahl ist
+                                        erforderlich</span>
                                 </div>
-                                <div class="custom-form">
-                                    <label for="facebook_link">Facebook Link</label>
-                                    <input type="text" placeholder="Enter Your FaceBook Link" id="facebook_link"
-                                        v-model="facebook_link" required>
+                                <div class="custom-form" :class="{ 'has-error': !facebook_link && showError }">
+                                    <label for="facebook_link">Facebook-Profillink</label>
+                                    <input type="text" placeholder="Geben Sie Ihren Facebook-Profillink ein"
+                                        id="facebook_link" v-model="facebook_link" required>
+                                    <span v-if="!facebook_link && showError" class="error-message">Facebook-Profillink
+                                        ist erforderlich</span>
                                 </div>
-                                <div class="custom-form">
-                                    <label for="password">Password</label>
-                                    <input type="password" placeholder="Enter Your Password" id="password"
+                                <div class="custom-form" :class="{ 'has-error': !password && showError }">
+                                    <label for="password">Passwort</label>
+                                    <input type="password" placeholder="Geben Sie Ihr Passwort ein" id="password"
                                         v-model="password" required>
+                                    <span v-if="!password && showError" class="error-message">Passwort ist
+                                        erforderlich</span>
                                 </div>
-                                <div class="custom-form">
-                                    <label for="confirmPassword">Confirm Password</label>
-                                    <input type="password" placeholder="Confirm Your Password" id="confirmPassword"
-                                        v-model="confirmPassword" required>
+                                <div class="custom-form" :class="{ 'has-error': !confirmPassword && showError }">
+                                    <label for="confirmPassword">Passwort bestätigen</label>
+                                    <input type="password" placeholder="Bestätigen Sie Ihr Passwort"
+                                        id="confirmPassword" v-model="confirmPassword" required>
+                                    <span v-if="!confirmPassword && showError" class="error-message">Passwortbestätigung
+                                        ist erforderlich</span>
                                 </div>
                                 <div class="login-buttons">
-                                    <button type="submit" class="btn bg-blue"> Register</button>
+                                    <button type="submit" class="btn bg-blue">Registrieren</button>
                                 </div>
                                 <div v-if="errorMessage" class="error-message">{{ errorMessage }}</div>
                             </form>
-
                         </div>
-
                     </div>
                 </div>
             </div>
         </div>
-
     </div>
-
-
 </template>
 <script>
-import axios from 'axios'; // Importing axios for HTTP requests
-import router from '@/router'; // Importing the Vue router for navigation
-import Swal from 'sweetalert2'; // Importing SweetAlert2 for alerts
-import '@fortawesome/fontawesome-free/css/all.css'; // Importing Font Awesome CSS for icons
-import '@fortawesome/fontawesome-free/js/all.js'; // Importing Font Awesome JS for icons
-import CryptoJS from 'crypto-js'; // Importing CryptoJS for encryption
+import axios from 'axios';
+import router from '@/router';
+import Swal from 'sweetalert2';
+import '@fortawesome/fontawesome-free/css/all.css';
+import '@fortawesome/fontawesome-free/js/all.js';
+import CryptoJS from 'crypto-js';
 
 export default {
     data() {
         return {
-            email_Address: '', // User email input
-            password: '', // User password input
-            firstName: '', // User first name input
-            lastName: '', // User last name input
-            gender: '', // User gender input
-            dateOfBirth: '', // User date of birth input
-            country: '', // User country input
-            city: '', // User city input
-            street: '', // User street input
-            houseNumber: '', // User house number input
-            postCode: '', // User post code input
-            facebook_link: '',//User input for facebook
-            confirmPassword: '', // User confirm password input
-            errorMessage: '' // Error message to display in case of registration failure
+            email_Address: '',
+            password: '',
+            firstName: '',
+            lastName: '',
+            gender: '',
+            dateOfBirth: '',
+            country: '',
+            city: '',
+            street: '',
+            houseNumber: '',
+            postCode: '',
+            facebook_link: '',
+            confirmPassword: '',
+            errorMessage: '',
+            state: '',
+            countries: [],
+            states: [],
+            cities: [],
+            countryId: '',
+            stateId: '',
+            cityId: '',
+            countryName: '',
+            stateName: '',
+            cityName: '',
         };
     },
     mounted() {
-    // Displaying a GDPR consent modal using SweetAlert2 when the component is mounted
-    Swal.fire({
-        title: 'Consent Required',
-        html: `
-        <p>We take your privacy seriously. To create your account, we'll need to collect some of your information.  
-        By continuing, you consent to the collection and use of your information for account creation and essential platform functions.</p>
-        <input type="checkbox" id="gdpr-consent-checkbox">
-        <label for="gdpr-consent-checkbox">I Agree</label>`,
-        icon: 'info',
-        showCancelButton: true,
-        confirmButtonText: 'I Accept',
-        cancelButtonText: 'I Decline',
-        allowOutsideClick: false, // Prevents closing on outside click
-        didOpen: () => {
-            // Initially disable the confirm button
-            const confirmButton = Swal.getConfirmButton();
-            confirmButton.disabled = true;
-
-            // Apply the custom class to the confirm button
-            confirmButton.classList.add('disabled-confirm-button');
-
-            // Get the checkbox element
-            const checkbox = document.getElementById('gdpr-consent-checkbox');
-
-            // Attach an event listener to the checkbox
-            checkbox.addEventListener('change', (event) => {
-                // Enable or disable the confirm button based on the checkbox state
-                confirmButton.disabled = !event.target.checked;
-                if (confirmButton.disabled) {
-                    confirmButton.classList.add('disabled-confirm-button');
+        this.loadCountries();
+        // Displaying a GDPR consent modal when the component is mounted
+        Swal.fire({
+            title: 'Consent Required',
+            html: `
+         <p>We take your privacy seriously. To create your account, we'll need to collect some of your information.  
+       By continuing, you consent to the collection and use of your information for account creation and essential platform functions.</p>
+         <input type="checkbox" id="gdpr-consent-checkbox">
+         <label for="gdpr-consent-checkbox">I Agree</label>`,
+            icon: 'info',
+            showCancelButton: true,
+            confirmButtonText: 'I Accept',
+            cancelButtonText: 'I Decline',
+            allowOutsideClick: false,
+            didOpen: () => {
+                const confirmButton = Swal.getConfirmButton();
+                confirmButton.disabled = true;
+                confirmButton.classList.add('disabled-confirm-button');
+                const checkbox = document.getElementById('gdpr-consent-checkbox');
+                checkbox.addEventListener('change', (event) => {
+                    confirmButton.disabled = !event.target.checked;
+                    if (confirmButton.disabled) {
+                        confirmButton.classList.add('disabled-confirm-button');
+                    } else {
+                        confirmButton.classList.remove('disabled-confirm-button');
+                    }
+                });
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // this.showSubscriptionIDPopup();
+            } else {
+                console.log('User did not consent to cookies. Redirecting...');
+                router.push('/');
+            }
+        });
+    },
+    methods: {
+        //Pop up for user consent and Subscription ID
+        showSubscriptionIDPopup() {
+            Swal.fire({
+                title: 'Enter Subscription ID',
+                html: `
+            <input type="text" id="swal-input1" class="swal2-input" placeholder="Subscription ID">
+            <br>
+            <a href="https://alreco.company.site/" target="_blank" class="swal2-confirm swal2-styled" style="display: inline-block; margin-top: 10px;">Buy Membership</a>
+        `,
+                showCancelButton: true,
+                confirmButtonText: 'Submit',
+                cancelButtonText: 'Cancel',
+                allowOutsideClick: false,
+                preConfirm: () => {
+                    const subscriptionID = Swal.getPopup().querySelector('#swal-input1').value;
+                    if (!subscriptionID) {
+                        Swal.showValidationMessage('You need to enter a Subscription ID!');
+                        return false;
+                    }//To check the subscription validity
+                    return axios.get(`${process.env.baseURL}membership/validate-subscriptionId?sid=${subscriptionID}`)
+                        .then(response => {
+                            if (response.data.isValid) {
+                                return { subscriptionID: subscriptionID };
+                            } else {
+                                Swal.showValidationMessage('Invalid Subscription ID. Please try again.');
+                                return false;
+                            }
+                        })
+                        .catch(error => {
+                            Swal.showValidationMessage('Error validating Subscription ID. Please try again.');
+                            return false;
+                        });
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    console.log('Valid Subscription ID:', result.value.subscriptionID);
+                    this.subscriptionID = result.value.subscriptionID;
                 } else {
-                    confirmButton.classList.remove('disabled-confirm-button');
+                    console.log('Subscription ID input cancelled');
+                    router.push('/login');
                 }
             });
-        }
-    }).then((result) => {
-        if (result.isConfirmed) {
-            // User consented, continue with the website
-            console.log('User consented to cookies.');
-        } else {
-            // User did not consent, redirect to / route
-            console.log('User did not consent to cookies. Redirecting...');
-            router.push('/');
-        }
-    });
-},
-    methods: {
+        },
+        //getall countries 
+        loadCountries() {
+            axios.get(`${process.env.baseURL}region/get-all-countries`)
+                .then(response => {
+                    this.countries = response.data;
+
+                })
+                .catch(error => {
+                    console.error('Error loading countries:', error);
+                });
+        },
+        //get states on the basis of country selection
+        loadStates() {
+            if (this.countryId) {
+                this.countryName = this.countries.find(c => c.country_ID === this.countryId).countryName;
+                axios.get(`${process.env.baseURL}region/get-state-by-countryId/${this.countryId}`)
+                    .then(response => {
+                        this.states = response.data;
+                        this.stateId = ''; 
+                        this.stateName = ''; 
+                        this.cityId = ''; 
+                        this.cityName = ''; 
+                        this.cities = []; 
+                    })
+                    .catch(error => {
+                        console.error('Error loading states:', error);
+                    });
+            } else {
+                this.countryName = '';
+                this.states = [];
+                this.stateId = '';
+                this.stateName = '';
+                this.cityId = '';
+                this.cityName = '';
+                this.cities = [];
+            }
+        },
+         //get cities on the basis of state selection
+        loadCities() {
+            if (this.stateId) {
+                this.stateName = this.states.find(s => s.id === this.stateId).name;
+                axios.get(`${process.env.baseURL}region/get-city-by-stateId/${this.stateId}`)
+                    .then(response => {
+                        this.cities = response.data;
+                        this.cityId = ''; 
+                        this.cityName = ''; 
+                    })
+                    .catch(error => {
+                        console.error('Error loading cities:', error);
+                    });
+            } else {
+                this.stateName = '';
+                this.cities = [];
+                this.cityId = '';
+                this.cityName = '';
+            }
+        },
+        updateCityName() {
+            if (this.cityId) {
+                this.cityName = this.cities.find(c => c.id === this.cityId).name;
+            } else {
+                this.cityName = '';
+            }
+        },
         // Method to handle the registration process
         register() {
-            // Check if passwords match
-            if (this.password !== this.confirmPassword) {
-                this.errorMessage = "Passwords do not match";
-                return;
+        // Show loader
+        Swal.fire({
+            title: 'Registering...',
+            text: 'Please wait',
+            allowOutsideClick: false,
+            showConfirmButton: false,
+            willOpen: () => {
+                Swal.showLoading();
             }
-
+        });
+        // Check if passwords match
+        if (this.password !== this.confirmPassword) {
+            Swal.close();
+            this.errorMessage = "Passwords do not match";
+            return;
+        }
             // Creating registration data object
             const registrationData = {
                 email_Address: this.email_Address,
@@ -470,37 +643,49 @@ export default {
                 lastName: this.lastName,
                 gender: this.gender,
                 dateOfBirth: this.dateOfBirth,
-                country: this.country,
-                city: this.city,
+                country: this.countryName,
+                state: this.stateName,
+                city: this.cityName,
                 street: this.street,
                 houseNumber: this.houseNumber,
                 postCode: this.postCode,
                 facebook_link: this.facebook_link,
             };
-
             // Sending a POST request to the registration endpoint with the registration data
-            axios.post(`${process.env.baseURL}auth/register`, registrationData)
-                .then(response => {
-                    // Displaying a success message using SweetAlert2
-                    Swal.fire({
-                        title: 'Registration Successful!',
-                        text: 'Check Your Email and Click Verify!',
-                        icon: 'success',
-                        confirmButtonText: 'OK'
-                    });
-                    // Encrypting the user ID received in the response
-                    const reg_Id = response.data.user_Id;
-                    const encryptedLogId = this.encryptItem(this.padString(reg_Id.toString()));
-                    // Storing the encrypted user ID in local storage
-                    localStorage.setItem('logId', encryptedLogId);
-                    // Redirecting to the upload ID page
-                    router.push('/uploadID');
-                })
-                .catch(error => {
-                    // Handling errors and setting appropriate error message
-                    this.errorMessage = error.response.data.message;
-                });
-        },
+            axios.post(`${process.env.baseURL}authenticate/register`, registrationData)
+    .then(response => {
+        Swal.close();
+        Swal.fire({
+            title: 'Registration Successful!',
+            text: 'Check Your Email and Click Verify!',
+            icon: 'success',
+            confirmButtonText: 'OK'
+        });
+        const reg_Id = response.data.user_Id;
+        const encryptedLogId = this.encryptItem(this.padString(reg_Id.toString()));
+        sessionStorage.setItem('logId', encryptedLogId);
+        router.push('/uploadID');
+    })
+    .catch(error => {
+        Swal.close();
+        if (error.response && error.response.status === 409) {
+            Swal.fire({
+                title: 'User Already Exists',
+                text: 'An account with this email already exists. Please use a different email or try logging in.',
+                icon: 'warning',
+                confirmButtonText: 'OK'
+            });
+        } else {
+            this.errorMessage = error.response ? error.response.data.message : 'An error occurred during registration';
+            Swal.fire({
+                title: 'Registration Error',
+                text: this.errorMessage,
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+        }
+    });
+    },
         // Method to encrypt a given item using AES encryption
         encryptItem(item) {
             return CryptoJS.AES.encrypt(item, process.env.SECRET_KEY).toString();
@@ -509,6 +694,7 @@ export default {
         padString(str) {
             return str.padStart(8, '0');
         },
+
     }
 };
 </script>

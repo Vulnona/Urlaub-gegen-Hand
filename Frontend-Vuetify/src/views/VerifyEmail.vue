@@ -14,7 +14,6 @@
         </div>
     </div>
 </template>
-
 <script>
 import axios from 'axios';
 
@@ -27,9 +26,10 @@ export default {
         };
     },
     methods: {
+        //method to send the verification email
         async VerificationEmail() {
             try {
-                const response = await axios.post(`${process.env.baseURL}auth/resend-email-verification`, {
+                const response = await axios.post(`${process.env.baseURL}authenticate/resend-email-verification`, {
                     email: this.email
                 });
                 this.message = response.data;

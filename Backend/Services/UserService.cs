@@ -1,31 +1,32 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using UGHApi.Models;
 using UGHModels;
 
 namespace UGHApi.Services
 {
-    public class userservice
+    public class UserService
     {
         private readonly UghContext _context;
         private readonly PasswordService _passwordService;
+        private readonly ILogger<UserService> _logger;
 
-        public userservice(UghContext context, PasswordService passwordService)
+        public UserService(UghContext context, PasswordService passwordService, ILogger<UserService> logger)
         {
             _context = context;
             _passwordService = passwordService;
+            _logger = logger;
         }
-
-        public User GetUserByToken(string token)
+        #region user-services
+        public async Task<User> GetUserByTokenAsync(string token)
         {
             try
             {
-                var userId = _context.emailverificators
-                                     .Where(x => x.verificationToken.ToString().Equals(token))
-                                     .Select(x => x.user_Id)
-                                     .FirstOrDefault();
+                var userId = await _context.emailverificators.Where(x => x.verificationToken.ToString().Equals(token)).Select(x => x.user_Id).FirstOrDefaultAsync();
+
                 if (userId > 0)
                 {
-                    var user = _context.users.FirstOrDefault(x => x.User_Id == userId);
+                    var user = await _context.users.FirstOrDefaultAsync(x => x.User_Id == userId);
                     if (user != null)
                     {
                         return user;
@@ -35,12 +36,13 @@ namespace UGHApi.Services
             }
             catch (Exception ex)
             {
-                // Log the exception or handle as needed
-                throw new InvalidOperationException("An error occurred while getting user by token.", ex);
+                _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                throw new InvalidOperationException( ex.Message);
             }
         }
 
-        public async Task<User?> GetUserByEmailAsync(string email)
+
+        public async Task<User> GetUserByEmailAsync(string email)
         {
             try
             {
@@ -53,8 +55,8 @@ namespace UGHApi.Services
             }
             catch (Exception ex)
             {
-                // Log the exception or handle as needed
-                throw new InvalidOperationException("An error occurred while getting user by email asynchronously.", ex);
+                _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                throw new InvalidOperationException(ex.Message);
             }
         }
 
@@ -64,7 +66,7 @@ namespace UGHApi.Services
             {
                 if (_context.users.Any(u => u.Email_Address.ToLower().Equals(request.Email_Address.ToLower())))
                 {
-                    return false; // User already exists
+                    return false;
                 }
 
                 DateTime parsedDateOfBirth = DateTime.Parse(request.DateOfBirth);
@@ -88,9 +90,10 @@ namespace UGHApi.Services
                     salt,
                     request.Facebook_link,
                     request.Link_RS,
-                    request.Link_VS
+                    request.Link_VS,
+                    request.State
                 );
-                newUser.VerificationState = UGH_Enums.VerificationState.verified;
+                newUser.VerificationState = UGH_Enums.VerificationState.Verified;
                 _context.users.Add(newUser);
                 _context.SaveChanges();
 
@@ -109,16 +112,16 @@ namespace UGHApi.Services
             }
             catch (Exception ex)
             {
-                // Log the exception or handle as needed
-                throw new InvalidOperationException("An error occurred while creating admin.", ex);
+                _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                throw new InvalidOperationException(ex.Message);
             }
         }
 
-        public async Task<IEnumerable<string>> GetuserrolesByUserEmail(string userEmail)
+        public async Task<IEnumerable<string>> GetUserRolesByUserEmail(string userEmail)
         {
             try
             {
-                var userroles = await _context.users
+                var userRoles = await _context.users
                     .Where(ur => ur.Email_Address == userEmail)
                     .SelectMany(ur => _context.userrolesmapping
                         .Where(urm => urm.UserId == ur.User_Id)
@@ -127,12 +130,13 @@ namespace UGHApi.Services
                             role => role.RoleId,
                             (urm, role) => role.RoleName))
                     .ToListAsync();
-                return userroles;
+                if (userRoles.Count == 0) return null;
+                return userRoles;
             }
             catch (Exception ex)
             {
-                // Log the exception or handle as needed
-                throw new InvalidOperationException("An error occurred while getting user roles by user email asynchronously.", ex);
+                _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                throw new InvalidOperationException(ex.Message);
             }
         }
 
@@ -163,8 +167,8 @@ namespace UGHApi.Services
             }
             catch (Exception ex)
             {
-                // Log the exception or handle as needed
-                throw new InvalidOperationException("An error occurred while validating user.", ex);
+                _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                throw new InvalidOperationException( ex.Message);
             }
         }
 
@@ -183,9 +187,10 @@ namespace UGHApi.Services
             }
             catch (Exception ex)
             {
-                // Log the exception or handle as needed
-                throw new InvalidOperationException("An error occurred while deleting user information.", ex);
+                _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                throw new InvalidOperationException( ex.Message);
             }
         }
+        #endregion
     }
 }

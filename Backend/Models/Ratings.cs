@@ -4,7 +4,7 @@ using UGHModels;
 
 namespace UGHApi.Models
 {
-    public class ratings
+    public class Ratings
     {
         public int Id { get; set; }
         [Range(0, 5, ErrorMessage = "Please select  number between 1 to 5")]

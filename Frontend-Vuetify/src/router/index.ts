@@ -35,7 +35,7 @@ const routes = [
     name: 'Login',
     component: () => import('@/components/account/AccountLogin.vue'),
     beforeEnter: (to, from, next) => {
-      const token = localStorage.getItem('token');
+      const token = sessionStorage.getItem('token');
       if (token) {
         next({ name: 'Home' });
       } else {
@@ -79,7 +79,7 @@ const routes = [
     component: () => import('@/views/EditProfile.vue'),
   },
   {
-    path: '/display-profile/:id',
+    path: '/display-profile',
     name: 'display-profile',
     component: () => import('@/views/DisplayProfile.vue'),
   },

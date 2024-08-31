@@ -1,46 +1,43 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
+using UGHApi.Models;
 using UGHModels;
 
 namespace UGHApi.Controllers
 {
-    [Route("api")]
+    [Route("api/user")]
     [ApiController]
     public class UserController : ControllerBase
     {
         private readonly UghContext _context;
+        private readonly ILogger<UserController> _logger;
 
-        public UserController(UghContext context)
+        public UserController(UghContext context, ILogger<UserController> logger)
         {
             _context = context;
+            _logger = logger;
         }
-
-        // GET: api/User
-        [HttpGet("user/get-all-users")]
-        public async Task<ActionResult<IEnumerable<User>>> Getusers()
+        #region users-info
+        [HttpGet("get-all-users")]
+        public async Task<ActionResult<IEnumerable<User>>> GetUsers()
         {
-            if (_context.users == null)
-            {
-                return NotFound();
-            }
             try
             {
-                return await _context.users.ToListAsync();
+                var users = await _context.users.ToListAsync();
+                if (!users.Any()) NotFound();
+                return Ok(users);
             }
             catch (Exception ex)
             {
+               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
 
-        // GET: api/User/5
-        [HttpGet("user/get-user/{id}")]
-        public async Task<ActionResult<User>> GetUser(int id)
+        [HttpGet("get-user-by-id/{id}")]
+        public async Task<ActionResult<User>> GetUser([Required]int id)
         {
-            if (_context.users == null)
-            {
-                return NotFound();
-            }
             try
             {
                 var user = await _context.users.FindAsync(id);
@@ -48,48 +45,48 @@ namespace UGHApi.Controllers
                 {
                     return NotFound();
                 }
-                return user;
+
+                return Ok(user);
             }
             catch (Exception ex)
             {
+               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
 
-        [HttpPut("user/upload-id/{id}")]
-        public async Task<IActionResult> UploadID(int id, string link_vs, string link_rs)
+        [HttpPut("upload-id")]
+        public async Task<IActionResult> UploadID([FromBody] UploadIDViewModel model)
         {
-            if (string.IsNullOrEmpty(link_vs) || string.IsNullOrEmpty(link_rs))
+            if (!ModelState.IsValid)
             {
-                return BadRequest("Link_VS or Link_RS is null or empty.");
+                return BadRequest(ModelState);
             }
+
             try
             {
-                var existUser = await _context.users.FindAsync(id);
+                var existUser = await _context.users.FindAsync(model.Id);
                 if (existUser == null)
                 {
-                    return NotFound("User not found.");
+                    return NotFound();
                 }
-                existUser.Link_VS = link_vs;
-                existUser.Link_RS = link_rs;
 
+                existUser.Link_VS = model.Link_VS;
+                existUser.Link_RS = model.Link_RS;
                 await _context.SaveChangesAsync();
-                return Ok("Links updated successfully.");
+                _logger.LogInformation("ID Uploaded Successfully");
+                return Ok("ID Uploaded Successfully");
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"An error occurred while saving the changes: {ex.Message}");
+               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
 
-        // DELETE: api/User/5
-        [HttpDelete("user/delete-user/{id}")]
-        public async Task<IActionResult> DeleteUser(int id)
+        [HttpDelete("delete-user/{id}")]
+        public async Task<IActionResult> DeleteUser([Required]int id)
         {
-            if (_context.users == null)
-            {
-                return NotFound();
-            }
             try
             {
                 var user = await _context.users.FindAsync(id);
@@ -105,13 +102,19 @@ namespace UGHApi.Controllers
             }
             catch (Exception ex)
             {
+               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
 
-        private bool UserExists(int id)
+        private async Task<bool> UserExistsAsync([Required] int id)
         {
-            return (_context.users?.Any(e => e.User_Id == id)).GetValueOrDefault();
+            if (_context == null || _context.users == null)
+            {
+                return false;
+            }
+            return await _context.users.AnyAsync(e => e.User_Id == id);
         }
+        #endregion
     }
 }

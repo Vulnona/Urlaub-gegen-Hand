@@ -1,6 +1,9 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Azure;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using RestSharp;
 using UGHApi.Models;
 using UGHApi.Services;
 
@@ -12,16 +15,18 @@ namespace UGHApi.Controllers
     public class CouponController : ControllerBase
     {
         private readonly UghContext _context;
-        private readonly couponservice _couponservice;
+        private readonly CouponService _couponService;
+        private readonly ILogger<CouponController> _logger;
 
 
-        public CouponController(UghContext context, couponservice couponservice)
+        public CouponController(UghContext context, CouponService couponService, ILogger<CouponController> logger)
         {
             _context = context;
-            _couponservice = couponservice;
+            _couponService = couponService;
+            _logger = logger;
         }
 
-        #region Coupon
+        #region Coupon-generation-by-admin
         [HttpPost("admin/add-coupon")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> AddCoupon(Coupon coupon)
@@ -35,13 +40,13 @@ namespace UGHApi.Controllers
                     return Conflict("Coupon code already exists.");
                 }
 
-                await _couponservice.AddCoupon(coupon);
+                await _couponService.AddCoupon(coupon);
                 return Ok("Coupon inserted successfully.");
             }
             catch (Exception ex)
             {
-                // Log the exception if needed
-                return BadRequest("An error occurred while processing the request.");
+               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
 
@@ -52,7 +57,8 @@ namespace UGHApi.Controllers
         {
             try
             {
-                await _couponservice.UpdateCoupon(updatedCoupon);
+                if (!ModelState.IsValid) return BadRequest(ModelState);
+                await _couponService.UpdateCoupon(updatedCoupon);
                 return Ok("Coupon updated successfully.");
             }
             catch (CouponNotFoundException)
@@ -61,8 +67,8 @@ namespace UGHApi.Controllers
             }
             catch (Exception ex)
             {
-                // Log the exception or handle it appropriately
-                return StatusCode(500, "An error occurred while updating the coupon.");
+               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
 
@@ -70,8 +76,17 @@ namespace UGHApi.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetAllCoupon()
         {
-            var coupons = await _couponservice.GetAllcoupons();
+            try
+            {
+            var coupons = await _couponService.GetAllcoupons();
+            if (coupons.IsNullOrEmpty()) return NotFound();
             return Ok(coupons);
+            }
+            catch (Exception ex)
+            {
+               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
         }
 
         [HttpDelete("admin/delete-coupon/{couponId}")]
@@ -80,7 +95,7 @@ namespace UGHApi.Controllers
         {
             try
             {
-                await _couponservice.DeleteCoupon(couponId);
+                await _couponService.DeleteCoupon(couponId);
                 return Ok("Coupon deleted successfully.");
             }
             catch (CouponNotFoundException)
@@ -89,8 +104,8 @@ namespace UGHApi.Controllers
             }
             catch (Exception ex)
             {
-                // Log the exception or handle it appropriately
-                return StatusCode(500, "An error occurred while deleting the coupon.");
+               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
 
@@ -100,7 +115,7 @@ namespace UGHApi.Controllers
         {
             try
             {
-                var result = await _couponservice.RedeemCoupon(couponCode, User);
+                var result = await _couponService.RedeemCoupon(couponCode, User);
                 return Ok(result);
             }
             catch (CouponNotFoundException)
@@ -113,8 +128,8 @@ namespace UGHApi.Controllers
             }
             catch (Exception ex)
             {
-                // Log the exception or handle it appropriately
-                return StatusCode(500, "An error occurred while redeeming the coupon.");
+               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
         #endregion

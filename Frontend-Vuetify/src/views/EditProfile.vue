@@ -36,25 +36,21 @@
             <input type="text" id="city" v-model="profile.user.city" class="form-control">
           </div>
           <div class="form-group">
-            <label for="country">Country</label>
-            <input type="text" id="country" v-model="profile.user.country" class="form-control">
+            <label for="state">State/Region</label>
+            <input type="text" id="state" v-model="profile.user.state" class="form-control">
           </div>
           <div class="form-group">
-            <label for="emailAddress">Email Address</label>
-            <input type="email" id="emailAddress" v-model="profile.user.email_Address" class="form-control" readonly>
+            <label for="country">Country</label>
+            <input type="text" id="country" v-model="profile.user.country" class="form-control">
           </div>
           <div class="form-group">
             <label for="facebookLink">Facebook Link</label>
             <input type="text" id="facebookLink" v-model="profile.user.facebook_link" class="form-control">
           </div>
-  
-  
           <div class="form-group">
             <label for="userPic">User Picture</label>
             <input type="file" id="userPic" multiple @change="onFileChange" class="form-control">
           </div>
-  
-         
           <div class="form-check">
             <input type="checkbox" id="smoker" v-model="profileOptions.smoker" class="form-check-input">
             <label for="smoker" class="form-check-label">Smoker</label>
@@ -67,8 +63,6 @@
             <input type="checkbox" id="liabilityInsurance" v-model="profileOptions.haveLiabilityInsurance" class="form-check-input">
             <label for="liabilityInsurance" class="form-check-label">Have Liability Insurance</label>
           </div>
-  
-       
           <div class="form-group">
             <button type="button" class="btn btn-primary col-2" style="color: #fff; background-color: #0d6efd;" @click="toggleHobbiesInput">+ Something Else</button>
           </div>
@@ -76,28 +70,22 @@
             <label for="hobbies">Hobbies</label>
             <input type="text" id="hobbies" v-model="profile.hobbies" class="form-control">
           </div>
-  
-   
           <button type="submit" class="btn btn-success col-3" style="color: #fff; background-color: #28a745; float: right;">Save Profile</button>
         </form>
       </div>
     </div>
   </template>
-  
   <script>
-
   import axios from 'axios';
   import Swal from 'sweetalert2';
-  import router from '@/router'; // Assuming router is correctly configured in Vue router
+  import router from '@/router';
   import CryptoJS from 'crypto-js';
 
-  // Global variable to store decrypted log ID
+  
   let globalToken = '';
-
   export default {
     data() {
       return {
-        // Initial data structure for profile and options
         profile: {
           id: 0,
           user_Id: 0,
@@ -111,6 +99,7 @@
             houseNumber: '',
             postCode: '',
             city: '',
+            state:'',
             country: '',
             email_Address: '',
             password: '',
@@ -125,22 +114,20 @@
           },
           userPic: '',
           hobbies: '',
-          options: 0, // Initial value for options
+          options: 0, 
         },
-        // Default options for profile
         profileOptions: {
           smoker: false,
           petOwner: false,
           haveLiabilityInsurance: false,
         },
-        showHobbiesInput: false, // Flag to toggle hobbies input
+        showHobbiesInput: false, 
       };
     },
     mounted() {
       
-      const decryptedtoken=this.decryptToken(localStorage.getItem("token"));
+      const decryptedtoken=this.decryptToken(sessionStorage.getItem("token"));
       globalToken=decryptedtoken;
-      // Fetch user profile using decrypted log ID
       const token = decryptedtoken;
       if (token) {
         this.fetchUserProfile(token);
@@ -148,18 +135,14 @@
         Swal.fire('Error', 'User ID not found', 'error');
         router.push('/login');
       }
-      
-      // Perform security check on login status
       this.Securitybot();
     },
     methods: {
-      // Method to toggle display of hobbies input
       toggleHobbiesInput() {
         this.showHobbiesInput = !this.showHobbiesInput;
       },
-      // Security check to verify user login status
       Securitybot() {
-        if (!localStorage.getItem("token")) {
+        if (!sessionStorage.getItem("token")) {
           Swal.fire({
             title: 'You are not logged In!',
             text: 'Login First to continue.',
@@ -183,10 +166,9 @@
       // Method to fetch user profile data from backend API
       async fetchUserProfile(token) {
         try {
-          const response = await axios.get(`${process.env.baseURL}profile/get-profile?token=${token}`);
+          const response = await axios.get(`${process.env.baseURL}profile/get-user-profile?token=${token}`);
           if (response.data.profile) {
             const profile = response.data.profile;
-            // Update profile data and options based on API response
             this.profile = {
               id: profile.id,
               user_Id: profile.user_Id,
@@ -200,6 +182,7 @@
                 houseNumber: profile.user.houseNumber,
                 postCode: profile.user.postCode,
                 city: profile.user.city,
+                state: profile.user.state,
                 country: profile.user.country,
                 email_Address: profile.user.email_Address,
                 password: profile.user.password,
@@ -213,7 +196,6 @@
               hobbies: profile.hobbies,
               options: profile.options,
             };
-            // Update profile options based on computed bitmask
             const options = profile.options;
             this.profileOptions = {
               smoker: (options & 1) === 1,
@@ -225,32 +207,28 @@
           }
         } catch (error) {
           console.error('Error fetching user profile:', error);
-          Swal.fire('Error', 'Failed to fetch user profile', 'error');
+          Swal.fire('Error', 'Failed to fetch user profile');
         }
       },
       decryptToken(encryptedToken) {
       try {
         const bytes = CryptoJS.AES.decrypt(encryptedToken, process.env.SECRET_KEY);
-        return bytes.toString(CryptoJS.enc.Utf8); // Convert decrypted bytes to UTF-8 string
+        return bytes.toString(CryptoJS.enc.Utf8); 
       } catch (e) {
-        console.error('Error decrypting token:', e); // Log error if decryption fails
+        console.error('Error decrypting token:', e);
         return null;
       }
     },
       // Method to save updated profile data
       async saveProfile() {
-        try {
-          // Compute options bitmask from profileOptions
+        try {      
           const optionsValue = this.computeOptionsValue(this.profileOptions);
-          // Construct profile data to be sent to backend
           const profileData = {
             ...this.profile,
             options: optionsValue,
-          };
-          // Send PUT request to update profile using globalLogid
-          const response = await axios.put(`${process.env.baseURL}profile/update-profile?token=${globalToken}`, profileData);
+          };    
+          const response = await axios.put(`${process.env.baseURL}profile/add-or-update-profile?token=${globalToken}`, profileData);
           if (response.status === 200) {
-            // Display success message and navigate to profile page
             Swal.fire('Success', 'Profile saved successfully', 'success');
             router.push('/profile');
           } else {
@@ -258,10 +236,9 @@
           }
         } catch (error) {
           console.error('Error saving user profile:', error);
-          Swal.fire('Error', 'Failed to save profile: ' + error.message, 'error');
+          Swal.fire('Error', 'Failed to save profile');
         }
       },
-      // Method to compute bitmask value from profileOptions
       computeOptionsValue(options) {
         let value = 0;
         if (options.smoker) value |= 1;
@@ -275,7 +252,6 @@
         if (file) {
           const reader = new FileReader();
           reader.onload = (e) => {
-            // Update userPic with base64 encoded image data
             this.profile.userPic = e.target.result.split(',')[1];
           };
           reader.readAsDataURL(file);
@@ -284,7 +260,7 @@
     }
   };
 </script>
-  <style scoped>
+<style scoped>
   .v-container {
     display: flex;
     justify-content: center;

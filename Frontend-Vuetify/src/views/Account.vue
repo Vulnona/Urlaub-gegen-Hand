@@ -10,15 +10,15 @@
           </span>
         </h5>
         <div class="card-text-group ">
-          <p  class="card-text text-center "><strong>Ratings: </strong>
+          <p class="card-text text-center "><strong>Ratings: </strong>
             <span v-for="(star, index) in stars" :key="index" class="star" :class="starClass(star)"></span>
             <span class="average-rating">({{ rate.averageRating }}/5) - {{ rate.ratingsCount }} votes</span>
           </p>
-
           <p class="card-text "><strong>Email:</strong> {{ user.email_Address }}</p>
           <p class="card-text"><strong>Date of Birth:</strong> {{ user.dateOfBirth }}</p>
           <p class="card-text"><strong>Gender:</strong> {{ user.gender }}</p>
           <p class="card-text"><strong>Country:</strong> {{ user.country }}</p>
+          <p class="card-text"><strong>Region/State:</strong> {{ user.state }}</p>
           <p class="card-text"><strong>City:</strong> {{ user.city }}</p>
           <p class="card-text"><strong>Postal Code:</strong> {{ user.postCode }}</p>
           <p class="card-text"><strong>Street Address:</strong> {{ user.street }}</p>
@@ -28,35 +28,31 @@
             <a :href="user.facebook_link" target="_blank">{{ user.facebook_link }}</a>&nbsp;
             <button class="btn btn-dark border" @click="copyToClipboard(user.facebook_link)">Copy</button>
           </p>
-          <p class="card-text"><strong>Options:</strong><br /> {{ options.join(', ') }}</p>
           <p class="card-text"><strong>Hobbies:</strong><br /> {{ hobbies }}</p>
-
-        
         </div>
       </div>
     </div>
   </div>
 </template>
 <script>
-import router from "@/router"; // Importing the Vue router for navigation
-import axios from "axios"; // Importing axios for HTTP requests
-import Swal from 'sweetalert2'; // Importing SweetAlert2 for alerts
-import CryptoJS from 'crypto-js'; // Importing CryptoJS for encryption and decryption
-import VueJwtDecode from 'vue-jwt-decode'; // Importing VueJwtDecode for decoding JWTs
+import router from "@/router";
+import axios from "axios";
+import Swal from 'sweetalert2';
+import CryptoJS from 'crypto-js';
+import VueJwtDecode from 'vue-jwt-decode';
 
-let globalLogId = ''; // Global variable to store the decrypted log ID
-const axiosInstance = axios.create(); // Creating an axios instance for custom configurations
-
+let globalLogId = ''; 
+const axiosInstance = axios.create();
 // Adding a request interceptor to the axios instance
 axiosInstance.interceptors.request.use(
   config => {
-    const token = localStorage.getItem('token');
+    const token = sessionStorage.getItem('token');
     if (token) {
       const decryptedToken = decryptToken(token);
       if (decryptedToken) {
         config.headers['Authorization'] = `Bearer ${decryptedToken}`;
       } else {
-        localStorage.removeItem('token');
+        sessionStorage.removeItem('token');
       }
     }
     return config;
@@ -89,45 +85,45 @@ export default {
   name: "UserCard",
   data() {
     return {
-      user: {}, // Object to store user data
-      profileImgSrc: '', // String to store the profile image source
-      options: [], // Array to store profile options
-      hobbies: '', // String to store user hobbies
-      rate: {}, // Object to store user rating
-      userRole: '', // String to store the user's role
+      user: {},
+      profileImgSrc: '',
+      options: [],
+      hobbies: '',
+      rate: {},
+      userRole: '',
     };
   },
   mounted() {
-    this.Securitybot(); // Call security check on component mount
-    this.fetchUserData(localStorage.getItem('UserId')); // Fetch user data on component mount
-    this.fetchUserRating(localStorage.getItem('UserId')); // Fetch user rating on component mount
-    this.checkLoginStatus(); // Check login status on component mount
+    this.Securitybot();
+    this.fetchUserData(sessionStorage.getItem('UserId'));
+    this.fetchUserRating(sessionStorage.getItem('UserId'));
+    this.checkLoginStatus();
   },
   methods: {
     // Method to check if the user is logged in
     Securitybot() {
-      if (!localStorage.getItem("token")) {
+      if (!sessionStorage.getItem("token")) {
         Swal.fire({
           title: 'You are not logged In!',
           text: 'Login First to continue.',
           icon: 'info',
           confirmButtonText: 'OK'
         });
-        router.push('/login'); // Redirect to login if not logged in
+        router.push('/login');
       }
     },
     // Method to check login status and set the user role
     checkLoginStatus() {
-      const token = localStorage.getItem("token");
+      const token = sessionStorage.getItem("token");
       if (token) {
-        const testlogid = this.decryptlogID(localStorage.getItem("logId"));
+        const testlogid = this.decryptlogID(sessionStorage.getItem("logId"));
         globalLogId = testlogid;
         const decryptedToken = this.decryptToken(token);
         if (decryptedToken) {
           const decodedToken = VueJwtDecode.decode(decryptedToken);
-          this.userRole = decodedToken["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"] || '';
+          this.userRole = decodedToken[`${process.env.claims_Url}`] || '';
         } else {
-          localStorage.removeItem('token');
+          sessionStorage.removeItem('token');
         }
       }
     },
@@ -155,7 +151,7 @@ export default {
     // Method to fetch user data
     async fetchUserData(id) {
       try {
-        const response = await axiosInstance.get(`${process.env.baseURL}profile/get-profile-for-admin/${id}`);
+        const response = await axiosInstance.get(`${process.env.baseURL}admin/get-user-profile/${id}`);
         this.user = response.data.profile.user;
         this.profileImgSrc = `data:image/jpeg;base64,${response.data.profile.userPic}`;
         this.options = this.processOptions(response.data.profile.options);
@@ -177,15 +173,16 @@ export default {
     editProfile() {
       router.push('/editprofile');
     },
-  
-   
     // Method to fetch user rating
     async fetchUserRating(id) {
       try {
-        const response = await axiosInstance.get(`${process.env.baseURL}get-rating-by-user-id/${id}`);
+        const response = await axiosInstance.get(`${process.env.baseURL}user-rating/get-rating-by-user-id/${id}`);
         this.rate = response.data;
-        this.user.averageRating = response.data.averageRating;
-        this.user.ratingsCount = response.data.ratingsCount;
+        if (this.rate.averageRating != null) {
+          this.rate.averageRating = parseFloat(response.data.averageRating).toFixed(1);
+          this.user.averageRating = parseFloat(response.data.averageRating).toFixed(1);
+          this.user.ratingsCount = response.data.ratingsCount;
+        }
       } catch (error) {
         console.error("Error Fetching User Rating:", error);
       }
@@ -219,7 +216,6 @@ export default {
   }
 };
 </script>
-
 <style scoped>
 .v-container {
   display: flex;

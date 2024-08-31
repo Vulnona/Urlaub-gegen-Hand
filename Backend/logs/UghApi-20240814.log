@@ -1,0 +1,26 @@
+2024-08-14 13:55:51.824 +05:30 [INF] New user registered successfully. UserName:abhaybundel@cssoftsolutions.com
+2024-08-14 13:56:29.315 +05:30 [INF] Verification Email Sent Successfully To The User: abhaybundel@cssoftsolutions.com
+2024-08-14 13:59:34.756 +05:30 [INF] New user registered successfully. UserName:testaccount2@gmail.com
+2024-08-14 14:00:46.761 +05:30 [INF] Verification Email Sent Successfully To The User: testaccount2@gmail.com
+2024-08-14 14:21:07.960 +05:30 [INF] Verification Email Sent Successfully To The User: abhay007official@gmail.com
+2024-08-14 14:24:38.350 +05:30 [INF] New user registered successfully. UserName:abhay-bundel@cssoftsolutions.com
+2024-08-14 14:24:42.162 +05:30 [INF] Verification Email Sent Successfully To The User: abhay-bundel@cssoftsolutions.com
+2024-08-14 15:22:37.535 +05:30 [INF] Template file for status 'Verified' not found.
+2024-08-14 15:22:37.683 +05:30 [ERR] Template file for status 'Verified' not found.
+2024-08-14 15:24:10.338 +05:30 [INF] Template file for status 'Verified' not found.
+2024-08-14 15:24:10.453 +05:30 [INF] Template file for status 'Verified' not found.
+2024-08-14 15:25:46.018 +05:30 [INF] Template file for status 'Verified' not found.
+2024-08-14 15:25:49.078 +05:30 [INF] Template file for status 'Verified' not found.
+2024-08-14 15:26:45.212 +05:30 [INF] Template file for status 'Verified' not found.
+2024-08-14 15:26:48.136 +05:30 [INF]    at UGHApi.Services.AdminVerificationMailService.SendConfirmationEmailAsync(ConfirmationReq request)
+   at UGHApi.Controllers.AdminController.UpdateVerifyState(Int32 userId, VerificationState verificationState)
+2024-08-14 15:28:19.243 +05:30 [INF] Template file for status 'Verified' not found.
+2024-08-14 15:28:20.794 +05:30 [INF]    at UGHApi.Services.AdminVerificationMailService.SendConfirmationEmailAsync(ConfirmationReq request)
+   at UGHApi.Controllers.AdminController.UpdateVerifyState(Int32 userId, VerificationState verificationState)
+2024-08-14 15:29:42.108 +05:30 [INF] Template file for status 'Verified' not found.
+2024-08-14 15:29:44.632 +05:30 [ERR] Template file for status 'Verified' not found.
+2024-08-14 15:29:44.633 +05:30 [INF]    at UGHApi.Services.AdminVerificationMailService.SendConfirmationEmailAsync(ConfirmationReq request)
+   at UGHApi.Controllers.AdminController.UpdateVerifyState(Int32 userId, VerificationState verificationState)
+2024-08-14 15:33:22.984 +05:30 [INF] Template file for status 'Verified' not found.
+2024-08-14 15:33:23.119 +05:30 [ERR] Exception occurred: Template file for status 'Verified' not found. | StackTrace:    at UGHApi.Services.AdminVerificationMailService.SendConfirmationEmailAsync(ConfirmationReq request)
+   at UGHApi.Controllers.AdminController.UpdateVerifyState(Int32 userId, VerificationState verificationState)

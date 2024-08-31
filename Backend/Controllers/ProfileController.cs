@@ -1,76 +1,80 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 using UGHApi.Models;
 using UGHApi.Services;
 
 namespace UGHApi.Controllers
 {
-    [Route("api/")]
+    [Route("api/profile")]
     [ApiController]
     public class ProfileController : ControllerBase
     {
         private readonly UghContext _context;
         private readonly TokenService _tokenService;
+        private readonly ILogger<ProfileController> _logger;
 
-        public ProfileController(UghContext context, TokenService tokenService)
+        public ProfileController(UghContext context, TokenService tokenService, ILogger<ProfileController> logger)
         {
             _context = context;
             _tokenService = tokenService;
+            _logger = logger;
         }
-
-        [HttpGet("profile/get-profile")]
-        public async Task<IActionResult> GetProfile(string token)
+        #region user-profile
+        [HttpGet("get-user-profile")]
+        public async Task<IActionResult> GetProfile([Required]string token)
         {
             try
             {
-                var accessUserId = await _tokenService.GetUserIdFromToken(token);
-
-                if (accessUserId == null)
+                var userAccessId = await _tokenService.GetUserIdFromToken(token);
+                if (userAccessId == null)
                 {
-                    return Unauthorized("Invalid token");
+                    return Unauthorized();
                 }
-                var userId = accessUserId.Value;
-
-                var profile = await _context.userprofiles.Include(u => u.User).FirstOrDefaultAsync(p => p.User_Id == userId);
-                if (profile == null)
+                var userId = userAccessId.Value;
+                var userProfile = await _context.userprofiles.Include(u => u.User).FirstOrDefaultAsync(p => p.User_Id == userId);
+                if (userProfile == null)
                 {
-                    var newProfile = new UserProfile
+                    var newUserProfile = new UserProfile
                     {
                         User_Id = userId,
                     };
 
-                    _context.userprofiles.Add(newProfile);
+                    _context.userprofiles.Add(newUserProfile);
                     await _context.SaveChangesAsync();
-
-                    profile = await _context.userprofiles.Include(u => u.User).FirstOrDefaultAsync(p => p.User_Id == userId);
+                    userProfile = await _context.userprofiles.Include(u => u.User).FirstOrDefaultAsync(p => p.User_Id == userId);
                 }
 
-                return Ok(new { Profile = profile });
+                return Ok(new { Profile = userProfile });
             }
             catch (Exception ex)
             {
-                // Log the exception 
+               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
 
-        [HttpPut("profile/update-profile")]
-        public async Task<IActionResult> UpdateProfile(string token, [FromBody] UserProfile profile)
+        [HttpPut("add-or-update-profile")]
+        public async Task<IActionResult> UpdateProfile([Required]string token, [FromBody] UserProfile profile)
         {
             try
             {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
                 var accessUserId = await _tokenService.GetUserIdFromToken(token);
 
                 if (accessUserId == null)
                 {
-                    return Unauthorized("Invalid token");
+                    return Unauthorized();
                 }
 
                 var userId = accessUserId.Value;
 
                 if (profile == null || profile.User_Id != userId)
                 {
-                    return BadRequest("Profile object is null or User ID mismatch");
+                    return BadRequest();
                 }
 
                 var existingProfile = await _context.userprofiles.Include(p => p.User).FirstOrDefaultAsync(p => p.User_Id == userId);
@@ -81,7 +85,6 @@ namespace UGHApi.Controllers
                     return Ok(profile);
                 }
 
-                // Update profile fields
                 existingProfile.Hobbies = profile.Hobbies;
                 existingProfile.Options = profile.Options;
                 if (profile.UserPic != null)
@@ -89,7 +92,6 @@ namespace UGHApi.Controllers
                     existingProfile.UserPic = profile.UserPic;
                 }
 
-                // Update user fields if provided in the profile
                 if (profile.User != null)
                 {
                     existingProfile.User.FirstName = profile.User.FirstName;
@@ -100,13 +102,13 @@ namespace UGHApi.Controllers
                     existingProfile.User.HouseNumber = profile.User.HouseNumber;
                     existingProfile.User.PostCode = profile.User.PostCode;
                     existingProfile.User.City = profile.User.City;
+                    existingProfile.User.State = profile.User.State;
                     existingProfile.User.Country = profile.User.Country;
                     existingProfile.User.Facebook_link = profile.User.Facebook_link;
                     existingProfile.User.Link_RS = profile.User.Link_RS;
                     existingProfile.User.Link_VS = profile.User.Link_VS;
                 }
 
-                // Update the database
                 _context.userprofiles.Update(existingProfile);
                 _context.users.Update(existingProfile.User);
                 await _context.SaveChangesAsync();
@@ -115,9 +117,10 @@ namespace UGHApi.Controllers
             }
             catch (Exception ex)
             {
-                // Log the exception (use your preferred logging mechanism)
+               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+        #endregion
     }
 }

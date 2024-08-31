@@ -4,10 +4,10 @@ namespace UGHApi.Models
     {
         public enum VerificationState
         {
-            isNew,
-            verificationPending,
-            verificationFailed,
-            verified
+            IsNew,
+            VerificationPending,
+            VerificationFailed,
+            Verified
         }
      
     }
