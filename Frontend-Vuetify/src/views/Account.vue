@@ -15,14 +15,14 @@
             <span class="average-rating">({{ rate.averageRating }}/5) - {{ rate.ratingsCount }} votes</span>
           </p>
           <p class="card-text "><strong>Email:</strong> {{ user.email_Address }}</p>
-          <p class="card-text"><strong>Date of Birth:</strong> {{ user.dateOfBirth }}</p>
-          <p class="card-text"><strong>Gender:</strong> {{ user.gender }}</p>
-          <p class="card-text"><strong>Country:</strong> {{ user.country }}</p>
+          <p class="card-text"><strong>Geburtsdatum:</strong> {{ user.dateOfBirth }}</p>
+          <p class="card-text"><strong>Geschlecht:</strong> {{ user.gender }}</p>
+          <p class="card-text"><strong>Land:</strong> {{ user.country }}</p>
           <p class="card-text"><strong>Region/State:</strong> {{ user.state }}</p>
-          <p class="card-text"><strong>City:</strong> {{ user.city }}</p>
-          <p class="card-text"><strong>Postal Code:</strong> {{ user.postCode }}</p>
-          <p class="card-text"><strong>Street Address:</strong> {{ user.street }}</p>
-          <p class="card-text"><strong>House No:</strong> {{ user.houseNumber }}</p>
+          <p class="card-text"><strong>Stadt:</strong> {{ user.city }}</p>
+          <p class="card-text"><strong>Postleitzahl:</strong> {{ user.postCode }}</p>
+          <p class="card-text"><strong>Adresse:</strong> {{ user.street }}</p>
+          <p class="card-text"><strong>Hausnummmer:</strong> {{ user.houseNumber }}</p>
           <p class="card-text">
             <strong>Facebook Link:</strong><br />
             <a :href="user.facebook_link" target="_blank">{{ user.facebook_link }}</a>&nbsp;
@@ -164,9 +164,9 @@ export default {
     // Method to process profile options
     processOptions(options) {
       const result = [];
-      if (options & ProfileOptions.Smoker) result.push('Smoker');
-      if (options & ProfileOptions.PetOwner) result.push('Pet Owner');
-      if (options & ProfileOptions.HaveLiabilityInsurance) result.push('Have Liability Insurance');
+      if (options & ProfileOptions.Smoker) result.push('raucht');
+      if (options & ProfileOptions.PetOwner) result.push('besitzt Tier(e)');
+      if (options & ProfileOptions.HaveLiabilityInsurance) result.push('Haftpflichtversichert');
       return result;
     },
     // Method to navigate to edit profile page
