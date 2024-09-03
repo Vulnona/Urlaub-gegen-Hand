@@ -23,14 +23,14 @@
             <span class="average-rating">({{ rate.averageRating }}/5) - {{ rate.ratingsCount }} votes</span>
           </p>
           <p class="card-text "><strong>Email:</strong> {{ user.email_Address }}</p>
-          <p class="card-text"><strong>Date of Birth:</strong> {{ user.dateOfBirth }}</p>
-          <p class="card-text"><strong>Gender:</strong> {{ user.gender }}</p>
-          <p class="card-text"><strong>Country:</strong> {{ user.country }}</p>
-          <p class="card-text"><strong>City:</strong> {{ user.city }}</p>
+          <p class="card-text"><strong>Geburtsdatum:</strong> {{ user.dateOfBirth }}</p>
+          <p class="card-text"><strong>Geschlecht:</strong> {{ user.gender }}</p>
+          <p class="card-text"><strong>Land:</strong> {{ user.country }}</p>
+          <p class="card-text"><strong>Stadt:</strong> {{ user.city }}</p>
           <p class="card-text"><strong>State/Region:</strong> {{ user.state }}</p>
-          <p class="card-text"><strong>Postal Code:</strong> {{ user.postCode }}</p>
-          <p class="card-text"><strong>Street Address:</strong> {{ user.street }}</p>
-          <p class="card-text"><strong>House No:</strong> {{ user.houseNumber }}</p>
+          <p class="card-text"><strong>Postleitzahl:</strong> {{ user.postCode }}</p>
+          <p class="card-text"><strong>Adresse:</strong> {{ user.street }}</p>
+          <p class="card-text"><strong>Hausnummer:</strong> {{ user.houseNumber }}</p>
           <p class="card-text">
             <strong>Facebook Link:</strong><br />
             <a :href="user.facebook_link" target="_blank">{{ user.facebook_link }}</a>&nbsp;
@@ -39,8 +39,8 @@
 
           <p class="card-text"><strong>Hobbies:</strong><br /> {{ hobbies }}</p>
           <div class="d-flex" style="justify-content: space-around;" v-if="user.verificationState === 3">
-            <button class="btn-primary col-5 rounded" style="height: 38px;" @click="editProfile">Edit Profile</button>
-            <button class="btn-primary col-5 rounded" style="height: 38px;" @click="shareProfile">Copy Link</button>
+            <button class="btn-primary col-5 rounded" style="height: 38px;" @click="editProfile">Editiere Profil</button>
+            <button class="btn-primary col-5 rounded" style="height: 38px;" @click="shareProfile">Kopiere Link</button>
           </div>
         </div>
       </div>
@@ -120,8 +120,8 @@ export default {
     Securitybot() {
       if (!sessionStorage.getItem("token")) {
         Swal.fire({
-          title: 'You are not logged In!',
-          text: 'Login First to continue.',
+          title: 'Du bist nicht eingeloggt!',
+          text: 'Logge dich ein, um fortzufahren.',
           icon: 'info',
           confirmButtonText: 'OK'
         });
@@ -180,21 +180,21 @@ export default {
         this.hobbies = response.data.profile.hobbies;
       } catch (error) {
         if (error.response && error.response.status === 500) {
-          Swal.fire('Session Expired', 'Your session has expired. Please log in again.', 'error');
+          Swal.fire('Sitzung abgelaufen', 'Deine Sitzung ist abgelaufen. Bitte logge dich erneut ein.', 'error');
           sessionStorage.clear();
           router.push('/');
         } else {
           console.error("Error Fetching User data:", error);
-          Swal.fire('Error', 'Failed to fetch user data', 'error');
+          Swal.fire('Error', 'Benutzerdaten konnten nicht abgerufen werden', 'error');
         }
       }
     },
     // Function to process user profile options bitmask and return corresponding array
     processOptions(options) {
       const result = [];
-      if (options & ProfileOptions.Smoker) result.push('Smoker');
-      if (options & ProfileOptions.PetOwner) result.push('Pet Owner');
-      if (options & ProfileOptions.HaveLiabilityInsurance) result.push('Have Liability Insurance');
+      if (options & ProfileOptions.Smoker) result.push('raucht');
+      if (options & ProfileOptions.PetOwner) result.push('besitzt Tier(e)');
+      if (options & ProfileOptions.HaveLiabilityInsurance) result.push('ist haftpflichtversichert');
       return result;
     },
     editProfile() {
@@ -230,11 +230,11 @@ export default {
     copyToClipboard(text) {
       navigator.clipboard.writeText(text)
         .then(() => {
-          Swal.fire('Copied', 'The URL has been copied to the clipboard', 'success');
+          Swal.fire('Kopiert', 'Die URL wurde in die Zwischenablage kopiert', 'success');
         })
         .catch(err => {
           console.error('Could not copy text: ', err);
-          Swal.fire('Error', 'Failed to copy the URL', 'error');
+          Swal.fire('Error', 'Die URL konnte nicht kopiert werden', 'error');
         });
     },
     // Function to fetch user rating using API request

@@ -6,7 +6,7 @@
                 <label for="email">Email:</label>
                 <input type="email" v-model="email" id="email" required />
             </div>
-            <button type="submit" class="submit-button">Send Verification Email</button>
+            <button type="submit" class="submit-button">Versende Bestätigungs-Email</button>
             <a href="/" class="text-center">Back</a>
         </form>
         <div v-if="message" :class="{ 'error-message': isError, 'success-message': !isError }">
@@ -39,7 +39,7 @@ export default {
                     this.message = error.response.data;
                     this.isError = true;
                 } else {
-                    this.message = 'An error occurred. Please try again.';
+                    this.message = 'Ein Fehler ist aufgetreten. Versuche es noch einmal.';
                     this.isError = true;
                 }
             }

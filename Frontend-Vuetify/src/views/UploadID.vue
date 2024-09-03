@@ -1,11 +1,11 @@
 <template>
   <div class="container" style="margin: auto;">
-    <h2 class="text-center" style="padding: 10px;">Upload ID Card</h2>
+    <h2 class="text-center" style="padding: 10px;">Lade deinen Ausweis hoch</h2>
     <div class="row">
       <div class="col-md-6">
         <div class="card">
           <div class="card-body">
-            <h5 class="card-title">Front ID Card</h5>
+            <h5 class="card-title">Vordere Seite des Ausweises</h5>
             <input type="file" accept="image/*" @change="onFrontIdChange">
             <div class="mt-3">
               <div v-if="frontIdPreview">
@@ -22,7 +22,7 @@
       <div class="col-md-6">
         <div class="card">
           <div class="card-body">
-            <h5 class="card-title">Back ID Card</h5>
+            <h5 class="card-title">Hintere Seite des Ausweises</h5>
             <input type="file" accept="image/*" @change="onBackIdChange">
             <div class="mt-3">
               <div v-if="backIdPreview">
@@ -96,8 +96,8 @@ const convertToJpeg = (file: File): Promise<File> => {
 const Securitybot = () => {
   if (!sessionStorage.getItem("logId")) {
     Swal.fire({
-      title: 'You are not logged In!',
-      text: 'Login First to continue.',
+      title: 'Du bist nicht eingeloggt!',
+      text: 'Logge dich ein um fortzufahren.',
       icon: 'info',
       confirmButtonText: 'OK'
     });
@@ -116,7 +116,7 @@ const uploadImage = async (file: File, fileName: string) => {
     await client.send(command);
   } catch (err) {
     console.error(err);
-    Swal.fire('Error', 'Failed to upload image', 'error');
+    Swal.fire('Error', 'Das Bild konnte nicht hochgeladen werden', 'error');
     throw err;
   }
 };
@@ -147,13 +147,13 @@ const updateUserLinks = async (userId: string, linkVS: string, linkRS: string) =
       throw new Error('Failed to update');
     }
     
-    Swal.fire('Success', 'Uploaded Successfully!', 'success').then(() => {
+    Swal.fire('Erfolgreich', 'Upload erfolgreich!', 'success').then(() => {
       sessionStorage.clear();
       router.push('/');
     });
   } catch (err) {
     console.error(err);
-    Swal.fire('Error', 'Failed to upload', 'error');
+    Swal.fire('Error', 'Upload nicht erfolgreich', 'error');
   }
 };
 
@@ -176,17 +176,17 @@ const backIdPreview = ref<string | null>(null);
 // Function to initiate image upload process
 const uploadImages = () => {
   if (!frontIdFile.value || !backIdFile.value) {
-    Swal.fire('', 'Please select both front and back ID card images', 'warning');
+    Swal.fire('', 'Bitte lade beides hoch, Vorder- und Rückseite!', 'warning');
     return;
   }
   Swal.fire({
-    title: 'Are you sure?',
-    text: 'Do you want to upload these images?',
+    title: 'Bist du sicher?',
+    text: 'Möchtest du diese Bilder hochladen?',
     icon: 'warning',
     showCancelButton: true,
     confirmButtonColor: '#3085d6',
     cancelButtonColor: '#d33',
-    confirmButtonText: 'Yes, upload it!',
+    confirmButtonText: 'Ja, lade sie hoch!',
   }).then((result) => {
     if (result.isConfirmed) {
       const userId = decryptlogID(sessionStorage.getItem("logId"));
@@ -204,7 +204,7 @@ const uploadImages = () => {
         })
         .catch(err => {
           console.error(err);
-          Swal.fire('Error', 'Failed to upload images', 'error');
+          Swal.fire('Error', 'Die Bilder konnten nicht hochgeladen werden', 'error');
         });
     }
   });

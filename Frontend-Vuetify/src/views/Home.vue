@@ -17,7 +17,7 @@
         </div>
       </div>
       <div v-if="offers">
-        <div v-if="loading" class="text-center">Loading...</div>
+        <div v-if="loading" class="text-center">Lädt...</div>
         <div v-else class="row">
           <div v-for="offer in filteredOffers" :key="offer.id" class="col-md-4 mb-4">
             <div class="card">
@@ -28,10 +28,10 @@
                 <div @click="redirectToOfferDetail(offer.id)">
                   <h3 class="card-title">{{ offer.title }}</h3>
                   <p class="card-text">{{ truncateDescription(offer.description) }}</p>
-                  <p class="card-text"><strong>Skills:</strong> {{ offer.skills }}</p>
-                  <p class="card-text"><strong>Accommodation:</strong> {{ offer.accomodation }}</p>
-                  <p class="card-text"><strong>Suitable for:</strong> {{ offer.accomodationsuitable }}</p>
-                  <p class="card-text"><strong>Region:</strong> {{ offer.state }}</p>
+                  <p class="card-text"><strong>Fähigkeiten:</strong> {{ offer.skills }}</p>
+                  <p class="card-text"><strong>Unterbringung:</strong> {{ offer.accomodation }}</p>
+                  <p class="card-text"><strong>Geeignet für:</strong> {{ offer.accomodationsuitable }}</p>
+                  <p class="card-text"><strong>Ort:</strong> {{ offer.state }}</p>
                 </div>
                 <div v-if="offer.user.user_Id != logId">
                   <div class="button-container" v-if="userRole != 'Admin'">
@@ -58,7 +58,7 @@
     </div>
     <div id="rating-modal" v-if="showModal">
       <div class="modal-content">
-        <h3>Add Rating</h3>
+        <h3>Bewertung hinzufügen</h3>
         <div id="rating-stars">
           <span class="star rating-star" v-for="n in 5" :key="n" :data-value="n" @click="selectStar(n)"
             :class="{ 'selected': n <= selectedRating }"></span>
@@ -165,15 +165,15 @@ export default {
           if (globalIsTrue != true) {
             setTimeout(() => {
               Swal.fire({
-                title: 'Membership Expired!',
-                text: 'Your membership has expired. Please renew your membership.',
+                title: 'Mitgliedschaft abgelaufen!',
+                text: 'Deine Mitgliedschaft ist abgelaufen. Bitte erneuere deine Mitgliedschaft.',
                 html: `
-          <p>Your membership has expired. Please renew your membership.</p>
+          <p>Deine Mitgliedschaft ist abgelaufen. Bitte erneuere deine Mitgliedschaft.</p>
               <input type="text" id="swal-input1" class="swal2-input" placeholder="Subscription ID">
-            <a href="https://alreco.company.site/" target="_blank" class="swal2-confirm swal2-styled" style="display: inline-block; margin-top: 10px;">Click To Buy Membership</a>
+            <a href="https://alreco.company.site/" target="_blank" class="swal2-confirm swal2-styled" style="display: inline-block; margin-top: 10px;">Klicke, um eine Mitgliedschaft zu kaufen</a>
         `,
                 icon: 'error',
-                confirmButtonText: 'Submit',
+                confirmButtonText: 'Senden',
                 confirmButtonText: 'OK'
               }).then(() => {
                 router.push('/login'); 
@@ -192,13 +192,13 @@ export default {
           if (error.response) {
             console.error("Error response:", error.response.data);
             Swal.fire({
-              title: 'No Membership Found!',
+              title: 'Keine Mitgliedschaft gefunden!',
               html: `
-          <p>Your membership not Found. Please Buy your membership.</p>
+          <p>Es konnte keine Mitgliedschaft gefunden werden. Bitte kaufe eine Mitgliedschaft.</p>
             
-            <a href="https://alreco.company.site/" target="_blank" class="swal2-confirm swal2-styled" style="display: inline-block; margin-top: 10px;">Click To Buy Membership</a>
+            <a href="https://alreco.company.site/" target="_blank" class="swal2-confirm swal2-styled" style="display: inline-block; margin-top: 10px;">Klicken, um Mitgliedschaft zu kaufen</a>
         `,
-              text: 'Your membership not Found. Please Buy your membership.',
+              text: 'Es konnte keine Mitgliedschaft gefunden werden. Bitte kaufe eine Mitgliedschaft.',
               icon: 'error',
               confirmButtonText: 'OK'
             }).then(() => {
@@ -292,8 +292,8 @@ export default {
     // Method to send request for offer application
     async sendRequest(offerId, userId) {
       const result = await Swal.fire({
-        title: 'Are you sure?',
-        text: 'Do you want to send this request?',
+        title: 'Bist du sicher?',
+        text: 'Möchtest du diese Anfrage senden?',
         icon: 'success',
         showCancelButton: true,
         confirmButtonColor: '#3085d6',
@@ -307,10 +307,10 @@ export default {
             userId,
             status: 0,
           });
-          Swal.fire('Success!', 'Your request has been sent.', 'success');
+          Swal.fire('Erfolg!', 'Deine Anfrage wurde gesendet.', 'success');
           await this.checkReviewStatus(offerId); 
         } catch (error) {
-          Swal.fire('Sorry', 'Failed to send request: Your Request was rejected!', '');
+          Swal.fire('Sorry', 'Leider konnte deine Anfrage nicht versendet werden!', '');
           console.error(error);
         }
       }
@@ -373,11 +373,11 @@ export default {
     // Method to show add review modal using Swal
     async showAddReviewModal(offer) {
       const { value: review, dismiss: dismissAction } = await Swal.fire({
-        title: 'Add Review',
-        html: `<textarea id="reviewTextArea" class="swal2-textarea" placeholder="Your review" readonly>Bitte gebt die gegenseitige Bewertung erst ab, nachdem diese terminlich abgeschlossen ist.</textarea>`,
+        title: 'Review hinzufügen',
+        html: `<textarea id="reviewTextArea" class="swal2-textarea" placeholder="Dein Review" readonly>Bitte gebt die gegenseitige Bewertung erst ab, nachdem diese terminlich abgeschlossen ist.</textarea>`,
         showCancelButton: true,
-        cancelButtonText: 'Cancel',
-        confirmButtonText: 'Submit',
+        cancelButtonText: 'Abbrechen',
+        confirmButtonText: 'Einreichen',
         preConfirm: () => {
           return document.getElementById('reviewTextArea').value;
         },
@@ -397,12 +397,12 @@ export default {
           addReviewForLoginUser: reviewText,
         });
         if (response.status === 200) {
-          Swal.fire('Review Added', 'Your review has been successfully added.', 'success');
+          Swal.fire('Review hinzugefügt', 'Dein Review wurde erfolgreich hinzugefügt.', 'success');
         } else {
-          Swal.fire('Error', 'Failed to add review.', 'error');
+          Swal.fire('Error', 'Das Review konnte nicht hinzugefügt werden.', 'error');
         }
       } catch (error) {
-        Swal.fire('Already Added', 'You Have Already Added Review!', '');
+        Swal.fire('Bereits hinzugefügt', 'Du hast bereits ein Review hinzugefügt!', '');
       }
     },
     // Method to search offers based on the searchTerm
@@ -436,7 +436,7 @@ export default {
         await this.addRating(this.currentOfferId, globalLogid, this.selectedRating); 
         this.showModal = false;
       } else {
-        Swal.fire('Error', 'Please select a rating.', 'error');
+        Swal.fire('Error', 'Bitte wähle ein Rating.', 'error');
       }
     },
     cancelRating() {
@@ -452,12 +452,12 @@ export default {
           submissionDate: new Date().toISOString()
         });
         if (response.status === 200) {
-          Swal.fire('Rating Added', 'Your rating has been successfully added.', 'success');
+          Swal.fire('Rating hinzugefügt', 'Dein Rating wurde erfolgreich hinzugefügt.', 'success');
         } else {
-          Swal.fire('Something Went Wrong', 'Unable To Add Rating.', 'error');
+          Swal.fire('Etwas ist schief gelaufen', 'Dein Rating konnte nicht abgegeben werden.', 'error');
         }
       } catch (error) {
-        Swal.fire('Already Added Rating', 'You have already added rating!', '');
+        Swal.fire('Bereits hinzugefügt', 'Du hast bereits ein Rating abgegeben!', '');
       }
     },
   },
