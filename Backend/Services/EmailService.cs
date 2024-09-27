@@ -61,7 +61,6 @@ public class EmailService
         _logger.LogInformation("Entering verification {1},{2},{3}",RecipientEmail, Status, FirstName);
         try
         {
-            //string templatePath = GetTemplatePath(Status);
             string subject;
             string templatePath;
             switch(Status){
@@ -74,7 +73,7 @@ public class EmailService
                     templatePath = _templateSettings.FailedTemplate;
                     break;
                 default:
-                    throw new Exception($"Invalid Call parameter '{Status}'.");
+                    throw new Exception($"Invalid Call parameter for function SendTemplateEmailAsync: '{Status}'.");
             }
             if (!string.IsNullOrEmpty(templatePath))
             {
