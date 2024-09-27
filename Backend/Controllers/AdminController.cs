@@ -16,9 +16,9 @@ namespace UGHApi.Controllers
     {
         private readonly UghContext _context;
         private readonly UserService _userService;
-        private readonly AdminVerificationMailService _mailService;
+        private readonly EmailService _mailService;
         private readonly ILogger<AdminController> _logger;
-        public AdminController(UghContext context, UserService userService, AdminVerificationMailService mailService, ILogger<AdminController> logger)
+        public AdminController(UghContext context, UserService userService, EmailService mailService, ILogger<AdminController> logger)
         {
             _context = context;
             _userService = userService;
@@ -90,7 +90,8 @@ namespace UGHApi.Controllers
                             : "Verified"
                     };
 
-                    await _mailService.SendConfirmationEmailAsync(request);
+                    //await _mailService.SendConfirmationEmailAsync(request);
+                    await _mailService.SendAdminVerificationConfirmationEmailAsync(request);
                 }
 
                 return Ok("Successfully updated verification state of user.");
