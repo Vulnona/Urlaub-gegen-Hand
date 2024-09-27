@@ -81,20 +81,11 @@ namespace UGHApi.Controllers
                         await Task.Delay(TimeSpan.FromMinutes(5));
                     }
 
-                    var request = new ConfirmationReq
-                    {
-                        toEmail = user.Email_Address,
-                        userName = $"{user.FirstName} {user.LastName}",
-                        status = verificationState == UGH_Enums.VerificationState.VerificationFailed
-                            ? "Verification Failed"
-                            : "Verified"
-                    };
-
-                    //await _mailService.SendConfirmationEmailAsync(request);
-                    await _mailService.SendAdminVerificationConfirmationEmailAsync(request);
+                    string status = verificationState == UGH_Enums.VerificationState.VerificationFailed ? "Verification Failed" : "Verified";
+                    await _mailService.SendTemplateEmailAsync(user.Email_Address, status, user.FirstName);
                 }
-
-                return Ok("Successfully updated verification state of user.");
+                    return Ok("Successfully updated verification state of user.");
+                
             }
             catch (DbUpdateException ex)
             {

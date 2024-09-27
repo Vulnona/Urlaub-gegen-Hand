@@ -56,20 +56,36 @@ public class EmailService
             return false;
         }
     }
-    public async Task SendAdminVerificationConfirmationEmailAsync(ConfirmationReq request)
+    public async Task SendTemplateEmailAsync(string RecipientEmail, string Status, string FirstName)
     {
+        _logger.LogInformation("Entering verification {1},{2},{3}",RecipientEmail, Status, FirstName);
         try
         {
-            string templatePath = GetTemplatePath(request.status);
+            //string templatePath = GetTemplatePath(Status);
+            string subject;
+            string templatePath;
+            switch(Status){
+                case string str when str.Equals("Verified"):
+                    subject="Dein Account wurde verifiziert.";
+                    templatePath = _templateSettings.SuccessTemplate;
+                    break;
+                case string str when str.Equals("Verification Failed"):
+                    subject="Die Verifikation deines Accounts wurde abgelehnt";
+                    templatePath = _templateSettings.FailedTemplate;
+                    break;
+                default:
+                    throw new Exception($"Invalid Call parameter '{Status}'.");
+            }
             if (!string.IsNullOrEmpty(templatePath))
             {
                 string body = await File.ReadAllTextAsync(templatePath);
-                await SendEmailAsync(request.toEmail,"Your verification by Admin", body); 
-                Console.WriteLine("Admin Verfication Email sent successfully");
+                body = body.Replace("FirstName", FirstName);
+                await SendEmailAsync(RecipientEmail, subject, body); 
+                _logger.LogInformation("{1} Email sent successfully", Status);
             }
             else
             {
-                throw new FileNotFoundException($"Template file for status '{request.status}' not found.");
+                throw new FileNotFoundException($"Template file for status '{Status}' not found.");
             }
         }
         catch (Exception ex)
@@ -78,22 +94,7 @@ public class EmailService
             throw new Exception(ex.Message);
         }
     }
-    private string GetTemplatePath(string status)
-    {
-        string templatePath = status switch
-            {
-                "Verified" => Environment.GetEnvironmentVariable("TemplateSettings__SuccessTemplate") ?? _templateSettings.SuccessTemplate,
-                "Verification Failed" => Environment.GetEnvironmentVariable("TemplateSettings__FailedTemplate") ?? _templateSettings.FailedTemplate,
-                _ => null
-            };
-                
-        if (string.IsNullOrEmpty(templatePath))
-        {
-            return null;
-        }
-        
-        return File.Exists(templatePath) ? templatePath : null;
-    }
+
     public bool IsValidEmail(string email)
     {
         string emailPattern = @"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$";
