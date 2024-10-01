@@ -16,9 +16,9 @@ namespace UGHApi.Controllers
     {
         private readonly UghContext _context;
         private readonly UserService _userService;
-        private readonly AdminVerificationMailService _mailService;
+        private readonly EmailService _mailService;
         private readonly ILogger<AdminController> _logger;
-        public AdminController(UghContext context, UserService userService, AdminVerificationMailService mailService, ILogger<AdminController> logger)
+        public AdminController(UghContext context, UserService userService, EmailService mailService, ILogger<AdminController> logger)
         {
             _context = context;
             _userService = userService;
@@ -81,19 +81,11 @@ namespace UGHApi.Controllers
                         await Task.Delay(TimeSpan.FromMinutes(5));
                     }
 
-                    var request = new ConfirmationReq
-                    {
-                        toEmail = user.Email_Address,
-                        userName = $"{user.FirstName} {user.LastName}",
-                        status = verificationState == UGH_Enums.VerificationState.VerificationFailed
-                            ? "Verification Failed"
-                            : "Verified"
-                    };
-
-                    await _mailService.SendConfirmationEmailAsync(request);
+                    string status = verificationState == UGH_Enums.VerificationState.VerificationFailed ? "Verification Failed" : "Verified";
+                    await _mailService.SendTemplateEmailAsync(user.Email_Address, status, user.FirstName);
                 }
-
-                return Ok("Successfully updated verification state of user.");
+                    return Ok("Successfully updated verification state of user.");
+                
             }
             catch (DbUpdateException ex)
             {

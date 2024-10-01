@@ -164,7 +164,6 @@ namespace UGHApi
             services.AddMemoryCache();
             services.AddScoped<TokenService>();
             services.AddTransient<CouponService>();
-            services.AddTransient<AdminVerificationMailService>();
             services.AddHostedService<ReviewUserHostedService>();
         }
         private static void ConfigureMiddleware(WebApplication app)
