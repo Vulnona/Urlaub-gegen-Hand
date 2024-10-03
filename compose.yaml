@@ -38,7 +38,7 @@ services:
     depends_on:
       - db
     volumes:
-    - D:/UGH Docker/UGH/Backend/logs:/app/logs
+    - /home/docker/UGH-Main/Backend/logs:/app/logs
 
   db:
     image: mysql:5.7

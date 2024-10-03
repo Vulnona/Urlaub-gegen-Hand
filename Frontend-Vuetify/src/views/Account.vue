@@ -1,114 +1,286 @@
 <template>
-  <div class="v-container account-page" style="margin: auto; max-width: 700px;">
-    <div class="card" style="width: 620px;">
-      <h2 class="text-center">User Profile</h2>
-      <div class="card-body">
-        <img :src="profileImgSrc" class="profile-img" alt="User Profile Picture">
-        <h5 class="card-title">{{ user.firstName }} {{ user.lastName }}
-          <span class="verState" v-if="user.verificationState === 3">
-            <i class="ri-shield-star-line" style="color: green;"></i>
-          </span>
-        </h5>
-        <div class="card-text-group ">
-          <p class="card-text text-center "><strong>Ratings: </strong>
-            <span v-for="(star, index) in stars" :key="index" class="star" :class="starClass(star)"></span>
-            <span class="average-rating">({{ rate.averageRating }}/5) - {{ rate.ratingsCount }} votes</span>
-          </p>
-          <p class="card-text "><strong>Email:</strong> {{ user.email_Address }}</p>
-          <p class="card-text"><strong>Geburtsdatum:</strong> {{ user.dateOfBirth }}</p>
-          <p class="card-text"><strong>Geschlecht:</strong> {{ user.gender }}</p>
-          <p class="card-text"><strong>Land:</strong> {{ user.country }}</p>
-          <p class="card-text"><strong>Region/State:</strong> {{ user.state }}</p>
-          <p class="card-text"><strong>Stadt:</strong> {{ user.city }}</p>
-          <p class="card-text"><strong>Postleitzahl:</strong> {{ user.postCode }}</p>
-          <p class="card-text"><strong>Adresse:</strong> {{ user.street }}</p>
-          <p class="card-text"><strong>Hausnummmer:</strong> {{ user.houseNumber }}</p>
-          <p class="card-text">
-            <strong>Facebook Link:</strong><br />
-            <a :href="user.facebook_link" target="_blank">{{ user.facebook_link }}</a>&nbsp;
-            <button class="btn btn-dark border" @click="copyToClipboard(user.facebook_link)">Copy</button>
-          </p>
-          <p class="card-text"><strong>Hobbies:</strong><br /> {{ hobbies }}</p>
+  <Navbar />
+  <div class="inner_banner_layout">
+    <div class="container">
+      <div class="row">
+        <div class="col-sm-12">
+          <div class="inner_banner">
+            <h2></h2>
+          </div>
         </div>
       </div>
     </div>
   </div>
+  <div class="container">
+    <div class="row profile-content">
+      <div class="col-xl-3">
+        <div class="card custom-card overflow-hidden border p-0 leftBox-content">
+          <div class="card-body border-bottom border-block-end-dashed">
+            <div class="text-center">
+
+              <span class="avatar avatar-xxl avatar-rounded online mb-3">
+                <img :src="profileImgSrc || defaultProfileImgSrc" @error="onImageError" class="profile-img"
+                  alt="User Profile Picture">
+              </span>
+              <h5 class="fw-semibold mb-1">{{ user.firstName }} {{ user.lastName }}</h5>
+              <span @click="showModal = true" class="action-link fs-13 font-normal">View All Reviews</span>
+            </div>
+          </div>
+
+          <div v-if="user.userRating != 0"
+            class="rating_block d-flex mb-0 flex-wrap gap-3 p-3 justify-content-center border-bottom border-block-end-dashed">
+            <div class="">
+              <p class="card-text text-center mb-0">User Ratings:<span class="average-rating">{{ user.averageRating
+                  }}</span>
+                {{ " " }} <span class="star ri-star-fill gold"></span>
+              </p>
+
+
+            </div>
+          </div>
+          <div class="p-3 pb-1 d-flex flex-wrap justify-content-between">
+            <div class="fw-medium fs-15 themeColor">
+              Basic Info :
+            </div>
+          </div>
+          <div class="card-body border-bottom border-block-end-dashed p-0">
+            <ul class="list-group list-group-flush basic_info">
+              <li class="list-group-item border-0">
+                <div>
+                  <span class="fw-medium me-2">Name :</span><span class="text-muted">{{ user.firstName }} {{
+                    user.lastName
+                    }}</span>
+                </div>
+              </li>
+              <li class="list-group-item border-0">
+                <div><span class="fw-medium me-2">DOB :</span><span class="text-muted">{{ user.dateOfBirth }}</span>
+                </div>
+              </li>
+              <li class="list-group-item border-0">
+                <div><span class="fw-medium me-2">Gender:</span><span class="text-muted">{{ user.gender }}</span>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="col-xl-9">
+        <div class="card custom-card overflow-hidden border p-0">
+          <div class="card-body">
+
+            <div>
+              <div class="back_link"><a href="#" @click="back()"><i class="ri-arrow-left-double-fill"></i> Back</a>
+              </div>
+              <ul class="list-group list-group-flush border rounded-3">
+                <li class="list-group-item p-3">
+                  <span class="fw-medium fs-15 d-block mb-3">General Info :</span>
+                  <div class="text-muted">
+                    <p class="mb-3">
+                      <span class="icon icon2">
+                        <i class="ri-map-pin-line align-middle fs-15"></i>
+                      </span>
+                      <span class="fw-medium text-default">House Number : </span> {{ user.houseNumber }}
+                    </p>
+                    <p class="mb-3">
+                      <span class="icon icon3">
+                        <i class="ri-building-line align-middle fs-15"></i>
+                      </span>
+                      <span class="fw-medium text-default">Address : </span>{{ user.street }}, {{ user.city }}, {{
+                      user.state }},
+                      {{ user.country }}
+                    </p>
+                    <p class="mb-0">
+                      <span class="icon icon4">
+                        <i class="ri-phone-line align-middle fs-15"></i>
+                      </span>
+                      <span class="fw-medium text-default">Postal code : </span> {{ user.postCode }}
+                    </p>
+                  </div>
+                </li>
+                <li class="list-group-item p-3 skills_content">
+                  <span class="fw-medium fs-15 d-block mb-3">Skills:</span>
+                  <div class="w-75">
+                    <a href="javascript:void(0);">
+                      <span v-for="skills in user.skills" :key="skills" class="badge bg-light text-muted m-1 border">{{
+                        skills }}</span>
+                    </a>
+                  </div>
+                </li>
+                <li class="list-group-item p-3 hobbies_content">
+                  <span class="fw-medium fs-15 d-block mb-3">Hobbies:</span>
+                  <div class="w-75">
+                    <a href="javascript:void(0);">
+                      <span v-for="hobbies in user.hobbies" :key="hobbies"
+                        class="badge bg-light text-muted m-1 border">{{ hobbies }}</span>
+                    </a>
+                  </div>
+                </li>
+                <li class="list-group-item p-3 social_link">
+                  <span class="fw-medium fs-15 d-block mb-3">Social Media :</span>
+                  <ul class="d-flex align-items-center flex-wrap">
+                    <li class="d-flex align-items-center gap-3">
+                      <button @click="redirectToFacebook(user.facebookLink)" type="button" class="btn social_btn">
+                        <span class="social_link_outer"><i class="ri-facebook-fill"></i></span>
+                        <span class="text-info">Facebook</span>
+                      </button>
+                    </li>
+                  </ul>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div v-if="showModal" class="modal review_modal_layout">
+    <div class="modal-content review_modal">
+      <div class="modal-header">
+        <h4 class="card-title">Rating & Reviews</h4>
+        <span class="close" @click="showModal = false">&times;</span>
+      </div>
+      <div class="modal-body">
+        <div class="review_layout all_reviews_layout">
+          <div class="row">
+            <div class="col-sm-4">
+              <div class="review_rating">
+                <div class="rating-score mb-2">
+                  <i class="ri-star-fill" aria-hidden="true"></i>{{ user.averageRating }}<span>/5</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-sm-8">
+              <div class="all_reviews">
+                <div class="flex_header">
+                  <h5>{{ reviews.length }} Reviews</h5>
+                </div>
+                <div class="comments-area">
+                  <div class="comment-list-wrap">
+                    <ol class="comment-list">
+                      <li v-for="userReviews in reviews" :key="userReviews" class="comment">
+                        <div>
+                          <div class="comment_head">
+                            <h6>{{ userReviews.offer.title }}</h6>
+                            <div class="img-thumb" v-if="userReviews.offer.imageData != null"><img
+                                :src="'data:' + userReviews.offer.imageMimeType + ';base64,' + userReviews.offer.imageData">
+                            </div>
+                            <div class="img-thumb" v-if="userReviews.offer.imageData == null"><img
+                                :src="defaultProfileImgSrc">
+                            </div>
+                          </div>
+                          <div class="comment-body">
+                            <div class="comment-author vcard" v-if="userReviews.reviewer.profilePicture != null">
+                              <img alt=""
+                                :src="'data:' + userReviews.offer.imageMimeType + ';base64,' + userReviews.reviewer.profilePicture"
+                                class="avatar avatar-80 photo" height="80" width="80" decoding="async">
+                            </div>
+                            <div class="comment-author vcard" v-if="userReviews.reviewer.profilePicture == null">
+                              <img alt="" :src="defaultProfileImgSrc" class="avatar avatar-80 photo" height="80"
+                                width="80" decoding="async">
+                            </div>
+                            <div class="comment-content">
+                              <div class="comment-head">
+                                <div class="comment-user">
+                                  <div class="user">{{ userReviews.reviewer.firstName }} {{
+                                    userReviews.reviewer.lastName }}</div>
+                                  <div class="comment-date">
+                                    <time datetime="2024-08-02T09:54:50+00:00"> <time
+                                        :datetime="userReviews.createdAt">{{
+                                          formatDate(userReviews.createdAt) }}</time></time>
+                                  </div>
+                                  <div class="comment-rating-stars stars">
+                                    <span class="star">
+                                      <i class="ri-star-fill"></i>
+                                      {{ userReviews.ratingValue }}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <div>
+                            <div class="comment-text">
+                              <p class="mb-0">{{ userReviews.reviewComment }}</p>
+                            </div>
+                          </div>
+                        </div>
+                      </li>
+                    </ol>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </template>
 <script>
 import router from "@/router";
-import axios from "axios";
-import Swal from 'sweetalert2';
 import CryptoJS from 'crypto-js';
 import VueJwtDecode from 'vue-jwt-decode';
+import axiosInstance from "@/interceptor/interceptor"
+import Navbar from "@/components/navbar/Navbar.vue";
 
-let globalLogId = ''; 
-const axiosInstance = axios.create();
-// Adding a request interceptor to the axios instance
-axiosInstance.interceptors.request.use(
-  config => {
-    const token = sessionStorage.getItem('token');
-    if (token) {
-      const decryptedToken = decryptToken(token);
-      if (decryptedToken) {
-        config.headers['Authorization'] = `Bearer ${decryptedToken}`;
-      } else {
-        sessionStorage.removeItem('token');
-      }
-    }
-    return config;
-  },
-  error => {
-    return Promise.reject(error);
-  }
-);
 
-// Function to decrypt token
-const decryptToken = (encryptedToken) => {
-  try {
-    const bytes = CryptoJS.AES.decrypt(encryptedToken, process.env.SECRET_KEY);
-    return bytes.toString(CryptoJS.enc.Utf8);
-  } catch (e) {
-    console.error('Error decrypting token:', e);
-    return null;
-  }
-};
-
-// Enum-like object for profile options
-const ProfileOptions = {
-  None: 0,
-  Smoker: 1 << 0,
-  PetOwner: 1 << 1,
-  HaveLiabilityInsurance: 1 << 2
-};
+let globalLogId = '';
 
 export default {
+  components: {
+    Navbar,
+  },
   name: "UserCard",
   data() {
     return {
       user: {},
       profileImgSrc: '',
+      defaultProfileImgSrc: '/defaultprofile.jpg',
       options: [],
       hobbies: '',
       rate: {},
       userRole: '',
+      showModal: false,
+      reviews: [],
     };
   },
+  watch: {
+    profileImgSrc(newVal) {
+      if (!newVal) {
+        this.profileImgSrc = this.defaultProfileImgSrc;
+      }
+    },
+  },
+
   mounted() {
     this.Securitybot();
+    this.showReviews(sessionStorage.getItem('UserId'));
     this.fetchUserData(sessionStorage.getItem('UserId'));
-    this.fetchUserRating(sessionStorage.getItem('UserId'));
     this.checkLoginStatus();
   },
   methods: {
+    back() {
+      window.history.back();
+    },
+    formatDate(dateString) {
+      const options = { year: 'numeric', month: 'long', day: '2-digit' };
+      return new Date(dateString).toLocaleDateString(undefined, options);
+    },
+    async showReviews(userid) {
+      try {
+        const response = await axiosInstance.get(`${process.env.baseURL}review/get-user-reviews?userId=${userid}`);
+        this.reviews = response.data;
+      } catch (error) {
+        console.error('Error fetching reviews:', error);
+      }
+    },
+    onImageError(event) {
+      event.target.src = this.defaultProfileImgSrc;
+    },
     // Method to check if the user is logged in
     Securitybot() {
       if (!sessionStorage.getItem("token")) {
-        Swal.fire({
-          title: 'You are not logged In!',
-          text: 'Login First to continue.',
-          icon: 'info',
-          confirmButtonText: 'OK'
-        });
         router.push('/login');
       }
     },
@@ -134,7 +306,6 @@ export default {
         const decryptedString = bytes.toString(CryptoJS.enc.Utf8);
         return parseInt(decryptedString, 10).toString();
       } catch (e) {
-        console.error('Error decrypting item:', e);
         return null;
       }
     },
@@ -144,7 +315,6 @@ export default {
         const bytes = CryptoJS.AES.decrypt(encryptedToken, process.env.SECRET_KEY);
         return bytes.toString(CryptoJS.enc.Utf8);
       } catch (e) {
-        console.error('Error decrypting token:', e);
         return null;
       }
     },
@@ -152,13 +322,12 @@ export default {
     async fetchUserData(id) {
       try {
         const response = await axiosInstance.get(`${process.env.baseURL}admin/get-user-profile/${id}`);
-        this.user = response.data.profile.user;
-        this.profileImgSrc = `data:image/jpeg;base64,${response.data.profile.userPic}`;
-        this.options = this.processOptions(response.data.profile.options);
-        this.hobbies = response.data.profile.hobbies;
+        this.user = response.data;
+        this.profileImgSrc = `data:image/jpeg;base64,${response.data.profilePicture}`;
+        this.options = this.processOptions(response.data.options);
+        this.hobbies = response.data.hobbies;
       } catch (error) {
-        console.error("Error Fetching User data:", error);
-        Swal.fire('Error', 'Failed to fetch user data', 'error');
+        this.toast.info("Failed to fetch user data!");
       }
     },
     // Method to process profile options
@@ -173,6 +342,9 @@ export default {
     editProfile() {
       router.push('/editprofile');
     },
+    redirectToFacebook(fblink) {
+      window.open(fblink);
+    },
     // Method to fetch user rating
     async fetchUserRating(id) {
       try {
@@ -184,7 +356,7 @@ export default {
           this.user.ratingsCount = response.data.ratingsCount;
         }
       } catch (error) {
-        console.error("Error Fetching User Rating:", error);
+
       }
     },
     // Method to get the appropriate class for star rating
@@ -197,6 +369,9 @@ export default {
     }
   },
   computed: {
+    imageSrc() {
+      return this.profileImgSrc || this.defaultProfileImgSrc;
+    },
     // Computed property to generate stars for rating
     stars() {
       const stars = [];
@@ -225,11 +400,8 @@ export default {
 }
 
 .account-page {
-  background-color: #f8f9fa;
   padding: 30px;
   border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  max-width: 600px;
   width: 100%;
 }
 
@@ -254,12 +426,6 @@ export default {
   text-align: center;
 }
 
-.profile-img {
-  width: 100%;
-  height: auto;
-  border-radius: 50%;
-  margin-bottom: 20px;
-}
 
 .card-text-group {
   display: flex;
@@ -285,12 +451,13 @@ export default {
   text-decoration: underline;
 }
 
+/*
 .btn-primary {
   margin-top: 20px;
   display: block;
   width: 100%;
   text-align: center;
-}
+} */
 
 .star {
   font-size: 1.2em;
@@ -304,5 +471,210 @@ export default {
   font-size: 0.9em;
   color: #555;
   margin-left: 10px;
+}
+
+.action-link {
+  cursor: pointer;
+}
+
+.modal {
+  display: block;
+  position: fixed;
+  z-index: 1;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgb(0, 0, 0);
+  background-color: rgba(0, 0, 0, 0.4);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-content {
+  background-color: #fefefe;
+  /* padding: 20px; */
+  width: 100%;
+  max-width: 800px;
+}
+
+.close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+}
+</style>
+<style scoped>
+.profile-content {
+  margin-block-start: -5rem;
+}
+
+
+body .account-page {
+  padding: 0 !important;
+}
+
+.leftBox-content .avatar.avatar-xxl {
+  width: 8rem;
+  height: 8rem;
+  line-height: 5rem;
+  font-size: 1.5rem;
+  display: inline-block;
+  position: relative;
+}
+
+.leftBox-content .avatar img {
+  width: 100%;
+  height: 100%;
+  border-radius: 100px;
+}
+
+.account-page .border,
+.account-page .list-group-item,
+.account-page .border-bottom {
+  border-color: #ecf3fb !important;
+}
+
+.profile-content,
+.profile-content p {
+  font-size: 14px;
+}
+
+.rating_block .star.gold {
+  color: #f6a716;
+}
+
+.basic_info li {
+  padding: 6px 15px;
+}
+
+
+
+.social_link_outer {
+  width: 20px;
+  height: 20px;
+  line-height: 20px;
+  display: inline-block;
+  font-size: 12px;
+  text-align: center;
+  background-color: rgb(13 110 253) !important;
+  color: #fff;
+  margin-right: 2px;
+  border-radius: 50px;
+}
+
+.fw-medium {
+  font-weight: 500;
+}
+
+.skills_content .badge {
+  font-size: 12px;
+  font-weight: 500;
+  background: #f0f6fd !important;
+}
+
+.basic_info {
+  margin-bottom: 10px;
+}
+
+
+.icon {
+  margin-inline-end: 8px;
+  width: 1.75rem;
+  height: 1.75rem;
+  line-height: 1.65rem;
+  font-size: .85rem;
+  display: inline-block;
+  text-align: center;
+  border-radius: 50px;
+}
+
+
+
+.profile-banner-img {
+  position: relative;
+}
+
+.icon4 {
+  color: #ff8e6f !important;
+  background-color: rgb(255 142 111 / 10%) !important;
+}
+
+.icon3 {
+  color: #ff5d9f;
+  background-color: rgb(255 93 159 / 10%);
+}
+
+.icon2 {
+  color: rgb(227 84 212) !important;
+  opacity: 1;
+  background-color: rgb(227 84 212 / 10%) !important;
+}
+
+.icon1 {
+  color: #5c67f7 !important;
+  opacity: 1;
+  background-color: rgb(92 103 247 / 10%) !important;
+}
+
+
+.profile-content .card-body {
+  padding: 1rem;
+}
+
+.rating_block .star {
+  font-size: 16px;
+}
+
+.themeColor {
+  color: #0f97cb;
+}
+
+.hobbies_content .badge {
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.social_btn {
+  color: rgb(13 110 253) !important;
+  font-size: 14px;
+  padding: 0;
+}
+
+.social_btn .text-info {
+  text-decoration: underline;
+  margin-left: 5px;
+}
+
+.inner_banner_layout {
+  position: relative;
+  background: #f1f1f1;
+  min-height: 170px;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  background-size: cover;
+  background-position: 90% center;
+  background-size: cover;
+  background-image: url(/images/profile_banner.webp);
+}
+
+.inner_banner_layout:before {
+  content: "";
+  position: absolute;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.65);
 }
 </style>

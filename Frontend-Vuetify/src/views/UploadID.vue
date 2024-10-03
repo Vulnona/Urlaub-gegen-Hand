@@ -1,36 +1,55 @@
 <template>
-  <div class="container" style="margin: auto;">
-    <h2 class="text-center" style="padding: 10px;">Lade deinen Ausweis hoch</h2>
-    <div class="row">
-      <div class="col-md-6">
-        <div class="card">
-          <div class="card-body">
-            <h5 class="card-title">Vordere Seite des Ausweises</h5>
-            <input type="file" accept="image/*" @change="onFrontIdChange">
-            <div class="mt-3">
-              <div v-if="frontIdPreview">
-                <img :src="frontIdPreview" alt="Front ID Preview" class="card-img-top"
-                  style="width: 300px; height: 200px;">
-              </div>
-              <div v-else class="no-image-selected">
-                No image selected
-              </div>
-            </div>
+  <div class="inner_banner_layout">
+    <div class="container">
+      <div class="row">
+        <div class="col-sm-12">
+          <div class="inner_banner">
+            <h2>Lade deinen Ausweis hoch</h2>
           </div>
         </div>
       </div>
-      <div class="col-md-6">
-        <div class="card">
-          <div class="card-body">
-            <h5 class="card-title">Hintere Seite des Ausweises</h5>
-            <input type="file" accept="image/*" @change="onBackIdChange">
-            <div class="mt-3">
-              <div v-if="backIdPreview">
-                <img :src="backIdPreview" alt="Back ID Preview" class="card-img-top"
-                  style="width: 300px; height: 200px;">
+    </div>
+  </div>
+  <div class="container">
+    <div class="row">
+      <div class="col-md-12">
+
+        <div class="upload-cards">
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">Vordere Seite des Ausweises</h5>
+              <div class="custom-upload">
+                <input type="file" accept="image/x-png,image/gif,image/jpeg" @change="onFrontIdChange">
+                <button type="button" class="btn themeBtn">
+                  <i class="ri-upload-2-line"></i> Choose File
+                </button>
               </div>
-              <div v-else class="no-image-selected">
-                No image selected
+              <div class="mt-3">
+                <div v-if="frontIdPreview">
+                  <img :src="frontIdPreview" alt="Front ID Preview" class="card-img-top">
+                </div>
+                <div v-else class="no-image-selected">
+                  No image selected
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">Hintere Seite des Ausweises</h5>
+              <div class="custom-upload">
+                <input type="file" accept="image/x-png,image/gif,image/jpeg" @change="onBackIdChange">
+                <button type="button" class="btn themeBtn">
+                  <i class="ri-upload-2-line"></i> Choose File
+                </button>
+              </div>
+              <div class="mt-3">
+                <div v-if="backIdPreview">
+                  <img :src="backIdPreview" alt="Back ID Preview" class="card-img-top">
+                </div>
+                <div v-else class="no-image-selected">
+                  No image selected
+                </div>
               </div>
             </div>
           </div>
@@ -38,9 +57,9 @@
       </div>
     </div>
     <div class="row mt-3">
-      <div class="text-center">
-        <button @click="back" class="btn-primary rounded col-2" style="padding: 5px;">Back</button>&nbsp;&nbsp;
-        <button @click="uploadImages" class="btn-primary rounded col-2" style="padding: 5px;">Upload</button>
+      <div class="col-sm-12 bottom_btn text-center">
+        <button @click="back" class="btn btn-primary rounded grey_btn">Cancel</button>&nbsp;&nbsp;
+        <button @click="uploadImages" class="btn btn-primary rounded">Upload</button>
       </div>
     </div>
   </div>
@@ -95,12 +114,6 @@ const convertToJpeg = (file: File): Promise<File> => {
 // Security check function to ensure user authentication
 const Securitybot = () => {
   if (!sessionStorage.getItem("logId")) {
-    Swal.fire({
-      title: 'Du bist nicht eingeloggt!',
-      text: 'Logge dich ein um fortzufahren.',
-      icon: 'info',
-      confirmButtonText: 'OK'
-    });
     router.push('/login');
   }
 };
@@ -130,14 +143,14 @@ const updateUserLinks = async (userId: string, linkVS: string, linkRS: string) =
     const encryptedLinkVS = encryptLink(linkVS);
     const encryptedLinkRS = encryptLink(linkRS);
     const apiUrl = `${process.env.baseURL}user/upload-id`;
-    
+
     const response = await fetch(apiUrl, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        id:userId,
+        id: userId,
         link_VS: encryptedLinkVS,
         link_RS: encryptedLinkRS,
       }),
@@ -146,7 +159,7 @@ const updateUserLinks = async (userId: string, linkVS: string, linkRS: string) =
     if (!response.ok) {
       throw new Error('Failed to update');
     }
-    
+
     Swal.fire('Erfolgreich', 'Upload erfolgreich!', 'success').then(() => {
       sessionStorage.clear();
       router.push('/');
@@ -210,7 +223,7 @@ const uploadImages = () => {
   });
 };
 const back = () => {
-  router.push('/');
+  window.history.back();
 }
 const decryptlogID = (encryptedItem: string | null) => {
   if (!encryptedItem) {
@@ -219,7 +232,7 @@ const decryptlogID = (encryptedItem: string | null) => {
   try {
     const bytes = CryptoJS.AES.decrypt(encryptedItem, process.env.SECRET_KEY);
     const decryptedString = bytes.toString(CryptoJS.enc.Utf8);
-    return parseInt(decryptedString, 10).toString();
+    return decryptedString;
   } catch (e) {
     console.error('Error decrypting item:', e);
     return null;
@@ -228,6 +241,7 @@ const decryptlogID = (encryptedItem: string | null) => {
 onMounted(() => {
   Securitybot();
 });
+
 </script>
 <style scoped>
 .card {
@@ -239,10 +253,35 @@ onMounted(() => {
   justify-content: center;
   align-items: center;
   height: 200px;
-  width: 300px;
+  width: 100%;
   background-color: #f8f9fa;
   border: 1px dashed #ccc;
   color: #999;
+  text-align: center;
+}
+
+.custom-upload {
+  position: relative;
+  width: 200px;
+  margin: auto;
+  cursor: pointer;
+}
+
+.custom-upload button {
+  width: 100%;
+}
+
+.custom-upload input {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  z-index: 999;
+  opacity: 0;
+}
+
+.upload-cards {
   text-align: center;
 }
 </style>

@@ -1,9 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
-using UGHModels;
-using UGHApi.Services;
-using UGHApi.Models;
-using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
+using UGH.Contracts.Authentication;
+using UGH.Application.Authentication;
+using MediatR;
 
 namespace UGHApi.Controllers
 {
@@ -11,27 +10,24 @@ namespace UGHApi.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private readonly UghContext _context;
-        private readonly UserService _userService;
-        private readonly EmailService _emailService;
-        private readonly PasswordService _passwordService;
         private readonly IConfiguration _configuration;
-        private readonly TokenService _tokenService;
         private readonly ILogger<AuthController> _logger;
+        private readonly IMediator _mediator;
 
-        public AuthController(UghContext context, EmailService emailService, UserService userService, PasswordService passwordService, IConfiguration configuration, TokenService tokenService, ILogger<AuthController> logger)
+        public AuthController(
+            IConfiguration configuration,
+            ILogger<AuthController> logger,
+            IMediator mediator
+        )
         {
-            _context = context;
-            _emailService = emailService;
-            _userService = userService;
-            _passwordService = passwordService;
             _configuration = configuration;
-            _tokenService = tokenService;
             _logger = logger;
+            _mediator = mediator;
         }
+
         #region user-authorization
         [HttpPost("register")]
-        public async Task<ActionResult> Register([FromBody] RegisterRequest request)
+        public async Task<IActionResult> Register([FromBody] RegisterUserCommand command)
         {
             try
             {
@@ -40,100 +36,23 @@ namespace UGHApi.Controllers
                     return BadRequest(ModelState);
                 }
 
-                else if (await _context.users.AnyAsync(u => u.Email_Address.ToLower().Equals(request.Email_Address.ToLower())))
+                var response = await _mediator.Send(command);
+
+                if (response.IsFailure)
                 {
-                    return Conflict("E-Mail Adresse existiert bereits");
+                    return BadRequest(new { Error = response.Error });
                 }
-
-                DateTime parsedDateOfBirth = DateTime.Parse(request.DateOfBirth);
-                DateOnly dateOnly = new DateOnly(parsedDateOfBirth.Year, parsedDateOfBirth.Month, parsedDateOfBirth.Day);
-
-                var salt = _passwordService.GenerateSalt();
-                var hashPassword = _passwordService.HashPassword(request.Password, salt);
-
-                var newUser = new User(
-                    request.FirstName,
-                    request.LastName,
-                    dateOnly,
-                    request.Gender,
-                    request.Street,
-                    request.HouseNumber,
-                    request.PostCode,
-                    request.City,
-                    request.Country,
-                    request.Email_Address,
-                    false,
-                    hashPassword,
-                    salt,
-                    request.Facebook_link,
-                    request.Link_RS,
-                    request.Link_VS,
-                    request.State
-                );
-
-                newUser.VerificationState = UGH_Enums.VerificationState.IsNew;
-
-                await _context.users.AddAsync(newUser);
-                await _context.SaveChangesAsync();
-                _logger.LogInformation("New user registered successfully. UserName:{Email}", newUser.Email_Address);
-                var getRegisteredUser = await _context.users.FirstOrDefaultAsync(u => u.Email_Address == request.Email_Address);
-                var newUserProfile = new UserProfile
-                {
-                    User_Id = getRegisteredUser.User_Id,
-                };
-
-                await _context.userprofiles.AddAsync(newUserProfile);
-                await _context.SaveChangesAsync();
-
-                var defaultUserRole = await _context.userroles.FirstOrDefaultAsync(r => r.RoleName == "User");
-                if (defaultUserRole != null)
-                {
-                    var userRoleMapping = new UserRoleMapping
-                    {
-                        UserId = newUser.User_Id,
-                        RoleId = defaultUserRole.RoleId
-                    };
-                    await _context.userrolesmapping.AddAsync(userRoleMapping);
-                    await _context.SaveChangesAsync();
-                }
-
-                var verificationToken = _tokenService.GenerateNewEmailVerificator(newUser.User_Id);
-                await _emailService.SendVerificationEmailAsync(newUser.Email_Address, verificationToken);
-
-                return Ok(newUser);
+                return Ok(response);
             }
             catch (Exception ex)
             {
-                _logger.LogInformation("Errors while registering UserName:{Email}", request.Email_Address);
-                _logger.LogInformation(ex.Message,$"{ex.StackTrace}");
-                return StatusCode(400, $"Bad Request {ex.Message}");
-            }
-        }
-
-        [HttpGet("verify-email")]
-        public async Task<IActionResult> Verify([Required]string token)
-        {
-            try
-            {
-                var user = await _userService.GetUserByTokenAsync(token);
-                if (user == null)
-                {
-                    return NotFound("Invalid token");
-                }
-
-                user.IsEmailVerified = true;
-                await _context.SaveChangesAsync();
-                return Ok("Email verified successfully");
-            }
-            catch (Exception ex)
-            {
-               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
-                return StatusCode(500, $"Internal server error: {ex.Message}");
+                _logger.LogWarning($"Conflict: {ex.Message}");
+                return Conflict(new { errorMessage = ex.Message });
             }
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login(LoginModel model)
+        public async Task<IActionResult> Login([FromBody] LoginCommand command)
         {
             try
             {
@@ -141,27 +60,47 @@ namespace UGHApi.Controllers
                 {
                     return BadRequest(ModelState);
                 }
-                var userValid = _userService.ValidateUser(model.Email, model.Password);
 
-                var user = await _context.users.FirstOrDefaultAsync(u => u.Email_Address == model.Email);
-                if (userValid.IsValid)
-                {
-                    var accessToken = await _tokenService.GenerateJwtToken(model.Email, user.User_Id.ToString());
-                    var refreshToken = _tokenService.GenerateRefreshToken();
-                    _tokenService.StoreRefreshToken(refreshToken, model.Email);
+                var response = await _mediator.Send(command);
 
-                    return Ok(new { accessToken, refreshToken, model.Email, user.User_Id, user.FirstName });
-                }
-                else
+                if (response.IsFailure)
                 {
-                    return Unauthorized(new { errorMessage = userValid.ErrorMessage });
+                    return Unauthorized(
+                        new { Code = response.Error.Code, Message = response.Error.Message }
+                    );
                 }
+
+                return Ok(response.Value);
             }
             catch (Exception ex)
             {
-               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
                 return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
 
+        [HttpGet("verify-email")]
+        public async Task<IActionResult> Verify([Required] string token)
+        {
+            try
+            {
+                var result = await _mediator.Send(new VerifyEmailCommand(token));
+
+                if (result.IsSuccess)
+                {
+                    return Ok(result);
+                }
+
+                if (result.Error.Code == "Error.InvalidToken")
+                {
+                    return NotFound(result.Error.Message);
+                }
+                return StatusCode(500, result.Error.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
 
@@ -170,23 +109,27 @@ namespace UGHApi.Controllers
         {
             try
             {
-                if (!_tokenService.TryGetUserEmail(request.RefreshToken, out var Email))
+                var command = new RefreshTokenCommand(request.RefreshToken);
+                var result = await _mediator.Send(command);
+
+                if (result.IsFailure)
                 {
-                    return Unauthorized();
+                    return Unauthorized(result.Error);
                 }
 
-                var accessToken = await _tokenService.GenerateJwtToken(Email, string.Empty); 
-                return Ok(new { accessToken });
+                return Ok(result);
             }
             catch (Exception ex)
             {
-               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
 
         [HttpPost("resend-email-verification")]
-        public async Task<IActionResult> ResendVerificationEmail([FromBody] ResendEmailVerification resentUrl)
+        public async Task<IActionResult> ResendVerificationEmail(
+            [FromBody] ResendEmailVerification resendUrl
+        )
         {
             try
             {
@@ -194,32 +137,33 @@ namespace UGHApi.Controllers
                 {
                     return BadRequest(ModelState);
                 }
-                if (string.IsNullOrEmpty(resentUrl.Email) || !_emailService.IsValidEmail(resentUrl.Email))
-                {
-                    return BadRequest("Invalid email address.");
-                }
-                var user = await _userService.GetUserByEmailAsync(resentUrl.Email);
-                if (user == null)
-                {
-                    return NotFound("User not found.");
-                }
-                var verificationToken = _tokenService.GenerateNewEmailVerificator(user.User_Id);
 
-                // Send verification email asynchronously
-                var emailSent = await _emailService.SendVerificationEmailAsync(resentUrl.Email, verificationToken);
-                if (!emailSent)
+                var command = new ResendVerificationEmailCommand(resendUrl.Email);
+                var result = await _mediator.Send(command);
+
+                if (result.IsFailure)
                 {
-                    return StatusCode(500, "Failed to send verification email.");
+                    if (result.Error.Message.Contains("InvalidEmail"))
+                        return BadRequest();
+
+                    if (result.Error.Message.Contains("UserNotFound"))
+                        return NotFound();
+
+                    if (result.Error.Message.Contains("EmailSendFailed"))
+                        return StatusCode(500, "Email sent failed");
+
+                    return StatusCode(500, "Internal server error.");
                 }
 
-                return Ok("Verification email sent successfully.");
+                return Ok(result);
             }
             catch (Exception ex)
             {
-               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+
         #endregion
     }
 }

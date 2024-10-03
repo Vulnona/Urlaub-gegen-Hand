@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
-using UGHApi.Models;
+using UGH.Domain.Entities;
 
 namespace UGHApi.Controllers
 {
@@ -10,9 +10,9 @@ namespace UGHApi.Controllers
 
     public class AccommodationController : ControllerBase
     {
-        private readonly UghContext _context;
+        private readonly Ugh_Context _context;
         private readonly ILogger<AccommodationController> _logger;
-        public AccommodationController(UghContext context, ILogger<AccommodationController> logger)
+        public AccommodationController(Ugh_Context context, ILogger<AccommodationController> logger)
         {
             _context = context;
             _logger = logger;

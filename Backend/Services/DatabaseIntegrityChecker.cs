@@ -20,7 +20,7 @@ public class DatabaseIntegrityChecker
 
         using var scope = _scopeFactory.CreateScope();
 
-        var dbContext = scope.ServiceProvider.GetRequiredService<UghContext>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<Ugh_Context>();
 
         if (!dbContext.userroles.Any())
 

@@ -1,730 +1,624 @@
+<style>
+  body .custom-card {
+    padding: 0;
+  }
+  body .custom-card .card-title {
+    font-size: 20px;
+    font-weight: 500;
+    text-transform: capitalize;
+  }
+  body .custom-card .card-text {
+    font-size: 14px;
+  }
+  body .custom-card .button-container .btn {
+    padding: 5px 9px;
+    font-size: 14px !important;
+  }
+  /*
+  .rating-buttons {
+    margin-bottom: 20px;
+  }
+  */
+  .rating-modal-content {
+    padding: 0;
+    border: none;
+  }
+  .swal2-textarea {
+    margin: 0;
+    width: 100%;
+  }
+  .user-info {
+    width: 100%;
+    margin: auto;
+  }
+  .user-details-container {
+    font-size: 16px;
+  }
+  .user-info a {
+    width: 250px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: inline-block;
+    white-space: nowrap;
+    vertical-align: bottom;
+  }
+  .card-offer {
+    cursor: pointer;
+  }
+  .card-offer:hover .card-title {
+    color: rgb(0, 189, 214);
+  }
+  body .custom-card .card-text strong {
+    font-weight: 500;
+  }
+</style>
 <template>
-  <div class="bg-ltgrey pt-40 pb-40">
+  <PublicNav />
+  <Navbar />
+  <!--Banner Section Start-->
+  <section class="main_banner">
     <div class="container">
       <div class="row">
         <div class="col-sm-12">
-          <div class="SearchBox_filter flexBox justify-content-center align-items-center">
-            <label class="f-14 mb-0">Suchen Sie nach Angeboten</label>
-            <div class="SearchBox">
-              <i class="ri-search-line"></i>
-              <input type="text" v-model="searchTerm" @input="searchOffers"
-                placeholder="Search offers / Region / Skills" class="form-control ">
-            </div>
-            <div class="btn_outer">
-              <button type="button" class="btn themeBtn">Suchen</button>
+          <div class="banner_content">
+            <h1>Become part of the community - as <span class="orange_text">a host</span> or <span class="orange_text">
+                  traveler</span>.</h1>
+            <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.
+              It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. </p>
+            <div>
+              <button type="button" class="btn themeBtn">Read More</button>
             </div>
           </div>
         </div>
       </div>
-      <div v-if="offers">
-        <div v-if="loading" class="text-center">Lädt...</div>
-        <div v-else class="row">
-          <div v-for="offer in filteredOffers" :key="offer.id" class="col-md-4 mb-4">
-            <div class="card">
-              <img @click="redirectToOfferDetail(offer.id)" v-if="offer.imageData"
-                :src="'data:' + offer.imageMimeType + ';base64,' + offer.imageData" class="card-img-top"
-                alt="Offer Image">
-              <div class="card-body">
-                <div @click="redirectToOfferDetail(offer.id)">
-                  <h3 class="card-title">{{ offer.title }}</h3>
-                  <p class="card-text">{{ truncateDescription(offer.description) }}</p>
-                  <p class="card-text"><strong>Fähigkeiten:</strong> {{ offer.skills }}</p>
-                  <p class="card-text"><strong>Unterbringung:</strong> {{ offer.accomodation }}</p>
-                  <p class="card-text"><strong>Geeignet für:</strong> {{ offer.accomodationsuitable }}</p>
-                  <p class="card-text"><strong>Ort:</strong> {{ offer.state }}</p>
-                </div>
-                <div v-if="offer.user.user_Id != logId">
-                  <div class="button-container" v-if="userRole != 'Admin'">
-                    <button :class="['btn', getButtonColor(offer.id)]" @click.stop="handleButtonClick(offer)">
-                      {{ getStatusText(offer) }}
-                    </button>
-                    <button v-if="getStatus(offer.id) === 'ViewDetails'" class="btn btn-secondary"
-                      @click.stop="showAddReviewModal(offer)">
-                      Add Review
-                    </button>
-                    <button v-if="getStatus(offer.id) === 'ViewDetails'"
-                      @click="showAddRatingModal(offer.id, currentUserId)" class="btn themeCancelBtn m-0"><i
-                        class="ri-star-line"></i></button>
-                  </div>
-                </div>
+    </div>
+  </section>
+  <section class="section_space chooseUs_layout">
+    <div class="container">
+      <div class="row">
+        <div class="col-sm-12">
+          <div class="text-center main_center_title">
+            <h2>Why Choose Us?</h2>
+            <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. <br> standard dummy text ever since the 1500s.</p>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-sm-4">
+          <div class="chooseUs_option">
+            <img src="https://themes-themegoods.b-cdn.net/grandtour/demo/wp-content/uploads/2016/12/Worldwide-Location-300x300.png" alt="image">
+            <h4>World Class Service</h4>
+            <p>Lorem ipsum dolor sit amet, consect adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa</p>
+          </div>
+        </div>
+        <div class="col-sm-4">
+          <div class="chooseUs_option">
+            <img src="https://themes-themegoods.b-cdn.net/grandtour/demo/wp-content/uploads/2016/12/Hot-Air-Balloon-300x300.png" alt="image">
+            <h4>Best Price Guarantee</h4>
+            <p>Lorem ipsum dolor sit amet, consect adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa</p>
+          </div>
+        </div>
+        <div class="col-sm-4">
+          <div class="chooseUs_option">
+            <img src="https://cdn-icons-png.flaticon.com/512/3762/3762131.png" alt="image">
+            <h4>Flexibility, freedom, fun</h4>
+            <p>Lorem ipsum dolor sit amet, consect adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section class="section_space  Offer_search_layout">
+    <div class="offer_search_overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-sm-12">
+          <div class="text-center main_center_title">
+            <h2>Suchen Sie nach Angeboten</h2>
+            <p>Looking for your dream vacation destination but don't know where to start? With the help of experienced
+              <br> and knowledgeable travel agents, you can plan the trip of a lifetime with ease.
+            </p>
+          </div>
+          <div class="offer_search_content">
+            <div class="SearchBox_filter flexBox align-items-center">
+              <div class="SearchBox">
+                <i class="ri-search-line"></i>
+                <input type="text" v-model="searchTerm" @input="debouncedSearch" placeholder="Search offers / Region / Skills" class="form-control ">
+              </div>
+              <div class="btn_outer">
+                <button type="button" class="btn themeBtn">Suchen</button>
               </div>
             </div>
           </div>
         </div>
       </div>
-      <div v-else>
-        <h2 class="text-center">No Offers Found!</h2>
+    </div>
+  </section>
+  <section class="section_space">
+    <div class="container">
+      <div class="row">
+        <div class="col-sm-12">
+          <div v-if="offers" class="offers_group">
+            <div v-if="loading" class="text-center">Lädt...</div>
+            <div v-else class="row">
+              <div v-for="(offer, index) in offers" :key="offer.id" class="col-md-3 mb-4">
+                <div class="all_items card-offer">
+                  <div class="item_img">
+                    <img @click="redirectToOfferDetail(offer.id)" v-if="offer.imageData" :src="'data:' + offer.imageMimeType + ';base64,' + offer.imageData" class="card-img-top" alt="Offer Image">
+                    <div class="rating" v-if="isActiveMember && offer.hostId != logId && offer.appliedStatus == 'Approved'" @click="showAddRatingModal(offer.id, offer.hostId, index)"><i class="ri-star-line"></i></div>
+                  </div>
+                  <div class="item_text">
+                    <div @click="redirectToOfferDetail(offer.id)">
+                      <h3 class="card-title">{{ offer.title }}</h3>
+                      <div class="item_description">
+                        <p class="card-text"><strong>Fähigkeiten:</strong> {{ offer.skills }}</p>
+                        <p class="card-text"><strong>Unterbringung:</strong> {{ offer.accomodation }}</p>
+                        <p class="card-text"><strong>Geeignet für:</strong> {{ offer.accomodationsuitable }}</p>
+                        <p class="card-text"><strong>Region/Ort:</strong> {{ offer.region }} {{ offer.location }}</p>
+                      </div>
+                    </div>
+                    <div class="rating_flexBox card-text">
+                      <strong>Overall Rating:</strong>
+                      <div class="rating_star">
+                        <span>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" aria-hidden="true"
+                              role="presentation" focusable="false"
+                              style="display: block; height: 13px; width: 13px; fill: #f6a716;">
+                              <path fill-rule="evenodd"
+                                d="m15.1 1.58-4.13 8.88-9.86 1.27a1 1 0 0 0-.54 1.74l7.3 6.57-1.97 9.85a1 1 0 0 0 1.48 1.06l8.62-5 8.63 5a1 1 0 0 0 1.48-1.06l-1.97-9.85 7.3-6.57a1 1 0 0 0-.55-1.73l-9.86-1.28-4.12-8.88a1 1 0 0 0-1.82 0z">
+                              </path>
+                            </svg>
+                          </span>
+                        <span class="vertical_middle">{{ offer.averageRating }} </span>
+                      </div>
+                      <!-- <a href="javascript:void();" class="action-link font-normal"><u>15 reviews</u></a> -->
+                    </div>
+                    <div v-if="isActiveMember && offer.hostId != logId && userRole != 'Admin'">
+                      <button v-if="offer.appliedStatus == 'CanApply'" @click="sendRequest(offer.id)" class="btn btn-success OfferButtons">Apply</button>
+                      <button v-if="offer.appliedStatus == 'Applied'" class="btn btn-info OfferButtons" disabled>Applied</button>
+                      <button v-if="offer.appliedStatus == 'Rejected'" class="btn btn-danger OfferButtons" disabled>Rejected</button>
+                      <button v-if="offer.appliedStatus == 'Approved'" @click="showUserDetails(offer.hostId)" class="btn btn-primary OfferButtons">View Host
+                          Details</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div v-else>
+            <h2 class="text-center">No Offers Found!</h2>
+          </div>
+        </div>
       </div>
     </div>
-    <div id="rating-modal" v-if="showModal">
-      <div class="modal-content">
-        <h3>Bewertung hinzufügen</h3>
-        <div id="rating-stars">
-          <span class="star rating-star" v-for="n in 5" :key="n" :data-value="n" @click="selectStar(n)"
-            :class="{ 'selected': n <= selectedRating }"></span>
+  </section>
+  <div v-if="showRatingModal" class="overlay"></div>
+  <div id="rating-modal" class="rating-modal" v-if="showRatingModal">
+    <div class="modal-content rating-modal-content">
+      <div class="review_rating_layout">
+        <div class="review_header">
+          <div class="photo">
+            <img :src="'data:' + offers[this.currentIndex].imageMimetype + ';base64,' + offers[this.currentIndex].imageData" alt="Offer Image" />
+          </div>
+          <div class="rightSideBox">
+            <h5>{{ offers[this.currentIndex].title }}</h5>
+            <p class="hostName"> {{ offers[this.currentIndex].hostName }}</p>
+          </div>
         </div>
-        <button @click="submitRating">Submit</button>
-        <button @click="cancelRating">Cancel</button>
+        <div class="rating_flexBox">
+          <p>Add Rating</p>
+          <div id="rating-stars">
+            <span class="star ri-star-fill" v-for="n in 5" :key="n" :data-value="n" @click="selectStar(n)" :class="{ 'selected': n <= selectedRating }"></span>
+          </div>
+        </div>
+        <div class="review_box">
+          <p>Write a review</p>
+          <textarea class="textarea form-control" style="height: 120px;" v-model="reviewText">
+                        Bitte gebt die gegenseitige Bewertung erst ab, nachdem diese terminlich abgeschlossen ist.
+                      </textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <div class="rating-buttons">
+        <button @click="submitRating" class="btn common-btn themeBtn">Submit</button>
+        <button @click="cancelRating" class="btn common-btn btn-cancel">Cancel</button>
       </div>
     </div>
   </div>
 </template>
+
 <script>
-import router from '@/router';
-import axios from 'axios';
-import Swal from 'sweetalert2';
-import VueJwtDecode from 'vue-jwt-decode';
-import CryptoJS from 'crypto-js';
-
-window.FontAwesomeConfig = { autoReplaceSvg: false };
-let globalLogid = '';
-let globalEmail = '';
-let globalrating = '';
-let globalIsTrue = '';
-let globalRole = '';
-export default {
-  data() {
-    return {
-      loading: true,
-      offers: [],
-      searchTerm: '',
-      statusMap: {},
-      logId: '',
-      showModal: false,
-      selectedRating: 0,
-      currentOfferId: null,
-      userRole: ''
-    };
-  },
-  mounted() {
-    this.checkLoginStatus(); 
-    this.fetchOffers(); 
-    this.Securitybot(); 
-    //  this.isActiveMembership();
-  },
-  methods: {
-    // Method to check login status and decrypt relevant data
-    checkLoginStatus() {
-      const token = sessionStorage.getItem("token");
-      if (token) {
-        const testlogid = this.decryptlogID(sessionStorage.getItem("logId"));
-        globalLogid = testlogid;
-        this.logId = testlogid;
-        globalEmail = this.decryptToken(sessionStorage.getItem("logEmail"));
-        const decryptedToken = this.decryptToken(token);
-        if (decryptedToken) {
-          const decodedToken = VueJwtDecode.decode(decryptedToken);
-          this.userRole = decodedToken[`${process.env.claims_Url}`] || '';
-          globalRole = this.userRole;
-        } else {
-          sessionStorage.removeItem('token');
-        }
-      }
+  import {
+    createToastInterface
+  } from "vue-toastification";
+  import "vue-toastification/dist/index.css";
+  import Navbar from '@/components/navbar/Navbar.vue';
+  import axiosInstance from '@/interceptor/interceptor';
+  import PublicNav from '@/components/navbar/PublicNav.vue';
+  import isActiveMembership from '@/services/CheckActiveMembership';
+  import getLoggedUserId from '@/services/LoggedInUserId';
+  import Swal from "sweetalert2";
+  import CheckUserRole from "@/services/CheckUserRole";
+  import router from "@/router";
+  let globalrating = '';
+  export default {
+    components: {
+      Navbar,
+      PublicNav
     },
-    // Method to decrypt AES encrypted token
-    decryptToken(encryptedToken) {
-      try {
-        const bytes = CryptoJS.AES.decrypt(encryptedToken, process.env.SECRET_KEY);
-        return bytes.toString(CryptoJS.enc.Utf8);
-      } catch (e) {
-        console.error('Error decrypting token:', e);
-        return null;
-      }
+    data() {
+      return {
+        loading: true,
+        offers: [],
+        searchTerm: '',
+        statusMap: {},
+        logId: getLoggedUserId(),
+        showModal: false,
+        selectedRating: 0,
+        currentOfferId: null,
+        userRole: CheckUserRole(),
+        isActiveMember: isActiveMembership(),
+        searchTimeout: null,
+        reviewText: '',
+        showRatingModal: false,
+        currentIndex: 0,
+      };
     },
-    // Method to decrypt AES encrypted logID
-    decryptlogID(encryptedItem) {
-      try {
-        const bytes = CryptoJS.AES.decrypt(encryptedItem, process.env.SECRET_KEY);
-        const decryptedString = bytes.toString(CryptoJS.enc.Utf8);
-        return parseInt(decryptedString, 10).toString();
-      } catch (e) {
-        console.error('Error decrypting item:', e);
-        return null;
-      }
+    created() {
+      this.toast = createToastInterface({
+        position: "top-right",
+        timeout: 3000,
+        closeOnClick: true,
+        pauseOnFocusLoss: true,
+        pauseOnHover: true,
+        draggable: true,
+        draggablePercent: 0.6,
+        showCloseButtonOnHover: false,
+        hideProgressBar: false,
+        closeButton: "button",
+        icon: true,
+        rtl: false
+      });
     },
-    // Method to enforce security by verifying token existence
-    Securitybot() {
-      if (!sessionStorage.getItem("token")) {
-        Swal.fire({
-          title: 'You are not logged In!',
-          text: 'Login First to continue.',
-          icon: 'info',
-          confirmButtonText: 'OK'
-        });
-        router.push('/login'); 
-      }
+    mounted() {
+      this.fetchOffers();
     },
-
-    async isActiveMembership() {
-      if (globalRole != 'Admin') {
+    methods: {
+      showUserDetails(userId) {
+        sessionStorage.setItem("UserId", userId);
+        router.push("/account")
+      },
+      // Method to fetch all offers based on search term
+      async fetchOffers() {
         try {
-          const decLogId = this.decryptlogID(sessionStorage.getItem("logId"));
-          const response = await axios.get(`${process.env.baseURL}membership/check-active-membership-byuserId/${decLogId}`);
-
-          globalIsTrue = response.data.isActive;
-          if (globalIsTrue != true) {
-            setTimeout(() => {
-              Swal.fire({
-                title: 'Mitgliedschaft abgelaufen!',
-                text: 'Deine Mitgliedschaft ist abgelaufen. Bitte erneuere deine Mitgliedschaft.',
-                html: `
-          <p>Deine Mitgliedschaft ist abgelaufen. Bitte erneuere deine Mitgliedschaft.</p>
-              <input type="text" id="swal-input1" class="swal2-input" placeholder="Subscription ID">
-            <a href="https://alreco.company.site/" target="_blank" class="swal2-confirm swal2-styled" style="display: inline-block; margin-top: 10px;">Klicke, um eine Mitgliedschaft zu kaufen</a>
-        `,
-                icon: 'error',
-                confirmButtonText: 'Senden',
-                confirmButtonText: 'OK'
-              }).then(() => {
-                router.push('/login'); 
-                sessionStorage.clear();
-                setTimeout(() => {
-                  window.location.reload();
-                }, 500);
-              });
-            }, 500);
-            router.push('/login'); 
-          } else {
-            // console.log("Active membership");
+          const response = await axiosInstance.get(`${process.env.baseURL}offer/get-all-offers`, {
+            params: {
+              searchTerm: this.searchTerm
+            }
+          });
+          this.offers = response.data.items;
+          //  await this.checkAllReviewStatuses();
+        } catch (error) {} finally {
+          this.loading = false;
+        }
+      },
+      // Method to send request for offer application
+      async sendRequest(offerId) {
+        const result = await Swal.fire({
+          title: 'Bist du sicher?',
+          text: 'Möchtest du diese Anfrage senden?',
+          icon: '',
+          showCancelButton: true,
+          confirmButtonText: 'Apply',
+          customClass: {
+            popup: 'custom-apply-modal dialog_box',
+            confirmButton: 'themeBtn',
+            cancelButton: 'Cancel_btn',
           }
-
-        } catch (error) {
-          if (error.response) {
-            console.error("Error response:", error.response.data);
-            Swal.fire({
-              title: 'Keine Mitgliedschaft gefunden!',
-              html: `
-          <p>Es konnte keine Mitgliedschaft gefunden werden. Bitte kaufe eine Mitgliedschaft.</p>
-            
-            <a href="https://alreco.company.site/" target="_blank" class="swal2-confirm swal2-styled" style="display: inline-block; margin-top: 10px;">Klicken, um Mitgliedschaft zu kaufen</a>
-        `,
-              text: 'Es konnte keine Mitgliedschaft gefunden werden. Bitte kaufe eine Mitgliedschaft.',
-              icon: 'error',
-              confirmButtonText: 'OK'
-            }).then(() => {
-              sessionStorage.clear();
-              router.push('/login'); 
-              window.location.reload();
-            });
-          } else if (error.request) {
-            console.error("No response received:", error.request);
-          } else {
-            console.error("Error:", error.message);
+        });
+        if (result.isConfirmed) {
+          try {
+            await axiosInstance.post(`${process.env.baseURL}offer/apply-offer?offerId=${offerId}`);
+            this.toast.success("Deine Anfrage wurde gesendet.!");
+            // await this.checkReviewStatus(offerId);
+            this.fetchOffers();
+          } catch (error) {
+            this.toast.info("Leider konnte deine Anfrage nicht versendet werden!");
           }
         }
-      }
-    },
-    // Method to fetch all offers based on search term
-    async fetchOffers() {
-      try {
-        const response = await axios.get(`${process.env.baseURL}offer/get-all-offers`, {
+      },
+      // Method to search offers based on the searchTerm
+      searchOffers() {
+        this.loading = true;
+        this.fetchOffers();
+      },
+      debouncedSearch() {
+        clearTimeout(this.searchTimeout);
+        this.searchTimeout = setTimeout(() => {
+          this.searchOffers();
+        }, 1000);
+      },
+      // Method to redirect to offer detail page
+      redirectToOfferDetail(offerId) {
+        this.$router.push({
+          name: 'OfferDetail',
           params: {
-            searchTerm: this.searchTerm
+            id: offerId
           }
         });
-        this.offers = response.data; 
-        await this.checkAllReviewStatuses(); 
-      } catch (error) {
-        console.error('Error fetching offers:', error);
-      } finally {
-        this.loading = false; 
-      }
-    },
-    // Method to check review status for all offers asynchronously
-    async checkAllReviewStatuses() {
-      const promises = this.offers.map(offer => this.checkReviewStatus(offer.id));
-      await Promise.all(promises);
-    },
-    // Method to check review status for a specific offer
-    async checkReviewStatus(offerId) {
-      try {
-        const response = await axios.get(`${process.env.baseURL}review/check-review-status`, {
-          params: {
-            userId: globalLogid,
-            offerId: offerId
-          }
-        });
-        this.statusMap[offerId] = response.data.status; 
-      } catch (error) {
-        console.error(`Error checking review status for offer ${offerId}:`, error);
-      }
-    },
-    // Method to get status from status map based on offerId
-    getStatus(offerId) {
-      return this.statusMap[offerId];
-    },
-    // Method to get text representation of status based on offer status
-    getStatusText(offer) {
-      const status = this.getStatus(offer.id);
-      switch (status) {
-        case 'Applied':
-          return 'Applied';
-        case 'ViewDetails':
-          return 'View Details';
-        default:
-          return 'Apply';
-      }
-    },
-    // Method to get button color based on offer status
-    getButtonColor(offerId) {
-      const status = this.getStatus(offerId);
-      switch (status) {
-        case 'Apply':
-          return 'btn-success';
-        case 'Applied':
-          return 'btn-warning';
-        case 'ViewDetails':
-          return 'btn-primary';
-        default:
-          return 'btn-primary';
-      }
-    },
-    // Method to handle button click actions based on offer status
-    async handleButtonClick(offer) {
-      const status = this.getStatus(offer.id);
-      if (status === 'Apply') {
-        await this.sendRequest(offer.id, globalLogid); 
-      } else if (status === 'ViewDetails') {
-        await this.fetchUsersByOfferId(offer.id);
-      } else {
-      }
-    },
-    // Method to send request for offer application
-    async sendRequest(offerId, userId) {
-      const result = await Swal.fire({
-        title: 'Bist du sicher?',
-        text: 'Möchtest du diese Anfrage senden?',
-        icon: 'success',
-        showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
-        confirmButtonText: 'Yes, send it!'
-      });
-      if (result.isConfirmed) {
+      },
+      async showAddRatingModal(offerId, userId, index) {
+        this.selectedRating = 0;
+        this.showRatingModal = true;
+        this.currentOfferId = offerId;
+        globalrating = userId;
+        this.currentIndex = index;
+      },
+      // Method to select star rating
+      selectStar(rating) {
+        this.selectedRating = rating;
+      },
+      // // Method to submit rating
+      async submitRating() {
+        if (this.selectedRating > 0) {
+          await this.addRating(this.currentOfferId, this.selectedRating, this.reviewText);
+          this.cancelRating();
+        } else {
+          this.toast.info("Please select a Rating");
+        }
+      },
+      cancelRating() {
+        this.showRatingModal = false;
+        this.reviewText = '';
+      },
+      // // Method to add rating for a specific offer
+      async addRating(offerId, userRating, reviewText) {
         try {
-          await axios.post(`${process.env.baseURL}review/add-review?email=${globalEmail}`, {
-            offerId,
-            userId,
-            status: 0,
+          const response = await axiosInstance.post(`${process.env.baseURL}review/add-review`, {
+            offerId: offerId,
+            ratingValue: userRating,
+            reviewComment: reviewText,
+            reviewedUserId: null,
           });
-          Swal.fire('Erfolg!', 'Deine Anfrage wurde gesendet.', 'success');
-          await this.checkReviewStatus(offerId); 
+          if (response.status === 200) {
+            this.toast.success("Dein Rating wurde erfolgreich hinzugefügt.");
+          } else if (response.data.message == "The Review with key '1' already exists.") {
+            this.toast.info("Ratings Already exists");
+          }
         } catch (error) {
-          Swal.fire('Sorry', 'Leider konnte deine Anfrage nicht versendet werden!', '');
-          console.error(error);
+          this.toast.info("Du hast bereits ein Rating abgegeben.");
         }
-      }
+      },
     },
-    // Method to fetch users details based on offerId
-    async fetchUsersByOfferId(offerId) {
-      try {
-        const response = await axios.get(`${process.env.baseURL}review/get-user-by-offerId/${offerId}`);
-        let users = response.data;
-        if (!Array.isArray(users)) {
-          users = [users];
-        }
-        if (users.length > 0) {
-          let userDetails = users.map(user => {
-            return `
-          <div class="user-detail">
-            <div class="user-info">
-              <b>Name:</b> ${user.firstName} ${user.lastName}
-            </div>
-            <div class="user-info">
-              <b>Email:</b> ${user.email_Address}
-            </div>
-            <div class="user-info">
-              <b>Gender:</b> ${user.gender}
-            </div>
-            <div class="user-info">
-              <b>Date of Birth:</b> ${user.dateOfBirth}
-            </div>
-            <div class="user-info">
-              <b>Facebook Link:</b> <a href="${response.data.facebook_link}" target="_blank">${response.data.facebook_link}</a>
-            </div>
-          </div>
-        `;
-          }).join('<br>');
-          Swal.fire({
-            title: 'User Details',
-            html: `<div class="user-details-container">${userDetails}</div>`,
-            icon: 'info',
-            width: '600px',
-            customClass: {
-              container: 'custom-swal-container',
-              title: 'custom-swal-title',
-              htmlContainer: 'custom-swal-html-container',
-            },
-            showCloseButton: true,
-            showConfirmButton: false,
-          });
-        } else {
-          Swal.fire({
-            title: 'No Users Found',
-            text: 'No users found for this offer.',
-            icon: 'info',
-          });
-        }
-      } catch (error) {
-        Swal.fire('Error!', 'Failed to fetch users: ' + error.message, 'error');
-        console.error(error);
-      }
-    },
-    // Method to show add review modal using Swal
-    async showAddReviewModal(offer) {
-      const { value: review, dismiss: dismissAction } = await Swal.fire({
-        title: 'Review hinzufügen',
-        html: `<textarea id="reviewTextArea" class="swal2-textarea" placeholder="Dein Review" readonly>Bitte gebt die gegenseitige Bewertung erst ab, nachdem diese terminlich abgeschlossen ist.</textarea>`,
-        showCancelButton: true,
-        cancelButtonText: 'Abbrechen',
-        confirmButtonText: 'Einreichen',
-        preConfirm: () => {
-          return document.getElementById('reviewTextArea').value;
-        },
-      });
-      if (review !== undefined) {
-        const reviewText = "Bitte gebt die gegenseitige Bewertung erst ab, nachdem diese terminlich abgeschlossen ist.";
-        this.addReview(offer.id, reviewText); 
-      } else if (dismissAction === Swal.DismissReason.cancel) {
-      }
-    },
-    // Method to add review for a specific offer
-    async addReview(offerId, reviewText) {
-      try {
-        const response = await axios.post(`${process.env.baseURL}review-login-user/create-review`, {
-          offerId,
-          userId: globalLogid,
-          addReviewForLoginUser: reviewText,
+    computed: {
+      filteredOffers() {
+        return this.offers.filter(offer => {
+          const title = offer.title ? offer.title.toLowerCase() : '';
+          const description = offer.description ? offer.description.toLowerCase() : '';
+          const skills = offer.skills ? offer.skills.toLowerCase() : '';
+          const region = offer.region ? offer.region.toLowerCase() : '';
+          const isValidOffer = offer.hostId != offer.id;
+          return isValidOffer && (
+            title.includes(this.searchTerm.toLowerCase()) ||
+            region.includes(this.searchTerm.toLowerCase()) ||
+            description.includes(this.searchTerm.toLowerCase()) ||
+            skills.includes(this.searchTerm.toLowerCase())
+          );
         });
-        if (response.status === 200) {
-          Swal.fire('Review hinzugefügt', 'Dein Review wurde erfolgreich hinzugefügt.', 'success');
-        } else {
-          Swal.fire('Error', 'Das Review konnte nicht hinzugefügt werden.', 'error');
-        }
-      } catch (error) {
-        Swal.fire('Bereits hinzugefügt', 'Du hast bereits ein Review hinzugefügt!', '');
       }
-    },
-    // Method to search offers based on the searchTerm
-    searchOffers() {
-      this.loading = true;
-      this.fetchOffers(); 
-    },
-    // Method to redirect to offer detail page
-    redirectToOfferDetail(offerId) {
-      this.$router.push({ name: 'OfferDetail', params: { id: offerId } });
-    },
-    truncateDescription(description) {
-      if (!description) return '';
-      const words = description.split(' ');
-      return words.slice(0, 15).join(' ') + (words.length > 15 ? '...' : '');
-    },
-    // Method to show add rating modal
-    async showAddRatingModal(offerId, userId) {
-      this.selectedRating = 0;
-      this.showModal = true;
-      this.currentOfferId = offerId;
-      globalrating = userId;
-    },
-    // Method to select star rating
-    selectStar(rating) {
-      this.selectedRating = rating;
-    },
-    // Method to submit rating
-    async submitRating() {
-      if (this.selectedRating > 0) {
-        await this.addRating(this.currentOfferId, globalLogid, this.selectedRating); 
-        this.showModal = false;
-      } else {
-        Swal.fire('Error', 'Bitte wähle ein Rating.', 'error');
-      }
-    },
-    cancelRating() {
-      this.showModal = false;
-    },
-    // Method to add rating for a specific offer
-    async addRating(offerId, toUserId, userRating) {
-      try {
-        const response = await axios.post(`${process.env.baseURL}user-rating/add-rating-to-host`, {
-          user_Id: toUserId,
-          offerId: offerId,
-          hostRating: userRating,
-          submissionDate: new Date().toISOString()
-        });
-        if (response.status === 200) {
-          Swal.fire('Rating hinzugefügt', 'Dein Rating wurde erfolgreich hinzugefügt.', 'success');
-        } else {
-          Swal.fire('Etwas ist schief gelaufen', 'Dein Rating konnte nicht abgegeben werden.', 'error');
-        }
-      } catch (error) {
-        Swal.fire('Bereits hinzugefügt', 'Du hast bereits ein Rating abgegeben!', '');
-      }
-    },
-  },
-  computed: {
-    filteredOffers() {
-      return this.offers.filter(offer => {
-        const title = offer.title ? offer.title.toLowerCase() : '';
-        const description = offer.description ? offer.description.toLowerCase() : '';
-        const skills = offer.skills ? offer.skills.toLowerCase() : '';
-        const region = offer.state ? offer.state.toLowerCase() : '';
-        return title.includes(this.searchTerm.toLowerCase()) || region.includes(this.searchTerm.toLowerCase()) || description.includes(this.searchTerm.toLowerCase()) || skills.includes(this.searchTerm.toLowerCase());
-      });
     }
-  }
-};
+  };
 </script>
 <style lang="scss" scoped>
-.offers-title {
-  font-size: 2.5rem;
-  color: #333;
-  margin-bottom: 1rem;
-  font-weight: bold;
-}
-
-
-.search-input {
-  padding: 0.75rem 1rem;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  font-size: 1rem;
-  width: 100%;
-  max-width: 400px;
-  margin: 0 auto;
-  display: block;
-  transition: border-color 0.3s ease;
-}
-
-.search-input:focus {
-  outline: none;
-  border-color: #1ee94a;
-  box-shadow: 0 0 5px rgba(63, 248, 27, 0.5);
-}
-
-
-.card {
-  max-width: 100%;
-  overflow: hidden;
-  border: 1px solid #e0e0e0;
-  border-radius: 10px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-.card-body {
-  padding: 1rem;
-}
-
-.card-img-top {
-  max-height: 200px;
-  min-height: 200px;
-  object-fit: cover;
-  border-top-left-radius: 10px;
-  border-top-right-radius: 10px;
-}
-
-.card-title {
-  font-size: 1.5rem;
-  font-weight: bold;
-  margin-bottom: 0.5rem;
-}
-
-.card-text {
-  font-size: 1rem;
-  margin-bottom: 0.5rem;
-}
-
-.btn {
-  display: inline-block;
-  padding: 0.5rem 1rem;
-  font-size: 1rem;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s, color 0.3s;
-}
-
-.btn-success {
-  background-color: #28a745;
-  color: white;
-}
-
-.btn-success:hover {
-  background-color: #218838;
-}
-
-.btn-warning {
-  background-color: #ffc107;
-  color: black;
-}
-
-.btn-warning:hover {
-  background-color: #e0a800;
-}
-
-.btn-primary {
-  background-color: #007bff;
-  color: white;
-}
-
-.btn-primary:hover {
-  background-color: #0056b3;
-}
-
-.btn-secondary {
-  background-color: #6c757d;
-  color: white;
-}
-
-.btn-secondary:hover {
-  background-color: #5a6268;
-}
-
-.mt-2 {
-  margin-top: 0.5rem;
-}
-
-.button-container {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 10px;
-}
-
-.btn {
-  flex: 1;
-  margin: 0 5px;
-}
-
-.btn-secondary.mt-2 {
-  margin-top: 0;
-
-}
-
-.custom-swal-container {
-  font-family: 'Arial', sans-serif;
-}
-
-.custom-swal-title {
-  font-size: 1.5rem;
-  color: #333;
-  font-weight: bold;
-}
-
-.custom-swal-html-container {
-  font-size: 1rem;
-  color: #555;
-  text-align: left;
-}
-
-.user-details-container {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.user-detail {
-  background-color: #f9f9f9;
-  border-radius: 8px;
-  padding: 1rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.user-info {
-  margin-bottom: 0.5rem;
-}
-
-.user-info b {
-  color: #333;
-}
-
-.user-info a {
-  color: #007bff;
-  text-decoration: none;
-}
-
-.user-info a:hover {
-  text-decoration: underline;
-}
-
-.container {
-  padding: 20px;
-}
-
-.table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.table th,
-.table td {
-  border: 1px solid #ccc;
-  padding: 8px;
-}
-
-.table th {
-  background-color: #f2f2f2;
-}
-
-.table td {
-  text-align: left;
-}
-
-.table th:first-child,
-.table td:first-child {
-  border-left: none;
-}
-
-.table th:last-child,
-.table td:last-child {
-  border-right: none;
-}
-
-#rating-modal {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  z-index: 1000;
-}
-
-.modal-content {
-  text-align: center;
-}
-
-#rating-stars {
-  display: flex;
-  justify-content: center;
-  margin: 20px 0;
-}
-
-.star {
-  font-size: 2rem;
-  cursor: pointer;
-  color: gray;
-}
-
-.star.selected {
-  color: gold;
-}
-
-button {
-  margin: 5px;
-}
-.rating-star {
-  font-family: var(--fa-style-family, "Font Awesome 6 Free");
-  font-weight: var(--fa-style, 900);
-}
-
-.rating-star:before {
-  content: "\f005";
-}
+  .offers-title {
+    font-size: 2.5rem;
+    color: #333;
+    margin-bottom: 1rem;
+    font-weight: bold;
+  }
+  .test {
+    font-size: 5.5rem;
+    color: #ca0000;
+    margin-bottom: 1rem;
+  }
+  .search-input {
+    padding: 0.75rem 1rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1rem;
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+    display: block;
+    transition: border-color 0.3s ease;
+  }
+  .search-input:focus {
+    outline: none;
+    border-color: #1ee94a;
+    box-shadow: 0 0 5px rgba(63, 248, 27, 0.5);
+  }
+  .card {
+    max-width: 100%;
+    overflow: hidden;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+  .card-body {
+    padding: 1rem;
+  }
+  .card-img-top {
+    max-height: 200px;
+    min-height: 200px;
+    object-fit: cover;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+  }
+  .card-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+  }
+  .card-text {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+  }
+  .btn-success {
+    background-color: #28a745;
+    color: white;
+  }
+  .btn-success:hover {
+    background-color: #218838;
+  }
+  .btn-warning {
+    background-color: #ffc107;
+    color: black;
+  }
+  .modal-content {
+    text-align: center;
+  }
+  .btn-warning:hover {
+    background-color: #e0a800;
+  }
+  .btn-primary {
+    background-color: #007bff;
+    color: white;
+  }
+  .btn-primary:hover {
+    background-color: #0056b3;
+  }
+  .btn-secondary {
+    background-color: #6c757d;
+    color: white;
+  }
+  .btn-secondary:hover {
+    background-color: #5a6268;
+  }
+  .mt-2 {
+    margin-top: 0.5rem;
+  }
+  .button-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+  }
+  .btn {
+    flex: 1;
+    margin: 0 5px;
+  }
+  .btn-secondary.mt-2 {
+    margin-top: 0;
+  }
+  .custom-swal-container {
+    font-family: 'Arial', sans-serif;
+  }
+  .custom-swal-title {
+    font-size: 1.5rem;
+    color: #333;
+    font-weight: bold;
+  }
+  .custom-swal-html-container {
+    font-size: 1rem;
+    color: #555;
+    text-align: left;
+  }
+  .user-details-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .user-detail {
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    padding: 1rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  .user-info {
+    margin-bottom: 0.5rem;
+  }
+  .user-info b {
+    color: #333;
+  }
+  .user-info a {
+    color: #007bff;
+    text-decoration: none;
+  }
+  .user-info a:hover {
+    text-decoration: underline;
+  }
+  // .container {
+  //   padding: 20px;
+  // }
+  .table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5);
+    /* Semi-transparent black */
+    z-index: 100;
+    /* Behind the modal */
+  }
+  .table th:first-child,
+  .table td:first-child {
+    border-left: none;
+  }
+  .table th:last-child,
+  .table td:last-child {
+    border-right: none;
+  }
+  #rating-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 0px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    max-width: 500px;
+    width: 100%;
+  }
+  .modal-content {
+    text-align: center;
+  }
+  #rating-stars {
+    display: flex;
+    justify-content: center;
+    margin: 0px 0;
+  }
+  .star {
+    font-size: 2rem;
+    cursor: pointer;
+    color: gray;
+  }
+  .star.selected {
+    color: #f6a716;
+  }
+  button {
+    margin: 5px;
+  }
+  .rating-star {
+    font-family: var(--fa-style-family, "Font Awesome 6 Free");
+    font-weight: var(--fa-style, 900);
+  }
+  .rating-star:before {
+    content: "\f005";
+  }
+  .OfferButtons {
+    width: 100%;
+  }
 </style>

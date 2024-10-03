@@ -32,6 +32,7 @@
     "vue-router": "^4.0.0",
     "vue-star-rating": "^1.7.0",
     "vue-toastification": "^2.0.0-rc.5",
+    "vue3-datepicker": "^0.4.0",
     "vuetify": "^3.0.0"
   },
   "devDependencies": {

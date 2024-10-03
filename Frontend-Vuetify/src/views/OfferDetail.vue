@@ -1,36 +1,130 @@
 <template>
-  <div class="offer-detail-container" v-if="!loading">
-    <div class="offer-image" v-if="offer.imageData">
-      <img :src="'data:' + offer.imageMimeType + ';base64,' + offer.imageData" alt="Offer Image" />
-    </div>
-    <div class="offer-content">
-      <h1 class="offer-title">{{ offer.title }}</h1>
-      <p class="offer-description">{{ offer.description }}</p>
-      <div class="offer-details">
-        <p><strong>Location:</strong> {{ offer.location }}</p>
-        <p><strong>Skills:</strong> {{ offer.skills }}</p>
-        <p><strong>Accommodation:</strong> {{ offer.accomodation }}</p>
-        <p><strong>Suitable for:</strong> {{ offer.accomodationsuitable }}</p>
-        <p><strong>Region:</strong> {{ offer.state }}</p>
+  <Navbar />
+  <section class="offer-detail-container offer_detail_layout section_space" v-if="!loading">
+    <div class="container">
+      <div class="row">
+        <div class="col-xs-12 col-sm-6">
+          <div class="offer-image" v-if="offer.imageData">
+            <img :src="'data:' + offer.imageMimeType + ';base64,' + offer.imageData" alt="Offer Image" />
+          </div>
+        </div>
+        <div class="col-xs-12 col-sm-6">
+          <div class="offer-content">
+            <h1 class="offer-title">{{ offer.title }}</h1>
+            <div class="offer-details">
+              <p><strong>Skills:</strong> {{ offer.skills }}</p>
+              <p><strong>Accommodation:</strong> {{ offer.accomodation }}</p>
+              <p><strong>Suitable for:</strong> {{ offer.accomodationsuitable }}</p>
+              <p><strong>Region:</strong> {{ offer.state }}</p>
+              <p><strong>Location:</strong> {{ offer.location }}</p>
+            </div>
+            <div class="offer_btn">
+              <button @click="backtooffers()" class="action-link"><i class="fa fa-angle-double-left"
+                  aria-hidden="true"></i> Back To Offers</button>
+            </div>
+          </div>
+        </div>
       </div>
-      <button @click="backtooffers()" class="btn btn-primary" style="background-color: #0062cc;color: #fff">Back To
-        Offers</button>
+      <div class="row">
+        <div class="col-sm-12">
+          <div class="offer_decription mt-4">
+            <p class="offer-description mb-0">{{ offer.description }}</p>
+          </div>
+        </div>
+      </div>
+      <!--Review-->
+      <div class="review_layout">
+        <div class="row">
+          <div class="col-sm-12">
+            <div class="secondary_title">
+              <h2>Reviews</h2>
+            </div>
+          </div>
+          <div class="col-sm-12">
+            <div class="review-score">
+              <div class="rating-value">
+                <div class="rating-score">
+                  <i class="ri-star-fill" aria-hidden="true"></i>{{ offer.averageRating }}<span>/5</span>
+                </div>
+                <div v-if="offer.averageRating >= 4" class="ratting-text">Wonderful </div>
+                <div v-if="offer.averageRating >= 3 && offer.averageRating < 4" class="ratting-text">Good</div>
+                <div v-if="offer.averageRating >= 1 && offer.averageRating < 3" class="ratting-text">Poor </div>
+                <div v-if="offer.averageRating == 0" class="ratting-text">No Ratings</div>
+                <div class="rating-vote">{{ reviews.length }} reviews</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="comments-area">
+          <div class="comment-list-wrap">
+            <ol class="comment-list">
+              <li v-for="(offerReviews, index) in displayedReviews" :key="index" class="comment">
+                <div class="comment-body">
+                  <div class="comment-author vcard" v-if="offerReviews.reviewer.profilePicture != null">
+                    <img alt="" :src="'data:' + offer.imageMimeType + ';base64,' + offerReviews.reviewer.profilePicture"
+                      class="avatar avatar-80 photo" height="80" width="80" decoding="async">
+                  </div>
+                  <div class="comment-author vcard" v-if="offerReviews.reviewer.profilePicture == null">
+                    <img alt="" :src="defaultProfileImgSrc" class="avatar avatar-80 photo" height="80" width="80"
+                      decoding="async">
+                  </div>
+                  <div class="comment-content">
+                    <div class="comment-head">
+                      <div class="comment-user">
+                        <div class="user">{{ offerReviews.reviewer.firstName }} {{ offerReviews.reviewer.lastName }}
+                        </div>
+                        <div class="comment-date"> <time :datetime="offerReviews.createdAt">{{
+                          formatDate(offerReviews.createdAt) }}</time>
+                        </div>
+                        <div class="comment-rating-stars stars">
+                          <span class="star star-1"> <i class="ri-star-fill"></i> {{ offerReviews.ratingValue }}</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="comment-text">
+                      <p class="mb-0">{{ offerReviews.reviewComment }}</p>
+                    </div>
+                  </div>
+                </div>
+              </li>
+            </ol>
+            <div class="text-center" v-if="reviews.length > 1">
+              <button type="button" @click="toggleShowMore" class="btn outline_Greybtn">
+                {{ showAllReviews ? "Hide Reviews" : "Show More Reviews" }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-  </div>
+  </section>
   <div class="loading" v-else>
     Loading...
   </div>
 </template>
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
-import { useRoute } from 'vue-router';
-import axios from 'axios';
-const { params } = useRoute();
+import {
+  ref,
+  onMounted,
+  computed
+} from 'vue';
+import {
+  useRoute
+} from 'vue-router';
+import Navbar from '@/components/navbar/Navbar.vue';
+import axiosInstance from '@/interceptor/interceptor';
+const {
+  params
+} = useRoute();
 const offer = ref(null);
 const loading = ref(true);
+const showAllReviews = ref(false);
+var reviews = ref([]);
+const defaultProfileImgSrc = '/defaultprofile.jpg';
 const fetchOfferDetail = async () => {
   try {
-    const response = await axios.get(`${process.env.baseURL}offer/get-offer-by-id/${params.id}`);
+    fetchReview();
+    const response = await axiosInstance.get(`${process.env.baseURL}offer/get-offer-by-id/${params.id}`);
     offer.value = response.data;
   } catch (error) {
     console.error('Error fetching offer detail:', error);
@@ -38,64 +132,95 @@ const fetchOfferDetail = async () => {
     loading.value = false;
   }
 };
-const backtooffers = () => {
-  window.location.href = '/home';
+const formatDate = (dateString) => {
+  const options: Intl.DateTimeFormatOptions = {
+    year: 'numeric',
+    month: 'long',
+    day: '2-digit',
+  };
+  return new Date(dateString).toLocaleDateString(undefined, options);
 };
-onMounted(fetchOfferDetail);
+const fetchReview = async () => {
+  try {
+    const response = await axiosInstance.get(`${process.env.baseURL}review/get-offer-reviews?offerId=${params.id}`);
+    reviews.value = response.data;
+  } catch (error) {
+    console.error('Error fetching reviews:', error);
+  }
+};
+const displayedReviews = computed(() => {
+  return showAllReviews.value ? reviews.value : reviews.value.slice(0, 1);
+});
+const toggleShowMore = () => {
+  showAllReviews.value = !showAllReviews.value;
+};
+const backtooffers = () => {
+    window.history.back();
+  };
+  onMounted(fetchOfferDetail);
 </script>
+
 <style scoped lang="scss">
-.offer-detail-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 20px;
-  background-color: #f9f9f9;
-  border-radius: 10px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  max-width: 800px;
-  margin: 40px auto;
-}
-
-.offer-image img {
-  max-width: 100%;
-  border-radius: 10px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.offer-content {
-  margin-top: 20px;
-  text-align: center;
-}
-
-.offer-title {
-  font-size: 2.5rem;
-  font-weight: bold;
-  color: #333;
-}
-
-.offer-description {
-  font-size: 1.2rem;
-  color: #555;
-  margin: 20px 0;
-}
-
-.offer-details {
-  font-size: 1rem;
-  color: #666;
-  text-align: left;
-  width: 100%;
-  max-width: 600px;
-  margin: 0 auto;
-}
-
-.offer-details p {
-  margin: 10px 0;
-}
-
 .loading {
   font-size: 1.5rem;
   color: #888;
   text-align: center;
   padding: 40px;
 }
+
+.modal {
+  display: block;
+  position: fixed;
+  z-index: 1;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgb(0, 0, 0);
+  background-color: rgba(0, 0, 0, 0.4);
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-content {
+  background-color: #fefefe;
+  /* padding: 20px; */
+  width: 100%;
+  max-width: 800px;
+}
+
+.close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.review-item {
+  // padding: 10px;
+  // border: 1px solid #ddd;
+  margin-bottom: 10px;
+}
+
+.outline_Greybtn {
+  /* Example button styling */
+  border: 1px solid grey;
+  background-color: transparent;
+    color: grey;
+    padding: 8px 12px;
+    cursor: pointer;
+  }
+  .reviews {
+    margin-top: 20px;
+  }
 </style>

@@ -21,14 +21,14 @@
                 </li>
                 &nbsp;&nbsp;&nbsp;&nbsp;
                 &nbsp;&nbsp;&nbsp;&nbsp;
-                <li class="nav-item dropdown border">
+                <li class="nav-item dropdown border rounded">
                   <span class="nav-link dropdown-toggle" id="navbarDropdown" role="button" data-toggle="dropdown"
                     aria-haspopup="true" aria-expanded="false">
                     <i class="ri-user-3-line"></i> {{ username }}
                   </span>
                   <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
-                    <a class="dropdown-item" @click="openProfile">Profile</a>
-                    <a class="dropdown-item" @click.prevent="doLogout">Abmelden</a>
+                    <a class="dropdown-item" @click="openProfile"><i class="ri-file-user-line"></i> Profile</a>
+                    <a class="dropdown-item" @click.prevent="doLogout"><i class="ri-logout-circle-r-line"></i> Abmelden</a>
                   </div>
                 </li>
               </ul>
@@ -40,10 +40,8 @@
   </div>
 </template>
 <script lang="ts" setup>
-import '@fortawesome/fontawesome-free/css/all.css'; 
-import '@fortawesome/fontawesome-free/js/all.js'; 
-import { ref, onMounted } from 'vue'; 
-import router from "@/router"; 
+import { ref, onMounted } from 'vue';
+import router from "@/router";
 
 // Declare reactive variables using ref
 const isLoggedIn = ref(false); // Reactive variable to track login status

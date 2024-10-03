@@ -1,12 +1,13 @@
-﻿using Azure;
+﻿/*
+using Azure;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using RestSharp;
+using UGH.Domain.Entities;
 using UGHApi.Models;
 using UGHApi.Services;
-
 
 namespace UGHApi.Controllers
 {
@@ -14,12 +15,15 @@ namespace UGHApi.Controllers
     [ApiController]
     public class CouponController : ControllerBase
     {
-        private readonly UghContext _context;
+        private readonly Ugh_Context _context;
         private readonly CouponService _couponService;
         private readonly ILogger<CouponController> _logger;
 
-
-        public CouponController(UghContext context, CouponService couponService, ILogger<CouponController> logger)
+        public CouponController(
+            Ugh_Context context,
+            CouponService couponService,
+            ILogger<CouponController> logger
+        )
         {
             _context = context;
             _couponService = couponService;
@@ -29,11 +33,13 @@ namespace UGHApi.Controllers
         #region Coupon-generation-by-admin
         [HttpPost("admin/add-coupon")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> AddCoupon(Coupon coupon)
+        public async Task<IActionResult> AddCoupon(UGH.Domain.Entities.Coupon coupon)
         {
             try
             {
-                var existingCoupon = await _context.coupons.FirstOrDefaultAsync(x => x.Code.Equals(coupon.Code));
+                var existingCoupon = await _context.coupons.FirstOrDefaultAsync(
+                    x => x.Code.Equals(coupon.Code)
+                );
 
                 if (existingCoupon != null)
                 {
@@ -45,11 +51,10 @@ namespace UGHApi.Controllers
             }
             catch (Exception ex)
             {
-               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
-
 
         [HttpPost("admin/update-coupon")]
         [Authorize(Roles = "Admin")]
@@ -57,7 +62,8 @@ namespace UGHApi.Controllers
         {
             try
             {
-                if (!ModelState.IsValid) return BadRequest(ModelState);
+                if (!ModelState.IsValid)
+                    return BadRequest(ModelState);
                 await _couponService.UpdateCoupon(updatedCoupon);
                 return Ok("Coupon updated successfully.");
             }
@@ -67,7 +73,7 @@ namespace UGHApi.Controllers
             }
             catch (Exception ex)
             {
-               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
@@ -78,13 +84,14 @@ namespace UGHApi.Controllers
         {
             try
             {
-            var coupons = await _couponService.GetAllcoupons();
-            if (coupons.IsNullOrEmpty()) return NotFound();
-            return Ok(coupons);
+                var coupons = await _couponService.GetAllcoupons();
+                if (coupons.IsNullOrEmpty())
+                    return NotFound();
+                return Ok(coupons);
             }
             catch (Exception ex)
             {
-               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
@@ -104,7 +111,7 @@ namespace UGHApi.Controllers
             }
             catch (Exception ex)
             {
-               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
@@ -128,10 +135,11 @@ namespace UGHApi.Controllers
             }
             catch (Exception ex)
             {
-               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
         #endregion
     }
 }
+*/

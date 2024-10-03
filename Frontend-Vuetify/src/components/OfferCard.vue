@@ -31,6 +31,7 @@
   </div>
 </template>
 <script>
+import axiosInstance from '@/interceptor/interceptor';
 import axios from 'axios';
 
 export default {
@@ -47,7 +48,7 @@ export default {
   methods: {
     async fetchOffers() {
       try {
-        const response = await axios.get(`${process.env.baseURL}offer/get-all-offers`, {
+        const response = await axiosInstance.get(`${process.env.baseURL}offer/get-all-offers`, {
           params: {
             searchTerm: this.searchTerm
           }

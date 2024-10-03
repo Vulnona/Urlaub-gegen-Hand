@@ -1,4 +1,5 @@
 <template>
+  <Navbar />
   <div v-if="userRole !== 'Admin'">
     <div class="justify-content center">
       <section class="page_404">
@@ -22,64 +23,94 @@
     </div>
   </div>
   <div v-else>
-    <h2 class="text-center mt-2 p-2">Admin Panel</h2>
-    <div class="user-list">
-      <table class="container">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>E-Mail</th>
-            <th>Code</th>
-            <th>VS</th>
-            <th>RS</th>
-            <th class="text-center">Status</th>
-            <th class="text-center">Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="(user, index) in admin" :key="index">
-            <td @click="getProfile(user.user_Id)" class="clickable">{{ user.firstName }}</td>
-            <td @click="setModal(user.user_Id)" class="clickable">{{ user.email_Address }}</td>
-            <td>{{ user.code }}</td>
-            <td v-if="user.link_VS">
-              <button class="btn btn-primary link-button" @click="showImageModal(decryptLink(user.link_VS))">
-                View VS <i class="fas fa-eye"></i>
-              </button>
-            </td>
-            <td v-else>No VS Data Available</td>
-            <td v-if="user.link_RS">
-              <button class="btn btn-primary link-button" @click="showImageModal(decryptLink(user.link_RS))">
-                View RS <i class="fas fa-eye"></i>
-              </button>
-            </td>
-            <td v-else>No RS Data Available</td>
-            <td class="text-center">
-              <span class="newState" v-if="user.verificationState === 0">New</span>
-              <span class="penState" v-else-if="user.verificationState === 1">Pending</span>
-              <span class="failState" v-else-if="user.verificationState === 2">Failed</span>
-              <span class="verState" v-else-if="user.verificationState === 3">Verified</span>
-            </td>
-            <td class="text-center">
-              <button class="btn btn-danger" @click="deleteUser(user.user_Id, user.link_VS, user.link_RS)"
-                v-if="user.verificationState === 2 && user.verificationState !== 0">
-                Löschen
-              </button>
-              <button class="btn btn-success" @click="reactivateUser(user.user_Id, 1)"
-                v-if="user.verificationState === 2 && user.verificationState !== 0">
-                Erneut Prüfen
-              </button>
-              <button class="btn btn-success" @click="approveUser(user.user_Id, 3)"
-                v-if="user.verificationState === 1 || user.verificationState === 0">
-                Zulassen
-              </button>&nbsp;
-              <button class="btn btn-danger" @click="rejectUser(user.user_Id, 2, user.link_VS, user.link_RS)"
-                v-if="user.verificationState === 1 || user.verificationState === 0">
-                Ablehnen
-              </button>&nbsp;
-            </td>
-          </tr>
-        </tbody>
-      </table>
+    <div class="Admin_inner_banner inner_banner_layout">
+      <div class="container">
+        <div class="row">
+          <div class="col-sm-12">
+            <div class="inner_banner">
+              <h2>Admin Panel</h2>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="section_space offers_request_layout admin-panel-grid">
+      <div class="offers_request_content">
+        <div class="card">
+          <div class="card-header">
+            <h1 class="main-title">Users List</h1>
+            <div class="sort-select"><label>Filter by</label>
+              <select class="form-control">
+                <option value="1">New</option>
+                <option value="4">Approved</option>
+                <option value="3">Pending</option>
+              </select>
+            </div>
+          </div>
+          <div class="card-body">
+            <table class="table theme_table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>E-Mail</th>
+                  <th>Code</th>
+                  <th>VS</th>
+                  <th>RS</th>
+                  <th class="text-center">Status</th>
+                  <th class="text-center">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(user, index) in admin" :key="index">
+                  <td @click="getProfile(user.user_Id)" class="clickable">{{ user.firstName }}</td>
+                  <td @click="setModal(user.user_Id)" class="clickable">{{ user.email_Address }}</td>
+                  <td>{{ user.code }}</td>
+                  <td v-if="user.link_VS" class="vs_link">
+                    <a class="" @click="showImageModal(decryptLink(user.link_VS))">
+                      <i class="ri-eye-line"></i> View VS
+                    </a>
+                  </td>
+                  <td v-else>No VS Data Available</td>
+                  <td v-if="user.link_RS" class="vs_link">
+                    <a class="" @click="showImageModal(decryptLink(user.link_RS))">
+                      <i class="ri-eye-line"></i> View RS
+                    </a>
+                  </td>
+                  <td v-else>No RS Data Available</td>
+                  <td class="text-center">
+                    <span class="newState badge badge-primary" v-if="user.verificationState === 0">New</span>
+                    <span class="penState badge badge-warning" v-else-if="user.verificationState === 1">Pending</span>
+                    <span class="failState badge badge-danger" v-else-if="user.verificationState === 2">Failed</span>
+                    <span class="verState badge badge-success" v-else-if="user.verificationState === 3">Verified</span>
+                  </td>
+                  <td class="text-center">
+                    <div class="action-icon-btns buttons_text">
+                      <button title="Reactivate" class="icon_btn bg_ltblue" @click="reactivate_User(user.user_Id, 1)"
+                        v-if="user.verificationState === 2 && user.verificationState !== 0">
+                        Reactivate
+                      </button>
+                      <button title="Delete" class="icon_btn bg_ltred"
+                        @click="deleteUser(user.user_Id, user.link_VS, user.link_RS)"
+                        v-if="user.verificationState === 2 && user.verificationState !== 0">
+                        Delete
+                      </button>
+                      <button title="Approve" class="icon_btn bg_ltgreen" @click="approveUser(user.user_Id, 3)"
+                        v-if="user.verificationState === 1 || user.verificationState === 0">
+                        Approve
+                      </button>
+                      <button title="Reject" class="icon_btn bg_ltred"
+                        @click="rejectUser(user.user_Id, 2, user.link_VS, user.link_RS)"
+                        v-if="user.verificationState === 1 || user.verificationState === 0">
+                        Reject
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
     </div>
     <!-- Image Modal -->
     <div class="modal-container text-center" v-if="imageUrlToShow">
@@ -94,7 +125,7 @@
       <div class="modal-overlay" @click="closeModal"></div>
       <div class="modal-content">
         <span class="close" @click="closeModal">&times;</span>
-        <h2>Send Email</h2>
+        <h4>Send Email</h4>
         <form @submit.prevent="sendEmail">
           <div class="form-group">
             <label for="from" class="text-left">From:</label>
@@ -113,10 +144,10 @@
             <textarea id="body" rows="5" v-model="emailBody" required></textarea>
           </div>
           <div class="modal-buttons">
-            <button class="btn-primary" type="submit" :disabled="isSending">
+            <button class="btn themeBtn common-btn" type="submit" :disabled="isSending">
               Send
             </button>
-            <button class="btn-secondary" type="button" @click="closeModal" :disabled="isSending">
+            <button class="btn-cancel common-btn" type="button" @click="closeModal" :disabled="isSending">
               Close
             </button>
           </div>
@@ -127,77 +158,57 @@
   </div>
 </template>
 <script>
-import axios from "axios"; 
 import Swal from "sweetalert2";
-import router from '@/router'; 
-import 'bootstrap/dist/css/bootstrap.min.css'; 
+import router from '@/router';
+import 'bootstrap/dist/css/bootstrap.min.css';
 import "bootstrap/dist/js/bootstrap.min.js";
-import VueJwtDecode from 'vue-jwt-decode'; 
-import { S3Client, DeleteObjectCommand } from '@aws-sdk/client-s3'; 
-import CryptoJS from 'crypto-js'; 
+import { S3Client, DeleteObjectCommand } from '@aws-sdk/client-s3';
+import CryptoJS from 'crypto-js';
+import { createToastInterface } from "vue-toastification";
+import "vue-toastification/dist/index.css"
+import axiosInstance from "@/interceptor/interceptor"
+import Navbar from "@/components/navbar/Navbar.vue";
+import UserRole from "@/services/CheckUserRole";
+import Securitybot from "@/services/SecurityBot";
 
-// Create an Axios instance for making HTTP requests
-const axiosInstance = axios.create();
-axiosInstance.interceptors.request.use(
-  config => {
-    const token = sessionStorage.getItem('token');
-    if (token) {
-      const decryptedToken = decryptToken(token);
-      if (decryptedToken) {
-        config.headers['Authorization'] = `Bearer ${decryptedToken}`;
-      } else {
-        sessionStorage.removeItem('token');
-      }
-    }
-    return config;
-  },
-  error => {
-    return Promise.reject(error);
-  }
-);
-
-// Function to decrypt token using CryptoJS.
-const decryptToken = (encryptedToken) => {
-  try {
-    const bytes = CryptoJS.AES.decrypt(encryptedToken, process.env.SECRET_KEY);
-    return bytes.toString(CryptoJS.enc.Utf8);
-  } catch (e) {
-    console.error('Error decrypting token:', e);
-    return null;
-  }
-};
 export default {
+  components: {
+    Navbar,
+  },
   name: "admin",
   data() {
     return {
-      admin: [], 
-      customMessage: "", 
+      admin: [],
+      customMessage: "",
       selectedUser: null,
-      emailBody: "", 
-      emailSubject: "", 
-      userRole: '',
-      imageUrlToShow: null, 
+      emailBody: "",
+      emailSubject: "",
+      userRole: UserRole(),
+      imageUrlToShow: null,
       isSending: false
     };
   },
   mounted() {
-    this.getdata(); 
-    this.Securitybot(); 
-    this.checkLoginStatus(); 
+    this.getdata();
+    Securitybot();
+  },
+  created() {
+    this.toast = createToastInterface({
+      position: "top-right",
+      timeout: 3000,
+      closeOnClick: true,
+      pauseOnFocusLoss: true,
+      pauseOnHover: true,
+      draggable: true,
+      draggablePercent: 0.6,
+      showCloseButtonOnHover: false,
+      hideProgressBar: false,
+      closeButton: "button",
+      icon: true,
+      rtl: false
+    });
   },
   methods: {
-    // Security check to ensure the user is authorized
-    Securitybot() {
-      if (!sessionStorage.getItem("token")) {
-        Swal.fire({
-          title: 'You are not authorized!',
-          text: 'Login as admin to continue.',
-          icon: 'info',
-          confirmButtonText: 'OK'
-        });
-        router.push('/login');
-      }
-    },
     // Method to show an image modal
     showImageModal(imageUrl) {
       this.imageUrlToShow = imageUrl;
@@ -212,58 +223,38 @@ export default {
         const bytes = CryptoJS.AES.decrypt(encryptedLink, process.env.SECRET_KEY);
         return bytes.toString(CryptoJS.enc.Utf8);
       } catch (e) {
-        console.error('Error decrypting link:', e);
-        return null;
-      }
-    },
-    // Method to check the login status of the user
-    checkLoginStatus() {
-      const token = sessionStorage.getItem("token");
-      if (token) {
-        const decryptedToken = this.decryptToken(token);
-        if (decryptedToken) {
-          const decodedToken = VueJwtDecode.decode(decryptedToken);
-          this.userRole = decodedToken[`${process.env.claims_Url}`] || '';
-        } else {
-          sessionStorage.removeItem('token');
-        }
-      }
-    },
-    // Method to decrypt a token
-    decryptToken(encryptedToken) {
-      try {
-        const bytes = CryptoJS.AES.decrypt(encryptedToken, process.env.SECRET_KEY);
-        return bytes.toString(CryptoJS.enc.Utf8);
-      } catch (e) {
-        console.error('Error decrypting token:', e);
+        //  console.error('Error decrypting link:', e);
         return null;
       }
     },
     // Method to fetch data from the server
-    getdata() {
-      axiosInstance.get(`${process.env.baseURL}admin/get-all-users`).then((res) => {
+    async getdata() {
+      try {
+        const res = await axiosInstance.get(`${process.env.baseURL}admin/get-all-users`);
         this.admin = res.data;
-      }).catch((error) => {
+      } catch (error) {
         this.handleAxiosError(error);
-      });
+      }
     },
     // Method to navigate to the home page
     goHome() {
       router.push('/home');
     },
     // Method to update the verification status of a user
-    statusUpdate(uid, staid) {
-      axiosInstance.post(`${process.env.baseURL}admin/update-verification-state/${uid}/${staid}`).then((res) => {
-        this.admin = res.data;
+    async statusUpdate(uid, staid) {
+      await axiosInstance.post(`${process.env.baseURL}admin/update-verification-state/${uid}/${staid}`).then((res) => {
+        // this.admin = res.data;
       }).catch((error) => {
         this.handleAxiosError(error);
       });
     },
     // Method to fetch a user's profile
     getProfile(uid) {
-      axiosInstance.get(`${process.env.baseURL}admin/get-user-by-id/${uid}`).then((res) => {
+      axiosInstance.get(`${process.env.baseURL}admin/get-user-profile/${uid}`).then((res) => {
+        //   console.log(res.data.profile.user_Id)
         sessionStorage.setItem("UserId", res.data.user_Id);
         router.push("/account");
+
       }).catch((error) => {
         this.handleAxiosError(error);
       });
@@ -281,11 +272,7 @@ export default {
       }).then((result) => {
         if (result.isConfirmed) {
           axiosInstance.delete(`${process.env.baseURL}user/delete-user/${userid}`).then(() => {
-            Swal.fire({
-              icon: "success",
-              title: "Success",
-              text: "User deleted successfully!",
-            });
+            this.toast.success("User deleted successfully!");
             this.deleteImagesFromS3(link_VS, link_RS);
             this.getdata();
           }).catch((error) => {
@@ -295,12 +282,12 @@ export default {
       });
     },
     // Method to delete images from S3
-    deleteImagesFromS3(linkVS, linkRS) {
+    async deleteImagesFromS3(linkVS, linkRS) {
       if (linkVS) {
-        this.deleteImageFromS3(linkVS);
+        await this.deleteImageFromS3(linkVS);
       }
       if (linkRS) {
-        this.deleteImageFromS3(linkRS);
+        await this.deleteImageFromS3(linkRS);
       }
     },
     // Method to delete an image from S3
@@ -323,48 +310,32 @@ export default {
         });
 
         await s3Client.send(command);
-        console.log(`Deleted ${decryptedLink} from S3.`);
+        //  console.log(`Deleted ${decryptedLink} from S3.`);
       } catch (error) {
-        console.error('Error deleting image from S3:', error);
+        //console.error('Error deleting image from S3:', error);
       }
     },
     // Method to approve a user
-    approveUser(userid, statusid) {
-      this.statusUpdate(userid, statusid);
-      Swal.fire({
-        icon: "success",
-        title: "Success",
-        text: "Status Updated successfully!",
-      });
-      setTimeout(() => {
-        window.location.reload();
-      }, 1500);
+    async approveUser(userid, statusid) {
+      await this.statusUpdate(userid, statusid);
+      await this.getdata(); // Ensure it fetches data after updating the status
+      this.toast.success("Status Updated successfully!");
     },
+
     // Method to reject a user and delete associated images from S3
-    rejectUser(userid, statusid, link_VS, link_RS) {
-      this.statusUpdate(userid, statusid);
-      Swal.fire({
-        icon: "success",
-        title: "Success",
-        text: "Status Updated successfully!",
-      });
-      this.deleteImagesFromS3(link_VS, link_RS);
-      setTimeout(() => {
-        window.location.reload();
-      }, 1500);
+    async rejectUser(userid, statusid, link_VS, link_RS) {
+      await this.statusUpdate(userid, statusid);
+      await this.getdata(); // Ensure data is fetched after images are deleted
+      this.toast.success("Status Updated successfully!");
+      await this.deleteImagesFromS3(link_VS, link_RS);
+
     },
+
     // Method to reactivate a user
-    reactivateUser(userid, statusid) {
-      this.statusUpdate(userid, statusid);
-      Swal.fire({
-        icon: "success",
-        title: "Success",
-        text: "Status Updated successfully!",
-      });
-      setTimeout(() => {
-        window.location.reload();
-      }, 1500);
-      console.log('Reactivate user with ID:', userid, statusid);
+    async reactivate_User(userid, statusid) {
+      await this.statusUpdate(userid, statusid);
+      await this.getdata(); // Ensure data fetch after reactivation
+      this.toast.success("Status Updated successfully!");
     },
     // Method to set the selected user for email modal
     setModal(userId) {
@@ -378,60 +349,41 @@ export default {
     // Method to send an email to the selected user
     sendEmail() {
       this.isSending = true;
-
       axiosInstance.post(`${process.env.baseURL}custom-mail/send`, {
         to: this.selectedUser.email_Address,
         subject: this.emailSubject,
         body: this.emailBody
       })
-      .then(response => {
-        Swal.fire({
-          icon: 'success',
-          title: 'Success',
-          text: 'Email sent successfully!'
+        .then(response => {
+          this.toast.success("Email sent successfully!");
+          this.closeModal();
+        })
+        .catch(error => {
+          this.handleAxiosError(error);
+        })
+        .finally(() => {
+          this.isSending = false;
         });
-        this.closeModal();
-      })
-      .catch(error => {
-        this.handleAxiosError(error);
-      })
-      .finally(() => {
-        this.isSending = false;
-      });
     },
     // Method to handle Axios errors
     handleAxiosError(error) {
       if (error.response) {
         if (error.response.status === 401) {
-          Swal.fire({
-            icon: 'error',
-            title: 'Session Expired',
-            text: 'Your session has expired. Please log in again.',
-          }).then(() => {
-            sessionStorage.clear();
-            router.push('/');
-          });
+          this.toast.info("Your session has expired. Please log in again.")
+            .then(() => {
+              sessionStorage.clear();
+              router.push('/');
+            });
         } else {
-          Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: `An error occurred: ${error.response.statusText}`,
-          });
+          this.toast.info("An error occurred!");
         }
       } else if (error.request) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Network Error',
-          text: 'A network error occurred. Please check your connection and try again.',
-        }).then(() => {
-          location.reload();
-        });
+        this.toast.info("A network error occurred. Please check your connection and try again.")
+          .then(() => {
+            router.push('/');
+          });
       } else {
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: `An error occurred: ${error.message}`,
-        });
+        this.toast.success("An error occurred");
       }
     }
   }
@@ -454,10 +406,6 @@ export default {
 
   th {
     text-align: left;
-  }
-
-  button {
-    margin-right: 5px;
   }
 }
 
@@ -524,7 +472,7 @@ export default {
   border-radius: 5px;
   position: relative;
   z-index: 1000;
-  width: 700px;
+  width: 500px;
 }
 
 .close {
@@ -593,13 +541,12 @@ h2 {
 
 .clickable {
   cursor: pointer;
-  color: black;
+  color: rgba(var(--bs-link-color-rgb));
   transition: color 0.3s ease;
 }
 
 .clickable:hover {
-  background-color: #e8e1e1;
-  color: #000;
+  text-decoration: underline;
 }
 
 .modal-container {
@@ -662,27 +609,6 @@ h2 {
   margin-left: 10px;
 }
 
-.newState {
-
-  color: #052fed;
-  font-weight: 600;
-}
-
-.penState {
-  font-weight: 600;
-  color: #f67119;
-}
-
-.failState {
-  font-weight: 600;
-  color: #d90c0c;
-}
-
-.verState {
-
-  color: #0eec3a;
-}
-
 .page_404 {
   padding: 40px 0;
   background: #fff;
@@ -720,6 +646,7 @@ h2 {
 .contant_box_404 {
   margin-top: -50px;
 }
+
 .loader {
   border: 4px solid #f3f3f3;
   border-radius: 50%;
@@ -731,7 +658,12 @@ h2 {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }
 </style>

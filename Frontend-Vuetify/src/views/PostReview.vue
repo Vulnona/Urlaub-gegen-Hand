@@ -32,10 +32,10 @@
   </div>
 </template>
 <script>
-import axios from 'axios';
 import Swal from 'sweetalert2';
 import router from '@/router';
 import CryptoJS from 'crypto-js';
+import axiosInstance from '@/interceptor/interceptor';
 
 let globalLogid = '';
 export default {
@@ -69,7 +69,7 @@ export default {
       try {
         const testlogid = this.decryptlogID(sessionStorage.getItem("logId"));
         globalLogid = testlogid;
-        const response = await axios.get(`${process.env.baseURL}post-review/get-posted-review-by-user-id/${globalLogid}`);
+        const response = await axiosInstance.get(`${process.env.baseURL}post-review/get-posted-review-by-user-id/${globalLogid}`);
         const reviews = response.data;
         // Separate host reviews and user reviews based on conditions
         this.hostReviews = reviews.filter(review => review.reviewOfferUsersID !== null);
@@ -102,9 +102,9 @@ export default {
 };
 </script>
 <style scoped>
-.container {
+/* .container {
   margin-top: 20px;
-}
+} */
 
 .title {
   color: #333;

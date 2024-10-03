@@ -1,0 +1,19 @@
+import CryptoJS from 'crypto-js';
+
+const decryptlogID = (encryptedItem) => {
+    try {
+        const bytes = CryptoJS.AES.decrypt(encryptedItem, process.env.SECRET_KEY);
+        const decryptedString = bytes.toString(CryptoJS.enc.Utf8);
+        return decryptedString;
+    } catch (e) {
+        return null;
+    }
+}
+
+const getLoggedUserId = () => {
+    const encryptedLogId = sessionStorage.getItem('logId');
+    if (!encryptedLogId) return null;
+    return decryptlogID(encryptedLogId);
+}
+
+export default getLoggedUserId;

@@ -1,3 +1,5 @@
+.vs
+Backend/.vs/UGHApi/FileContentIndex/03f7a746-0ef9-4a55-bf7b-cee8f7c0ac24.vsidx
 obj/project.assets.json
 obj/project.nuget.cache
 obj/UGHApi.csproj.nuget.dgspec.json
@@ -569,8 +571,7 @@ Backend/obj/project.nuget.cache
 Backend/obj/UGHApi.csproj.nuget.dgspec.json
 Backend/obj/UGHApi.csproj.nuget.g.props
 Backend/obj/UGHApi.csproj.nuget.g.targets
-Backend/appsettings.json
-Frontend-Vuetify/.env
+
 Backend/obj/Release/net7.0/PubTmp/Out/appsettings.json
 Backend/bin
 
