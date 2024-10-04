@@ -462,20 +462,20 @@ export default {
         confirmButtonText: "Yes, delete it!",
       }).then((result) => {
         if (result.isConfirmed) {
-          console.log(userid);
           axiosInstance.delete(`${process.env.baseURL}user/delete-user/${userid}`).then(() => {
             this.toast.success("User data deleted successfully!");
-            this.deleteImagesFromS3(link_VS, link_RS);
+            this.deleteImagesFromS3(link_VS);
+            this.deleteImagesFromS3(link_RS);
             sessionStorage.clear();
             router.push("/");
           }).catch((error) => {
-            //    console.log(error);
+            console.log(error);
           });
         }
       });
     },
     // Method to delete an image from S3
-    async deleteImageFromS3(encryptedLink) {
+    async deleteImagesFromS3(encryptedLink) {
       try {
         const bytes = CryptoJS.AES.decrypt(encryptedLink, process.env.SECRET_KEY);
         const decryptedLink = bytes.toString(CryptoJS.enc.Utf8);

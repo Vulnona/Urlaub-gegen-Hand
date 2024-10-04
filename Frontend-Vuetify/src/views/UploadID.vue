@@ -195,7 +195,7 @@ const uploadImages = () => {
   Swal.fire({
     title: 'Bist du sicher?',
     text: 'Möchtest du diese Bilder hochladen?',
-    icon: 'warning',
+    icon: '',
     showCancelButton: true,
     confirmButtonColor: '#3085d6',
     cancelButtonColor: '#d33',

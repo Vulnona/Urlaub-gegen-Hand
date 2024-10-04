@@ -92,17 +92,17 @@
                 </div>
                 <form class="form-border" @submit.prevent="login">
                   <div class="custom-form">
-                    <label for="fname">Email</label>
-                    <input type="text" placeholder="Enter Username" id="username" v-model="email" required>
+                    <label for="fname">E-Mail</label>
+                    <input type="text" placeholder="Benutzernamen eingeben" id="username" v-model="email" >
                   </div>
                   <div>
                     <div class="custom-form">
                       <div class="d-flex justify-content-between">
-                        <label>Password</label>
+                        <label>Passwort</label>
                       </div>
                       <div class="password-container" style="position: relative;">
-                        <input :type="showPassword ? 'text' : 'password'" placeholder="Enter Your Password"
-                          id="password" v-model="password" required>
+                        <input :type="showPassword ? 'text' : 'password'" placeholder="Passwort eingeben"
+                          id="password" v-model="password" >
                         <i @click="togglePasswordVisibility" :class="showPassword ? 'ri-eye-off-fill' : 'ri-eye-fill'"
                           style="position: absolute; right: 10px; top: 10px; cursor: pointer;">
                         </i>
@@ -116,7 +116,7 @@
                   <div v-if="errorMessage" class="error-message">{{ errorMessage }}</div>
                     <div class="back-login flexBox_btn">
                       <a href="/home"><i class="ri-arrow-left-double-fill"></i> Back to home</a>
-                      <a href="/verify-email" previewlistener="true"><i class="ri-shield-check-fill"></i> Verify Email</a>
+                      <a href="/verify-email" previewlistener="true"><i class="ri-shield-check-fill"></i> E-Mail bestätigen</a>
                     </div>
                     
                 </form>
@@ -172,6 +172,10 @@ export default {
     // Method to handle the login process
     async login() {
       try {
+        if(this.email.trim() =='' || this.password.trim() ==''){
+          this.toast.info("Bitte geben Sie sowohl E-Mail als auch Passwort ein!");
+          return;
+        }
         // Sending a POST request to the login endpoint with the email and password
         const response = await axiosInstance.post(`${process.env.baseURL}authenticate/login`, {
           email: this.email,
@@ -208,12 +212,12 @@ export default {
 
         if (error.response && error.response.status === 401) {
           // Invalid email or password error
-          this.toast.info("Invalid email or password or Verify Your Email First");
+          this.toast.info("Ungültige E-Mail oder Passwort oder bestätigen Sie zuerst Ihre E-Mail");
         }
 
         else {
           //Server errors
-          this.toast.info("We have a problem on the server. Please try again!");
+          this.toast.info("Wir haben ein Problem auf dem Server. Bitte versuchen Sie es erneut!");
         }
       }
     },

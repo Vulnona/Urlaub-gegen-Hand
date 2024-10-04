@@ -44,10 +44,7 @@ public class UpdateVerifyStateCommandHandler : IRequestHandler<UpdateVerifyState
             user.VerificationState = request.VerificationState;
             await _userRepository.UpdateUserAsync(user);
 
-            if (
-                request.VerificationState == UGH_Enums.VerificationState.VerificationFailed
-                || request.VerificationState == UGH_Enums.VerificationState.Verified
-            )
+            if (request.VerificationState == UGH_Enums.VerificationState.VerificationFailed)
             {
                 _userService.DeleteUserInfo(request.UserId);
 

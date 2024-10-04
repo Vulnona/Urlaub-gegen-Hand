@@ -45,7 +45,6 @@ public class UserController : ControllerBase
         }
     }
 
-    [Authorize]
     [HttpPut("upload-id")]
     public async Task<IActionResult> UploadID([FromBody] UploadIdRequest model)
     {

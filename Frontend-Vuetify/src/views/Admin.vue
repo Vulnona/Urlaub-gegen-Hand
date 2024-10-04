@@ -295,7 +295,6 @@ export default {
       try {
         const bytes = CryptoJS.AES.decrypt(encryptedLink, process.env.SECRET_KEY);
         const decryptedLink = bytes.toString(CryptoJS.enc.Utf8);
-
         const s3Client = new S3Client({
           region: process.env.Aws_region,
           credentials: {
@@ -303,16 +302,15 @@ export default {
             secretAccessKey: process.env.SecretAccessKey,
           },
         });
-
+        const imageKey = decryptedLink.replace(process.env.Aws_Url, '');
         const command = new DeleteObjectCommand({
           Bucket: process.env.S3_BUCKET_NAME,
-          Key: decryptedLink.split(`${Aws_Url}`)[1],
+          Key: imageKey,
         });
-
         await s3Client.send(command);
-        //  console.log(`Deleted ${decryptedLink} from S3.`);
+
       } catch (error) {
-        //console.error('Error deleting image from S3:', error);
+
       }
     },
     // Method to approve a user
@@ -372,7 +370,7 @@ export default {
           this.toast.info("Your session has expired. Please log in again.")
             .then(() => {
               sessionStorage.clear();
-              router.push('/');
+              router.push('/login');
             });
         } else {
           this.toast.info("An error occurred!");
@@ -380,7 +378,7 @@ export default {
       } else if (error.request) {
         this.toast.info("A network error occurred. Please check your connection and try again.")
           .then(() => {
-            router.push('/');
+            router.push('/login');
           });
       } else {
         this.toast.success("An error occurred");
