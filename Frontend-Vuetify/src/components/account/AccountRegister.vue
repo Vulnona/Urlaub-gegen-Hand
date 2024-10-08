@@ -92,26 +92,25 @@
 
                     <div class="custom-form" :class="{ 'has-error': !firstName && showError }">
                       <label for="firstName">Vorname</label>
-                      <input type="text" placeholder="Geben Sie Ihren Vornamen ein" id="firstName" v-model="firstName"
-                         />
+                      <input type="text" placeholder="Geben Sie Ihren Vornamen ein" id="firstName"
+                        v-model="firstName" />
                       <span v-if="!firstName && showError" class="error-message">Vorname ist erforderlich</span>
                     </div>
                     <div class="custom-form" :class="{ 'has-error': !lastName && showError }">
                       <label for="lastName">Nachname</label>
-                      <input type="text" placeholder="Geben Sie Ihren Nachnamen ein" id="lastName" v-model="lastName"
-                         />
+                      <input type="text" placeholder="Geben Sie Ihren Nachnamen ein" id="lastName" v-model="lastName" />
                       <span v-if="!lastName && showError" class="error-message">Nachname ist erforderlich</span>
                     </div>
                     <div class="custom-form" :class="{ 'has-error': !email_Address && showError }">
                       <label for="email_Address">E-Mail-Adresse</label>
                       <input type="email" placeholder="Geben Sie Ihre E-Mail-Adresse ein" id="email"
-                        v-model="email_Address"  />
+                        v-model="email_Address" />
                       <span v-if="!email_Address && showError" class="error-message">E-Mail-Adresse ist
                         erforderlich</span>
                     </div>
                     <div class="custom-form" :class="{ 'has-error': !gender && showError }">
                       <label>Geschlecht</label>&nbsp;&nbsp;
-                      <select class="form-group p-2" style="width: 100%;" v-model="gender" >
+                      <select class="form-group p-2" style="width: 100%;" v-model="gender">
                         <option disabled value="">Bitte wählen Sie Ihr Geschlecht</option>
                         <option value="Male">Männlich</option>
                         <option value="Female">Weiblich</option>
@@ -131,7 +130,7 @@
                     <div class="custom-form" :class="{ 'has-error': !countryName && showError }">
                       <label for="country">Land</label>
                       <select class="form-group p-2" style="width: 100%;" id="country" v-model="countryId"
-                        @change="loadStates" >
+                        @change="loadStates">
                         <option value="">Bitte wählen Sie ein Land</option>
                         <option v-for="c in countries" :key="c.country_ID" :value="c.country_ID">{{
                           c.countryName }}</option>
@@ -142,7 +141,7 @@
                     <div class="custom-form" :class="{ 'has-error': !stateId && showError }">
                       <label for="state">Region/Bundesland</label>
                       <select class="form-group p-2" style="width: 100%;" id="state" v-model="stateId"
-                        @change="updateStateSelection" >
+                        @change="updateStateSelection">
                         <option value="">Bitte wählen Sie ein Bundesland</option>
                         <option v-for="s in states" :key="s.id" :value="s.id">
                           {{ s.name }}
@@ -153,7 +152,7 @@
                     <div class="custom-form" :class="{ 'has-error': !cityId && showError }">
                       <label for="city">Stadt</label>
                       <select class="form-group p-2" style="width: 100%;" id="city" v-model="cityId"
-                        @change="updateCitySelection" >
+                        @change="updateCitySelection">
                         <option value="">Bitte wählen Sie eine Stadt</option>
                         <option v-for="c in cities" :key="c.id" :value="c.id">
                           {{ c.name }}
@@ -163,28 +162,27 @@
                     </div>
                     <div class="custom-form" :class="{ 'has-error': !street && showError }">
                       <label for="street">Straße</label>
-                      <input type="text" placeholder="Geben Sie Ihre Straße ein" id="street" v-model="street" >
+                      <input type="text" placeholder="Geben Sie Ihre Straße ein" id="street" v-model="street">
                       <span v-if="!street && showError" class="error-message">Straße ist
                         erforderlich</span>
                     </div>
                     <div class="custom-form" :class="{ 'has-error': !houseNumber && showError }">
                       <label for="houseNumber">Hausnummer</label>
                       <input type="text" placeholder="Geben Sie Ihre Hausnummer ein" id="houseNumber"
-                        v-model="houseNumber" >
+                        v-model="houseNumber">
                       <span v-if="!houseNumber && showError" class="error-message">Hausnummer ist
                         erforderlich</span>
                     </div>
                     <div class="custom-form" :class="{ 'has-error': !postCode && showError }">
                       <label for="postCode">Postleitzahl</label>
-                      <input type="text" placeholder="Geben Sie Ihre Postleitzahl ein" id="postCode" v-model="postCode"
-                        >
+                      <input type="text" placeholder="Geben Sie Ihre Postleitzahl ein" id="postCode" v-model="postCode">
                       <span v-if="!postCode && showError" class="error-message">Postleitzahl ist
                         erforderlich</span>
                     </div>
                     <div class="custom-form" :class="{ 'has-error': !isValidFacebookLink && showError }">
                       <label for="facebook_link">Facebook-Profillink</label>
                       <input type="text" placeholder="Geben Sie Ihren Facebook-Profillink ein" id="facebook_link"
-                        v-model="facebook_link" >
+                        v-model="facebook_link">
                       <span v-if="!isValidFacebookLink && showError" class="error-message">
                         Ungültiger Facebook-Link. Muss mit https://www.facebook.com/ beginnen
                       </span>
@@ -193,7 +191,7 @@
                       <label for="password">Passwort</label>
                       <div class="password-container" style="position: relative;">
                         <input :type="showPassword ? 'text' : 'password'" placeholder="Geben Sie Ihr Passwort ein"
-                          id="password" v-model="password" @input="validatePassword" >
+                          id="password" v-model="password" @input="validatePassword">
                         <i @click="togglePasswordVisibility" :class="showPassword ? 'ri-eye-off-fill' : 'ri-eye-fill'"
                           style="position: absolute; right: 10px; top: 10px; cursor: pointer;">
                         </i>
@@ -207,8 +205,9 @@
                       <label for="confirmPassword">Passwort bestätigen</label>
                       <div class="password-container" style="position: relative;">
                         <input :type="showPassword ? 'text' : 'password'" placeholder="Bestätigen Sie Ihr Passwort"
-                          id="confirmPassword" v-model="confirmPassword" >
-                        <i @click="toggleConfirmPasswordVisibility" :class="showConfirmPassword ? 'ri-eye-off-fill' : 'ri-eye-fill'"
+                          id="confirmPassword" v-model="confirmPassword">
+                        <i @click="toggleConfirmPasswordVisibility"
+                          :class="showConfirmPassword ? 'ri-eye-off-fill' : 'ri-eye-fill'"
                           style="position: absolute; right: 10px; top: 10px; cursor: pointer;">
                         </i>
                       </div>
@@ -232,15 +231,14 @@
     </div>
   </div>
 </template>
+
 <script>
-import axios from 'axios';
 import router from '@/router';
 import Swal from 'sweetalert2';
 import CryptoJS from 'crypto-js';
-import { createToastInterface } from "vue-toastification";
-import "vue-toastification/dist/index.css";
 import Datepicker from 'vue3-datepicker';
 import axiosInstance from '@/interceptor/interceptor';
+import toast from '../toaster/toast';
 
 export default {
   components: {
@@ -280,22 +278,7 @@ export default {
       isPasswordValid: true,
     };
   },
-  created() {
-    this.toast = createToastInterface({
-      position: "top-right",
-      timeout: 3000,
-      closeOnClick: true,
-      pauseOnFocusLoss: true,
-      pauseOnHover: true,
-      draggable: true,
-      draggablePercent: 0.6,
-      showCloseButtonOnHover: false,
-      hideProgressBar: false,
-      closeButton: "button",
-      icon: true,
-      rtl: false
-    });
-  },
+
   computed: {
 
     isValidPassword() {
@@ -468,7 +451,7 @@ export default {
       axiosInstance.post(`${process.env.baseURL}authenticate/register`, registrationData)
         .then(response => {
           Swal.close();
-          this.toast.success('Registrierung erfolgreich!', 'Überprüfen Sie Ihre E-Mail und klicken Sie auf „Bestätigen“.');
+          toast.success('Registrierung erfolgreich!', 'Überprüfen Sie Ihre E-Mail und klicken Sie auf „Bestätigen“.');
 
           const reg_Id = response.data.value.userId;
           const encryptedLogId = this.encryptItem(reg_Id);
@@ -477,11 +460,11 @@ export default {
         })
         .catch(error => {
           Swal.close();
-          if (error.response && error.response.status === 409) {
-            this.toast.warning('Benutzer mit dieser E-Mail existiert bereits!', 'Versuchen Sie es mit einer anderen E-Mail-Adresse oder versuchen Sie sich anzumelden');
+          if (error.response && error.response.data.error.message === "E-Mail Adresse existiert bereits") {
+            toast.warning('Benutzer mit dieser E-Mail existiert bereits!', 'Versuchen Sie es mit einer anderen E-Mail-Adresse oder versuchen Sie sich anzumelden');
           } else {
             this.errorMessage = error.response ? error.response.data.message : 'An error occurred during registration';
-            this.toast.error('Registrierung fehlgeschlagen!', 'Es ist ein Fehler aufgetreten!');
+            toast.error('Registrierung fehlgeschlagen!', 'Es ist ein Fehler aufgetreten!');
           }
         });
     },
@@ -530,6 +513,7 @@ Indem Sie fortfahren, stimmen Sie der Erfassung und Verwendung Ihrer Daten für 
   }
 }
 </script>
+
 <style>
 .v-container {
   display: none !important;

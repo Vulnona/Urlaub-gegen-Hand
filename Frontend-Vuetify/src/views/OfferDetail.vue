@@ -155,9 +155,9 @@ const toggleShowMore = () => {
   showAllReviews.value = !showAllReviews.value;
 };
 const backtooffers = () => {
-    window.history.back();
-  };
-  onMounted(fetchOfferDetail);
+  window.history.back();
+};
+onMounted(fetchOfferDetail);
 </script>
 
 <style scoped lang="scss">
@@ -216,11 +216,12 @@ const backtooffers = () => {
   /* Example button styling */
   border: 1px solid grey;
   background-color: transparent;
-    color: grey;
-    padding: 8px 12px;
-    cursor: pointer;
-  }
-  .reviews {
-    margin-top: 20px;
-  }
+  color: grey;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.reviews {
+  margin-top: 20px;
+}
 </style>

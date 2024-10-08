@@ -82,7 +82,7 @@ public class User
                 .Select(r => r.RatingValue)
                 .ToList();
 
-            return totalRatings.Any() ? totalRatings.Average() : 0.0;
+            return totalRatings.Any() ? Math.Round(totalRatings.Average(), 1) : 0.0;
         }
     }
 

@@ -115,11 +115,10 @@
     </div>
   </div>
 </template>
+
 <script>
 import axiosInstance from '@/interceptor/interceptor';
-import { createToastInterface } from "vue-toastification";
-import "vue-toastification/dist/index.css";
-
+import toast from '@/components/toaster/toast';
 export default {
   data() {
     return {
@@ -129,22 +128,7 @@ export default {
       loading: false // Add loading state
     };
   },
-  created() {
-    this.toast = createToastInterface({
-      position: "top-right",
-      timeout: 3000,
-      closeOnClick: true,
-      pauseOnFocusLoss: true,
-      pauseOnHover: true,
-      draggable: true,
-      draggablePercent: 0.6,
-      showCloseButtonOnHover: false,
-      hideProgressBar: false,
-      closeButton: "button",
-      icon: true,
-      rtl: false
-    });
-  },
+
   methods: {
     async VerificationEmail() {
       this.loading = true; // Disable the button
@@ -159,7 +143,7 @@ export default {
           this.message = error.response.data.value;
           this.isError = true;
         } else {
-          this.toast.info("Ein Fehler ist aufgetreten. Versuche es noch einmal");
+          toast.info("Ein Fehler ist aufgetreten. Versuche es noch einmal");
           this.isError = true;
         }
       } finally {

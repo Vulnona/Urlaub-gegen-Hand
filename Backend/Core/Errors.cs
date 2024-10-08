@@ -11,7 +11,7 @@ public static class Errors
             new("General.NullOrEmpty", $"The field '{fieldName}' cannot be null or empty.");
 
         public static Error AlreadyExists(string entityName, object key) =>
-            new("General.AlreadyExists", $"The {entityName} with key '{key}' already exists.");
+            new("General.AlreadyExists", $"The {entityName} already exists.");
 
         public static Error NotFound(string entityName, object key) =>
             new("General.NotFound", $"The {entityName} with key '{key}' was not found.");
@@ -35,7 +35,10 @@ public static class Errors
             new("Validation.Quantity", $"The quantity '{quantity}' must be greater than zero.");
 
         public static Error DateTimeCannotBeMinValue() =>
-            new("Validation.DateTimeMinValue", "The DateTime value cannot be equal to DateTime.MinValue.");
+            new(
+                "Validation.DateTimeMinValue",
+                "The DateTime value cannot be equal to DateTime.MinValue."
+            );
 
         public static Error EmptyGuid() =>
             new("Validation.EmptyGuid", "The GUID value cannot be empty.");

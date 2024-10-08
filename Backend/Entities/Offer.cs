@@ -49,7 +49,7 @@ public class Offer
                 return 0.0;
             }
 
-            return Reviews.Average(r => r.RatingValue);
+            return Math.Round(Reviews.Average(r => r.RatingValue), 1);
         }
     }
 

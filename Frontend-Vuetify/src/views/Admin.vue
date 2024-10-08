@@ -1,26 +1,7 @@
 <template>
   <Navbar />
   <div v-if="userRole !== 'Admin'">
-    <div class="justify-content center">
-      <section class="page_404">
-        <div class="container">
-          <div class="row">
-            <div class="col-sm-12">
-              <div class="col-sm-12 col-sm-offset-1 text-center">
-                <div class="four_zero_four_bg">
-                  <h1 class="text-center">404</h1>
-                </div>
-                <div class="contant_box_404">
-                  <h3 class="h2">Look like you're lost</h3>
-                  <p>The page you are looking for is not available!</p>
-                  <button @click="goHome()" class="link_404">Go to Home</button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-    </div>
+    <Errorpage />
   </div>
   <div v-else>
     <div class="Admin_inner_banner inner_banner_layout">
@@ -39,13 +20,13 @@
         <div class="card">
           <div class="card-header">
             <h1 class="main-title">Users List</h1>
-            <div class="sort-select"><label>Filter by</label>
+            <!-- <div class="sort-select"><label>Filter by</label>
               <select class="form-control">
                 <option value="1">New</option>
                 <option value="4">Approved</option>
                 <option value="3">Pending</option>
               </select>
-            </div>
+            </div> -->
           </div>
           <div class="card-body">
             <table class="table theme_table">
@@ -164,16 +145,16 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import "bootstrap/dist/js/bootstrap.min.js";
 import { S3Client, DeleteObjectCommand } from '@aws-sdk/client-s3';
 import CryptoJS from 'crypto-js';
-import { createToastInterface } from "vue-toastification";
-import "vue-toastification/dist/index.css"
 import axiosInstance from "@/interceptor/interceptor"
 import Navbar from "@/components/navbar/Navbar.vue";
 import UserRole from "@/services/CheckUserRole";
 import Securitybot from "@/services/SecurityBot";
-
+import Errorpage from "./Errorpage.vue";
+import toast from "@/components/toaster/toast";
 export default {
   components: {
     Navbar,
+    Errorpage
   },
   name: "admin",
   data() {
@@ -191,22 +172,6 @@ export default {
   mounted() {
     this.getdata();
     Securitybot();
-  },
-  created() {
-    this.toast = createToastInterface({
-      position: "top-right",
-      timeout: 3000,
-      closeOnClick: true,
-      pauseOnFocusLoss: true,
-      pauseOnHover: true,
-      draggable: true,
-      draggablePercent: 0.6,
-      showCloseButtonOnHover: false,
-      hideProgressBar: false,
-      closeButton: "button",
-      icon: true,
-      rtl: false
-    });
   },
   methods: {
     // Method to show an image modal
@@ -272,7 +237,7 @@ export default {
       }).then((result) => {
         if (result.isConfirmed) {
           axiosInstance.delete(`${process.env.baseURL}user/delete-user/${userid}`).then(() => {
-            this.toast.success("User deleted successfully!");
+            toast.success("User deleted successfully!");
             this.deleteImagesFromS3(link_VS, link_RS);
             this.getdata();
           }).catch((error) => {
@@ -317,14 +282,14 @@ export default {
     async approveUser(userid, statusid) {
       await this.statusUpdate(userid, statusid);
       await this.getdata(); // Ensure it fetches data after updating the status
-      this.toast.success("Status Updated successfully!");
+      toast.success("Status Updated successfully!");
     },
 
     // Method to reject a user and delete associated images from S3
     async rejectUser(userid, statusid, link_VS, link_RS) {
       await this.statusUpdate(userid, statusid);
       await this.getdata(); // Ensure data is fetched after images are deleted
-      this.toast.success("Status Updated successfully!");
+      toast.success("Status Updated successfully!");
       await this.deleteImagesFromS3(link_VS, link_RS);
 
     },
@@ -333,7 +298,7 @@ export default {
     async reactivate_User(userid, statusid) {
       await this.statusUpdate(userid, statusid);
       await this.getdata(); // Ensure data fetch after reactivation
-      this.toast.success("Status Updated successfully!");
+      toast.success("Status Updated successfully!");
     },
     // Method to set the selected user for email modal
     setModal(userId) {
@@ -353,7 +318,7 @@ export default {
         body: this.emailBody
       })
         .then(response => {
-          this.toast.success("Email sent successfully!");
+          toast.success("Email sent successfully!");
           this.closeModal();
         })
         .catch(error => {
@@ -367,21 +332,21 @@ export default {
     handleAxiosError(error) {
       if (error.response) {
         if (error.response.status === 401) {
-          this.toast.info("Your session has expired. Please log in again.")
+          toast.info("Your session has expired. Please log in again.")
             .then(() => {
               sessionStorage.clear();
-              router.push('/login');
+              router.push('/');
             });
         } else {
-          this.toast.info("An error occurred!");
+          // toast.info("An error occurred!");
         }
       } else if (error.request) {
-        this.toast.info("A network error occurred. Please check your connection and try again.")
+        toast.info("A network error occurred. Please check your connection and try again.")
           .then(() => {
-            router.push('/login');
+            router.push('/');
           });
       } else {
-        this.toast.success("An error occurred");
+        //  toast.success("An error occurred");
       }
     }
   }

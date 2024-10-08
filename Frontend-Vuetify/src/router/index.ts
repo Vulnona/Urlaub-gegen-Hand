@@ -54,24 +54,9 @@ const routes = [
     component: () => import('@/components/account/AccountRegister.vue'),
   },
   {
-    path: '/account-detail',
-    name: 'AccountDetail',
-    component: () => import('@/components/account/AccountDetail.vue'),
-  },
-  {
-    path: '/offers',
-    name: 'OfferCard',
-    component: () => import('@/components/OfferCard.vue'),
-  },
-  {
     path: '/offerRequest',
     name: 'OfferRequest',
     component: () => import('@/views/OfferRequests.vue'),
-  },
-  {
-    path: '/postReview',
-    name: 'PostReview',
-    component: () => import('@/views/PostReview.vue'),
   },
   {
     path: '/profile',
@@ -82,11 +67,6 @@ const routes = [
     path: '/editprofile',
     name: 'editprofile',
     component: () => import('@/views/EditProfile.vue'),
-  },
-  {
-    path: '/display-profile',
-    name: 'display-profile',
-    component: () => import('@/views/DisplayProfile.vue'),
   },
   {
     path: '/uploadID',

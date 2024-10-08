@@ -164,13 +164,10 @@ import router from '@/router';
 import Multiselect from 'vue-multiselect';
 import 'vue-multiselect/dist/vue-multiselect.css';
 import CryptoJS from 'crypto-js';
-import {
-  createToastInterface
-} from "vue-toastification";
-import "vue-toastification/dist/index.css";
 import Navbar from '@/components/navbar/Navbar.vue';
 import Securitybot from '@/services/SecurityBot';
 import axiosInstance from '@/interceptor/interceptor';
+import toast from '@/components/toaster/toast';
 let globalLogid = '';
 export default {
   components: {
@@ -229,22 +226,7 @@ export default {
       cityName: '',
     };
   },
-  created() {
-    this.toast = createToastInterface({
-      position: "top-right",
-      timeout: 3000,
-      closeOnClick: true,
-      pauseOnFocusLoss: true,
-      pauseOnHover: true,
-      draggable: true,
-      draggablePercent: 0.6,
-      showCloseButtonOnHover: false,
-      hideProgressBar: false,
-      closeButton: "button",
-      icon: true,
-      rtl: false
-    });
-  },
+
   mounted() {
     Securitybot();
     this.fetchSkills();
@@ -453,15 +435,15 @@ export default {
     async createOffer() {
       // Method to create a new offer
       if (this.offer.image && this.offer.image.size > 3.5 * 1024 * 1024) {
-        this.toast.warning("Image size cannot be greater than 3.5 MB.");
+        toast.warning("Image size cannot be greater than 3.5 MB.");
         return;
       }
       if (!this.offer.title || !this.offer.skills.length || !this.offer.image) {
-        this.toast.info("Please fill all the required fields marked with *");
+        toast.info("Please fill all the required fields marked with *");
         return;
       }
       if (!this.offer.location && !this.cityName) {
-        this.toast.info("Please select land, region, and stadt or You can enter Ort.");
+        toast.info("Please select land, region, and stadt or You can enter Ort.");
         return;
       }
       const offerData = new FormData();
@@ -488,12 +470,12 @@ export default {
           }
         }
         ).then(() => {
-          this.toast.success("Your offer has been created!");
+          toast.success("Your offer has been created!");
           router.push('/my-offers');
         });
         this.resetForm();
       } catch (error) {
-        this.toast.info("Unable To Create Offer!");
+        toast.info("Unable To Create Offer!");
         this.resetForm();
       }
     },
@@ -527,8 +509,7 @@ export default {
       }
     },
     onFileChange(event) {
-      // Method to handle file change (image selection)
-      this.offer.image = event.target.files[0]; // Updating selected image
+      this.offer.image = event.target.files[0]; 
     }
   }
 };

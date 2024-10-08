@@ -3,8 +3,78 @@
   "WorkspaceRootPath": "D:\\UGH Gitlab\\ugh\\Backend\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{6C6E1DA1-C1AC-4896-9ED3-44FA970CF25F}|UGHApi.csproj|d:\\ugh gitlab\\ugh\\backend\\applications\\offers\\addoffercommandhandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6C6E1DA1-C1AC-4896-9ED3-44FA970CF25F}|UGHApi.csproj|solutionrelative:applications\\offers\\addoffercommandhandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6C6E1DA1-C1AC-4896-9ED3-44FA970CF25F}|UGHApi.csproj|d:\\ugh gitlab\\ugh\\backend\\controllers\\offercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6C6E1DA1-C1AC-4896-9ED3-44FA970CF25F}|UGHApi.csproj|solutionrelative:controllers\\offercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6C6E1DA1-C1AC-4896-9ED3-44FA970CF25F}|UGHApi.csproj|d:\\ugh gitlab\\ugh\\backend\\viewmodels\\userprofiledatadto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6C6E1DA1-C1AC-4896-9ED3-44FA970CF25F}|UGHApi.csproj|solutionrelative:viewmodels\\userprofiledatadto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6C6E1DA1-C1AC-4896-9ED3-44FA970CF25F}|UGHApi.csproj|d:\\ugh gitlab\\ugh\\backend\\entities\\offer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6C6E1DA1-C1AC-4896-9ED3-44FA970CF25F}|UGHApi.csproj|solutionrelative:entities\\offer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6C6E1DA1-C1AC-4896-9ED3-44FA970CF25F}|UGHApi.csproj|d:\\ugh gitlab\\ugh\\backend\\facebookcrawler.py||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{6C6E1DA1-C1AC-4896-9ED3-44FA970CF25F}|UGHApi.csproj|solutionrelative:facebookcrawler.py||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Dotnet.CSPC393\\AppData\\Local\\Temp\\.vsdbgsrc\\5db02b54a6b076ac0c5c018b056ba14c4426c4ff0752e34d805f30a6adddaac6\\ProfileController.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Program Files\\Microsoft Visual Studio\\2022\\Professional\\MSBuild\\Current\\Bin\\amd64\\Microsoft.Common.CurrentVersion.targets||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6C6E1DA1-C1AC-4896-9ED3-44FA970CF25F}|UGHApi.csproj|d:\\ugh gitlab\\ugh\\backend\\entities\\user.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6C6E1DA1-C1AC-4896-9ED3-44FA970CF25F}|UGHApi.csproj|solutionrelative:entities\\user.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6C6E1DA1-C1AC-4896-9ED3-44FA970CF25F}|UGHApi.csproj|d:\\ugh gitlab\\ugh\\backend\\entities\\review.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6C6E1DA1-C1AC-4896-9ED3-44FA970CF25F}|UGHApi.csproj|solutionrelative:entities\\review.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6C6E1DA1-C1AC-4896-9ED3-44FA970CF25F}|UGHApi.csproj|d:\\ugh gitlab\\ugh\\backend\\applications\\reviews\\getallreviewsbyofferidquery.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6C6E1DA1-C1AC-4896-9ED3-44FA970CF25F}|UGHApi.csproj|solutionrelative:applications\\reviews\\getallreviewsbyofferidquery.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6C6E1DA1-C1AC-4896-9ED3-44FA970CF25F}|UGHApi.csproj|d:\\ugh gitlab\\ugh\\backend\\controllers\\reviewcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6C6E1DA1-C1AC-4896-9ED3-44FA970CF25F}|UGHApi.csproj|solutionrelative:controllers\\reviewcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6C6E1DA1-C1AC-4896-9ED3-44FA970CF25F}|UGHApi.csproj|d:\\ugh gitlab\\ugh\\backend\\core\\errors.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6C6E1DA1-C1AC-4896-9ED3-44FA970CF25F}|UGHApi.csproj|solutionrelative:core\\errors.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6C6E1DA1-C1AC-4896-9ED3-44FA970CF25F}|UGHApi.csproj|d:\\ugh gitlab\\ugh\\backend\\viewmodels\\offerapplicationdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6C6E1DA1-C1AC-4896-9ED3-44FA970CF25F}|UGHApi.csproj|solutionrelative:viewmodels\\offerapplicationdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6C6E1DA1-C1AC-4896-9ED3-44FA970CF25F}|UGHApi.csproj|d:\\ugh gitlab\\ugh\\backend\\applications\\authentication\\verifyemailcommandhandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6C6E1DA1-C1AC-4896-9ED3-44FA970CF25F}|UGHApi.csproj|solutionrelative:applications\\authentication\\verifyemailcommandhandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{6C6E1DA1-C1AC-4896-9ED3-44FA970CF25F}|UGHApi.csproj|d:\\ugh gitlab\\ugh\\backend\\controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{6C6E1DA1-C1AC-4896-9ED3-44FA970CF25F}|UGHApi.csproj|solutionrelative:controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6C6E1DA1-C1AC-4896-9ED3-44FA970CF25F}|UGHApi.csproj|d:\\ugh gitlab\\ugh\\backend\\applications\\admin\\updateverifystatecommandhandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6C6E1DA1-C1AC-4896-9ED3-44FA970CF25F}|UGHApi.csproj|solutionrelative:applications\\admin\\updateverifystatecommandhandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6C6E1DA1-C1AC-4896-9ED3-44FA970CF25F}|UGHApi.csproj|d:\\ugh gitlab\\ugh\\backend\\applications\\profiles\\getuserprofilequeryhandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6C6E1DA1-C1AC-4896-9ED3-44FA970CF25F}|UGHApi.csproj|solutionrelative:applications\\profiles\\getuserprofilequeryhandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6C6E1DA1-C1AC-4896-9ED3-44FA970CF25F}|UGHApi.csproj|d:\\ugh gitlab\\ugh\\backend\\controllers\\admincontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6C6E1DA1-C1AC-4896-9ED3-44FA970CF25F}|UGHApi.csproj|solutionrelative:controllers\\admincontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6C6E1DA1-C1AC-4896-9ED3-44FA970CF25F}|UGHApi.csproj|d:\\ugh gitlab\\ugh\\backend\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{6C6E1DA1-C1AC-4896-9ED3-44FA970CF25F}|UGHApi.csproj|solutionrelative:appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{6C6E1DA1-C1AC-4896-9ED3-44FA970CF25F}|UGHApi.csproj|d:\\ugh gitlab\\ugh\\backend\\controllers\\usercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -15,48 +85,20 @@
       "RelativeMoniker": "D:0:0:{6C6E1DA1-C1AC-4896-9ED3-44FA970CF25F}|UGHApi.csproj|solutionrelative:controllers\\profilecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{6C6E1DA1-C1AC-4896-9ED3-44FA970CF25F}|UGHApi.csproj|d:\\ugh gitlab\\ugh\\backend\\controllers\\admincontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{6C6E1DA1-C1AC-4896-9ED3-44FA970CF25F}|UGHApi.csproj|solutionrelative:controllers\\admincontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{6C6E1DA1-C1AC-4896-9ED3-44FA970CF25F}|UGHApi.csproj|d:\\ugh gitlab\\ugh\\backend\\applications\\admin\\getprofilequeryhandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{6C6E1DA1-C1AC-4896-9ED3-44FA970CF25F}|UGHApi.csproj|solutionrelative:applications\\admin\\getprofilequeryhandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{6C6E1DA1-C1AC-4896-9ED3-44FA970CF25F}|UGHApi.csproj|d:\\ugh gitlab\\ugh\\backend\\applications\\profiles\\getuserprofilequeryhandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{6C6E1DA1-C1AC-4896-9ED3-44FA970CF25F}|UGHApi.csproj|solutionrelative:applications\\profiles\\getuserprofilequeryhandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{6C6E1DA1-C1AC-4896-9ED3-44FA970CF25F}|UGHApi.csproj|d:\\ugh gitlab\\ugh\\backend\\viewmodels\\userprofiledatadto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{6C6E1DA1-C1AC-4896-9ED3-44FA970CF25F}|UGHApi.csproj|solutionrelative:viewmodels\\userprofiledatadto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{6C6E1DA1-C1AC-4896-9ED3-44FA970CF25F}|UGHApi.csproj|d:\\ugh gitlab\\ugh\\backend\\services\\facebook\\facebookservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{6C6E1DA1-C1AC-4896-9ED3-44FA970CF25F}|UGHApi.csproj|solutionrelative:services\\facebook\\facebookservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{6C6E1DA1-C1AC-4896-9ED3-44FA970CF25F}|UGHApi.csproj|d:\\ugh gitlab\\ugh\\backend\\applications\\offers\\addoffercommandhandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{6C6E1DA1-C1AC-4896-9ED3-44FA970CF25F}|UGHApi.csproj|solutionrelative:applications\\offers\\addoffercommandhandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{6C6E1DA1-C1AC-4896-9ED3-44FA970CF25F}|UGHApi.csproj|d:\\ugh gitlab\\ugh\\backend\\controllers\\offercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{6C6E1DA1-C1AC-4896-9ED3-44FA970CF25F}|UGHApi.csproj|solutionrelative:controllers\\offercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{6C6E1DA1-C1AC-4896-9ED3-44FA970CF25F}|UGHApi.csproj|d:\\ugh gitlab\\ugh\\backend\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{6C6E1DA1-C1AC-4896-9ED3-44FA970CF25F}|UGHApi.csproj|solutionrelative:program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{6C6E1DA1-C1AC-4896-9ED3-44FA970CF25F}|UGHApi.csproj|d:\\ugh gitlab\\ugh\\backend\\facebookcrawler.py||{8B382828-6202-11D1-8870-0000F87579D2}",
-      "RelativeMoniker": "D:0:0:{6C6E1DA1-C1AC-4896-9ED3-44FA970CF25F}|UGHApi.csproj|solutionrelative:facebookcrawler.py||{8B382828-6202-11D1-8870-0000F87579D2}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{6C6E1DA1-C1AC-4896-9ED3-44FA970CF25F}|UGHApi.csproj|d:\\ugh gitlab\\ugh\\backend\\controllers\\couponcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{6C6E1DA1-C1AC-4896-9ED3-44FA970CF25F}|UGHApi.csproj|solutionrelative:controllers\\couponcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{6C6E1DA1-C1AC-4896-9ED3-44FA970CF25F}|UGHApi.csproj|d:\\ugh gitlab\\ugh\\backend\\viewmodels\\offerapplicationdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{6C6E1DA1-C1AC-4896-9ED3-44FA970CF25F}|UGHApi.csproj|solutionrelative:viewmodels\\offerapplicationdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{6C6E1DA1-C1AC-4896-9ED3-44FA970CF25F}|UGHApi.csproj|d:\\ugh gitlab\\ugh\\backend\\applications\\offers\\getofferapplicationsbyhostqueryhandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -74,11 +116,11 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 1,
+          "SelectedChildIndex": 7,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 2,
               "Title": "UserProfileDataDTO.cs",
               "DocumentMoniker": "D:\\UGH Gitlab\\ugh\\Backend\\ViewModels\\UserProfileDataDTO.cs",
               "RelativeDocumentMoniker": "ViewModels\\UserProfileDataDTO.cs",
@@ -86,144 +128,77 @@
               "RelativeToolTip": "ViewModels\\UserProfileDataDTO.cs",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-10-01T12:27:55.531Z",
-              "IsPinned": true,
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "AuthController.cs",
-              "DocumentMoniker": "D:\\UGH Gitlab\\ugh\\Backend\\Controllers\\AuthController.cs",
-              "RelativeDocumentMoniker": "Controllers\\AuthController.cs",
-              "ToolTip": "D:\\UGH Gitlab\\ugh\\Backend\\Controllers\\AuthController.cs",
-              "RelativeToolTip": "Controllers\\AuthController.cs",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-10-04T10:56:45.73Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "UserController.cs",
-              "DocumentMoniker": "D:\\UGH Gitlab\\ugh\\Backend\\Controllers\\UserController.cs",
-              "RelativeDocumentMoniker": "Controllers\\UserController.cs",
-              "ToolTip": "D:\\UGH Gitlab\\ugh\\Backend\\Controllers\\UserController.cs",
-              "RelativeToolTip": "Controllers\\UserController.cs",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-10-04T06:05:17.248Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 5,
-              "Title": "GetUserProfileQueryHandler.cs",
-              "DocumentMoniker": "D:\\UGH Gitlab\\ugh\\Backend\\Applications\\Profiles\\GetUserProfileQueryHandler.cs",
-              "RelativeDocumentMoniker": "Applications\\Profiles\\GetUserProfileQueryHandler.cs",
-              "ToolTip": "D:\\UGH Gitlab\\ugh\\Backend\\Applications\\Profiles\\GetUserProfileQueryHandler.cs",
-              "RelativeToolTip": "Applications\\Profiles\\GetUserProfileQueryHandler.cs",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-10-03T09:42:04.486Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "GetProfileQueryHandler.cs",
-              "DocumentMoniker": "D:\\UGH Gitlab\\ugh\\Backend\\Applications\\Admin\\GetProfileQueryHandler.cs",
-              "RelativeDocumentMoniker": "Applications\\Admin\\GetProfileQueryHandler.cs",
-              "ToolTip": "D:\\UGH Gitlab\\ugh\\Backend\\Applications\\Admin\\GetProfileQueryHandler.cs",
-              "RelativeToolTip": "Applications\\Admin\\GetProfileQueryHandler.cs",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-10-03T09:41:16.915Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "ProfileController.cs",
-              "DocumentMoniker": "D:\\UGH Gitlab\\ugh\\Backend\\Controllers\\ProfileController.cs",
-              "RelativeDocumentMoniker": "Controllers\\ProfileController.cs",
-              "ToolTip": "D:\\UGH Gitlab\\ugh\\Backend\\Controllers\\ProfileController.cs",
-              "RelativeToolTip": "Controllers\\ProfileController.cs",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-10-03T09:41:35.867Z",
-              "EditorCaption": ""
+              "IsPinned": true
             },
             {
               "$type": "Document",
               "DocumentIndex": 3,
-              "Title": "AdminController.cs",
-              "DocumentMoniker": "D:\\UGH Gitlab\\ugh\\Backend\\Controllers\\AdminController.cs",
-              "RelativeDocumentMoniker": "Controllers\\AdminController.cs",
-              "ToolTip": "D:\\UGH Gitlab\\ugh\\Backend\\Controllers\\AdminController.cs",
-              "RelativeToolTip": "Controllers\\AdminController.cs",
+              "Title": "Offer.cs",
+              "DocumentMoniker": "D:\\UGH Gitlab\\ugh\\Backend\\Entities\\Offer.cs",
+              "RelativeDocumentMoniker": "Entities\\Offer.cs",
+              "ToolTip": "D:\\UGH Gitlab\\ugh\\Backend\\Entities\\Offer.cs",
+              "RelativeToolTip": "Entities\\Offer.cs",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-10-01T13:36:01.284Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 7,
-              "Title": "FacebookService.cs",
-              "DocumentMoniker": "D:\\UGH Gitlab\\ugh\\Backend\\Services\\Facebook\\FacebookService.cs",
-              "RelativeDocumentMoniker": "Services\\Facebook\\FacebookService.cs",
-              "ToolTip": "D:\\UGH Gitlab\\ugh\\Backend\\Services\\Facebook\\FacebookService.cs",
-              "RelativeToolTip": "Services\\Facebook\\FacebookService.cs",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-10-03T08:50:04.359Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-10-08T09:36:28.983Z"
             },
             {
               "$type": "Document",
               "DocumentIndex": 11,
+              "Title": "Errors.cs",
+              "DocumentMoniker": "D:\\UGH Gitlab\\ugh\\Backend\\Core\\Errors.cs",
+              "RelativeDocumentMoniker": "Core\\Errors.cs",
+              "ToolTip": "D:\\UGH Gitlab\\ugh\\Backend\\Core\\Errors.cs",
+              "RelativeToolTip": "Core\\Errors.cs",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-10-08T09:19:43.356Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
               "Title": "facebookcrawler.py",
               "DocumentMoniker": "D:\\UGH Gitlab\\ugh\\Backend\\facebookcrawler.py",
               "RelativeDocumentMoniker": "facebookcrawler.py",
               "ToolTip": "D:\\UGH Gitlab\\ugh\\Backend\\facebookcrawler.py",
               "RelativeToolTip": "facebookcrawler.py",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
-              "WhenOpened": "2024-10-03T05:23:38.113Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 12,
-              "Title": "CouponController.cs",
-              "DocumentMoniker": "D:\\UGH Gitlab\\ugh\\Backend\\Controllers\\CouponController.cs",
-              "RelativeDocumentMoniker": "Controllers\\CouponController.cs",
-              "ToolTip": "D:\\UGH Gitlab\\ugh\\Backend\\Controllers\\CouponController.cs",
-              "RelativeToolTip": "Controllers\\CouponController.cs",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-10-01T13:14:38.259Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 13,
-              "Title": "OfferApplicationDto.cs",
-              "DocumentMoniker": "D:\\UGH Gitlab\\ugh\\Backend\\ViewModels\\OfferApplicationDto.cs",
-              "RelativeDocumentMoniker": "ViewModels\\OfferApplicationDto.cs",
-              "ToolTip": "D:\\UGH Gitlab\\ugh\\Backend\\ViewModels\\OfferApplicationDto.cs",
-              "RelativeToolTip": "ViewModels\\OfferApplicationDto.cs",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-10-01T10:20:26.477Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-10-08T10:01:54.536Z"
             },
             {
               "$type": "Document",
               "DocumentIndex": 9,
-              "Title": "OfferController.cs",
-              "DocumentMoniker": "D:\\UGH Gitlab\\ugh\\Backend\\Controllers\\OfferController.cs",
-              "RelativeDocumentMoniker": "Controllers\\OfferController.cs",
-              "ToolTip": "D:\\UGH Gitlab\\ugh\\Backend\\Controllers\\OfferController.cs",
-              "RelativeToolTip": "Controllers\\OfferController.cs",
+              "Title": "GetAllReviewsByOfferIdQuery.cs",
+              "DocumentMoniker": "D:\\UGH Gitlab\\ugh\\Backend\\Applications\\Reviews\\GetAllReviewsByOfferIdQuery.cs",
+              "RelativeDocumentMoniker": "Applications\\Reviews\\GetAllReviewsByOfferIdQuery.cs",
+              "ToolTip": "D:\\UGH Gitlab\\ugh\\Backend\\Applications\\Reviews\\GetAllReviewsByOfferIdQuery.cs",
+              "RelativeToolTip": "Applications\\Reviews\\GetAllReviewsByOfferIdQuery.cs",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-10-01T10:19:10.761Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-10-08T09:35:51.879Z"
             },
             {
               "$type": "Document",
               "DocumentIndex": 8,
+              "Title": "Review.cs",
+              "DocumentMoniker": "D:\\UGH Gitlab\\ugh\\Backend\\Entities\\Review.cs",
+              "RelativeDocumentMoniker": "Entities\\Review.cs",
+              "ToolTip": "D:\\UGH Gitlab\\ugh\\Backend\\Entities\\Review.cs",
+              "RelativeToolTip": "Entities\\Review.cs",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-10-08T09:36:01.392Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "User.cs",
+              "DocumentMoniker": "D:\\UGH Gitlab\\ugh\\Backend\\Entities\\User.cs",
+              "RelativeDocumentMoniker": "Entities\\User.cs",
+              "ToolTip": "D:\\UGH Gitlab\\ugh\\Backend\\Entities\\User.cs",
+              "RelativeToolTip": "Entities\\User.cs",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-10-08T09:37:57.782Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
               "Title": "AddOfferCommandHandler.cs",
               "DocumentMoniker": "D:\\UGH Gitlab\\ugh\\Backend\\Applications\\Offers\\AddOfferCommandHandler.cs",
               "RelativeDocumentMoniker": "Applications\\Offers\\AddOfferCommandHandler.cs",
@@ -235,39 +210,215 @@
             },
             {
               "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "ProfileController.cs",
+              "DocumentMoniker": "C:\\Users\\Dotnet.CSPC393\\AppData\\Local\\Temp\\.vsdbgsrc\\5db02b54a6b076ac0c5c018b056ba14c4426c4ff0752e34d805f30a6adddaac6\\ProfileController.cs",
+              "ToolTip": "C:\\Users\\Dotnet.CSPC393\\AppData\\Local\\Temp\\.vsdbgsrc\\5db02b54a6b076ac0c5c018b056ba14c4426c4ff0752e34d805f30a6adddaac6\\ProfileController.cs [Read Only]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-10-08T09:43:38.328Z",
+              "EditorCaption": " [Read Only]"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "OfferController.cs",
+              "DocumentMoniker": "D:\\UGH Gitlab\\ugh\\Backend\\Controllers\\OfferController.cs",
+              "RelativeDocumentMoniker": "Controllers\\OfferController.cs",
+              "ToolTip": "D:\\UGH Gitlab\\ugh\\Backend\\Controllers\\OfferController.cs",
+              "RelativeToolTip": "Controllers\\OfferController.cs",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-10-08T10:03:24.487Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "Microsoft.Common.CurrentVersion.targets",
+              "DocumentMoniker": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Professional\\MSBuild\\Current\\Bin\\amd64\\Microsoft.Common.CurrentVersion.targets",
+              "ToolTip": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Professional\\MSBuild\\Current\\Bin\\amd64\\Microsoft.Common.CurrentVersion.targets",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003801|",
+              "WhenOpened": "2024-10-08T09:50:06.491Z"
+            },
+            {
+              "$type": "Document",
               "DocumentIndex": 10,
+              "Title": "ReviewController.cs",
+              "DocumentMoniker": "D:\\UGH Gitlab\\ugh\\Backend\\Controllers\\ReviewController.cs",
+              "RelativeDocumentMoniker": "Controllers\\ReviewController.cs",
+              "ToolTip": "D:\\UGH Gitlab\\ugh\\Backend\\Controllers\\ReviewController.cs",
+              "RelativeToolTip": "Controllers\\ReviewController.cs",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-10-08T09:19:22.066Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "AuthController.cs",
+              "DocumentMoniker": "D:\\UGH Gitlab\\ugh\\Backend\\Controllers\\AuthController.cs",
+              "RelativeDocumentMoniker": "Controllers\\AuthController.cs",
+              "ToolTip": "D:\\UGH Gitlab\\ugh\\Backend\\Controllers\\AuthController.cs",
+              "RelativeToolTip": "Controllers\\AuthController.cs",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-10-04T10:56:45.73Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 15,
+              "Title": "UpdateVerifyStateCommandHandler.cs",
+              "DocumentMoniker": "D:\\UGH Gitlab\\ugh\\Backend\\Applications\\Admin\\UpdateVerifyStateCommandHandler.cs",
+              "RelativeDocumentMoniker": "Applications\\Admin\\UpdateVerifyStateCommandHandler.cs",
+              "ToolTip": "D:\\UGH Gitlab\\ugh\\Backend\\Applications\\Admin\\UpdateVerifyStateCommandHandler.cs",
+              "RelativeToolTip": "Applications\\Admin\\UpdateVerifyStateCommandHandler.cs",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-10-04T12:03:46.553Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "OfferApplicationDto.cs",
+              "DocumentMoniker": "D:\\UGH Gitlab\\ugh\\Backend\\ViewModels\\OfferApplicationDto.cs",
+              "RelativeDocumentMoniker": "ViewModels\\OfferApplicationDto.cs",
+              "ToolTip": "D:\\UGH Gitlab\\ugh\\Backend\\ViewModels\\OfferApplicationDto.cs",
+              "RelativeToolTip": "ViewModels\\OfferApplicationDto.cs",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-10-01T10:20:26.477Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "VerifyEmailCommandHandler.cs",
+              "DocumentMoniker": "D:\\UGH Gitlab\\ugh\\Backend\\Applications\\Authentication\\VerifyEmailCommandHandler.cs",
+              "RelativeDocumentMoniker": "Applications\\Authentication\\VerifyEmailCommandHandler.cs",
+              "ToolTip": "D:\\UGH Gitlab\\ugh\\Backend\\Applications\\Authentication\\VerifyEmailCommandHandler.cs",
+              "RelativeToolTip": "Applications\\Authentication\\VerifyEmailCommandHandler.cs",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-10-04T10:58:13.91Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 16,
+              "Title": "GetUserProfileQueryHandler.cs",
+              "DocumentMoniker": "D:\\UGH Gitlab\\ugh\\Backend\\Applications\\Profiles\\GetUserProfileQueryHandler.cs",
+              "RelativeDocumentMoniker": "Applications\\Profiles\\GetUserProfileQueryHandler.cs",
+              "ToolTip": "D:\\UGH Gitlab\\ugh\\Backend\\Applications\\Profiles\\GetUserProfileQueryHandler.cs",
+              "RelativeToolTip": "Applications\\Profiles\\GetUserProfileQueryHandler.cs",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-10-03T09:42:04.486Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 18,
+              "Title": "appsettings.json",
+              "DocumentMoniker": "D:\\UGH Gitlab\\ugh\\Backend\\appsettings.json",
+              "RelativeDocumentMoniker": "appsettings.json",
+              "ToolTip": "D:\\UGH Gitlab\\ugh\\Backend\\appsettings.json",
+              "RelativeToolTip": "appsettings.json",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2024-10-04T11:01:31.143Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 21,
+              "Title": "GetProfileQueryHandler.cs",
+              "DocumentMoniker": "D:\\UGH Gitlab\\ugh\\Backend\\Applications\\Admin\\GetProfileQueryHandler.cs",
+              "RelativeDocumentMoniker": "Applications\\Admin\\GetProfileQueryHandler.cs",
+              "ToolTip": "D:\\UGH Gitlab\\ugh\\Backend\\Applications\\Admin\\GetProfileQueryHandler.cs",
+              "RelativeToolTip": "Applications\\Admin\\GetProfileQueryHandler.cs",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-10-03T09:41:16.915Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 20,
+              "Title": "ProfileController.cs",
+              "DocumentMoniker": "D:\\UGH Gitlab\\ugh\\Backend\\Controllers\\ProfileController.cs",
+              "RelativeDocumentMoniker": "Controllers\\ProfileController.cs",
+              "ToolTip": "D:\\UGH Gitlab\\ugh\\Backend\\Controllers\\ProfileController.cs",
+              "RelativeToolTip": "Controllers\\ProfileController.cs",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-10-03T09:41:35.867Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 17,
+              "Title": "AdminController.cs",
+              "DocumentMoniker": "D:\\UGH Gitlab\\ugh\\Backend\\Controllers\\AdminController.cs",
+              "RelativeDocumentMoniker": "Controllers\\AdminController.cs",
+              "ToolTip": "D:\\UGH Gitlab\\ugh\\Backend\\Controllers\\AdminController.cs",
+              "RelativeToolTip": "Controllers\\AdminController.cs",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-10-01T13:36:01.284Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 19,
+              "Title": "UserController.cs",
+              "DocumentMoniker": "D:\\UGH Gitlab\\ugh\\Backend\\Controllers\\UserController.cs",
+              "RelativeDocumentMoniker": "Controllers\\UserController.cs",
+              "ToolTip": "D:\\UGH Gitlab\\ugh\\Backend\\Controllers\\UserController.cs",
+              "RelativeToolTip": "Controllers\\UserController.cs",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-10-04T06:05:17.248Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 22,
+              "Title": "FacebookService.cs",
+              "DocumentMoniker": "D:\\UGH Gitlab\\ugh\\Backend\\Services\\Facebook\\FacebookService.cs",
+              "RelativeDocumentMoniker": "Services\\Facebook\\FacebookService.cs",
+              "ToolTip": "D:\\UGH Gitlab\\ugh\\Backend\\Services\\Facebook\\FacebookService.cs",
+              "RelativeToolTip": "Services\\Facebook\\FacebookService.cs",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-10-03T08:50:04.359Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 24,
+              "Title": "CouponController.cs",
+              "DocumentMoniker": "D:\\UGH Gitlab\\ugh\\Backend\\Controllers\\CouponController.cs",
+              "RelativeDocumentMoniker": "Controllers\\CouponController.cs",
+              "ToolTip": "D:\\UGH Gitlab\\ugh\\Backend\\Controllers\\CouponController.cs",
+              "RelativeToolTip": "Controllers\\CouponController.cs",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-10-01T13:14:38.259Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 23,
               "Title": "Program.cs",
               "DocumentMoniker": "D:\\UGH Gitlab\\ugh\\Backend\\Program.cs",
               "RelativeDocumentMoniker": "Program.cs",
               "ToolTip": "D:\\UGH Gitlab\\ugh\\Backend\\Program.cs",
               "RelativeToolTip": "Program.cs",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-10-03T07:11:04.028Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-10-03T07:11:04.028Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 14,
+              "DocumentIndex": 25,
               "Title": "GetOfferApplicationsByHostQueryHandler.cs",
               "DocumentMoniker": "D:\\UGH Gitlab\\ugh\\Backend\\Applications\\Offers\\GetOfferApplicationsByHostQueryHandler.cs",
               "RelativeDocumentMoniker": "Applications\\Offers\\GetOfferApplicationsByHostQueryHandler.cs",
               "ToolTip": "D:\\UGH Gitlab\\ugh\\Backend\\Applications\\Offers\\GetOfferApplicationsByHostQueryHandler.cs",
               "RelativeToolTip": "Applications\\Offers\\GetOfferApplicationsByHostQueryHandler.cs",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-10-01T10:20:07.709Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-10-01T10:20:07.709Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 15,
+              "DocumentIndex": 26,
               "Title": "GetOffersQueryHandler.cs",
               "DocumentMoniker": "D:\\UGH Gitlab\\ugh\\Backend\\Applications\\Offers\\GetOffersQueryHandler.cs",
               "RelativeDocumentMoniker": "Applications\\Offers\\GetOffersQueryHandler.cs",
               "ToolTip": "D:\\UGH Gitlab\\ugh\\Backend\\Applications\\Offers\\GetOffersQueryHandler.cs",
               "RelativeToolTip": "Applications\\Offers\\GetOffersQueryHandler.cs",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-10-01T10:19:26.357Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-10-01T10:19:26.357Z"
             }
           ]
         }

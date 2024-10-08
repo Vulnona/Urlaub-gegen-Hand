@@ -49,7 +49,7 @@
                 <div>
                   <span class="fw-medium me-2">Name :</span><span class="text-muted">{{ user.firstName }} {{
                     user.lastName
-                    }}</span>
+                  }}</span>
                 </div>
               </li>
               <li class="list-group-item border-0">
@@ -86,7 +86,7 @@
                         <i class="ri-building-line align-middle fs-15"></i>
                       </span>
                       <span class="fw-medium text-default">Address : </span>{{ user.street }}, {{ user.city }}, {{
-                      user.state }},
+                        user.state }},
                       {{ user.country }}
                     </p>
                     <p class="mb-0">
@@ -223,10 +223,8 @@ import CryptoJS from 'crypto-js';
 import VueJwtDecode from 'vue-jwt-decode';
 import axiosInstance from "@/interceptor/interceptor"
 import Navbar from "@/components/navbar/Navbar.vue";
-
-
-let globalLogId = '';
-
+import Securitybot from '@/services/SecurityBot';
+import toast from "@/components/toaster/toast";
 export default {
   components: {
     Navbar,
@@ -254,10 +252,9 @@ export default {
   },
 
   mounted() {
-    this.Securitybot();
+    Securitybot();
     this.showReviews(sessionStorage.getItem('UserId'));
     this.fetchUserData(sessionStorage.getItem('UserId'));
-    this.checkLoginStatus();
   },
   methods: {
     back() {
@@ -278,70 +275,17 @@ export default {
     onImageError(event) {
       event.target.src = this.defaultProfileImgSrc;
     },
-    // Method to check if the user is logged in
-    Securitybot() {
-      if (!sessionStorage.getItem("token")) {
-        router.push('/login');
-      }
-    },
-    // Method to check login status and set the user role
-    checkLoginStatus() {
-      const token = sessionStorage.getItem("token");
-      if (token) {
-        const testlogid = this.decryptlogID(sessionStorage.getItem("logId"));
-        globalLogId = testlogid;
-        const decryptedToken = this.decryptToken(token);
-        if (decryptedToken) {
-          const decodedToken = VueJwtDecode.decode(decryptedToken);
-          this.userRole = decodedToken[`${process.env.claims_Url}`] || '';
-        } else {
-          sessionStorage.removeItem('token');
-        }
-      }
-    },
-    // Method to decrypt log ID
-    decryptlogID(encryptedItem) {
-      try {
-        const bytes = CryptoJS.AES.decrypt(encryptedItem, process.env.SECRET_KEY);
-        const decryptedString = bytes.toString(CryptoJS.enc.Utf8);
-        return parseInt(decryptedString, 10).toString();
-      } catch (e) {
-        return null;
-      }
-    },
-    // Method to decrypt token, redefined inside methods for instance access
-    decryptToken(encryptedToken) {
-      try {
-        const bytes = CryptoJS.AES.decrypt(encryptedToken, process.env.SECRET_KEY);
-        return bytes.toString(CryptoJS.enc.Utf8);
-      } catch (e) {
-        return null;
-      }
-    },
     // Method to fetch user data
     async fetchUserData(id) {
       try {
         const response = await axiosInstance.get(`${process.env.baseURL}admin/get-user-profile/${id}`);
         this.user = response.data;
         this.profileImgSrc = `data:image/jpeg;base64,${response.data.profilePicture}`;
-        this.options = this.processOptions(response.data.options);
-        this.hobbies = response.data.hobbies;
       } catch (error) {
-        this.toast.info("Failed to fetch user data!");
+        toast.info("Failed to fetch user data!");
       }
     },
-    // Method to process profile options
-    processOptions(options) {
-      const result = [];
-      if (options & ProfileOptions.Smoker) result.push('raucht');
-      if (options & ProfileOptions.PetOwner) result.push('besitzt Tier(e)');
-      if (options & ProfileOptions.HaveLiabilityInsurance) result.push('Haftpflichtversichert');
-      return result;
-    },
-    // Method to navigate to edit profile page
-    editProfile() {
-      router.push('/editprofile');
-    },
+
     redirectToFacebook(fblink) {
       window.open(fblink);
     },
@@ -359,7 +303,6 @@ export default {
 
       }
     },
-    // Method to get the appropriate class for star rating
     starClass(star) {
       return {
         'ri-star-fill gold': star === 'full',
@@ -372,22 +315,6 @@ export default {
     imageSrc() {
       return this.profileImgSrc || this.defaultProfileImgSrc;
     },
-    // Computed property to generate stars for rating
-    stars() {
-      const stars = [];
-      const integerPart = Math.floor(this.rate.averageRating);
-      const decimalPart = this.rate.averageRating - integerPart;
-      for (let i = 0; i < 5; i++) {
-        if (i < integerPart) {
-          stars.push('full');
-        } else if (decimalPart >= 0.5 && i === integerPart) {
-          stars.push('half');
-        } else {
-          stars.push('empty');
-        }
-      }
-      return stars;
-    }
   }
 };
 </script>
@@ -450,15 +377,6 @@ export default {
 .card-text a:hover {
   text-decoration: underline;
 }
-
-/*
-.btn-primary {
-  margin-top: 20px;
-  display: block;
-  width: 100%;
-  text-align: center;
-} */
-
 .star {
   font-size: 1.2em;
 }
@@ -513,8 +431,6 @@ export default {
   text-decoration: none;
   cursor: pointer;
 }
-</style>
-<style scoped>
 .profile-content {
   margin-block-start: -5rem;
 }

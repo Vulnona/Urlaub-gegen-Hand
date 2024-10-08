@@ -77,7 +77,11 @@ const isActiveMember = ref(false);
 // Handle logout and session clearing
 const doLogout = () => {
   sessionStorage.clear();
-  router.push("/login");
+  if (router.currentRoute.value.path === '/home') {
+    router.go(0); 
+  } else {
+    router.push("/");
+  }
 };
 
 // Navigate to profile

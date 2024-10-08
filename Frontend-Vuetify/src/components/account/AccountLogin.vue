@@ -93,7 +93,7 @@
                 <form class="form-border" @submit.prevent="login">
                   <div class="custom-form">
                     <label for="fname">E-Mail</label>
-                    <input type="text" placeholder="Benutzernamen eingeben" id="username" v-model="email" >
+                    <input type="text" placeholder="Benutzernamen eingeben" id="username" v-model="email">
                   </div>
                   <div>
                     <div class="custom-form">
@@ -101,8 +101,8 @@
                         <label>Passwort</label>
                       </div>
                       <div class="password-container" style="position: relative;">
-                        <input :type="showPassword ? 'text' : 'password'" placeholder="Passwort eingeben"
-                          id="password" v-model="password" >
+                        <input :type="showPassword ? 'text' : 'password'" placeholder="Passwort eingeben" id="password"
+                          v-model="password">
                         <i @click="togglePasswordVisibility" :class="showPassword ? 'ri-eye-off-fill' : 'ri-eye-fill'"
                           style="position: absolute; right: 10px; top: 10px; cursor: pointer;">
                         </i>
@@ -114,14 +114,15 @@
                     </div>
                   </div>
                   <div v-if="errorMessage" class="error-message">{{ errorMessage }}</div>
-                    <div class="back-login flexBox_btn">
-                      <a href="/home"><i class="ri-arrow-left-double-fill"></i> Back to home</a>
-                      <a href="/verify-email" previewlistener="true"><i class="ri-shield-check-fill"></i> E-Mail bestätigen</a>
-                    </div>
-                    
+                  <div class="back-login flexBox_btn">
+                    <a href="/home"><i class="ri-arrow-left-double-fill"></i> Back to home</a>
+                    <a href="/verify-email" previewlistener="true"><i class="ri-shield-check-fill"></i> E-Mail
+                      bestätigen</a>
+                  </div>
+
                 </form>
-                
-              
+
+
               </div>
             </div>
           </div>
@@ -131,15 +132,12 @@
   </div>
 </template>
 <script>
-import axios from 'axios';
 import router from '@/router';
 import CryptoJS from 'crypto-js';
-import Swal from 'sweetalert2';
-import { createToastInterface } from "vue-toastification";
-import "vue-toastification/dist/index.css";
 import CheckUserRole from '@/services/CheckUserRole';
 import isActiveMembership from '@/services/CheckActiveMembership';
 import axiosInstance from '@/interceptor/interceptor';
+import toast from '../toaster/toast';
 export default {
   data() {
     return {
@@ -149,22 +147,7 @@ export default {
       showPassword: false,
     };
   },
-  created() {
-    this.toast = createToastInterface({
-      position: "top-right",
-      timeout: 3000,
-      closeOnClick: true,
-      pauseOnFocusLoss: true,
-      pauseOnHover: true,
-      draggable: true,
-      draggablePercent: 0.6,
-      showCloseButtonOnHover: false,
-      hideProgressBar: false,
-      closeButton: "button",
-      icon: true,
-      rtl: false
-    });
-  },
+
   methods: {
     togglePasswordVisibility() {
       this.showPassword = !this.showPassword;
@@ -172,56 +155,48 @@ export default {
     // Method to handle the login process
     async login() {
       try {
-        if(this.email.trim() =='' || this.password.trim() ==''){
-          this.toast.info("Bitte geben Sie sowohl E-Mail als auch Passwort ein!");
+        if (this.email.trim() == '' || this.password.trim() == '') {
+          toast.info("Bitte geben Sie sowohl E-Mail als auch Passwort ein!");
           return;
         }
-        // Sending a POST request to the login endpoint with the email and password
+     
         const response = await axiosInstance.post(`${process.env.baseURL}authenticate/login`, {
           email: this.email,
           password: this.password
         });
-      
-        // Extracting necessary data from the response
+
         const token = response.data.accessToken;
         const logId = response.data.userId;
         const logEmail = response.data.email;
         const firstName = response.data.firstName;
 
-        // Encrypting the token, logId, and email
         const encryptedToken = this.encryptItem(token);
         const encryptedLogId = this.encryptItem(logId);
         const encryptedEmail = this.encryptItem(logEmail);
 
-        // Storing encrypted data in session storage
         sessionStorage.setItem('token', encryptedToken);
         sessionStorage.setItem('logId', encryptedLogId);
         sessionStorage.setItem('logEmail', encryptedEmail);
         sessionStorage.setItem('firstName', firstName);
-        
-        if(CheckUserRole()=='Admin'){
+
+        if (CheckUserRole() == 'Admin') {
           router.push('/admin');
-        }else if(CheckUserRole()=='User' && isActiveMembership()){
+        } else if (CheckUserRole() == 'User' && isActiveMembership()) {
           router.push('/my-offers');
         }
-        else{
+        else {
           router.push('/home');
         }
-
       } catch (error) {
 
         if (error.response && error.response.status === 401) {
-          // Invalid email or password error
-          this.toast.info("Ungültige E-Mail oder Passwort oder bestätigen Sie zuerst Ihre E-Mail");
+          toast.info("Ungültige E-Mail oder Passwort oder bestätigen Sie zuerst Ihre E-Mail");
         }
-
         else {
-          //Server errors
-          this.toast.info("Wir haben ein Problem auf dem Server. Bitte versuchen Sie es erneut!");
+          toast.info("Wir haben ein Problem auf dem Server. Bitte versuchen Sie es erneut!");
         }
       }
     },
-    // Method to encrypt a given item using AES encryption
     encryptItem(item) {
       return CryptoJS.AES.encrypt(item, process.env.SECRET_KEY).toString();
     },

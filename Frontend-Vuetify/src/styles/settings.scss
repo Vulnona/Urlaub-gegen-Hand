@@ -623,7 +623,7 @@ button{margin:0px!important;}
 .banner_content p {   line-height: 1.6; }
 .orange_text {   color: var(--BtnPrimaryBgcolor);}
 .banner_content h1 {   font-weight: 600;   font-size: 48px;   font-family: var(--Secondaryfontfamily);}
-.chooseUs_layout{background-image: url('/images/choose_uspattern.png'); background-repeat: no-repeat;   background-position: left bottom;   background-size: 250px;}
+.chooseUs_layout{background-image: url('/images/choose_uspattern.webp'); background-repeat: no-repeat;   background-position: left bottom;   background-size: 250px;}
 .chooseUs_layout .chooseUs_option h4 { margin-bottom:0;  font-size: 24px;   text-align: center;   font-weight: 600;}
 .chooseUs_layout  .chooseUs_option img {   max-width: 120px;   margin: auto;}
 .chooseUs_layout  .chooseUs_option {     text-align: center;   display: flex;  flex-direction: column;   gap: 15px;}
@@ -991,7 +991,7 @@ body .multiselect__option--highlight::after, body .multiselect__option--highligh
    position: relative;
 }
 .login-right-content-heading.form-act::before {
-   background: url(/images/auth-bg.jpg);
+   background: url(/images/auth-bg.webp);
    position: absolute;
    left: 0;
    top: 0;

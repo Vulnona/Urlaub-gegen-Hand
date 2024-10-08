@@ -1,24 +1,3 @@
-<style scoped>
-.rating-star {
-  font-family: var(--fa-style-family, "Font Awesome 6 Free");
-  font-weight: var(--fa-style, 900);
-}
-
-.rating-star:before {
-  content: "\f005";
-}
-
-/*
-.rating-buttons {
-  margin-bottom: 20px;
-}
-*/
-.rating-modal-content {
-  padding: 0;
-  border: none;
-
-}
-</style>
 <template>
   <Navbar />
   <div class="inner_banner_layout">
@@ -38,7 +17,7 @@
       <div class="card">
         <div class="card-header">
           <h1 class="main-title">Offers Requests</h1>
-          <div><router-link class="action-link" to="/home"> <i class="ri-arrow-left-double-fill"></i> Back To Offers
+          <div><router-link class="action-link" to="/my-offers"> <i class="ri-arrow-left-double-fill"></i> Back To Offers
               <span class="sr-only">(current)</span></router-link></div>
         </div>
         <div class="card-body">
@@ -137,15 +116,14 @@
     </div>
   </div>
 </template>
+
 <script>
 import router from '@/router';
 import CryptoJS from 'crypto-js';
-import { createToastInterface } from "vue-toastification";
-import "vue-toastification/dist/index.css";
 import Navbar from '@/components/navbar/Navbar.vue';
 import Securitybot from '@/services/SecurityBot';
 import axiosInstance from '@/interceptor/interceptor';
-
+import toast from '@/components/toaster/toast';
 let globalLogid = '';
 let globalratingId = '';
 
@@ -166,22 +144,6 @@ export default {
       offerRequestIndex: 0,
       defaultProfileImgSrc: '/defaultprofile.jpg',
     };
-  },
-  created() {
-    this.toast = createToastInterface({
-      position: "top-right",
-      timeout: 3000,
-      closeOnClick: true,
-      pauseOnFocusLoss: true,
-      pauseOnHover: true,
-      draggable: true,
-      draggablePercent: 0.6,
-      showCloseButtonOnHover: false,
-      hideProgressBar: false,
-      closeButton: "button",
-      icon: true,
-      rtl: false
-    });
   },
   mounted() {
     this.fetchUserOffers();
@@ -274,10 +236,10 @@ export default {
     // Method to submit rating
     async submitRating() {
       if (this.selectedRating > 0) {
-        await this.addRating(this.currentOfferId, this.selectedRating, this.reviewText);
+        await this.addRating(this.currentOfferId, this.selectedRating, this.reviewText,globalratingId);
         this.cancelRating();
       } else {
-        this.toast.info("Please select a Rating");
+        toast.info("Please select a Rating");
       }
     },
     cancelRating() {
@@ -295,18 +257,42 @@ export default {
           reviewedUserId: userId,
         });
         if (response.status === 200) {
-          this.toast.success("Dein Rating wurde erfolgreich hinzugefügt.");
-        } else {
-          this.toast.success("Dein Rating konnte nicht abgegeben werden.");
-        }
+          toast.success("Dein Rating wurde erfolgreich hinzugefügt.");
+        } 
       } catch (error) {
-        this.toast.success("Dein Rating konnte nicht abgegeben werden.");
+        if (error.response.data.message == "The Review already exists.") {
+          toast.info("Du hast bereits ein Rating abgegeben.");
+        }
+        else{
+          toast.error("Fehler beim Absenden der Bewertungen!");
+        }
       }
     },
   },
 };
 </script>
+
 <style scoped>
+.rating-star {
+  font-family: var(--fa-style-family, "Font Awesome 6 Free");
+  font-weight: var(--fa-style, 900);
+}
+
+.rating-star:before {
+  content: "\f005";
+}
+
+/*
+.rating-buttons {
+  margin-bottom: 20px;
+}
+*/
+.rating-modal-content {
+  padding: 0;
+  border: none;
+
+}
+
 .table {
   width: 100%;
   border-collapse: collapse;

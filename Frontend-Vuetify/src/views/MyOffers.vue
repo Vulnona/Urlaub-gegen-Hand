@@ -39,7 +39,7 @@
               <div v-for="offer in filteredOffers" :key="offer.id" class="col-md-3 mb-4">
                 <div class="all_items card-offer">
                   <div class="item_img">
-                    <img @click="redirectToOfferDetail(offer.id)" v-if="offer.imageData"
+                    <img @click="redirectToOfferDetail(offer.id)" v-if="offer.imageData" loading="lazy"
                       :src="'data:' + offer.imageMimeType + ';base64,' + offer.imageData" class="card-img-top"
                       alt="Offer Image">
                     <div class="rating" v-if="getStatusText(offer) === 'View Details'"
@@ -98,13 +98,10 @@ import router from '@/router';
 import Swal from 'sweetalert2';
 import VueJwtDecode from 'vue-jwt-decode';
 import CryptoJS from 'crypto-js';
-import {
-  createToastInterface
-} from "vue-toastification";
-import "vue-toastification/dist/index.css";
 import Navbar from '@/components/navbar/Navbar.vue';
 import axiosInstance from "@/interceptor/interceptor"
 import Securitybot from '@/services/SecurityBot';
+import toast from '@/components/toaster/toast';
 window.FontAwesomeConfig = {
   autoReplaceSvg: false
 };
@@ -131,22 +128,7 @@ export default {
       reviewText: '',
     };
   },
-  created() {
-    this.toast = createToastInterface({
-      position: "top-right",
-      timeout: 3000,
-      closeOnClick: true,
-      pauseOnFocusLoss: true,
-      pauseOnHover: true,
-      draggable: true,
-      draggablePercent: 0.6,
-      showCloseButtonOnHover: false,
-      hideProgressBar: false,
-      closeButton: "button",
-      icon: true,
-      rtl: false
-    });
-  },
+
   mounted() {
     this.checkLoginStatus();
     this.fetchOffers();
@@ -437,7 +419,7 @@ export default {
         await this.addRating(this.currentOfferId, this.selectedRating, this.reviewText);
         this.showModal = false;
       } else {
-        this.toast.info("Please select a Rating");
+        toast.info("Please select a Rating");
       }
     },
     cancelRating() {

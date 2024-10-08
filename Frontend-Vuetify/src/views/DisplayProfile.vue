@@ -304,15 +304,12 @@ import {
   S3Client,
   DeleteObjectCommand
 } from '@aws-sdk/client-s3';
-import {
-  createToastInterface
-} from "vue-toastification";
-import "vue-toastification/dist/index.css";
 import axiosInstance from "@/interceptor/interceptor"
 import Navbar from "@/components/navbar/Navbar.vue";
 import userRole from "@/services/CheckUserRole";
 import isActiveMember from "@/services/CheckActiveMembership";
 import Securitybot from "@/services/SecurityBot";
+import toast from "@/components/toaster/toast";
 
 // Profile options bitmask enumeration
 const ProfileOptions = {
@@ -345,22 +342,7 @@ export default {
       selectedFile: null
     };
   },
-  created() {
-    this.toast = createToastInterface({
-      position: "top-right",
-      timeout: 3000,
-      closeOnClick: true,
-      pauseOnFocusLoss: true,
-      pauseOnHover: true,
-      draggable: true,
-      draggablePercent: 0.6,
-      showCloseButtonOnHover: false,
-      hideProgressBar: false,
-      closeButton: "button",
-      icon: true,
-      rtl: false
-    });
-  },
+
   mounted() {
     Securitybot();
     this.fetchUserData();
@@ -389,7 +371,7 @@ export default {
     // Submit the profile picture as Base64 JSON to the API
     async submitProfilePic() {
       if (!this.selectedFile) {
-        this.toast.info("Please Select a profile picture!");
+        toast.info("Please Select a profile picture!");
         return;
       }
 
@@ -408,15 +390,15 @@ export default {
           });
 
           if (response.status === 200) {
-            this.toast.success("Profile picture updated successfully!");
+            toast.success("Profile picture updated successfully!");
             this.showPicModal = false;  // Close modal on success
             this.fetchUserData();
           } else {
-            this.toast.info("Failed to update proile picture!");
+            toast.info("Failed to update proile picture!");
           }
         } catch (error) {
           console.error(error);
-          this.toast.info("An Error Occoured At Our End!");
+          toast.info("An Error Occoured At Our End!");
         }
       };
 
@@ -487,7 +469,7 @@ export default {
       }).then((result) => {
         if (result.isConfirmed) {
           axiosInstance.delete(`${process.env.baseURL}user/delete-user/${userid}`).then(() => {
-            this.toast.success("User data deleted successfully!");
+            toast.success("User data deleted successfully!");
             this.deleteImagesFromS3(link_VS, link_RS);
             sessionStorage.clear();
             router.push("/");
@@ -517,7 +499,7 @@ export default {
         await s3Client.send(command);
         //   console.log(`Deleted ${decryptedLink} from S3.`);
       } catch (error) {
-        //   console.error('Error deleting image from S3:', error);
+     
       }
     },
     // Function to fetch user data using API request
@@ -530,11 +512,11 @@ export default {
         this.hobbies = response.data.profile.hobbies;
       } catch (error) {
         if (error.response && error.response.status === 500) {
-          this.toast.info("Deine Sitzung ist abgelaufen. Bitte logge dich erneut ein");
+          toast.info("Deine Sitzung ist abgelaufen. Bitte logge dich erneut ein");
           sessionStorage.clear();
           router.push('/');
         } else {
-          this.toast.info("Benutzerdaten konnten nicht abgerufen werden");
+          toast.info("Benutzerdaten konnten nicht abgerufen werden");
         }
       }
     },

@@ -254,35 +254,23 @@
   </div>
 
 </template>
+
 <script>
 import router from "@/router";
 import Swal from 'sweetalert2';
 import CryptoJS from 'crypto-js';
-// import VueJwtDecode from 'vue-jwt-decode';
 import {
   S3Client,
   DeleteObjectCommand
 } from '@aws-sdk/client-s3';
-import {
-  createToastInterface
-} from "vue-toastification";
-import "vue-toastification/dist/index.css";
 import axiosInstance from "@/interceptor/interceptor"
 import Navbar from "@/components/navbar/Navbar.vue";
 import userRole from "@/services/CheckUserRole";
 import isActiveMember from "@/services/CheckActiveMembership";
 import Securitybot from "@/services/SecurityBot";
 import getLoggedUserId from "@/services/LoggedInUserId";
-// Profile options bitmask enumeration
-const ProfileOptions = {
-  None: 0,
-  Smoker: 1 << 0,
-  PetOwner: 1 << 1,
-  HaveLiabilityInsurance: 1 << 2
-};
+import toast from "@/components/toaster/toast";
 
-
-// Global variable for storing log ID
 let globalLogId = '';
 export default {
   components: {
@@ -307,22 +295,6 @@ export default {
       userId: getLoggedUserId(),
       reviews: [],
     };
-  },
-  created() {
-    this.toast = createToastInterface({
-      position: "top-right",
-      timeout: 3000,
-      closeOnClick: true,
-      pauseOnFocusLoss: true,
-      pauseOnHover: true,
-      draggable: true,
-      draggablePercent: 0.6,
-      showCloseButtonOnHover: false,
-      hideProgressBar: false,
-      closeButton: "button",
-      icon: true,
-      rtl: false
-    });
   },
   mounted() {
     Securitybot();
@@ -365,7 +337,7 @@ export default {
     // Submit the profile picture as Base64 JSON to the API
     async submitProfilePic() {
       if (!this.selectedFile) {
-        this.toast.info("Please Select a profile picture!");
+        toast.info("Please Select a profile picture!");
         return;
       }
 
@@ -384,15 +356,15 @@ export default {
           });
 
           if (response.status === 200) {
-            this.toast.success("Profile picture updated successfully!");
-            this.showPicModal = false;  // Close modal on success
+            toast.success("Profile picture updated successfully!");
+            this.showPicModal = false; 
             this.fetchUserData();
           } else {
-            this.toast.info("Failed to update proile picture!");
+            toast.info("Failed to update proile picture!");
           }
         } catch (error) {
           console.error(error);
-          this.toast.info("An Error Occoured At Our End!");
+          toast.info("An Error Occoured At Our End!");
         }
       };
 
@@ -405,24 +377,6 @@ export default {
     redirectToFacebook(fblink) {
       window.open(fblink);
     },
-
-    // // Function to check user login status and retrieve user role from JWT token
-    // checkLoginStatus() {
-    //   const token = sessionStorage.getItem("token");
-    //   const decryptToken = this.decryptToken(token);
-    //   globalToken = decryptToken;
-    //   const testlogid = this.decryptlogID(sessionStorage.getItem("logId"));
-    //   globalLogId = testlogid;
-    //   if (token) {
-    //     const decryptedToken = this.decryptToken(token);
-    //     if (decryptedToken) {
-    //       const decodedToken = VueJwtDecode.decode(decryptedToken);
-    //       this.userRole = decodedToken[`${process.env.claims_Url}`] || '';
-    //     } else {
-    //       sessionStorage.removeItem('token');
-    //     }
-    //   }
-    // },
     editProfilePic() {
       this.showPicModal = true;
     },
@@ -463,7 +417,7 @@ export default {
       }).then((result) => {
         if (result.isConfirmed) {
           axiosInstance.delete(`${process.env.baseURL}user/delete-user/${userid}`).then(() => {
-            this.toast.success("User data deleted successfully!");
+            toast.success("User data deleted successfully!");
             this.deleteImagesFromS3(link_VS);
             this.deleteImagesFromS3(link_RS);
             sessionStorage.clear();
@@ -503,25 +457,9 @@ export default {
         const response = await axiosInstance.get(`${process.env.baseURL}profile/get-user-profile`);
         this.user = response.data.profile;
         this.profileImgSrc = `data:image/jpeg;base64,${response.data.profile.profilePicture}`;
-        this.options = this.processOptions(response.data.profile.options);
-        this.hobbies = response.data.profile.hobbies;
       } catch (error) {
-        if (error.response && error.response.status === 500) {
-          this.toast.info("Deine Sitzung ist abgelaufen. Bitte logge dich erneut ein");
-          sessionStorage.clear();
-          router.push('/');
-        } else {
-          this.toast.info("Benutzerdaten konnten nicht abgerufen werden");
-        }
+          toast.info("Benutzerdaten konnten nicht abgerufen werden");
       }
-    },
-    // Function to process user profile options bitmask and return corresponding array
-    processOptions(options) {
-      const result = [];
-      if (options & ProfileOptions.Smoker) result.push('raucht');
-      if (options & ProfileOptions.PetOwner) result.push('besitzt Tier(e)');
-      if (options & ProfileOptions.HaveLiabilityInsurance) result.push('ist haftpflichtversichert');
-      return result;
     },
     editProfile() {
       router.push('/editprofile');
@@ -557,6 +495,7 @@ export default {
   }
 };
 </script>
+
 <style scoped>
 .v-container {
   display: flex;
@@ -615,14 +554,6 @@ export default {
 .card-text a:hover {
   text-decoration: underline;
 }
-
-/*
-    .btn-primary {
-      margin-top: 20px;
-      display: block;
-      width: 100%;
-      text-align: center;
-    } */
 .star {
   font-size: 1.2em;
 }
@@ -678,8 +609,6 @@ export default {
   text-decoration: none;
   cursor: pointer;
 }
-</style>
-<style scoped>
 .profile-content {
   margin-block-start: -5rem;
 }

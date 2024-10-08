@@ -10,7 +10,6 @@
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.556.0",
-    "@fortawesome/fontawesome-free": "^6.5.2",
     "@mdi/font": "7.0.96",
     "axios": "^1.6.8",
     "axios-interceptor": "^3.0.15",

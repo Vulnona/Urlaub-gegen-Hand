@@ -174,12 +174,9 @@
 import Navbar from '@/components/navbar/Navbar.vue';
 import Securitybot from '@/services/SecurityBot';
 import axiosInstance from '@/interceptor/interceptor';
-import {
-  createToastInterface
-} from "vue-toastification";
-import "vue-toastification/dist/index.css";
 import Multiselect from 'vue-multiselect';
 import 'vue-multiselect/dist/vue-multiselect.css';
+import toast from '@/components/toaster/toast';
 export default {
   components: {
     Navbar,
@@ -221,12 +218,6 @@ export default {
       cities: [],
     };
   },
-  created() {
-    this.toast = createToastInterface({
-      position: "top-right",
-      timeout: 3000,
-    });
-  },
   mounted() {
     Securitybot();
     this.fetchUserProfile();
@@ -261,7 +252,7 @@ export default {
           this.fetchStates(this.selectedCountry.country_ID);
         }
       } catch (error) {
-        this.toast.error("Failed to fetch countries");
+        toast.error("Failed to fetch countries");
       }
     },
     getLocationNames() {
@@ -289,10 +280,10 @@ export default {
             this.skills.find(skill => skill.skill_ID === userSkill.skill_ID) || userSkill
           );
         } else {
-          this.toast.info("User profile data not found");
+          toast.info("User profile data not found");
         }
       } catch (error) {
-        this.toast.info("Failed to fetch user profile!");
+        toast.info("Failed to fetch user profile!");
       }
     },
     async fetchStates(countryId) {
@@ -304,7 +295,7 @@ export default {
           this.fetchCities(this.selectedState.id);
         }
       } catch (error) {
-        this.toast.error("Failed to fetch states");
+        toast.error("Failed to fetch states");
       }
     },
     async fetchCities(stateId) {
@@ -313,7 +304,7 @@ export default {
         this.cities = response.data;
         this.selectedCity = this.cities.find(city => city.name === this.profile.cityName) || null;
       } catch (error) {
-        this.toast.error("Failed to fetch cities");
+        toast.error("Failed to fetch cities");
       }
     },
     onCountryChange() {
@@ -350,14 +341,14 @@ export default {
         delete updatedProfile.cityName;
         this.updateProfileAPI(updatedProfile);
       } else {
-        this.toast.error("Please correct the errors in the form before submitting.");
+        toast.error("Please correct the errors in the form before submitting.");
       }
     },
     async updateProfileAPI(updatedProfile) {
       try {
         const response = await axiosInstance.put(`${process.env.baseURL}profile/update-profile`, updatedProfile);
         if (response.status === 200) {
-          this.toast.success("Profile saved successfully!");
+          toast.success("Profile saved successfully!");
           if (response.data && response.data.profile) {
             this.profile = response.data.profile;
             this.profile.countryName = this.profile.country;
@@ -379,11 +370,11 @@ export default {
           }
           this.$router.push('/profile');
         } else {
-          this.toast.error("Failed to save profile. Please try again.");
+          toast.error("Failed to save profile. Please try again.");
         }
       } catch (error) {
         console.error("Error updating profile:", error);
-        this.toast.error("An error occurred while saving the profile. Please try again later.");
+        toast.error("An error occurred while saving the profile. Please try again later.");
       }
     },
     validateForm() {
