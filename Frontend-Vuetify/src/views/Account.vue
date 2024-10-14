@@ -40,20 +40,20 @@
           </div>
           <div class="p-3 pb-1 d-flex flex-wrap justify-content-between">
             <div class="fw-medium fs-15 themeColor">
-              Basic Info :
+              Basic Info:
             </div>
           </div>
           <div class="card-body border-bottom border-block-end-dashed p-0">
             <ul class="list-group list-group-flush basic_info">
               <li class="list-group-item border-0">
                 <div>
-                  <span class="fw-medium me-2">Name :</span><span class="text-muted">{{ user.firstName }} {{
+                  <span class="fw-medium me-2">Name:</span><span class="text-muted">{{ user.firstName }} {{
                     user.lastName
                   }}</span>
                 </div>
               </li>
               <li class="list-group-item border-0">
-                <div><span class="fw-medium me-2">DOB :</span><span class="text-muted">{{ user.dateOfBirth }}</span>
+                <div><span class="fw-medium me-2">DOB:</span><span class="text-muted">{{ user.dateOfBirth }}</span>
                 </div>
               </li>
               <li class="list-group-item border-0">
@@ -73,19 +73,19 @@
               </div>
               <ul class="list-group list-group-flush border rounded-3">
                 <li class="list-group-item p-3">
-                  <span class="fw-medium fs-15 d-block mb-3">General Info :</span>
+                  <span class="fw-medium fs-15 d-block mb-3">General Info:</span>
                   <div class="text-muted">
                     <p class="mb-3">
                       <span class="icon icon2">
                         <i class="ri-map-pin-line align-middle fs-15"></i>
                       </span>
-                      <span class="fw-medium text-default">House Number : </span> {{ user.houseNumber }}
+                      <span class="fw-medium text-default">House Number: </span> {{ user.houseNumber }}
                     </p>
                     <p class="mb-3">
                       <span class="icon icon3">
                         <i class="ri-building-line align-middle fs-15"></i>
                       </span>
-                      <span class="fw-medium text-default">Address : </span>{{ user.street }}, {{ user.city }}, {{
+                      <span class="fw-medium text-default">Address: </span>{{ user.street }}, {{ user.city }}, {{
                         user.state }},
                       {{ user.country }}
                     </p>
@@ -93,7 +93,7 @@
                       <span class="icon icon4">
                         <i class="ri-phone-line align-middle fs-15"></i>
                       </span>
-                      <span class="fw-medium text-default">Postal code : </span> {{ user.postCode }}
+                      <span class="fw-medium text-default">Postal code: </span> {{ user.postCode }}
                     </p>
                   </div>
                 </li>
@@ -116,10 +116,10 @@
                   </div>
                 </li>
                 <li class="list-group-item p-3 social_link">
-                  <span class="fw-medium fs-15 d-block mb-3">Social Media :</span>
+                  <span class="fw-medium fs-15 d-block mb-3">Social Media:</span>
                   <ul class="d-flex align-items-center flex-wrap">
                     <li class="d-flex align-items-center gap-3">
-                      <button @click="redirectToFacebook(user.facebookLink)" type="button" class="btn social_btn">
+                      <button @click="redirectToFacebook(user.facebook_link)" type="button" class="btn social_btn">
                         <span class="social_link_outer"><i class="ri-facebook-fill"></i></span>
                         <span class="text-info">Facebook</span>
                       </button>
@@ -133,6 +133,7 @@
       </div>
     </div>
   </div>
+
   <div v-if="showModal" class="modal review_modal_layout">
     <div class="modal-content review_modal">
       <div class="modal-header">
@@ -160,8 +161,10 @@
                       <li v-for="userReviews in reviews" :key="userReviews" class="comment">
                         <div>
                           <div class="comment_head">
-                            <h6>{{ userReviews.offer.title }}</h6>
-                            <div class="img-thumb" v-if="userReviews.offer.imageData != null"><img
+                            <h6 @click="redirectToOffer(userReviews.offer.id)" class="clickable-item">{{
+                              userReviews.offer.title }}</h6>
+                            <div class="img-thumb clickable-item" v-if="userReviews.offer.imageData != null"><img
+                                @click="redirectToOffer(userReviews.offer.id)"
                                 :src="'data:' + userReviews.offer.imageMimeType + ';base64,' + userReviews.offer.imageData">
                             </div>
                             <div class="img-thumb" v-if="userReviews.offer.imageData == null"><img
@@ -170,19 +173,21 @@
                           </div>
                           <div class="comment-body">
                             <div class="comment-author vcard" v-if="userReviews.reviewer.profilePicture != null">
-                              <img alt=""
+                              <img alt="" @click="redirectToProfile(userReviews.reviewer.user_Id)"
                                 :src="'data:' + userReviews.offer.imageMimeType + ';base64,' + userReviews.reviewer.profilePicture"
-                                class="avatar avatar-80 photo" height="80" width="80" decoding="async">
+                                class="avatar avatar-80 photo clickable-item" height="80" width="80" decoding="async">
                             </div>
                             <div class="comment-author vcard" v-if="userReviews.reviewer.profilePicture == null">
-                              <img alt="" :src="defaultProfileImgSrc" class="avatar avatar-80 photo" height="80"
+                              <img @click="redirectToProfile(userReviews.reviewer.user_Id)" alt=""
+                                :src="defaultProfileImgSrc" class="avatar avatar-80 photo clickable-item" height="80"
                                 width="80" decoding="async">
                             </div>
                             <div class="comment-content">
                               <div class="comment-head">
                                 <div class="comment-user">
-                                  <div class="user">{{ userReviews.reviewer.firstName }} {{
-                                    userReviews.reviewer.lastName }}</div>
+                                  <div @click="redirectToProfile(userReviews.reviewer.user_Id)"
+                                    class="user clickable-item">{{ userReviews.reviewer.firstName }} {{
+                                      userReviews.reviewer.lastName }}</div>
                                   <div class="comment-date">
                                     <time datetime="2024-08-02T09:54:50+00:00"> <time
                                         :datetime="userReviews.createdAt">{{
@@ -257,6 +262,18 @@ export default {
     this.fetchUserData(sessionStorage.getItem('UserId'));
   },
   methods: {
+    redirectToOffer(offerId) {
+      this.$router.push({
+        name: 'OfferDetail',
+        params: {
+          id: offerId
+        }
+      });
+    },
+    redirectToProfile(userId) {
+      sessionStorage.setItem("UserId", userId);
+      window.location.reload();
+    },
     back() {
       window.history.back();
     },
@@ -377,6 +394,7 @@ export default {
 .card-text a:hover {
   text-decoration: underline;
 }
+
 .star {
   font-size: 1.2em;
 }
@@ -431,6 +449,7 @@ export default {
   text-decoration: none;
   cursor: pointer;
 }
+
 .profile-content {
   margin-block-start: -5rem;
 }

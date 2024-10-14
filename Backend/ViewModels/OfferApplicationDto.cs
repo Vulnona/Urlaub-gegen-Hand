@@ -4,6 +4,7 @@ namespace UGH.Domain.ViewModels;
 
 public class OfferApplicationDto
 {
+#pragma warning disable CS8632
     public int OfferId { get; set; }
     public Guid HostId { get; set; }
     public OfferDto Offer { get; set; }

@@ -34,7 +34,7 @@
                   </router-link>
                 </li>
                 <li v-if="isActiveMember && userRole != 'Admin'" class="nav-item">
-                  <router-link class="nav-link" to="/offerrequest">
+                  <router-link class="nav-link" to="/offer-request">
                     <i class="ri-mail-line"></i> Offer Request
                   </router-link>
                 </li>

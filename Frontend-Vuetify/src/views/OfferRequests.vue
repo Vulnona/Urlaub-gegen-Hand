@@ -17,11 +17,14 @@
       <div class="card">
         <div class="card-header">
           <h1 class="main-title">Offers Requests</h1>
-          <div><router-link class="action-link" to="/my-offers"> <i class="ri-arrow-left-double-fill"></i> Back To Offers
+          <div><router-link class="action-link" to="/my-offers"> <i class="ri-arrow-left-double-fill"></i> Back To
+              Offers
               <span class="sr-only">(current)</span></router-link></div>
         </div>
         <div class="card-body">
-          <div v-if="loading" class="text-center">Loading...</div>
+          <div v-if="loading" class="spinner-container text-center">
+            <div class="spinner"></div>
+          </div>
           <div v-else>
             <div class="table-responsive">
               <table v-if="offers && offers.length > 0" class="table theme_table">
@@ -36,11 +39,11 @@
                   <tr v-for="(item, index) in offers" :key="item.id">
                     <td><a class="view_user" style="cursor: pointer;" @click="showUserDetails(item.user.user_Id)">
                         <span class="user_img" v-if="item.user.profilePicture != null">
-                          <img data-v-f32632b7="" class="" alt="User Profile Picture"
+                          <img loading="lazy" class="" alt="User Profile Picture"
                             :src="'data:' + 'image/jpeg' + ';base64,' + item.user.profilePicture">
                         </span>
                         <span class="user_img" v-if="item.user.profilePicture == null">
-                          <img data-v-f32632b7="" class="" alt="User Profile Picture" :src="defaultProfileImgSrc">
+                          <img loading="lazy" class="" alt="User Profile Picture" :src="defaultProfileImgSrc">
                         </span>
                         {{
                           item.user.firstName }} {{ item.user.lastName }}</a> </td>
@@ -76,13 +79,14 @@
         </div>
       </div>
     </div>
+
     <div v-if="showModal" class="overlay"></div>
     <div id="rating-modal" class="rating-modal" v-if="showModal">
       <div class="modal-content rating-modal-content">
         <div class="review_rating_layout">
           <div class="review_header">
             <div class="photo">
-              <img
+              <img loading="lazy"
                 :src="'data:' + offers[this.offerRequestIndex].offer.imageMimetype + ';base64,' + offers[this.offerRequestIndex].offer.imageData"
                 alt="Offer Image" />
             </div>
@@ -119,12 +123,11 @@
 
 <script>
 import router from '@/router';
-import CryptoJS from 'crypto-js';
 import Navbar from '@/components/navbar/Navbar.vue';
 import Securitybot from '@/services/SecurityBot';
 import axiosInstance from '@/interceptor/interceptor';
 import toast from '@/components/toaster/toast';
-let globalLogid = '';
+
 let globalratingId = '';
 
 export default {
@@ -174,21 +177,10 @@ export default {
         this.loading = false;
       }
     },
-    // Method to decrypt an encrypted item
-    decryptlogID(encryptedItem) {
-      try {
-        const bytes = CryptoJS.AES.decrypt(encryptedItem, process.env.SECRET_KEY);
-        const decryptedString = bytes.toString(CryptoJS.enc.Utf8);
-        return decryptedString;
-      } catch (e) {
-        //console.error('Error decrypting item:', e);
-        return null;
-      }
-    },
     // Method to approve an offer
     async approveOffer(reviewId, userId) {
       try {
-        const response = await axiosInstance.put(`${process.env.baseURL}offer/update-application-status?offerId=${reviewId}&isApprove=true&hostId=${globalLogid}&userId=${userId}`);
+        const response = await axiosInstance.put(`${process.env.baseURL}offer/update-application-status?offerId=${reviewId}&isApprove=true&userId=${userId}`);
         const index = this.offers.findIndex(item => item.id === reviewId);
         if (index !== -1) {
           this.offers[index].status = 1;
@@ -206,7 +198,7 @@ export default {
     // Method to reject an offer
     async rejectOffer(reviewId, userId) {
       try {
-        const response = await axiosInstance.put(`${process.env.baseURL}offer/update-application-status?offerId=${reviewId}&isApprove=false&hostId=${globalLogid}&userId=${userId}`);
+        const response = await axiosInstance.put(`${process.env.baseURL}offer/update-application-status?offerId=${reviewId}&isApprove=false&userId=${userId}`);
         const index = this.offers.findIndex(item => item.id === reviewId);
         if (index !== -1) {
           this.offers[index].status = 2;
@@ -236,7 +228,7 @@ export default {
     // Method to submit rating
     async submitRating() {
       if (this.selectedRating > 0) {
-        await this.addRating(this.currentOfferId, this.selectedRating, this.reviewText,globalratingId);
+        await this.addRating(this.currentOfferId, this.selectedRating, this.reviewText, globalratingId);
         this.cancelRating();
       } else {
         toast.info("Please select a Rating");
@@ -258,12 +250,12 @@ export default {
         });
         if (response.status === 200) {
           toast.success("Dein Rating wurde erfolgreich hinzugefügt.");
-        } 
+        }
       } catch (error) {
         if (error.response.data.message == "The Review already exists.") {
           toast.info("Du hast bereits ein Rating abgegeben.");
         }
-        else{
+        else {
           toast.error("Fehler beim Absenden der Bewertungen!");
         }
       }

@@ -2,6 +2,7 @@
 
 public class UserProfileDataDTO
 {
+#pragma warning disable CS8632
     public string FirstName { get; set; }
     public string LastName { get; set; }
     public byte[] ProfilePicture { get; set; }

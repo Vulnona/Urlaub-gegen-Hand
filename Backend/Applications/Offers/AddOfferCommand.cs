@@ -7,9 +7,11 @@ namespace UGH.Application.Offers;
 public class AddOfferCommand : IRequest<Result>
 {
     public OfferViewModel OfferViewModel { get; }
+    public Guid UserId { get; }
 
-    public AddOfferCommand(OfferViewModel offerViewModel)
+    public AddOfferCommand(OfferViewModel offerViewModel, Guid userId)
     {
         OfferViewModel = offerViewModel;
+        UserId = userId;
     }
 }

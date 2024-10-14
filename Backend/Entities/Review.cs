@@ -4,6 +4,7 @@ namespace UGH.Domain.Entities;
 
 public class Review
 {
+#pragma warning disable CS8632
     public int Id { get; set; }
     public int OfferId { get; set; }
     public int RatingValue { get; set; }

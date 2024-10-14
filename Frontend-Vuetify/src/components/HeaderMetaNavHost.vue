@@ -23,7 +23,7 @@
                 </li>
 
                 <li class="nav-item">
-                  <router-link class="nav-link" to="/offerrequest"><i class="ri-mail-line"></i> Offer
+                  <router-link class="nav-link" to="/offer-request"><i class="ri-mail-line"></i> Offer
                     Request</router-link>
                 </li>
                 &nbsp;&nbsp;&nbsp;&nbsp;

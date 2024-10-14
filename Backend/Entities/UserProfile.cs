@@ -5,6 +5,7 @@ namespace UGH.Domain.Entities;
 
 public class UserProfile
 {
+#pragma warning disable CS8632
     [Required]
     public int Id { get; set; }
 
@@ -13,7 +14,6 @@ public class UserProfile
 
     [ForeignKey("User_Id")]
     public User User { get; set; }
-
     public byte[]? UserPic { get; private set; }
 
     public ProfileOptions Options { get; set; }

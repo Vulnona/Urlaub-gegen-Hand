@@ -121,8 +121,9 @@
                     </div>
                     <div class="custom-form" :class="{ 'has-error': !isValidDateOfBirth && showError }">
                       <label for="dateOfBirth">Geburtsdatum</label>
-                      <Datepicker v-model="dateOfBirth" :format="'yyyy-MM-dd'"
-                        placeholder="Bitte wählen Sie das Geburtsdatum" />
+                      <Datepicker v-model="dateOfBirth" :format="'yyyy-MM-dd'" :enable-time-picker="false"
+                        :auto-apply="true" placeholder="YYYY-MM-DD" :typeable="true" :text-input="true"
+                        input-class-name="datepicker-input" @update:model-value="validateDate" />
                       <span v-if="!isValidDateOfBirth && showError" class="error-message">
                         Alter muss zwischen 14 und 120 Jahren liegen
                       </span>
@@ -235,7 +236,7 @@
 <script>
 import router from '@/router';
 import Swal from 'sweetalert2';
-import CryptoJS from 'crypto-js';
+import AES from 'crypto-js/aes';
 import Datepicker from 'vue3-datepicker';
 import axiosInstance from '@/interceptor/interceptor';
 import toast from '../toaster/toast';
@@ -456,7 +457,7 @@ export default {
           const reg_Id = response.data.value.userId;
           const encryptedLogId = this.encryptItem(reg_Id);
           sessionStorage.setItem('logId', encryptedLogId);
-          router.push('/uploadID');
+          router.push('/upload-id');
         })
         .catch(error => {
           Swal.close();
@@ -469,9 +470,12 @@ export default {
         });
     },
     // Method to encrypt a given item using AES encryption
+    // encryptItem(item) {
+    //   return CryptoJS.AES.encrypt(item, process.env.SECRET_KEY).toString();
+    // },
     encryptItem(item) {
-      return CryptoJS.AES.encrypt(item, process.env.SECRET_KEY).toString();
-    },
+      return AES.encrypt(item, process.env.SECRET_KEY).toString();
+    }
   },
   mounted() {
     this.loadCountries(); // Load the list of countries when the component is mounted

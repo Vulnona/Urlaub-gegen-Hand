@@ -7,7 +7,7 @@ namespace UGH.Infrastructure.Services
     {
         Task<IActionResult> GetOffersAsync(string searchTerm);
         Task<IActionResult> GetOfferAsync(int offerId);
-        Task<IActionResult> AddOfferAsync(OfferViewModel offerViewModel);
+        Task<IActionResult> AddOfferAsync(OfferViewModel offerViewModel, Guid userId);
         Task<IActionResult> DeleteOfferAsync(int offerId);
         Task<IActionResult> ApplyForOfferAsync(int offerId, string email);
         Task<IActionResult> GetOfferApplicationsByHostAsync(Guid hostId);

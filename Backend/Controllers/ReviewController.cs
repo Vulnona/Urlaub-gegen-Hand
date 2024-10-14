@@ -45,7 +45,7 @@ public class ReviewController : ControllerBase
 
             return Ok(result.Value);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             return StatusCode(500, "Internal server error occurred while fetching all reviews.");
         }
@@ -98,7 +98,7 @@ public class ReviewController : ControllerBase
 
             return Ok(result);
         }
-        catch (Exception ex)
+        catch (Exception )
         {
             return StatusCode(500, "Internal server error occurred while updating the review.");
         }
@@ -125,7 +125,7 @@ public class ReviewController : ControllerBase
 
             return Ok(result);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             return StatusCode(500, "Internal server error occurred while deleting the review.");
         }
@@ -147,7 +147,7 @@ public class ReviewController : ControllerBase
 
             return Ok(result.Value);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             return StatusCode(500, "Internal server error occurred while fetching user reviews.");
         }
@@ -169,7 +169,7 @@ public class ReviewController : ControllerBase
 
             return Ok(result.Value);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             return StatusCode(500, "Internal server error occurred while fetching user reviews.");
         }

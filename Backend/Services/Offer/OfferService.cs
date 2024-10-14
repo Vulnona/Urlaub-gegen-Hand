@@ -58,11 +58,11 @@ public class OfferService : IOfferService
         }
     }
 
-    public async Task<IActionResult> AddOfferAsync(OfferViewModel offerViewModel)
+    public async Task<IActionResult> AddOfferAsync(OfferViewModel offerViewModel, Guid userId)
     {
         try
         {
-            var user = await _userRepository.GetUserByIdAsync(offerViewModel.User_Id);
+            var user = await _userRepository.GetUserByIdAsync(userId);
             if (user == null)
                 return new BadRequestObjectResult("User not found.");
 
@@ -91,7 +91,7 @@ public class OfferService : IOfferService
                 Accomodation = offerViewModel.Accommodation,
                 accomodationsuitable = offerViewModel.AccommodationSuitable,
                 skills = offerViewModel.Skills,
-                HostId = offerViewModel.User_Id,
+                HostId = userId,
                 country = offerViewModel.Country,
                 state = offerViewModel.State,
                 city = offerViewModel.City,

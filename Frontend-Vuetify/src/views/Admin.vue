@@ -47,13 +47,13 @@
                   <td @click="setModal(user.user_Id)" class="clickable">{{ user.email_Address }}</td>
                   <td>{{ user.code }}</td>
                   <td v-if="user.link_VS" class="vs_link">
-                    <a class="" @click="showImageModal(decryptLink(user.link_VS))">
+                    <a class="" @click="showImageModal(decryptLink(user.link_VS), user)">
                       <i class="ri-eye-line"></i> View VS
                     </a>
                   </td>
                   <td v-else>No VS Data Available</td>
                   <td v-if="user.link_RS" class="vs_link">
-                    <a class="" @click="showImageModal(decryptLink(user.link_RS))">
+                    <a class="" @click="showImageModal(decryptLink(user.link_RS), user)">
                       <i class="ri-eye-line"></i> View RS
                     </a>
                   </td>
@@ -94,11 +94,29 @@
       </div>
     </div>
     <!-- Image Modal -->
-    <div class="modal-container text-center" v-if="imageUrlToShow">
-      <div class="modal-overlay" @click="closeImageModal"></div>
-      <div class="modal-content">
+    <div class="modal-container-2 text-center" v-if="imageUrlToShow">
+      <div class="modal-overlay-2" @click="closeImageModal"></div>
+      <div class="modal-content-2">
         <span class="close" @click="closeImageModal">&times;</span>
-        <img :src="imageUrlToShow" alt="Image" style="max-width: 100%; max-height: 80vh;">
+        <div class="modal-body-2">
+          <div class="user-data">
+            <div class="card">
+              <h4>Benutzerdaten</h4>
+              <p><strong>Vollständiger Name:</strong> {{ userdata.firstName }} {{ userdata.lastName }}</p>
+              <p><strong>Geburtsdatum:</strong> {{ userdata.dateOfBirth }}</p>
+              <p><strong>Geschlecht:</strong> {{ userdata.gender }}</p>
+              <p><strong>Land:</strong> {{ userdata.country }}</p>
+              <p><strong>Bundesland:</strong> {{ userdata.state }}</p>
+              <p><strong>Stadt:</strong> {{ userdata.city }}</p>
+              <p><strong>Postleitzahl:</strong> {{ userdata.postCode }}</p>
+              <p><strong>Hausnummer:</strong> {{ userdata.houseNumber }}</p>
+              <p><strong>Straßenadresse:</strong> {{ userdata.street }}</p>
+            </div>
+          </div>
+          <div class="image-container">
+            <img :src="imageUrlToShow" alt="Image" class="modal-image">
+          </div>
+        </div>
       </div>
     </div>
     <!-- Email Modal -->
@@ -166,7 +184,8 @@ export default {
       emailSubject: "",
       userRole: UserRole(),
       imageUrlToShow: null,
-      isSending: false
+      isSending: false,
+      userdata: null,
     };
   },
   mounted() {
@@ -175,8 +194,9 @@ export default {
   },
   methods: {
     // Method to show an image modal
-    showImageModal(imageUrl) {
+    showImageModal(imageUrl, userdata) {
       this.imageUrlToShow = imageUrl;
+      this.userdata = userdata;
     },
     // Method to close the image modal
     closeImageModal() {
@@ -589,7 +609,6 @@ h2 {
   background-position: center;
 }
 
-
 .four_zero_four_bg h1 {
   font-size: 80px;
 }
@@ -628,5 +647,69 @@ h2 {
   100% {
     transform: rotate(360deg);
   }
+}
+
+.modal-container-2 {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.modal-overlay-2 {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content-2 {
+  position: relative;
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  max-width: 90%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.modal-body-2 {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 900px;
+}
+
+.user-data {
+  flex: 1;
+  padding-right: 20px;
+  text-align: left;
+}
+
+.image-container {
+  flex: 1;
+}
+
+.modal-image {
+  max-width: 100%;
+  max-height: 80vh;
+  border-radius: 8px;
+}
+
+.close {
+  position: absolute;
+  top: 10px;
+  right: 20px;
+  font-size: 24px;
+  cursor: pointer;
 }
 </style>

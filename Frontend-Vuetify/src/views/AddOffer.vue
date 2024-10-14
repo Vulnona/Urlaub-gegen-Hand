@@ -28,7 +28,6 @@
                       <label>Titel für Angebot <b style="color: red;">*</b></label>
                       <input v-model="offer.title" type="text" class="form-control"
                         placeholder="Offer 1 for Urlaub Gegen Hand" />
-                      <small v-if="!validations.title" style="color: red;">Title is required</small>
                     </div>
                     <div class="form-group">
                       <label>Beschreibung</label>
@@ -52,9 +51,6 @@
                           <option v-for="c in countries" :key="c.country_ID" :value="c.country_ID">{{ c.countryName }}
                           </option>
                         </select>
-                        <small v-if="!validations.addressFields" style="color: black;">Either address or location must
-                          be
-                          provided</small>
                       </div>
                       <div class="form-group">
                         <label>Region</label>
@@ -77,8 +73,6 @@
                       <input v-model="offer.location" type="text" class="form-control"
                         placeholder="Geben Sie Ihren Standort ein" :disabled="locationFieldDisabled"
                         @input="handleLocationChange" />
-                      <small v-if="!validations.location" style="color: black;">Location is required if address is not
-                        provided</small>
                     </div>
                   </div>
                 </div>
@@ -95,7 +89,6 @@
                       <label>Fertigkeiten <b style="color: red;">*</b></label>
                       <multiselect v-model="offer.skills" :options="skills" placeholder="Select Fertigkeiten"
                         label="skillDescrition" track-by="skill_ID" multiple></multiselect>
-                      <small v-if="!validations.skills" style="color: red;">At least one skill is required</small>
                     </div>
                     <div class="amenities-wrapper">
                       <div class="form-group">
@@ -136,14 +129,9 @@
                     </div>
                     <div class="form-group">
                       <label>Bild hochladen <b style="color: red;">*</b></label>
-                      <input ref="imageInput" type="file" accept="image/x-png,image/gif,image/jpeg" multiple
-                        @change="onFileChange" class="form-control" />
-                      <small v-if="!validations.image" style="color: red;">Image is required</small>
-                      <small v-if="validations.tooManyImages" style="color: red;">You can upload up to 6 images
-                        only.</small>
+                      <input ref="imageInput" type="file" accept="image/x-png,image/jpeg" @change="onFileChange"
+                        class="form-control" />
                     </div>
-
-
                   </div>
                 </div>
               </div>
@@ -163,12 +151,11 @@
 import router from '@/router';
 import Multiselect from 'vue-multiselect';
 import 'vue-multiselect/dist/vue-multiselect.css';
-import CryptoJS from 'crypto-js';
 import Navbar from '@/components/navbar/Navbar.vue';
 import Securitybot from '@/services/SecurityBot';
 import axiosInstance from '@/interceptor/interceptor';
 import toast from '@/components/toaster/toast';
-let globalLogid = '';
+
 export default {
   components: {
     Multiselect,
@@ -178,17 +165,6 @@ export default {
     return {
       addressFieldsDisabled: false,
       locationFieldDisabled: false,
-      activeStep: 0,
-      steps: [{
-        label: "Allgemeine Informationen"
-      },
-      {
-        label: "Address Information"
-      },
-      {
-        label: "Additional Information"
-      }
-      ],
       toast: null,
       offer: {
         title: '',
@@ -197,20 +173,10 @@ export default {
         accommodation: [],
         accommodationSuitable: [],
         skills: [],
-        user_Id: globalLogid,
         image: null,
         city: '',
         state: '',
         country: '',
-        activeTab: 'gen_info',
-      },
-      validations: {
-        title: true,
-        country: true,
-        state: true,
-        city: true,
-        skills: true,
-        image: true,
       },
       skills: [],
       accommodations: [],
@@ -252,24 +218,9 @@ export default {
     }
   },
   methods: {
-    nextStep() {
-      if (this.validateStep()) {
-        this.activeStep += 1;
-      }
-    },
-    goToStep(index) {
-      if (this.validateStep() || index < this.activeStep) {
-        this.activeStep = index;
-      }
-    },
-    prevStep() {
-      this.activeStep -= 1;
-    },
     handleLocationChange() {
       if (this.offer.location.trim() !== '') {
         this.addressFieldsDisabled = true;
-        this.validations.addressFields = true;
-        this.validations.location = true;
       } else {
         this.addressFieldsDisabled = false;
       }
@@ -277,7 +228,6 @@ export default {
     handleAddressChange() {
       if (this.countryId && this.stateId && this.cityId) {
         this.locationFieldDisabled = true;
-        this.validations.location = true;
       } else {
         this.locationFieldDisabled = false;
       }
@@ -287,67 +237,9 @@ export default {
       this.addressFieldsDisabled = false;
       this.locationFieldDisabled = false;
     },
-    validateStep() {
-      // Reset validations
-      this.resetValidations();
-      if (this.activeStep === 0) {
-        // Step 1 validation
-        if (!this.offer.title) {
-          this.validations.title = false;
-          return false;
-        }
-      } else if (this.activeStep === 1) {
-        // Step 2 validation
-        const isLocationFilled = this.offer.location.trim() !== '';
-        const isAddressFilled = this.countryId && this.stateId && this.cityId;
-        if (!isLocationFilled && !isAddressFilled) {
-          this.validations.address = false;
-          return false;
-        }
-        if (!isLocationFilled) {
-          this.validations.location = false;
-        }
-        if (!isAddressFilled) {
-          this.validations.addressFields = false;
-        }
-      } else if (this.activeStep === 2) {
-        // Step 3 validation
-        if (this.offer.skills.length === 0) {
-          this.validations.skills = false;
-          return false;
-        }
-        if (!this.offer.image) {
-          this.validations.image = false;
-          return false;
-        }
-      }
-      return true;
-    },
-    resetValidations() {
-      this.validations = {
-        title: true,
-        country: true,
-        state: true,
-        city: true,
-        skills: true,
-        image: true,
-      };
-    },
-    // Method to decrypt user ID from sessionStorage
-    decryptlogID(encryptedItem) {
-      try {
-        const bytes = CryptoJS.AES.decrypt(encryptedItem, process.env.SECRET_KEY);
-        const decryptedString = bytes.toString(CryptoJS.enc.Utf8);
-        return decryptedString;
-      } catch (e) {
-        return null;
-      }
-    },
     // Method to fetch accommodations data
     async fetchAccommodations() {
       try {
-        const decryptlogid = this.decryptlogID(sessionStorage.getItem("logId"));
-        globalLogid = decryptlogid;
         const response = await axiosInstance.get(`${process.env.baseURL}accommodation/get-all-accommodations`);
         this.accommodations = response.data;
       } catch (error) {
@@ -454,7 +346,6 @@ export default {
       offerData.append('accommodation', this.offer.accommodation.join(', '));
       offerData.append('accommodationSuitable', this.offer.accommodationSuitable.join(', '));
       offerData.append('skills', this.offer.skills.map(skill => skill.skillDescrition).join(', '));
-      offerData.append('user_Id', globalLogid);
       offerData.append('country', this.countryName);
       offerData.append('state', this.stateName);
       offerData.append('city', this.cityName);
@@ -479,16 +370,7 @@ export default {
         this.resetForm();
       }
     },
-    decryptEmail(encryptedToken) {
-      // Method to decrypt email
-      try {
-        const bytes = CryptoJS.AES.decrypt(encryptedToken, process.env.SECRET_KEY);
-        return bytes.toString(CryptoJS.enc.Utf8);
-      } catch (e) {
-        // console.error('Error decrypting Email:', e);
-        return null;
-      }
-    },
+
     resetForm() {
       this.offer.title = '';
       this.offer.description = '';
@@ -509,7 +391,7 @@ export default {
       }
     },
     onFileChange(event) {
-      this.offer.image = event.target.files[0]; 
+      this.offer.image = event.target.files[0];
     }
   }
 };

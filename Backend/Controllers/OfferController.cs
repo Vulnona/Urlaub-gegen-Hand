@@ -70,14 +70,16 @@ public class OfferController : ControllerBase
             return StatusCode(500, $"Internal server error: {ex.Message}");
         }
     }
-
+   
     [HttpGet("get-offer-by-user")]
-    public async Task<IActionResult> GetOfferAsync()
+    public async Task<IActionResult> GetOfferAsync(string searchTerm,
+        int pageNumber = 1,
+        int pageSize = 10)
     {
         try
         {
             var userId = _userProvider.UserId;
-            var query = new GetOfferByUserQuery(userId);
+            var query = new GetOfferByUserQuery(userId, searchTerm, pageNumber, pageSize);
             var result = await _mediator.Send(query);
 
             if (result.IsFailure)
@@ -125,8 +127,11 @@ public class OfferController : ControllerBase
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var command = new AddOfferCommand(offerViewModel);
-            var result = await _mediator.Send(command);
+
+            var userId = _userProvider.UserId;
+
+            var command = new AddOfferCommand(offerViewModel, userId);
+            var result = await _mediator.Send(command); 
 
             if (result.IsFailure)
             {

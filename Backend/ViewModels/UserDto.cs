@@ -4,6 +4,7 @@ namespace UGHApi.ViewModels;
 
 public class UserDTO
 {
+#pragma warning disable CS8632
     public Guid User_Id { get; set; }
     public string FirstName { get; set; }
     public string LastName { get; set; }

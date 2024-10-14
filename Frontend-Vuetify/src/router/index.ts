@@ -21,7 +21,7 @@ const routes = [
     component: () => import('@/views/Account.vue'),
   },
   {
-    path: '/offer',
+    path: '/add-offer',
     name: 'AddOffer',
     component: () => import('@/views/AddOffer.vue'),
   },
@@ -54,7 +54,7 @@ const routes = [
     component: () => import('@/components/account/AccountRegister.vue'),
   },
   {
-    path: '/offerRequest',
+    path: '/offer-request',
     name: 'OfferRequest',
     component: () => import('@/views/OfferRequests.vue'),
   },
@@ -64,12 +64,12 @@ const routes = [
     component: () => import('@/views/Profile.vue'),
   },
   {
-    path: '/editprofile',
+    path: '/edit-profile',
     name: 'editprofile',
     component: () => import('@/views/EditProfile.vue'),
   },
   {
-    path: '/uploadID',
+    path: '/upload-id',
     name: 'UploadID',
     component: () => import('@/views/UploadID.vue'),
   },

@@ -433,7 +433,7 @@ export default {
       this.showPicModal = true;
     },
     upload_id() {
-      router.push("/uploadID").then(() => { });
+      router.push("/upload-id").then(() => { });
     },
     // Function to decrypt encrypted token using AES decryption
     decryptToken(encryptedToken) {
@@ -529,7 +529,7 @@ export default {
       return result;
     },
     editProfile() {
-      router.push('/editprofile');
+      router.push('/edit-profile');
     },
     // Function to dynamically set star class based on rating
     starClass(star) {

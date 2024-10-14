@@ -82,25 +82,6 @@ p{
    margin-bottom: 20px;
 }
  
-// .btn {
-//    display: inline-block;
-//    font-weight: 400;
-//    line-height: 1.5;
-//    color: #212529;
-//    text-align: center;
-//    text-decoration: none;
-//    vertical-align: middle;
-//    cursor: pointer;
-//    -webkit-user-select: none;
-//    -moz-user-select: none;
-//    user-select: none;
-//    background-color: transparent;
-//    border: 1px solid transparent;
-//    padding: 6px 12px;
-//    font-size: 14px!important;
-//    border-radius: 4px;
-//    transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out;
-// }
 .custom-confirm-btn {
    margin-right: 10px; 
  }
@@ -117,15 +98,7 @@ p{
    background-color: rgb(155, 219, 228);
    color: rgb(0,109,124);
 }
-// .btn.themeBtn, .btn.themeBtn:active {
-//    background-color: rgb(0,189,214);
-//    color: #ffffff;
-//    margin: 5px 0px;
-// }
-// .btn.themeBtn:hover {
-//    background-color: rgb(4 177 201);
-//    color:#fff;
-// }
+
 .themeFlexBtn{
    display: flex;
    align-items: center;
@@ -630,7 +603,7 @@ button{margin:0px!important;}
 .chooseUs_layout .chooseUs_option p { margin-bottom:0; font-weight: 300;}
 .offer_detail_layout {   max-width: 1080px;   margin: auto;   width: 100%;}
 .Offer_search_layout{   background-color: #eff2f9;  position: relative;  }
-.offer_search_overlay{   background-image: url('/images/offer-searchbg.jpg');    background-repeat: no-repeat;   background-position: bottom left;   background-size: cover;   opacity: 0.1;   mix-blend-mode: multiply;   transition: background 0.3s, border-radius 0.3s, opacity 0.3s;   height: 100%;   width: 100%;   top: 0;   left: 0;   position: absolute;}
+.offer_search_overlay{   background-image: url('/images/offer-searchbg.webp');    background-repeat: no-repeat;   background-position: bottom left;   background-size: cover;   opacity: 0.1;   mix-blend-mode: multiply;   transition: background 0.3s, border-radius 0.3s, opacity 0.3s;   height: 100%;   width: 100%;   top: 0;   left: 0;   position: absolute;}
 .offer_search_content .SearchBox_filter {background-color: var(--white);  padding:0px;   margin: 0px 0px 0px 0px;   box-shadow: 0px 0px 30px 0px rgba(0, 0, 0, 0.1);   border-radius: 50px;}
 .Offer_search_layout .offer_search_content .btn_outer .btn {   min-width: 180px;   padding: 15px;   text-transform: uppercase;}
 .Offer_search_layout .SearchBox .form-control {  background-color: transparent;   padding: 15px 30px 15px 55px;   font-size: 16px;   border-radius: 0;   border: 0;   height: 56px;}
@@ -639,7 +612,7 @@ button{margin:0px!important;}
 .offer_search_content {   max-width: 800px;   margin: auto;}
 .offer_search_content  .SearchBox {   position: relative;   flex: 1;}
 .offer_search_content .SearchBox i {   position: absolute;   top: 50%;   font-size: 18px;   left: 30px;   transform: translateY(-50%);   color:var(--SecondarytextColor);}
-.Offer_search_layout .offers_group {   background-image: url('/images/pattern.jpg');   background-repeat: no-repeat;   background-position: bottom left; }
+.Offer_search_layout .offers_group {   background-image: url('/images/pattern.webp');   background-repeat: no-repeat;   background-position: bottom left; }
 .offers_group .all_items.card-offer {   box-shadow: rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, rgba(0, 0, 0, 0.06) 0px 1px 2px 0px;border:1px solid var(--cardBorderColor);  border-radius: 20px;   background:var(--white);   margin-bottom: 20px;}
 .offers_group .item_img { position:relative;  margin-bottom: -25px;   border-top-left-radius: 20px;   border-top-right-radius: 20px;   overflow: hidden;}
 .offers_group .item_text {  border-top: 1px solid color(a98-rgb 0.86 0.86 0.86 / 0.36); z-index: 3;   position: relative;   padding: 15px 25px 15px;   width: 100%;   background-color:var(--white); min-height: 260px;   border-radius: 20px;}
@@ -757,7 +730,6 @@ select.form-control{appearance: auto; --webkit-apearance:auto; --moz-appearance:
 
 
 /*offerRequest*/
-// .offers_request_layout {background-image: url(https://demo2.wpopal.com/havezic/wp-content/uploads/2024/07/deco-right.png); background-image: url('https://demo2.wpopal.com/havezic/wp-content/uploads/2024/07/deco-right.png');    background-position: right bottom;}
 .upload-btn {
    margin-bottom: 10px;
 }
@@ -807,7 +779,15 @@ select.form-control{appearance: auto; --webkit-apearance:auto; --moz-appearance:
    margin-top: 10px;
 }
 
-
+.clickable-item:hover{
+   cursor: pointer;
+   color: #007bff;
+}
+.pagination {
+   display: flex;
+   justify-content: center;
+   gap: 12px;
+}
 /*My Offers*/
 .sort-new-button .SearchBox {
    position: relative;
@@ -1798,6 +1778,29 @@ body .profile-form-inner .form-group {
       right: inherit;
   }
 }
+.spinner-container {
+   display: flex;
+   justify-content: center;
+   align-items: center;
+   height: 100px; /* Adjust based on your layout */
+ }
  
+ .spinner {
+   border: 4px solid rgba(0, 0, 0, 0.1);
+   border-left-color: #09f;
+   border-radius: 50%;
+   width: 50px;
+   height: 50px;
+   animation: spin 1s linear infinite;
+ }
+ 
+ @keyframes spin {
+   0% {
+     transform: rotate(0deg);
+   }
+   100% {
+     transform: rotate(360deg);
+   }
+ }
  
  //============================HomePage Css End============================//

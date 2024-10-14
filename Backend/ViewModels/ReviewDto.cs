@@ -4,6 +4,7 @@ namespace UGHApi.ViewModels;
 
 public class ReviewDto
 {
+#pragma warning disable CS8632
     public int Id { get; set; }
     public int OfferId { get; set; }
     public int RatingValue { get; set; }
@@ -17,6 +18,7 @@ public class ReviewDto
 
 public class UserDto
 {
+    public Guid User_Id { get; set; }
     public string FirstName { get; set; }
     public string LastName { get; set; }
     public byte[]? ProfilePicture { get; set; }

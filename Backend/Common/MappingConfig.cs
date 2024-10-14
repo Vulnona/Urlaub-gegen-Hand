@@ -5,6 +5,7 @@ using UGHApi.ViewModels;
 
 public static class MapsterConfig
 {
+#pragma warning disable CS8632
     public static void RegisterMappings()
     {
         TypeAdapterConfig<User, UserDTO>
@@ -15,6 +16,7 @@ public static class MapsterConfig
 
     private static List<string?> SplitAndTrim(string? input)
     {
+#pragma warning disable CS8632
         return input?.Split(',').Select(h => h.Trim()).ToList() ?? new List<string?>();
     }
 }

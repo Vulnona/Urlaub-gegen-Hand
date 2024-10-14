@@ -5,6 +5,7 @@ namespace UGH.Domain.ApplicationResponses;
 
 public class UserResponse
 {
+#pragma warning disable CS8632
     public Guid User_Id { get; set; }
     public string FirstName { get; set; }
     public string LastName { get; set; }

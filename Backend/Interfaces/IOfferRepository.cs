@@ -17,7 +17,7 @@ namespace UGH.Domain.Interfaces
         Task AddOfferAsync(Offer offer);
         Task RemoveOfferAsync(int offerId);
         Task<OfferApplication> GetOfferApplicationAsync(int offerId, Guid userId);
-        Task<List<OfferDTO>> GetUserOffersAsync(Guid userId, string searchTerm = null);
+        Task<PaginatedList<OfferDTO>> GetUserOffersAsync(Guid userId, int pageNumber = 1, int pageSize = 10, string searchTerm = null);
         Task AddOfferApplicationAsync(OfferApplication application);
         Task<List<OfferApplication>> GetOfferApplicationsByHostAsync(Guid hostId);
         Task<bool> UpdateOfferApplicationAsync(OfferApplication offerApplication);

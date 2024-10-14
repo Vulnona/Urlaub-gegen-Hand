@@ -4,6 +4,7 @@ namespace UGH.Contracts.Review;
 
 public class UpdateReviewRequest
 {
+#pragma warning disable CS8632
     [Required]
     public int ReviewId { get; set; }
 

@@ -2,6 +2,7 @@
 
 public class UserOffer
 {
+#pragma warning disable CS8632
     public int Id { get; set; }
     public byte[] ImageData { get; set; }
     public string Title { get; set; }

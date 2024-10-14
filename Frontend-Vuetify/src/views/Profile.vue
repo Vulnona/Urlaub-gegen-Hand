@@ -24,7 +24,7 @@
                 alt="User Profile Picture">
             </span>
             <h5 class="fw-semibold mb-1">{{ user.firstName }} {{ user.lastName }}</h5>
-            <span @click="showModal = true" class="action-link fs-13 font-normal">View All Reviews</span>
+            <span @click="openReviewsModal()" class="action-link fs-13 font-normal">View All Reviews</span>
           </div>
         </div>
 
@@ -170,8 +170,10 @@
                       <li v-for="userReviews in reviews" :key="userReviews" class="comment">
                         <div>
                           <div class="comment_head">
-                            <h6>{{ userReviews.offer.title }}</h6>
-                            <div class="img-thumb" v-if="userReviews.offer.imageData != null"><img
+                            <h6 @click="redirectToOffer(userReviews.offer.id)" class="clickable-item">{{
+                              userReviews.offer.title }}</h6>
+                            <div @click="redirectToOffer(userReviews.offer.id)" class="img-thumb clickable-item"
+                              v-if="userReviews.offer.imageData != null"><img
                                 :src="'data:' + userReviews.offer.imageMimeType + ';base64,' + userReviews.offer.imageData">
                             </div>
                             <div class="img-thumb" v-if="userReviews.offer.imageData == null"><img
@@ -180,19 +182,21 @@
                           </div>
                           <div class="comment-body">
                             <div class="comment-author vcard" v-if="userReviews.reviewer.profilePicture != null">
-                              <img alt=""
+                              <img alt="" @click="redirectToProfile(userReviews.reviewer.user_Id)"
                                 :src="'data:' + userReviews.offer.imageMimeType + ';base64,' + userReviews.reviewer.profilePicture"
-                                class="avatar avatar-80 photo" height="80" width="80" decoding="async">
+                                class="avatar avatar-80 photo clickable-item" height="80" width="80" decoding="async">
                             </div>
                             <div class="comment-author vcard" v-if="userReviews.reviewer.profilePicture == null">
-                              <img alt="" :src="defaultProfileImgSrc" class="avatar avatar-80 photo" height="80"
+                              <img alt="" @click="redirectToProfile(userReviews.reviewer.user_Id)"
+                                :src="defaultProfileImgSrc" class="avatar avatar-80 photo clickable-item" height="80"
                                 width="80" decoding="async">
                             </div>
                             <div class="comment-content">
                               <div class="comment-head">
                                 <div class="comment-user">
-                                  <div class="user">{{ userReviews.reviewer.firstName }} {{
-                                    userReviews.reviewer.lastName }}</div>
+                                  <div @click="redirectToProfile(userReviews.reviewer.user_Id)"
+                                    class="user clickable-item">{{ userReviews.reviewer.firstName }} {{
+                                      userReviews.reviewer.lastName }}</div>
                                   <div class="comment-date">
                                     <time :datetime="userReviews.createdAt">{{
                                       formatDate(userReviews.createdAt) }}</time>
@@ -271,7 +275,7 @@ import Securitybot from "@/services/SecurityBot";
 import getLoggedUserId from "@/services/LoggedInUserId";
 import toast from "@/components/toaster/toast";
 
-let globalLogId = '';
+
 export default {
   components: {
     Navbar,
@@ -287,7 +291,6 @@ export default {
       rate: {},
       userRole: userRole(),
       isActiveMember: isActiveMember(),
-      globalEmail: '',
       showModal: false,
       showPicModal: false,
       profilePic: null,
@@ -298,7 +301,6 @@ export default {
   },
   mounted() {
     Securitybot();
-    this.showReviews(this.userId);
     this.fetchUserData();
   },
   watch: {
@@ -309,6 +311,22 @@ export default {
     },
   },
   methods: {
+    openReviewsModal(){
+      this.showModal = true;
+      this.showReviews(this.userId);
+    },
+    redirectToOffer(offerId) {
+      this.$router.push({
+        name: 'OfferDetail',
+        params: {
+          id: offerId
+        }
+      });
+    },
+    redirectToProfile(userId) {
+      sessionStorage.setItem("UserId", userId);
+      router.push("/account");
+    },
     formatDate(dateString) {
       const options = { year: 'numeric', month: 'long', day: '2-digit' };
       return new Date(dateString).toLocaleDateString(undefined, options);
@@ -330,7 +348,7 @@ export default {
         reader.onload = (e) => {
           this.profilePic = e.target.result;
         };
-        reader.readAsDataURL(file); // Convert image to base64 for preview
+        reader.readAsDataURL(file); 
       }
     },
 
@@ -357,7 +375,7 @@ export default {
 
           if (response.status === 200) {
             toast.success("Profile picture updated successfully!");
-            this.showPicModal = false; 
+            this.showPicModal = false;
             this.fetchUserData();
           } else {
             toast.info("Failed to update proile picture!");
@@ -368,7 +386,7 @@ export default {
         }
       };
 
-      reader.readAsDataURL(this.selectedFile); // Convert image to Base64
+      reader.readAsDataURL(this.selectedFile); 
     }
     ,
     onImageError(event) {
@@ -381,7 +399,7 @@ export default {
       this.showPicModal = true;
     },
     upload_id() {
-      router.push("/uploadID").then(() => { });
+      router.push("/upload-id").then(() => { });
     },
     // Function to decrypt encrypted token using AES decryption
     decryptToken(encryptedToken) {
@@ -390,17 +408,6 @@ export default {
         return bytes.toString(CryptoJS.enc.Utf8);
       } catch (e) {
         //    console.error('Error decrypting token:', e);
-        return null;
-      }
-    },
-    // Function to decrypt encrypted log ID and parse it as an integer
-    decryptlogID(encryptedItem) {
-      try {
-        const bytes = CryptoJS.AES.decrypt(encryptedItem, process.env.SECRET_KEY);
-        const decryptedString = bytes.toString(CryptoJS.enc.Utf8);
-        return decryptedString;
-      } catch (e) {
-        // console.error('Error decrypting item:', e);
         return null;
       }
     },
@@ -423,7 +430,7 @@ export default {
             sessionStorage.clear();
             router.push("/");
           }).catch((error) => {
-            console.log(error);
+           // console.log(error);
           });
         }
       });
@@ -458,40 +465,18 @@ export default {
         this.user = response.data.profile;
         this.profileImgSrc = `data:image/jpeg;base64,${response.data.profile.profilePicture}`;
       } catch (error) {
-          toast.info("Benutzerdaten konnten nicht abgerufen werden");
+        toast.info("Benutzerdaten konnten nicht abgerufen werden");
       }
     },
     editProfile() {
-      router.push('/editprofile');
+      router.push('/edit-profile');
     },
-    // Function to dynamically set star class based on rating
-    starClass(star) {
-      return {
-        'ri-star-fill gold': star === 'full',
-        'ri-star-half-s-line gold': star === 'half',
-        'ri-star-line': star === 'empty'
-      };
-    }
   },
+
   computed: {
     imageSrc() {
       return this.profileImgSrc || this.defaultProfileImgSrc;
     },
-    stars() {
-      const stars = [];
-      const integerPart = Math.floor(this.user.averageRating);
-      const decimalPart = this.user.averageRating - integerPart;
-      for (let i = 0; i < 5; i++) {
-        if (i < integerPart) {
-          stars.push('full');
-        } else if (decimalPart >= 0.5 && i === integerPart) {
-          stars.push('half');
-        } else {
-          stars.push('empty');
-        }
-      }
-      return stars;
-    }
   }
 };
 </script>
@@ -554,6 +539,7 @@ export default {
 .card-text a:hover {
   text-decoration: underline;
 }
+
 .star {
   font-size: 1.2em;
 }
@@ -609,6 +595,7 @@ export default {
   text-decoration: none;
   cursor: pointer;
 }
+
 .profile-content {
   margin-block-start: -5rem;
 }

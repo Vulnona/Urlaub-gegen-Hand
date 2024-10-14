@@ -5,6 +5,7 @@ namespace UGH.Domain.Entities;
 
 public class Offer
 {
+#pragma warning disable CS8632
     public int Id { get; set; }
 
     [Required]
@@ -34,12 +35,6 @@ public class Offer
     public ICollection<OfferApplication> OfferApplications { get; set; }
     public ICollection<Review> Reviews { get; set; } = new List<Review>();
 
-    //private readonly List<OfferApplication> _offerApplication = new List<OfferApplication>();
-    //public IReadOnlyCollection<OfferApplication> OfferApplications =>
-    //    _offerApplication.AsReadOnly();
-
-    //private readonly List<Review> _reviews = new List<Review>();
-    //public IReadOnlyCollection<Review> Reviews => _reviews.AsReadOnly();
     public double AverageRating
     {
         get

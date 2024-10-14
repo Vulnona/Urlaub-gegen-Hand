@@ -133,7 +133,8 @@
 </template>
 <script>
 import router from '@/router';
-import CryptoJS from 'crypto-js';
+// import CryptoJS from 'crypto-js';
+import AES from 'crypto-js/aes';
 import CheckUserRole from '@/services/CheckUserRole';
 import isActiveMembership from '@/services/CheckActiveMembership';
 import axiosInstance from '@/interceptor/interceptor';
@@ -159,7 +160,7 @@ export default {
           toast.info("Bitte geben Sie sowohl E-Mail als auch Passwort ein!");
           return;
         }
-     
+
         const response = await axiosInstance.post(`${process.env.baseURL}authenticate/login`, {
           email: this.email,
           password: this.password
@@ -197,9 +198,13 @@ export default {
         }
       }
     },
+    // encryptItem(item) {
+    //   return CryptoJS.AES.encrypt(item, process.env.SECRET_KEY).toString();
+    // },
     encryptItem(item) {
-      return CryptoJS.AES.encrypt(item, process.env.SECRET_KEY).toString();
-    },
+      return AES.encrypt(item, process.env.SECRET_KEY).toString();
+    }
+
   }
 };
 </script>

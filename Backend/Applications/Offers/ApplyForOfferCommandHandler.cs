@@ -94,7 +94,7 @@ public class ApplyForOfferCommandHandler : IRequestHandler<ApplyForOfferCommand,
                     await _emailService.SendEmailAsync(hostEmail, subject, body);
                     _logger.LogInformation("Notification email sent successfully to the host.");
                 })
-                .ConfigureAwait(false); // Background task ko configure karna
+                .ConfigureAwait(false); 
 
             _logger.LogInformation("Application submitted successfully.");
             return Result.Success();

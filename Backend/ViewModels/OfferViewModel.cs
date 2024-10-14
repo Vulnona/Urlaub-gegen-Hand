@@ -5,6 +5,7 @@ namespace UGH.Domain.ViewModels
 {
     public class OfferViewModel
     {
+#pragma warning disable CS8632
         [Required]
         public string Title { get; set; }
         public string Description { get; set; }
@@ -18,9 +19,6 @@ namespace UGH.Domain.ViewModels
         public string? Country { get; set; }
         public string? State { get; set; }
         public string? City { get; set; }
-
-        [Required]
-        public Guid User_Id { get; set; }
 
         [Required]
         public IFormFile Image { get; set; }

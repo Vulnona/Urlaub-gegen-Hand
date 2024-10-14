@@ -19,8 +19,8 @@
               <p><strong>Location:</strong> {{ offer.location }}</p>
             </div>
             <div class="offer_btn">
-              <button @click="backtooffers()" class="action-link"><i class="fa fa-angle-double-left"
-                  aria-hidden="true"></i> Back To Offers</button>
+              <button @click="backtooffers()" class="action-link"><i class="ri-arrow-go-back-line"
+                  aria-hidden="true"></i> Back </button>
             </div>
           </div>
         </div>
@@ -61,8 +61,8 @@
               <li v-for="(offerReviews, index) in displayedReviews" :key="index" class="comment">
                 <div class="comment-body">
                   <div class="comment-author vcard" v-if="offerReviews.reviewer.profilePicture != null">
-                    <img alt="" :src="'data:' + offer.imageMimeType + ';base64,' + offerReviews.reviewer.profilePicture"
-                      class="avatar avatar-80 photo" height="80" width="80" decoding="async">
+                    <img @click="redirectToProfile(offerReviews.reviewer.user_Id)" alt="" :src="'data:' + offer.imageMimeType + ';base64,' + offerReviews.reviewer.profilePicture"
+                      class="avatar avatar-80 photo clickable-item" height="80" width="80" decoding="async">
                   </div>
                   <div class="comment-author vcard" v-if="offerReviews.reviewer.profilePicture == null">
                     <img alt="" :src="defaultProfileImgSrc" class="avatar avatar-80 photo" height="80" width="80"
@@ -71,7 +71,7 @@
                   <div class="comment-content">
                     <div class="comment-head">
                       <div class="comment-user">
-                        <div class="user">{{ offerReviews.reviewer.firstName }} {{ offerReviews.reviewer.lastName }}
+                        <div @click="redirectToProfile(offerReviews.reviewer.user_Id)" class="user clickable-item">{{ offerReviews.reviewer.firstName }} {{ offerReviews.reviewer.lastName }}
                         </div>
                         <div class="comment-date"> <time :datetime="offerReviews.createdAt">{{
                           formatDate(offerReviews.createdAt) }}</time>
@@ -113,6 +113,7 @@ import {
 } from 'vue-router';
 import Navbar from '@/components/navbar/Navbar.vue';
 import axiosInstance from '@/interceptor/interceptor';
+import router from '@/router';
 const {
   params
 } = useRoute();
@@ -121,6 +122,11 @@ const loading = ref(true);
 const showAllReviews = ref(false);
 var reviews = ref([]);
 const defaultProfileImgSrc = '/defaultprofile.jpg';
+
+const redirectToProfile=(userId)=> {
+      sessionStorage.setItem("UserId", userId);
+      router.push("/account");
+    }
 const fetchOfferDetail = async () => {
   try {
     fetchReview();
@@ -187,7 +193,6 @@ onMounted(fetchOfferDetail);
 
 .modal-content {
   background-color: #fefefe;
-  /* padding: 20px; */
   width: 100%;
   max-width: 800px;
 }

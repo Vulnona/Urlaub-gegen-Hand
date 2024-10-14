@@ -4,6 +4,7 @@ public class Result
 {
     protected internal Result(bool isSuccess, Error error)
     {
+#pragma warning disable CS8632
         if (isSuccess && error != Error.None)
         {
             throw new InvalidOperationException();

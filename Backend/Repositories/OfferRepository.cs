@@ -41,7 +41,7 @@ public class OfferRepository : IOfferRepository
         return await _context.offers.Include(o => o.User).FirstOrDefaultAsync(o => o.Id == offerId);
     }
 
-    public async Task<List<OfferDTO>> GetUserOffersAsync(Guid userId, string searchTerm = null)
+    public async Task<PaginatedList<OfferDTO>> GetUserOffersAsync(Guid userId, int pageNumber = 1, int pageSize = 10, string searchTerm = null)
     {
         IQueryable<Offer> query = _context.offers
             .Include(o => o.Reviews)
@@ -59,14 +59,14 @@ public class OfferRepository : IOfferRepository
             );
         }
 
-        var offers = await query.ToListAsync();
+        int totalCount = await query.CountAsync();
 
-        return offers
+        var offers = await query.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
+
+        var offerDTOs = offers
             .Select(o =>
             {
-                var firstApplication = o.OfferApplications.FirstOrDefault(
-                    oa => oa.UserId == userId
-                );
+                var firstApplication = o.OfferApplications.FirstOrDefault(oa => oa.UserId == userId);
                 string appliedStatus;
 
                 if (firstApplication == null)
@@ -100,6 +100,8 @@ public class OfferRepository : IOfferRepository
                 };
             })
             .ToList();
+
+        return PaginatedList<OfferDTO>.Create(offerDTOs, totalCount, pageNumber, pageSize);
     }
 
     public async Task<PaginatedList<OfferDTO>> GetAllOfferByUserAsync(
@@ -214,7 +216,7 @@ public class OfferRepository : IOfferRepository
                 .Where(app => app.HostId == hostId)
                 .ToListAsync();
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             throw;
         }

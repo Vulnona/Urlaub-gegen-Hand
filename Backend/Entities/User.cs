@@ -6,6 +6,7 @@ namespace UGH.Domain.Entities;
 
 public class User
 {
+#pragma warning disable CS8632
     [Key]
     public Guid User_Id { get; set; }
 
@@ -44,7 +45,6 @@ public class User
 
     [Required]
     public string Password { get; set; }
-
     public string? SaltKey { get; set; }
 
     public bool IsEmailVerified { get; set; }
@@ -52,7 +52,7 @@ public class User
     public string? Facebook_link { get; set; }
     public string? Link_RS { get; set; }
     public string? Link_VS { get; set; }
-
+#pragma warning disable CS8632
     public string? Hobbies { get; set; }
     public string? Skills { get; set; }
     public byte[]? ProfilePicture { get; set; }
@@ -78,7 +78,7 @@ public class User
             }
 
             var totalRatings = Offers
-                .SelectMany(o => o.Reviews)
+                .SelectMany(o => o.Reviews.Where(r=>r.ReviewedId == User_Id))
                 .Select(r => r.RatingValue)
                 .ToList();
 

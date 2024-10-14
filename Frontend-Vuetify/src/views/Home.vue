@@ -138,11 +138,11 @@ body .custom-card .card-text strong {
             <div class="SearchBox_filter flexBox align-items-center">
               <div class="SearchBox">
                 <i class="ri-search-line"></i>
-                <input type="text" v-model="searchTerm" @input="debouncedSearch"
+                <input type="text" v-model="searchTerm" @input="resetSearch(this.searchTerm)"
                   placeholder="Search offers / Region / Skills" class="form-control ">
               </div>
               <div class="btn_outer">
-                <button type="button" class="btn themeBtn">Suchen</button>
+                <button type="button" @click="debouncedSearch" class="btn themeBtn">Suchen</button>
               </div>
             </div>
           </div>
@@ -155,18 +155,15 @@ body .custom-card .card-text strong {
       <div class="row">
         <div class="col-sm-12">
           <div v-if="offers" class="offers_group">
-            <div v-if="loading" class="text-center">Lädt...</div>
+            <div v-if="loading" class="spinner-container text-center">
+              <div class="spinner"></div>
+            </div>
             <div v-else class="row">
               <div v-for="(offer, index) in offers" :key="offer.id" class="col-md-3 mb-4">
                 <div class="all_items card-offer">
                   <div class="item_img">
-                    <!-- <img @click="redirectToOfferDetail(offer.id)" v-if="offer.imageData"
-                      :src="'data:' + offer.imageMimeType + ';base64,' + offer.imageData" class="card-img-top"
-                      alt="Offer Image"> -->
-                      <img loading="lazy" :src="'data:' + offer.imageMimeType + ';base64,' + offer.imageData" class="card-img-top" alt="Offer Image">
-                      <!-- <img v-lazy="'data:' + offer.imageMimeType + ';base64,' + offer.imageData" class="card-img-top" alt="Offer Image"> -->
-
-
+                    <img loading="lazy" :src="'data:' + offer.imageMimeType + ';base64,' + offer.imageData"
+                      class="card-img-top" alt="Offer Image">
                     <div class="rating"
                       v-if="isActiveMember && offer.hostId != logId && offer.appliedStatus == 'Approved'"
                       @click="showAddRatingModal(offer.id, offer.hostId, index)"><i class="ri-star-line"></i></div>
@@ -195,7 +192,6 @@ body .custom-card .card-text strong {
                         </span>
                         <span class="vertical_middle">{{ offer.averageRating }} </span>
                       </div>
-                      <!-- <a href="javascript:void();" class="action-link font-normal"><u>15 reviews</u></a> -->
                     </div>
                     <div v-if="isActiveMember && offer.hostId != logId && userRole != 'Admin'">
                       <button v-if="offer.appliedStatus === 'CanApply'" @click="sendRequest(offer.id)"
@@ -206,11 +202,18 @@ body .custom-card .card-text strong {
                         disabled>Rejected</button>
                       <button v-else-if="offer.appliedStatus === 'Approved'" @click="showUserDetails(offer.hostId)"
                         class="btn btn-primary OfferButtons">View Host Details</button>
-
                     </div>
                   </div>
                 </div>
               </div>
+            </div>
+            <!-- Pagination Section -->
+            <div class="pagination">
+              <button class="action-link" @click="changePage(currentPage - 1)" :hidden="currentPage === 1"><i
+                  class="ri-arrow-left-s-line"></i>Previous</button>
+              <span>Page {{ currentPage }} of {{ totalPages }}</span>
+              <button class="action-link" @click="changePage(currentPage + 1)"
+                :hidden="currentPage === totalPages">Next<i class="ri-arrow-right-s-line"></i></button>
             </div>
           </div>
           <div v-else>
@@ -269,7 +272,8 @@ import Swal from "sweetalert2";
 import CheckUserRole from "@/services/CheckUserRole";
 import router from "@/router";
 import toast from '@/components/toaster/toast';
-let globalrating = '';
+import debounce from 'lodash/debounce';
+
 export default {
   components: {
     Navbar,
@@ -291,27 +295,47 @@ export default {
       reviewText: '',
       showRatingModal: false,
       currentIndex: 0,
+      currentPage: 1,
+      totalPages: 1,
+      pageSize: 8,
     };
   },
   mounted() {
+    this.debouncedSearchOffers = debounce(this.searchOffers, 300);
     this.fetchOffers();
   },
   methods: {
+    resetSearch(search) {
+      if (search == '') {
+        this.fetchOffers();
+      }
+    },
     showUserDetails(userId) {
       sessionStorage.setItem("UserId", userId);
       router.push("/account")
     },
-    // Method to fetch all offers based on search term
     async fetchOffers() {
+      this.loading = true;
       try {
         const response = await axiosInstance.get(`${process.env.baseURL}offer/get-all-offers`, {
           params: {
-            searchTerm: this.searchTerm
+            searchTerm: this.searchTerm,
+            pageSize: this.pageSize,
+            pageNumber: this.currentPage
           }
         });
         this.offers = response.data.items;
-      } catch (error) { } finally {
+        this.totalPages = Math.ceil(response.data.totalCount / this.pageSize);
+      } catch (error) {
+        console.error(error);
+      } finally {
         this.loading = false;
+      }
+    },
+    changePage(newPage) {
+      if (newPage >= 1 && newPage <= this.totalPages) {
+        this.currentPage = newPage;
+        this.fetchOffers(); // fetch new data for the selected page
       }
     },
     // Method to send request for offer application
@@ -345,10 +369,8 @@ export default {
       this.fetchOffers();
     },
     debouncedSearch() {
-      clearTimeout(this.searchTimeout);
-      this.searchTimeout = setTimeout(() => {
-        this.searchOffers();
-      }, 1000);
+      this.currentPage = 1;
+      this.debouncedSearchOffers();
     },
     // Method to redirect to offer detail page
     redirectToOfferDetail(offerId) {
@@ -363,7 +385,6 @@ export default {
       this.selectedRating = 0;
       this.showRatingModal = true;
       this.currentOfferId = offerId;
-      globalrating = userId;
       this.currentIndex = index;
     },
     // Method to select star rating
@@ -409,14 +430,12 @@ export default {
     filteredOffers() {
       return this.offers.filter(offer => {
         const title = offer.title ? offer.title.toLowerCase() : '';
-        const description = offer.description ? offer.description.toLowerCase() : '';
         const skills = offer.skills ? offer.skills.toLowerCase() : '';
         const region = offer.region ? offer.region.toLowerCase() : '';
         const isValidOffer = offer.hostId != offer.id;
         return isValidOffer && (
           title.includes(this.searchTerm.toLowerCase()) ||
           region.includes(this.searchTerm.toLowerCase()) ||
-          description.includes(this.searchTerm.toLowerCase()) ||
           skills.includes(this.searchTerm.toLowerCase())
         );
       });
@@ -679,4 +698,5 @@ button {
 .OfferButtons {
   width: 100%;
 }
+
 </style>
