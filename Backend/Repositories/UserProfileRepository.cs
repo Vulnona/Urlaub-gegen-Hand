@@ -1,5 +1,6 @@
 ﻿using UGH.Domain.Interfaces;
 using UGH.Domain.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace UGH.infrastructure.Repositories;
 
@@ -14,7 +15,7 @@ public class UserProfileRepository : IUserProfileRepository
 
     public async Task<UserProfile> GetUserProfileByUserIdAsync(Guid userId)
     {
-        return _context.userprofiles.FirstOrDefault(p => p.User_Id == userId);
+        return await _context.userprofiles.FirstOrDefaultAsync(p => p.User_Id == userId);
     }
 
     public async Task AddUserProfileAsync(UserProfile profile)
@@ -25,6 +26,7 @@ public class UserProfileRepository : IUserProfileRepository
     public async Task UpdateUserProfileAsync(UserProfile profile)
     {
         _context.userprofiles.Update(profile);
+        await _context.SaveChangesAsync();
     }
 
     public async Task SaveChangesAsync()

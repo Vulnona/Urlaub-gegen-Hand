@@ -40,7 +40,7 @@ public class UserService
                 .Select(x => x.user_Id)
                 .FirstOrDefaultAsync();
 
-            if (userId != null)
+            if (userId != Guid.Empty)
             {
                 var user = await _context.users.FirstOrDefaultAsync(x => x.User_Id == userId);
                 if (user != null)
