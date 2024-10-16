@@ -35,13 +35,6 @@ public class GetAllOffersQueryHandler
                 request.PageSize
             );
 
-            if (paginatedOffers.Items == null || !paginatedOffers.Items.Any())
-            {
-                return Result.Failure<PaginatedList<OfferDTO>>(
-                    Errors.General.NotFound("Offers", request.SearchTerm)
-                );
-            }
-
             return Result.Success(paginatedOffers);
         }
         catch (Exception ex)

@@ -1,11 +1,12 @@
-﻿using UGH.Domain.Interfaces;
+﻿using UGH.Infrastructure.Services;
+using UGH.Domain.Interfaces;
 using UGH.Domain.Entities;
 using UGH.Domain.Core;
 using MediatR;
-using UGH.Infrastructure.Services;
 
 namespace UGH.Application.Offers;
 
+#pragma warning disable CS4014
 public class UpdateApplicationStatusCommandHandler
     : IRequestHandler<UpdateApplicationStatusCommand, Result>
 {

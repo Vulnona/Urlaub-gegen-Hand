@@ -7,6 +7,7 @@ using MediatR;
 
 namespace UGH.Application.Admin;
 
+#pragma warning disable CS4014
 public class UpdateVerifyStateCommandHandler : IRequestHandler<UpdateVerifyStateCommand, Result>
 {
     private readonly IUserRepository _userRepository;

@@ -6,6 +6,7 @@ using UGH.Infrastructure.Services;
 
 namespace UGH.Application.Offers;
 
+#pragma warning disable CS4014
 public class ApplyForOfferCommandHandler : IRequestHandler<ApplyForOfferCommand, Result>
 {
     private readonly IOfferRepository _offerRepository;
