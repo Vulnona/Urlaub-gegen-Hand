@@ -34,10 +34,6 @@ public class Ugh_Context : DbContext
             .AddJsonFile("appsettings.json")
             .Build();
         var connectionString = configuration.GetConnectionString("DefaultConnection");
-        optionsBuilder.UseMySql(
-            connectionString,
-            ServerVersion.AutoDetect(connectionString),
-            b => b.MigrationsAssembly("UGH.Infrastructure")
-        );
+        optionsBuilder.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
     }
 }
