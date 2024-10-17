@@ -19,6 +19,7 @@ public class Offer
     [Required]
     public byte[] ImageData { get; set; }
     public string ImageMimeType { get; set; }
+    public DateTime CreatedAt { get; set; }
     public string? Contact { get; set; }
     public string? Accomodation { get; set; }
     public string? accomodationsuitable { get; set; }

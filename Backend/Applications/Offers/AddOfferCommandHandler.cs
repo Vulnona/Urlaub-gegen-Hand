@@ -67,6 +67,7 @@ public class AddOfferCommandHandler : IRequestHandler<AddOfferCommand, Result>
                 Title = offerViewModel.Title,
                 Description = offerViewModel.Description,
                 Location = offerViewModel.Location,
+                CreatedAt = DateTime.Now,
                 Contact = offerViewModel.Contact,
                 Accomodation = offerViewModel.Accommodation,
                 accomodationsuitable = offerViewModel.AccommodationSuitable,
