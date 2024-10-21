@@ -18,8 +18,8 @@ public class UserProfile
 
     public ProfileOptions Options { get; set; }
 
-    public string? Hobbies { get; set; } //Changed from Hobbies
-    public string? Skills { get; set; } //Changed from Hobbies
+    public string? Hobbies { get; set; }
+    public string? Skills { get; set; } 
     public string? Token { get; private set; }
 
     public void SetToken(string token)

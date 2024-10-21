@@ -7,20 +7,14 @@ namespace UGH.Application.Profile;
 
 public class GetUserProfileQueryHandler : IRequestHandler<GetUserProfileQuery, UserProfileDataDTO>
 {
-    private readonly IUserProfileRepository _userProfileRepository;
     private readonly IUserRepository _userRepository;
-    private readonly TokenService _tokenService;
     private readonly ILogger<GetUserProfileQueryHandler> _logger;
 
     public GetUserProfileQueryHandler(
-        IUserProfileRepository userProfileRepository,
-        TokenService tokenService,
         ILogger<GetUserProfileQueryHandler> logger,
         IUserRepository userRepository
     )
     {
-        _userProfileRepository = userProfileRepository;
-        _tokenService = tokenService;
         _logger = logger;
         _userRepository = userRepository;
     }

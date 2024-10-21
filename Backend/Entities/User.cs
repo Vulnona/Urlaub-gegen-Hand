@@ -101,6 +101,12 @@ public class User
         MembershipId = membershipId;
     }
 
+    public void SetDocumentLinks(string linkRS, string linkVS)
+    {
+        linkRS= linkRS ?? string.Empty;
+        linkVS= linkVS ?? string.Empty;
+    }
+
     public User() { }
 
     public User(

@@ -3,6 +3,9 @@ using System.ComponentModel.DataAnnotations;
 using UGH.Contracts.Authentication;
 using UGH.Application.Authentication;
 using MediatR;
+using UGHApi.Services.UserProvider;
+using UGHApi.Applications.Authentication;
+using Microsoft.AspNetCore.Authorization;
 
 namespace UGHApi.Controllers
 {
@@ -13,16 +16,19 @@ namespace UGHApi.Controllers
         private readonly IConfiguration _configuration;
         private readonly ILogger<AuthController> _logger;
         private readonly IMediator _mediator;
+        private readonly IUserProvider _userProvider;
 
         public AuthController(
             IConfiguration configuration,
             ILogger<AuthController> logger,
-            IMediator mediator
+            IMediator mediator,
+            IUserProvider userProvider
         )
         {
             _configuration = configuration;
             _logger = logger;
             _mediator = mediator;
+            _userProvider = userProvider;
         }
 
         #region user-authorization
@@ -161,6 +167,25 @@ namespace UGHApi.Controllers
             {
                 _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
                 return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        [Authorize]
+        [HttpPost("upload-id")]
+        public async Task<IActionResult> UploadFile(IFormFile fileRS, IFormFile fileVS)
+        {
+            try
+            {
+                var userId = _userProvider.UserId;
+
+                var command = new UploadFilesCommand(fileRS, fileVS, userId);
+                var result = await _mediator.Send(command);
+
+                return Ok(new { result.LinkRS, result.LinkVS });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "An error occurred while uploading files.");
             }
         }
 

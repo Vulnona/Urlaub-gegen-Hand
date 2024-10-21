@@ -1,6 +1,5 @@
 ﻿using UGH.Domain.ApplicationResponses;
 using UGH.Domain.Interfaces;
-using UGH.Domain.Entities;
 using MediatR;
 
 namespace UGH.Application.Admin;
@@ -8,15 +7,12 @@ namespace UGH.Application.Admin;
 public class GetUserByIdQueryHandler : IRequestHandler<GetUserByIdQuery, UserDataResponse>
 {
     private readonly IUserRepository _userRepository;
-    private readonly IUserProfileRepository _userProfileRepository;
 
     public GetUserByIdQueryHandler(
-        IUserRepository userRepository,
-        IUserProfileRepository userProfileRepository
+        IUserRepository userRepository
     )
     {
         _userRepository = userRepository;
-        _userProfileRepository = userProfileRepository;
     }
 
     public async Task<UserDataResponse> Handle(
@@ -28,13 +24,10 @@ public class GetUserByIdQueryHandler : IRequestHandler<GetUserByIdQuery, UserDat
 
         if (user == null)
         {
-            //return Result.Failure(Errors.General.InvalidOperation("User not found."));
             throw new Exception("User not found.");
         }
 
-        var userProfile = await _userProfileRepository.GetUserProfileByUserIdAsync(request.UserId);
-
-        var userData = new UGH.Domain.ApplicationResponses.UserDataResponse
+        var userData = new UserDataResponse
         {
             User_Id = user.User_Id,
             FirstName = user.FirstName,

@@ -106,4 +106,9 @@ public class UserRepository : IUserRepository
             .Include(u => u.CurrentMembership)
             .FirstOrDefaultAsync(u => u.Email_Address == email);
     }
+
+    public async Task SaveChangesAsync()
+    {
+        await _context.SaveChangesAsync();
+    }
 }

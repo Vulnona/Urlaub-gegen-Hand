@@ -15,8 +15,7 @@
               <p><strong>Skills:</strong> {{ offer.skills }}</p>
               <p><strong>Accommodation:</strong> {{ offer.accomodation }}</p>
               <p><strong>Suitable for:</strong> {{ offer.accomodationsuitable }}</p>
-              <p><strong>Region:</strong> {{ offer.state }}</p>
-              <p><strong>Location:</strong> {{ offer.location }}</p>
+              <p><strong>Location/Region:</strong> {{ offer.location }} {{ offer.state }}</p>
             </div>
             <div class="offer_btn">
               <button @click="backtooffers()" class="action-link"><i class="ri-arrow-go-back-line"
@@ -61,7 +60,8 @@
               <li v-for="(offerReviews, index) in displayedReviews" :key="index" class="comment">
                 <div class="comment-body">
                   <div class="comment-author vcard" v-if="offerReviews.reviewer.profilePicture != null">
-                    <img @click="redirectToProfile(offerReviews.reviewer.user_Id)" alt="" :src="'data:' + offer.imageMimeType + ';base64,' + offerReviews.reviewer.profilePicture"
+                    <img @click="redirectToProfile(offerReviews.reviewer.user_Id)" alt=""
+                      :src="'data:' + offer.imageMimeType + ';base64,' + offerReviews.reviewer.profilePicture"
                       class="avatar avatar-80 photo clickable-item" height="80" width="80" decoding="async">
                   </div>
                   <div class="comment-author vcard" v-if="offerReviews.reviewer.profilePicture == null">
@@ -71,7 +71,8 @@
                   <div class="comment-content">
                     <div class="comment-head">
                       <div class="comment-user">
-                        <div @click="redirectToProfile(offerReviews.reviewer.user_Id)" class="user clickable-item">{{ offerReviews.reviewer.firstName }} {{ offerReviews.reviewer.lastName }}
+                        <div @click="redirectToProfile(offerReviews.reviewer.user_Id)" class="user clickable-item">{{
+                          offerReviews.reviewer.firstName }} {{ offerReviews.reviewer.lastName }}
                         </div>
                         <div class="comment-date"> <time :datetime="offerReviews.createdAt">{{
                           formatDate(offerReviews.createdAt) }}</time>
@@ -123,10 +124,10 @@ const showAllReviews = ref(false);
 var reviews = ref([]);
 const defaultProfileImgSrc = '/defaultprofile.jpg';
 
-const redirectToProfile=(userId)=> {
-      sessionStorage.setItem("UserId", userId);
-      router.push("/account");
-    }
+const redirectToProfile = (userId) => {
+  sessionStorage.setItem("UserId", userId);
+  router.push("/account");
+}
 const fetchOfferDetail = async () => {
   try {
     fetchReview();

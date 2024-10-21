@@ -16,8 +16,7 @@ using Serilog;
 using MediatR;
 using UGHApi.Repositories;
 using Mapster;
-
-//using UGHApi.Services.Membership;
+using UGHApi.Shared;
 
 namespace UGHApi
 {
@@ -91,6 +90,7 @@ namespace UGHApi
                 typeof(AddReviewCommandHandler).Assembly,
                 typeof(VerifyEmailCommandHandler).Assembly
             );
+            builder.Services.Configure<AwsOptions>(builder.Configuration.GetSection("AwsOptions"));
             builder.Services.AddMediatR(
                 Assembly.GetExecutingAssembly(),
                 typeof(AddReviewCommandHandler).Assembly
@@ -207,6 +207,7 @@ namespace UGHApi
             services.AddSingleton<EmailService>();
             services.AddTransient<UserService>();
             services.AddScoped<PasswordService>();
+            services.AddScoped<S3Uploader>();
             //services.AddScoped<MembershipService>();
             services.AddMemoryCache();
             services.AddScoped<TokenService>();
