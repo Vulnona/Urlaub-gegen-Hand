@@ -1,23 +1,32 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using UGH.Domain.Interfaces;
 using UGH.Domain.Entities;
-using Mapster;
+using UGHApi.Services.AWS;
 using UGHApi.ViewModels;
+using UGHApi.Shared;
+using Mapster;
 
 namespace UGH.Infrastructure.Repositories;
 
 public class UserRepository : IUserRepository
 {
     private readonly Ugh_Context _context;
+    private readonly IUrlBuilderService _urlBuilderService;
 
-    public UserRepository(Ugh_Context context)
+    public UserRepository(Ugh_Context context, IUrlBuilderService urlBuilderService)
     {
         _context = context;
+        _urlBuilderService = urlBuilderService;
     }
 
     public async Task<User> GetUserByIdAsync(Guid userId)
     {
         return await _context.users.FindAsync(userId);
+    }
+
+    public async Task<User> GetUserForMembershipByIdAsync(Guid userId)
+    {
+        return await _context.users.Include(u => u.CurrentMembership).Include(u => u.UserMemberships).FirstOrDefaultAsync(u => u.User_Id == userId);
     }
 
     public async Task<UserDTO> GetUserDetailsByIdAsync(Guid userId)
@@ -38,6 +47,11 @@ public class UserRepository : IUserRepository
         return userDto;
     }
 
+    public async Task AddUserMembership(UserMembership userMembership)
+    {
+        await _context.usermembership.AddAsync(userMembership);
+    }
+
     public async Task<User> GetUserWithRatingByIdAsync(Guid userId)
     {
         return await _context.users
@@ -46,21 +60,41 @@ public class UserRepository : IUserRepository
             .FirstOrDefaultAsync(u => u.User_Id == userId);
     }
 
-    public async Task<IEnumerable<UserDTO>> GetAllUsersAsync()
+    public async Task<PaginatedList<UserDTO>> GetAllUsersAsync(int pageNumber, int pageSize)
     {
-        var users = await _context.users
-            .Include(u => u.Offers)
-            .ThenInclude(o => o.Reviews)
+        IQueryable<User> query = _context.users
+        .Include(u => u.Offers)
+        .ThenInclude(o => o.Reviews)
+        .OrderBy(u => u.VerificationState)
+        .AsQueryable();
+
+        int totalCount = await query.CountAsync();
+
+        var users = await query
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
             .ToListAsync();
 
-        if (users == null)
+        if (users == null || !users.Any())
         {
             return null;
         }
 
+        TypeAdapterConfig<User, UserDTO>
+            .NewConfig()
+            .Map(dest => dest.Hobbies, src => SplitAndTrim(src.Hobbies))
+            .Map(dest => dest.Skills, src => SplitAndTrim(src.Skills))
+            .Map(dest => dest.Link_RS, src => _urlBuilderService.BuildAWSFileUrl(src.Link_RS))
+            .Map(dest => dest.Link_VS, src => _urlBuilderService.BuildAWSFileUrl(src.Link_VS));
+
         var userDtoList = users.Adapt<List<UserDTO>>();
 
-        return userDtoList;
+        return PaginatedList<UserDTO>.Create(userDtoList, totalCount, pageNumber, pageSize);
+    }
+
+    private static List<string?> SplitAndTrim(string? input)
+    {
+        return input?.Split(',').Select(h => h.Trim()).ToList() ?? new List<string?>();
     }
 
     public async Task<User> AddUserAsync(User user)
@@ -103,6 +137,7 @@ public class UserRepository : IUserRepository
     public async Task<User> GetUserByEmailAsync(string email)
     {
         return await _context.users
+            .Include(u => u.UserMemberships)
             .Include(u => u.CurrentMembership)
             .FirstOrDefaultAsync(u => u.Email_Address == email);
     }

@@ -1,10 +1,11 @@
 ﻿using UGH.Domain.Interfaces;
-using MediatR;
 using UGHApi.ViewModels;
+using UGHApi.Shared;
+using MediatR;
 
 namespace UGH.Application.Users;
 
-public class GetAllUsersQueryHandler : IRequestHandler<GetAllUsersQuery, IEnumerable<UserDTO>>
+public class GetAllUsersQueryHandler : IRequestHandler<GetAllUsersQuery, PaginatedList<UserDTO>>
 {
     private readonly IUserRepository _userRepository;
     private readonly ILogger<GetAllUsersQueryHandler> _logger;
@@ -18,16 +19,16 @@ public class GetAllUsersQueryHandler : IRequestHandler<GetAllUsersQuery, IEnumer
         _logger = logger;
     }
 
-    public async Task<IEnumerable<UserDTO>> Handle(
+    public async Task<PaginatedList<UserDTO>> Handle(
         GetAllUsersQuery request,
         CancellationToken cancellationToken
     )
     {
         try
         {
-            var users = await _userRepository.GetAllUsersAsync();
+            var paginatedUsers = await _userRepository.GetAllUsersAsync(request.PageNumber, request.PageSize);
 
-            return users;
+            return paginatedUsers;
         }
         catch (Exception ex)
         {

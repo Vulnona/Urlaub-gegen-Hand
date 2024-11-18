@@ -43,4 +43,10 @@ public static class Errors
         public static Error EmptyGuid() =>
             new("Validation.EmptyGuid", "The GUID value cannot be empty.");
     }
+
+    public static class Email
+    {
+        public static Error EmailNotVerified() =>
+            new("Email.NotVerified", "User's email not verified, Please verify your email to login.");
+    }
 }

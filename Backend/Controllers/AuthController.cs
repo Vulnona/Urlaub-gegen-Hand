@@ -1,11 +1,11 @@
-using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
-using UGH.Contracts.Authentication;
-using UGH.Application.Authentication;
-using MediatR;
-using UGHApi.Services.UserProvider;
 using UGHApi.Applications.Authentication;
 using Microsoft.AspNetCore.Authorization;
+using UGH.Application.Authentication;
+using UGH.Contracts.Authentication;
+using UGHApi.Services.UserProvider;
+using Microsoft.AspNetCore.Mvc;
+using MediatR;
 
 namespace UGHApi.Controllers
 {

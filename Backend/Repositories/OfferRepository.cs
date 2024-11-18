@@ -250,7 +250,7 @@ public class OfferRepository : IOfferRepository
             State = offer.state,
             City = offer.city,
             AverageRating = offer.AverageRating,
-            User = new Domain.ViewModels.UserResponse
+            User = new UserResponse
             {
                 User_Id = offer.User.User_Id,
                 FirstName = offer.User.FirstName,

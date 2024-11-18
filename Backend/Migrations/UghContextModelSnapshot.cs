@@ -30,7 +30,7 @@ namespace UGHApi.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("accomodations", (string)null);
+                    b.ToTable("accomodations");
                 });
 
             modelBuilder.Entity("UGH.Domain.Entities.City", b =>
@@ -48,7 +48,7 @@ namespace UGHApi.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("cities", (string)null);
+                    b.ToTable("cities");
                 });
 
             modelBuilder.Entity("UGH.Domain.Entities.Continent", b =>
@@ -59,7 +59,7 @@ namespace UGHApi.Migrations
 
                     b.HasKey("Continent_ID");
 
-                    b.ToTable("continents", (string)null);
+                    b.ToTable("continents");
                 });
 
             modelBuilder.Entity("UGH.Domain.Entities.Country", b =>
@@ -76,7 +76,7 @@ namespace UGHApi.Migrations
 
                     b.HasKey("Country_ID");
 
-                    b.ToTable("countries", (string)null);
+                    b.ToTable("countries");
                 });
 
             modelBuilder.Entity("UGH.Domain.Entities.Coupon", b =>
@@ -110,7 +110,7 @@ namespace UGHApi.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("coupons", (string)null);
+                    b.ToTable("coupons");
                 });
 
             modelBuilder.Entity("UGH.Domain.Entities.EmailVerificator", b =>
@@ -130,7 +130,7 @@ namespace UGHApi.Migrations
 
                     b.HasKey("verificationId");
 
-                    b.ToTable("emailverificators", (string)null);
+                    b.ToTable("emailverificators");
                 });
 
             modelBuilder.Entity("UGH.Domain.Entities.Membership", b =>
@@ -139,13 +139,10 @@ namespace UGHApi.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime(6)");
-
                     b.Property<string>("Description")
                         .HasColumnType("longtext");
 
-                    b.Property<int>("DurationMonths")
+                    b.Property<int>("DurationDays")
                         .HasColumnType("int");
 
                     b.Property<bool>("IsActive")
@@ -159,12 +156,9 @@ namespace UGHApi.Migrations
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(65,30)");
 
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime(6)");
-
                     b.HasKey("MembershipID");
 
-                    b.ToTable("memberships", (string)null);
+                    b.ToTable("memberships");
                 });
 
             modelBuilder.Entity("UGH.Domain.Entities.Offer", b =>
@@ -223,7 +217,7 @@ namespace UGHApi.Migrations
 
                     b.HasIndex("HostId");
 
-                    b.ToTable("offers", (string)null);
+                    b.ToTable("offers");
                 });
 
             modelBuilder.Entity("UGH.Domain.Entities.OfferApplication", b =>
@@ -258,7 +252,7 @@ namespace UGHApi.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("offerapplication", (string)null);
+                    b.ToTable("offerapplication");
                 });
 
             modelBuilder.Entity("UGH.Domain.Entities.Redemption", b =>
@@ -280,7 +274,7 @@ namespace UGHApi.Migrations
 
                     b.HasIndex("CouponId");
 
-                    b.ToTable("redemptions", (string)null);
+                    b.ToTable("redemptions");
                 });
 
             modelBuilder.Entity("UGH.Domain.Entities.Region", b =>
@@ -294,7 +288,7 @@ namespace UGHApi.Migrations
 
                     b.HasKey("Region_ID");
 
-                    b.ToTable("regions", (string)null);
+                    b.ToTable("regions");
                 });
 
             modelBuilder.Entity("UGH.Domain.Entities.Review", b =>
@@ -332,7 +326,7 @@ namespace UGHApi.Migrations
 
                     b.HasIndex("ReviewerId");
 
-                    b.ToTable("reviews", (string)null);
+                    b.ToTable("reviews");
                 });
 
             modelBuilder.Entity("UGH.Domain.Entities.Skill", b =>
@@ -349,7 +343,7 @@ namespace UGHApi.Migrations
 
                     b.HasKey("Skill_ID");
 
-                    b.ToTable("skills", (string)null);
+                    b.ToTable("skills");
                 });
 
             modelBuilder.Entity("UGH.Domain.Entities.State", b =>
@@ -366,7 +360,7 @@ namespace UGHApi.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("states", (string)null);
+                    b.ToTable("states");
                 });
 
             modelBuilder.Entity("UGH.Domain.Entities.SuitableAccommodation", b =>
@@ -381,7 +375,7 @@ namespace UGHApi.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("accommodationsuitables", (string)null);
+                    b.ToTable("accommodationsuitables");
                 });
 
             modelBuilder.Entity("UGH.Domain.Entities.User", b =>
@@ -439,7 +433,7 @@ namespace UGHApi.Migrations
                     b.Property<string>("Link_VS")
                         .HasColumnType("longtext");
 
-                    b.Property<int>("MembershipId")
+                    b.Property<int?>("MembershipId")
                         .HasColumnType("int");
 
                     b.Property<string>("Password")
@@ -474,7 +468,7 @@ namespace UGHApi.Migrations
 
                     b.HasIndex("MembershipId");
 
-                    b.ToTable("users", (string)null);
+                    b.ToTable("users");
                 });
 
             modelBuilder.Entity("UGH.Domain.Entities.UserMembership", b =>
@@ -507,7 +501,7 @@ namespace UGHApi.Migrations
 
                     b.HasIndex("User_Id");
 
-                    b.ToTable("usermembership", (string)null);
+                    b.ToTable("usermembership");
                 });
 
             modelBuilder.Entity("UGH.Domain.Entities.UserProfile", b =>
@@ -538,7 +532,7 @@ namespace UGHApi.Migrations
 
                     b.HasIndex("User_Id");
 
-                    b.ToTable("userprofiles", (string)null);
+                    b.ToTable("userprofiles");
                 });
 
             modelBuilder.Entity("UGH.Domain.Entities.UserRole", b =>
@@ -552,7 +546,7 @@ namespace UGHApi.Migrations
 
                     b.HasKey("RoleId");
 
-                    b.ToTable("userroles", (string)null);
+                    b.ToTable("userroles");
                 });
 
             modelBuilder.Entity("UGH.Domain.Entities.UserRoleMapping", b =>
@@ -573,7 +567,7 @@ namespace UGHApi.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("userrolesmapping", (string)null);
+                    b.ToTable("userrolesmapping");
                 });
 
             modelBuilder.Entity("UGH.Domain.Entities.Offer", b =>
@@ -656,9 +650,7 @@ namespace UGHApi.Migrations
                 {
                     b.HasOne("UGH.Domain.Entities.Membership", "CurrentMembership")
                         .WithMany()
-                        .HasForeignKey("MembershipId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("MembershipId");
 
                     b.Navigation("CurrentMembership");
                 });

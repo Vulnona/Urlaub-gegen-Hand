@@ -48,11 +48,10 @@ public class User
     public string? SaltKey { get; set; }
 
     public bool IsEmailVerified { get; set; }
-    public int MembershipId { get; set; }
+    public int? MembershipId { get; set; }
     public string? Facebook_link { get; set; }
     public string? Link_RS { get; set; }
     public string? Link_VS { get; set; }
-#pragma warning disable CS8632
     public string? Hobbies { get; set; }
     public string? Skills { get; set; }
     public byte[]? ProfilePicture { get; set; }
@@ -65,6 +64,8 @@ public class User
     public Membership CurrentMembership { get; set; }
 
     public ICollection<Offer> Offers { get; set; } = new List<Offer>();
+
+    public ICollection<UserMembership> UserMemberships { get; set; } = new List<UserMembership>();
 
     private UserProfile Profile { get; set; }
 
@@ -96,15 +97,9 @@ public class User
         IsEmailVerified = status;
     }
 
-    public void SetMembershipId(int membershipId)
+    public void SetMembershipId(int? membershipId)
     {
         MembershipId = membershipId;
-    }
-
-    public void SetDocumentLinks(string linkRS, string linkVS)
-    {
-        linkRS= linkRS ?? string.Empty;
-        linkVS= linkVS ?? string.Empty;
     }
 
     public User() { }

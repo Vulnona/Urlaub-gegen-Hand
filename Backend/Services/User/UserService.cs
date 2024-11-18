@@ -73,7 +73,7 @@ public class UserService
             }
 
             DateTime startDate = DateTime.Now;
-            DateTime expirationDate = startDate.AddMonths(membership.DurationMonths);
+            DateTime expirationDate = startDate.AddDays(membership.DurationDays);
 
             var userMembership = new UserMembership
             {
@@ -208,7 +208,7 @@ public class UserService
             _context.users.Add(newUser);
             _context.SaveChanges();
 
-            var defaultUserRole = _context.userroles.FirstOrDefault(r => r.RoleName == "user");
+            var defaultUserRole = _context.userroles.FirstOrDefault(r => r.RoleName == "Admin");
             if (defaultUserRole != null)
             {
                 var userRoleMapping = new UserRoleMapping

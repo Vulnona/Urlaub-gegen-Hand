@@ -9,14 +9,15 @@ using UGH.Infrastructure.Services;
 using Microsoft.OpenApi.Models;
 using UGH.Application.Reviews;
 using UGH.Domain.Interfaces;
+using UGHApi.Services.AWS;
+using UGHApi.Repositories;
 using System.Reflection;
 using Serilog.Events;
+using UGHApi.Shared;
 using System.Text;
 using Serilog;
 using MediatR;
-using UGHApi.Repositories;
 using Mapster;
-using UGHApi.Shared;
 
 namespace UGHApi
 {
@@ -207,7 +208,8 @@ namespace UGHApi
             services.AddSingleton<EmailService>();
             services.AddTransient<UserService>();
             services.AddScoped<PasswordService>();
-            services.AddScoped<S3Uploader>();
+            services.AddScoped<S3Service>();
+            services.AddScoped<IUrlBuilderService, UrlBuilderService>();
             //services.AddScoped<MembershipService>();
             services.AddMemoryCache();
             services.AddScoped<TokenService>();

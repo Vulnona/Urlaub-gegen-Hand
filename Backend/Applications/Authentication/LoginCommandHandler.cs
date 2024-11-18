@@ -1,8 +1,8 @@
-﻿using MediatR;
-using UGH.Contracts.Authentication;
-using UGH.Domain.Core;
-using UGH.Domain.Interfaces;
+﻿using UGH.Contracts.Authentication;
 using UGH.Infrastructure.Services;
+using UGH.Domain.Interfaces;
+using UGH.Domain.Core;
+using MediatR;
 
 namespace UGH.Application.Authentication;
 
@@ -36,18 +36,38 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, Result<LoginRes
             var userValid = _userService.ValidateUser(request.Email, request.Password);
             if (!userValid.IsValid)
             {
-                //Handle error with result
                 return Result.Failure<LoginResponse>(
-                    Errors.General.NotFound("User", request.Email)
+                    Errors.Email.EmailNotVerified()
                 );
             }
 
             var user = await _userRepository.GetUserByEmailAsync(request.Email);
 
+            var activeMemberships = user.UserMemberships
+                .Where(um => um.IsMembershipActive)
+                .ToList();
+
+            if (activeMemberships.Any())
+            {
+                if (user.CurrentMembership == null)
+                {
+                    user.SetMembershipId(activeMemberships.First().MembershipID);
+                    await _userRepository.UpdateUserAsync(user);
+                }
+            }
+            else
+            {
+                if (user.CurrentMembership != null)
+                {
+                    user.SetMembershipId(null);
+                    await _userRepository.UpdateUserAsync(user);
+                }
+            }
+
             var accessToken = await _tokenService.GenerateJwtToken(
                 request.Email,
                 user.User_Id,
-                user.CurrentMembership
+                activeMemberships
             );
 
             var refreshToken = _tokenService.GenerateRefreshToken();

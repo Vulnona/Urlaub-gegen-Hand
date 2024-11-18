@@ -1,5 +1,6 @@
 ﻿using UGH.Domain.ApplicationResponses;
 using UGH.Domain.Interfaces;
+using UGHApi.Services.AWS;
 using MediatR;
 
 namespace UGH.Application.Admin;
@@ -7,11 +8,14 @@ namespace UGH.Application.Admin;
 public class GetUserByIdQueryHandler : IRequestHandler<GetUserByIdQuery, UserDataResponse>
 {
     private readonly IUserRepository _userRepository;
+    private readonly IUrlBuilderService _urlBuilderService;
 
     public GetUserByIdQueryHandler(
-        IUserRepository userRepository
+        IUserRepository userRepository,
+        IUrlBuilderService urlBuilderService
     )
     {
+        _urlBuilderService = urlBuilderService;
         _userRepository = userRepository;
     }
 
@@ -44,8 +48,8 @@ public class GetUserByIdQueryHandler : IRequestHandler<GetUserByIdQuery, UserDat
             IsEmailVerified = user.IsEmailVerified,
             MembershipId = user.MembershipId,
             Facebook_Link = user.Facebook_link,
-            Link_RS = user.Link_RS,
-            Link_VS = user.Link_VS,
+            Link_RS = _urlBuilderService.BuildAWSFileUrl(user.Link_RS),
+            Link_VS = _urlBuilderService.BuildAWSFileUrl(user.Link_VS),
             VerificationState = (int)user.VerificationState,
             CurrentMembership = user.CurrentMembership,
             AverageRating = user.AverageRating

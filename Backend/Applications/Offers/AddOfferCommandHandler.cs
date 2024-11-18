@@ -4,12 +4,13 @@ using UGH.Domain.Interfaces;
 using UGH.Domain.Entities;
 using UGH.Domain.Core;
 using OpenQA.Selenium;
+using UGHApi.Common;
 using System.Text;
 using MediatR;
-using UGHApi.Common;
 
 namespace UGH.Application.Offers;
 
+#pragma warning disable CS4014
 public class AddOfferCommandHandler : IRequestHandler<AddOfferCommand, Result>
 {
     private readonly IOfferRepository _offerRepository;

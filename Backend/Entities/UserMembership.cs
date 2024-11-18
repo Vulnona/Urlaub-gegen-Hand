@@ -1,5 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
 
 namespace UGH.Domain.Entities;
 
@@ -35,7 +35,7 @@ public class UserMembership
 
     public bool IsMembershipActive
     {
-        get { return Expiration > DateTime.Now; }
+        get { return StartDate <= DateTime.Now && Expiration > DateTime.Now; }
     }
 
     public DateTime CreatedAt { get; set; } = DateTime.Now;

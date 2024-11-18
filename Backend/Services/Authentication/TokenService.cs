@@ -38,7 +38,7 @@ public class TokenService
     public async Task<string> GenerateJwtToken(
         string userName,
         Guid userId,
-        Membership membership = null
+        List<UserMembership> memberships = null
     )
     {
         try
@@ -51,7 +51,7 @@ public class TokenService
 
             // Handle membership status, default to "Inactive" if membership is null
             var membershipStatus =
-                membership != null && membership.IsActive ? "Active" : "Inactive";
+                memberships.Count != 0 ? "Active" : "Inactive";
 
             var claims = new List<Claim>
             {

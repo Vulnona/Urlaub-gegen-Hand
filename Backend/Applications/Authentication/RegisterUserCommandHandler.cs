@@ -95,11 +95,8 @@ public class RegisterUserCommandHandler
                 VerificationState = UGH_Enums.VerificationState.IsNew
             };
 
-            newUser.SetMembershipId(2);
             var savedUser = await _userRepository.AddUserAsync(newUser);
 
-            // Create default membership mapping
-            _ = await _userService.SetMembership(newUser.User_Id, 2);
 
             var defaultUserRole = await _userService.GetDefaultUserRoleAsync();
 

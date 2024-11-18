@@ -1,12 +1,13 @@
 ﻿using UGH.Domain.Interfaces;
-using UGH.Domain.Core;
-using MediatR;
 using UGHApi.ViewModels;
+using UGH.Domain.Core;
+using UGHApi.Shared;
+using MediatR;
 
 namespace UGH.Application.Admin;
 
 public class GetAllUsersByAdminQueryHandler
-    : IRequestHandler<GetAllUsersByAdminQuery, Result<IEnumerable<UserDTO>>>
+    : IRequestHandler<GetAllUsersByAdminQuery, Result<PaginatedList<UserDTO>>>
 {
     private readonly IUserRepository _userRepository;
     private readonly ILogger<GetAllUsersByAdminQueryHandler> _logger;
@@ -20,28 +21,31 @@ public class GetAllUsersByAdminQueryHandler
         _logger = logger;
     }
 
-    public async Task<Result<IEnumerable<UserDTO>>> Handle(
+    public async Task<Result<PaginatedList<UserDTO>>> Handle(
         GetAllUsersByAdminQuery request,
         CancellationToken cancellationToken
     )
     {
         try
         {
-            var users = await _userRepository.GetAllUsersAsync();
+            var paginatedUsers = await _userRepository.GetAllUsersAsync(
+                request.PageNumber,
+                request.PageSize
+            );
 
-            if (users == null || !users.Any())
+            if (paginatedUsers == null)
             {
-                return Result.Failure<IEnumerable<UserDTO>>(
-                    Errors.General.NotFound("NoUserFound", users)
+                return Result.Failure<PaginatedList<UserDTO>>(
+                    Errors.General.NotFound("NoUserFound", paginatedUsers)
                 );
             }
 
-            return Result<IEnumerable<UserDTO>>.Success(users);
+            return Result<PaginatedList<UserDTO>>.Success(paginatedUsers);
         }
         catch (Exception ex)
         {
             _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
-            return Result.Failure<IEnumerable<UserDTO>>(
+            return Result.Failure<PaginatedList<UserDTO>>(
                 Errors.General.InvalidOperation("Something went wrong while fetching users")
             );
         }

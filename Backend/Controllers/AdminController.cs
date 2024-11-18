@@ -1,10 +1,12 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Authorization;
-using UGH.Infrastructure.Services;
+using UGHApi.Applications.Admin;
 using Microsoft.AspNetCore.Mvc;
 using UGH.Application.Admin;
-using UGH.Domain.Entities;
+using UGHApi.ViewModels;
 using UGH.Domain.Core;
+using UGHApi.Shared;
+using UGHApi.Users;
 using MediatR;
 
 namespace UGHApi.Controllers;
@@ -14,23 +16,14 @@ namespace UGHApi.Controllers;
 [Authorize(Roles = "Admin")]
 public class AdminController : ControllerBase
 {
-    private readonly Ugh_Context _context;
-    private readonly UserService _userService;
     private readonly IMediator _mediator;
-    private readonly AdminVerificationMailService _mailService;
     private readonly ILogger<AdminController> _logger;
 
     public AdminController(
-        Ugh_Context context,
-        UserService userService,
-        AdminVerificationMailService mailService,
         ILogger<AdminController> logger,
         IMediator mediator
     )
     {
-        _context = context;
-        _userService = userService;
-        _mailService = mailService;
         _mediator = mediator;
         _logger = logger;
     }
@@ -67,9 +60,11 @@ public class AdminController : ControllerBase
     }
 
     [HttpGet("get-all-users")]
-    public async Task<ActionResult<IEnumerable<User>>> GetAllUsersByAdmin()
+    public async Task<ActionResult<PaginatedList<UserDTO>>> GetAllUsersByAdmin(
+        int pageNumber = 1,
+        int pageSize = 10)
     {
-        var result = await _mediator.Send(new GetAllUsersByAdminQuery());
+        var result = await _mediator.Send(new GetAllUsersByAdminQuery(pageNumber, pageSize));
 
         if (result.IsSuccess)
         {
@@ -101,7 +96,6 @@ public class AdminController : ControllerBase
         }
     }
 
-    [AllowAnonymous]
     [HttpGet("get-user-profile/{userId}")]
     public async Task<IActionResult> GetProfile([Required] Guid userId)
     {
@@ -122,6 +116,41 @@ public class AdminController : ControllerBase
             _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
             return StatusCode(500, new { Message = "Internal server error", Details = ex.Message });
         }
+    }
+
+    [HttpDelete("delete-admin-user/{userId}")]
+    public async Task<IActionResult> DeleteUserByAdmin([Required] Guid userId)
+    {
+        try
+        {
+            var result = await _mediator.Send(new DeleteAdminUserCommand(userId));
+
+            if (result.IsFailure)
+            {
+                _logger.LogWarning($"Profile with UserId {userId} not found.");
+                return NotFound($"Profile with UserId {userId} not found.");
+            }
+
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+            return StatusCode(500, new { Message = "Internal server error", Details = ex.Message });
+        }
+    }
+
+    [HttpPost("assign-membership")]
+    public async Task<IActionResult> AssignMembership(AssignMembershipRequest request)
+    {
+        var command = new AssignMembershipCommand(
+            request.UserId,
+            request.MembershipId);
+
+        var result = await _mediator.Send(command);
+
+        if (!result) return BadRequest("Failed to assign membership");
+        return Ok("Membership assigned successfully.");
     }
 
     #endregion

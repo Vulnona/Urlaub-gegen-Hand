@@ -1,15 +1,15 @@
-﻿using MediatR;
-using UGH.Domain.Interfaces;
+﻿using UGH.Domain.Interfaces;
 using UGHApi.ViewModels;
+using MediatR;
 
 namespace UGHApi.Applications.Authentication;
 
 public class UploadFilesCommandHandler : IRequestHandler<UploadFilesCommand, UploadFilesResult>
 {
-    private readonly S3Uploader _s3Uploader;
+    private readonly S3Service _s3Uploader;
     private readonly IUserRepository _userRepository;
 
-    public UploadFilesCommandHandler(S3Uploader s3Uploader, IUserRepository userRepository)
+    public UploadFilesCommandHandler(S3Service s3Uploader, IUserRepository userRepository)
     {
         _s3Uploader = s3Uploader;
         _userRepository = userRepository;
@@ -34,7 +34,8 @@ public class UploadFilesCommandHandler : IRequestHandler<UploadFilesCommand, Upl
             {
                 await request.FileRS.CopyToAsync(memoryStreamRS);
                 var byteFileRS = memoryStreamRS.ToArray();
-                linkRS = await _s3Uploader.UploadFileAsync(byteFileRS, request.FileRS.FileName, request.FileRS.ContentType);
+                linkRS = await _s3Uploader.UploadFileAsync(byteFileRS, $"{Ulid.NewUlid()}-" + request.FileRS.FileName,
+                request.FileRS.ContentType);
             }
         }
 
@@ -45,12 +46,15 @@ public class UploadFilesCommandHandler : IRequestHandler<UploadFilesCommand, Upl
             {
                 await request.FileVS.CopyToAsync(memoryStreamVS);
                 var byteFileVS = memoryStreamVS.ToArray();
-                linkVS = await _s3Uploader.UploadFileAsync(byteFileVS, request.FileVS.FileName, request.FileVS.ContentType);
+                linkVS = await _s3Uploader.UploadFileAsync(byteFileVS, $"{Ulid.NewUlid()}-" + request.FileVS.FileName, 
+                request.FileVS.ContentType);
             }
         }
 
-        user.SetDocumentLinks(linkRS, linkVS);
-        await _userRepository.SaveChangesAsync();
+        user.Link_RS = linkRS;
+        user.Link_VS = linkVS;
+
+        await _userRepository.UpdateUserAsync(user);
 
         return new UploadFilesResult
         {
