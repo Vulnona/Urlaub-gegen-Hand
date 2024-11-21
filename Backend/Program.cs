@@ -5,6 +5,7 @@ using UGH.Application.Authentication;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.EntityFrameworkCore;
 using UGHApi.Services.UserProvider;
+using UGH.Contracts.Authentication;
 using UGH.Infrastructure.Services;
 using Microsoft.OpenApi.Models;
 using UGH.Application.Reviews;
@@ -104,7 +105,7 @@ namespace UGHApi
             ConfigureSwagger(builder);
             RegisterServices(builder.Services);
             //SeedDefaultRoles(builder.Services);
-            //CreateAutoAdminUser(builder.Services.BuildServiceProvider().GetService<userService>());
+            //CreateAutoAdminUser(builder.Services.BuildServiceProvider().GetService<UserService>());
         }
 
         private static void ConfigureAuthentication(WebApplicationBuilder builder)
@@ -293,7 +294,7 @@ namespace UGHApi
         //            Country = "Admin Country",
         //            State = "Admin State",
         //            Email_Address = "admin@example.com",
-        //            Password = "admin@123"
+        //            Password = "Admin@12345"
         //        };
         //        userService.CreateAdmin(adminUser);
         //    }

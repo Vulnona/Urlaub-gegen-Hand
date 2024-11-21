@@ -62,6 +62,11 @@ public class UserService
         return await _context.userroles.FirstOrDefaultAsync(r => r.RoleName == "User");
     }
 
+    public async Task<User> GetUserByEmailAsync(string email)
+    {
+        return await _context.users.FirstOrDefaultAsync(r => r.Email_Address == email);
+    }
+
     public async Task<Result> SetMembership(Guid userId, int membershipId)
     {
         try
