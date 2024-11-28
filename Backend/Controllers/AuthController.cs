@@ -1,6 +1,5 @@
 using System.ComponentModel.DataAnnotations;
 using UGHApi.Applications.Authentication;
-using Microsoft.AspNetCore.Authorization;
 using UGH.Application.Authentication;
 using UGH.Contracts.Authentication;
 using UGHApi.Services.UserProvider;
@@ -90,23 +89,16 @@ namespace UGHApi.Controllers
         {
             try
             {
-                var result = await _mediator.Send(new VerifyEmailCommand(token));
-
-                if (result.IsSuccess)
-                {
-                    return Ok(result);
-                }
-
-                if (result.Error.Code == "Error.InvalidToken")
-                {
-                    return NotFound(result.Error.Message);
-                }
-                return StatusCode(500, result.Error.Message);
+                var (htmlContent, mimeType) = await _mediator.Send(new VerifyEmailCommand(token));
+                return Content(htmlContent, mimeType);
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
-                return StatusCode(500, $"Internal server error: {ex.Message}");
+                _logger.LogError($"Exception: {ex.Message} | {ex.StackTrace}");
+                return Content(
+                    $"<html><body><h1>Internal Server Error</h1><p>{ex.Message}</p></body></html>",
+                    "text/html"
+                );
             }
         }
 
@@ -170,7 +162,6 @@ namespace UGHApi.Controllers
             }
         }
 
-        [Authorize]
         [HttpPost("upload-id")]
         public async Task<IActionResult> UploadFile(IFormFile fileRS, IFormFile fileVS)
         {

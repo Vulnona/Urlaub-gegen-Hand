@@ -133,7 +133,7 @@
               <button class="btn  btn-primary rounded" @click="editProfile">Editiere
                 Profil</button>
             </div>
-            <button class="btn btn-danger" @click="deleteUser(userId, user.link_VS, user.link_RS)">Löschen
+            <button class="btn btn-danger" @click="deleteUser()">Löschen
             </button>
           </div>
         </div>
@@ -262,11 +262,6 @@
 <script>
 import router from "@/router";
 import Swal from 'sweetalert2';
-import CryptoJS from 'crypto-js';
-import {
-  S3Client,
-  DeleteObjectCommand
-} from '@aws-sdk/client-s3';
 import axiosInstance from "@/interceptor/interceptor"
 import Navbar from "@/components/navbar/Navbar.vue";
 import userRole from "@/services/CheckUserRole";
@@ -274,7 +269,6 @@ import isActiveMember from "@/services/CheckActiveMembership";
 import Securitybot from "@/services/SecurityBot";
 import getLoggedUserId from "@/services/LoggedInUserId";
 import toast from "@/components/toaster/toast";
-
 
 export default {
   components: {
@@ -334,7 +328,7 @@ export default {
     async showReviews(userid) {
       try {
         const response = await axiosInstance.get(`${process.env.baseURL}review/get-user-reviews?userId=${userid}`);
-        this.reviews = response.data;
+        this.reviews = response.data.items;
       } catch (error) {
         console.error('Error fetching reviews:', error);
       }
@@ -401,18 +395,8 @@ export default {
     upload_id() {
       router.push("/upload-id").then(() => { });
     },
-    // Function to decrypt encrypted token using AES decryption
-    decryptToken(encryptedToken) {
-      try {
-        const bytes = CryptoJS.AES.decrypt(encryptedToken, process.env.SECRET_KEY);
-        return bytes.toString(CryptoJS.enc.Utf8);
-      } catch (e) {
-        //    console.error('Error decrypting token:', e);
-        return null;
-      }
-    },
     // Method to delete a user and associated images from S3
-    deleteUser(userid, link_VS, link_RS) {
+    deleteUser() {
       Swal.fire({
         title: "Are you sure?",
         text: "You want to delete your Data!",
@@ -423,10 +407,8 @@ export default {
         confirmButtonText: "Yes, delete it!",
       }).then((result) => {
         if (result.isConfirmed) {
-          axiosInstance.delete(`${process.env.baseURL}user/delete-user/${userid}`).then(() => {
+          axiosInstance.delete(`${process.env.baseURL}user/delete-user`).then(() => {
             toast.success("User data deleted successfully!");
-            this.deleteImagesFromS3(link_VS);
-            this.deleteImagesFromS3(link_RS);
             sessionStorage.clear();
             router.push("/");
           }).catch((error) => {
@@ -435,29 +417,7 @@ export default {
         }
       });
     },
-    // Method to delete an image from S3
-    async deleteImagesFromS3(encryptedLink) {
-      try {
-        const bytes = CryptoJS.AES.decrypt(encryptedLink, process.env.SECRET_KEY);
-        const decryptedLink = bytes.toString(CryptoJS.enc.Utf8);
-        const s3Client = new S3Client({
-          region: process.env.Aws_region,
-          credentials: {
-            accessKeyId: process.env.AccessKeyId,
-            secretAccessKey: process.env.SecretAccessKey,
-          },
-        });
-        const imageKey = decryptedLink.replace(process.env.Aws_Url, '');
-        const command = new DeleteObjectCommand({
-          Bucket: process.env.S3_BUCKET_NAME,
-          Key: imageKey,
-        });
-        await s3Client.send(command);
-
-      } catch (error) {
-
-      }
-    },
+  
     // Function to fetch user data using API request
     async fetchUserData() {
       try {

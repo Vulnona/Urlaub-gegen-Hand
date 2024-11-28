@@ -75,8 +75,11 @@
                 <p class="text-center">No offers found for this user.</p>
               </div>
             </div>
+            
           </div>
+
         </div>
+        
       </div>
     </div>
 
@@ -118,6 +121,14 @@
         </div>
       </div>
     </div>
+     <!-- Pagination Section -->
+     <div class="pagination">
+              <button class="action-link" @click="changePage(currentPage - 1)" :hidden="currentPage === 1"><i
+                  class="ri-arrow-left-s-line"></i>Previous</button>
+              <span>Page {{ currentPage }} of {{ totalPages }}</span>
+              <button class="action-link" @click="changePage(currentPage + 1)"
+                :hidden="currentPage === totalPages">Next<i class="ri-arrow-right-s-line"></i></button>
+            </div>
   </div>
 </template>
 
@@ -146,6 +157,10 @@ export default {
       ratingModalData: [],
       offerRequestIndex: 0,
       defaultProfileImgSrc: '/defaultprofile.jpg',
+      currentIndex: 0,
+      currentPage: 1,
+      totalPages: 1,
+      pageSize: 10,
     };
   },
   mounted() {
@@ -153,6 +168,12 @@ export default {
     Securitybot();
   },
   methods: {
+    changePage(newPage) {
+      if (newPage >= 1 && newPage <= this.totalPages) {
+        this.currentPage = newPage;
+        this.fetchUserOffers(); // fetch new data for the selected page
+      }
+    },
     async checkRatings() {
       try {
         const response = await axiosInstance.post(`${process.env.baseURL}user-rating/add-rating-to-user`, {
@@ -169,8 +190,14 @@ export default {
     // Method to fetch user offers from the server
     async fetchUserOffers() {
       try {
-        const response = await axiosInstance.get(`${process.env.baseURL}offer/offer-applications`);
-        this.offers = response.data;
+        const response = await axiosInstance.get(`${process.env.baseURL}offer/offer-applications`, {
+          params: {
+            pageSize: this.pageSize,
+            pageNumber: this.currentPage
+          }
+        });
+        this.offers = response.data.items;
+        this.totalPages = Math.ceil(response.data.totalCount / this.pageSize);
       } catch (error) {
 
       } finally {
@@ -274,11 +301,6 @@ export default {
   content: "\f005";
 }
 
-/*
-.rating-buttons {
-  margin-bottom: 20px;
-}
-*/
 .rating-modal-content {
   padding: 0;
   border: none;

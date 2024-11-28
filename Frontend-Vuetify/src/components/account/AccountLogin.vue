@@ -133,7 +133,6 @@
 </template>
 <script>
 import router from '@/router';
-// import CryptoJS from 'crypto-js';
 import AES from 'crypto-js/aes';
 import CheckUserRole from '@/services/CheckUserRole';
 import isActiveMembership from '@/services/CheckActiveMembership';
@@ -165,19 +164,15 @@ export default {
           email: this.email,
           password: this.password
         });
-
         const token = response.data.accessToken;
         const logId = response.data.userId;
-        const logEmail = response.data.email;
         const firstName = response.data.firstName;
 
         const encryptedToken = this.encryptItem(token);
         const encryptedLogId = this.encryptItem(logId);
-        const encryptedEmail = this.encryptItem(logEmail);
 
         sessionStorage.setItem('token', encryptedToken);
         sessionStorage.setItem('logId', encryptedLogId);
-        sessionStorage.setItem('logEmail', encryptedEmail);
         sessionStorage.setItem('firstName', firstName);
 
         if (CheckUserRole() == 'Admin') {
@@ -198,9 +193,7 @@ export default {
         }
       }
     },
-    // encryptItem(item) {
-    //   return CryptoJS.AES.encrypt(item, process.env.SECRET_KEY).toString();
-    // },
+
     encryptItem(item) {
       return AES.encrypt(item, process.env.SECRET_KEY).toString();
     }

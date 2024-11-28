@@ -1,9 +1,9 @@
 <template>
-  <Navbar />
   <div v-if="userRole !== 'Admin'">
     <Errorpage />
   </div>
   <div v-else>
+    <Navbar />
     <div class="Admin_inner_banner inner_banner_layout">
       <div class="container">
         <div class="row">
@@ -47,13 +47,13 @@
                   <td @click="setModal(user.user_Id)" class="clickable">{{ user.email_Address }}</td>
                   <td>{{ user.code }}</td>
                   <td v-if="user.link_VS" class="vs_link">
-                    <a class="" @click="showImageModal(decryptLink(user.link_VS), user)">
+                    <a class="" @click="showImageModal(user.link_VS, user)">
                       <i class="ri-eye-line"></i> View VS
                     </a>
                   </td>
                   <td v-else>No VS Data Available</td>
                   <td v-if="user.link_RS" class="vs_link">
-                    <a class="" @click="showImageModal(decryptLink(user.link_RS), user)">
+                    <a class="" @click="showImageModal(user.link_RS, user)">
                       <i class="ri-eye-line"></i> View RS
                     </a>
                   </td>
@@ -71,7 +71,7 @@
                         Reactivate
                       </button>
                       <button title="Delete" class="icon_btn bg_ltred"
-                        @click="deleteUser(user.user_Id, user.link_VS, user.link_RS)"
+                        @click="deleteUser(user.user_Id)"
                         v-if="user.verificationState === 2 && user.verificationState !== 0">
                         Delete
                       </button>
@@ -80,7 +80,7 @@
                         Approve
                       </button>
                       <button title="Reject" class="icon_btn bg_ltred"
-                        @click="rejectUser(user.user_Id, 2, user.link_VS, user.link_RS)"
+                        @click="rejectUser(user.user_Id, 2)"
                         v-if="user.verificationState === 1 || user.verificationState === 0">
                         Reject
                       </button>
@@ -161,12 +161,10 @@ import Swal from "sweetalert2";
 import router from '@/router';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import "bootstrap/dist/js/bootstrap.min.js";
-import { S3Client, DeleteObjectCommand } from '@aws-sdk/client-s3';
-import CryptoJS from 'crypto-js';
 import axiosInstance from "@/interceptor/interceptor"
 import Navbar from "@/components/navbar/Navbar.vue";
-import UserRole from "@/services/CheckUserRole";
 import Securitybot from "@/services/SecurityBot";
+import UserRole from "@/services/CheckUserRole";
 import Errorpage from "./Errorpage.vue";
 import toast from "@/components/toaster/toast";
 export default {
@@ -195,28 +193,27 @@ export default {
   methods: {
     // Method to show an image modal
     showImageModal(imageUrl, userdata) {
-      this.imageUrlToShow = imageUrl;
+  axiosInstance
+    .get(imageUrl, { responseType: 'arraybuffer' }) 
+    .then(response => {
+      const blob = new Blob([response.data], { type: 'image/jpeg' }); 
+      this.imageUrlToShow = URL.createObjectURL(blob); 
       this.userdata = userdata;
-    },
+    })
+    .catch(error => {
+      console.error('Error fetching image:', error);
+    });
+},
+
     // Method to close the image modal
     closeImageModal() {
       this.imageUrlToShow = null;
-    },
-    // Method to decrypt a link using CryptoJS
-    decryptLink(encryptedLink) {
-      try {
-        const bytes = CryptoJS.AES.decrypt(encryptedLink, process.env.SECRET_KEY);
-        return bytes.toString(CryptoJS.enc.Utf8);
-      } catch (e) {
-        //  console.error('Error decrypting link:', e);
-        return null;
-      }
     },
     // Method to fetch data from the server
     async getdata() {
       try {
         const res = await axiosInstance.get(`${process.env.baseURL}admin/get-all-users`);
-        this.admin = res.data;
+        this.admin = res.data.items;
       } catch (error) {
         this.handleAxiosError(error);
       }
@@ -228,7 +225,6 @@ export default {
     // Method to update the verification status of a user
     async statusUpdate(uid, staid) {
       await axiosInstance.post(`${process.env.baseURL}admin/update-verification-state/${uid}/${staid}`).then((res) => {
-        // this.admin = res.data;
       }).catch((error) => {
         this.handleAxiosError(error);
       });
@@ -236,7 +232,6 @@ export default {
     // Method to fetch a user's profile
     getProfile(uid) {
       axiosInstance.get(`${process.env.baseURL}admin/get-user-profile/${uid}`).then((res) => {
-        //   console.log(res.data.profile.user_Id)
         sessionStorage.setItem("UserId", res.data.user_Id);
         router.push("/account");
 
@@ -245,7 +240,7 @@ export default {
       });
     },
     // Method to delete a user and associated images from S3
-    deleteUser(userid, link_VS, link_RS) {
+    deleteUser(userid) {
       Swal.fire({
         title: "Are you sure?",
         text: "You want to delete This User!",
@@ -256,9 +251,8 @@ export default {
         confirmButtonText: "Yes, delete it!",
       }).then((result) => {
         if (result.isConfirmed) {
-          axiosInstance.delete(`${process.env.baseURL}user/delete-user/${userid}`).then(() => {
+          axiosInstance.delete(`${process.env.baseURL}admin/delete-admin-user/${userid}`).then(() => {
             toast.success("User deleted successfully!");
-            this.deleteImagesFromS3(link_VS, link_RS);
             this.getdata();
           }).catch((error) => {
             this.handleAxiosError(error);
@@ -266,58 +260,24 @@ export default {
         }
       });
     },
-    // Method to delete images from S3
-    async deleteImagesFromS3(linkVS, linkRS) {
-      if (linkVS) {
-        await this.deleteImageFromS3(linkVS);
-      }
-      if (linkRS) {
-        await this.deleteImageFromS3(linkRS);
-      }
-    },
-    // Method to delete an image from S3
-    async deleteImageFromS3(encryptedLink) {
-      try {
-        const bytes = CryptoJS.AES.decrypt(encryptedLink, process.env.SECRET_KEY);
-        const decryptedLink = bytes.toString(CryptoJS.enc.Utf8);
-        const s3Client = new S3Client({
-          region: process.env.Aws_region,
-          credentials: {
-            accessKeyId: process.env.AccessKeyId,
-            secretAccessKey: process.env.SecretAccessKey,
-          },
-        });
-        const imageKey = decryptedLink.replace(process.env.Aws_Url, '');
-        const command = new DeleteObjectCommand({
-          Bucket: process.env.S3_BUCKET_NAME,
-          Key: imageKey,
-        });
-        await s3Client.send(command);
-
-      } catch (error) {
-
-      }
-    },
     // Method to approve a user
     async approveUser(userid, statusid) {
       await this.statusUpdate(userid, statusid);
-      await this.getdata(); // Ensure it fetches data after updating the status
+      await this.getdata(); 
       toast.success("Status Updated successfully!");
     },
 
     // Method to reject a user and delete associated images from S3
-    async rejectUser(userid, statusid, link_VS, link_RS) {
+    async rejectUser(userid, statusid) {
       await this.statusUpdate(userid, statusid);
-      await this.getdata(); // Ensure data is fetched after images are deleted
+      await this.getdata(); 
       toast.success("Status Updated successfully!");
-      await this.deleteImagesFromS3(link_VS, link_RS);
-
     },
 
     // Method to reactivate a user
     async reactivate_User(userid, statusid) {
       await this.statusUpdate(userid, statusid);
-      await this.getdata(); // Ensure data fetch after reactivation
+      await this.getdata(); 
       toast.success("Status Updated successfully!");
     },
     // Method to set the selected user for email modal

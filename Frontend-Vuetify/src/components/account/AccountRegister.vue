@@ -183,7 +183,7 @@
                     <div class="custom-form" :class="{ 'has-error': !isValidFacebookLink && showError }">
                       <label for="facebook_link">Facebook-Profillink</label>
                       <input type="text" placeholder="Geben Sie Ihren Facebook-Profillink ein" id="facebook_link"
-                        v-model="facebook_link">
+                        v-model="facebook_link" required>
                       <span v-if="!isValidFacebookLink && showError" class="error-message">
                         Ungültiger Facebook-Link. Muss mit https://www.facebook.com/ beginnen
                       </span>

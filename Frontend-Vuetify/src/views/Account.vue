@@ -284,7 +284,7 @@ export default {
     async showReviews(userid) {
       try {
         const response = await axiosInstance.get(`${process.env.baseURL}review/get-user-reviews?userId=${userid}`);
-        this.reviews = response.data;
+        this.reviews = response.data.items;
       } catch (error) {
         console.error('Error fetching reviews:', error);
       }

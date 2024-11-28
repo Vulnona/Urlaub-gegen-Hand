@@ -5,7 +5,7 @@ using UGH.Application.Authentication;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.EntityFrameworkCore;
 using UGHApi.Services.UserProvider;
-using UGH.Contracts.Authentication;
+using UGHApi.Services.HtmlTemplate;
 using UGH.Infrastructure.Services;
 using Microsoft.OpenApi.Models;
 using UGH.Application.Reviews;
@@ -210,6 +210,7 @@ namespace UGHApi
             services.AddTransient<UserService>();
             services.AddScoped<PasswordService>();
             services.AddScoped<S3Service>();
+            services.AddScoped<HtmlTemplateService>();
             services.AddScoped<IUrlBuilderService, UrlBuilderService>();
             //services.AddScoped<MembershipService>();
             services.AddMemoryCache();

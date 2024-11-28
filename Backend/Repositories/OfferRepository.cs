@@ -169,6 +169,52 @@ public class OfferRepository : IOfferRepository
         return PaginatedList<OfferDTO>.Create(offerDTOs, totalCount, pageNumber, pageSize);
     }
 
+    public async Task<PaginatedList<OfferDTO>> GetAllOfferForUnothorizeUserAsync(
+    string searchTerm,
+    int pageNumber,
+    int pageSize)
+    {
+        IQueryable<Offer> query = _context.offers
+            .Include(o => o.User)
+            .Include(o => o.Reviews);
+
+        if (!string.IsNullOrEmpty(searchTerm))
+        {
+            query = query.Where(
+                o =>
+                    o.Title.Contains(searchTerm)
+                    || o.skills.Contains(searchTerm)
+                    || o.Location.Contains(searchTerm)
+                    || o.state.Contains(searchTerm)
+            );
+        }
+
+        int totalCount = await query.CountAsync();
+
+        var offers = await query
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        var offerDTOs = offers.Select(o => new OfferDTO
+        {
+            Id = o.Id,
+            ImageData = o.ImageData,
+            Title = o.Title,
+            Accomodation = o.Accomodation,
+            Accomodationsuitable = o.accomodationsuitable,
+            Skills = o.skills,
+            HostId = null,
+            HostName = o.User != null ? $"{o.User.FirstName} {o.User.LastName}" : "Unknown",
+            AverageRating = o.Reviews.Any() ? o.Reviews.Average(r => r.RatingValue) : 0.0,
+            Location = o.Location ?? "",
+            Region = o.state ?? "",
+            AppliedStatus = null
+        }).ToList();
+
+        return PaginatedList<OfferDTO>.Create(offerDTOs, totalCount, pageNumber, pageSize);
+    }
+
     public async Task AddOfferAsync(Offer offer)
     {
         _context.offers.Add(offer);

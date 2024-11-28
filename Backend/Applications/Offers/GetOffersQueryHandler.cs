@@ -22,18 +22,31 @@ public class GetAllOffersQueryHandler
     }
 
     public async Task<Result<PaginatedList<OfferDTO>>> Handle(
-        GetOffersQuery request,
-        CancellationToken cancellationToken
-    )
+    GetOffersQuery request,
+    CancellationToken cancellationToken
+)
     {
         try
         {
-            var paginatedOffers = await _offerRepository.GetAllOfferByUserAsync(
-                request.UserId,
-                request.SearchTerm,
-                request.PageNumber,
-                request.PageSize
-            );
+            PaginatedList<OfferDTO> paginatedOffers;
+
+            if (request.UserId == null || request.UserId == Guid.Empty)
+            {
+                paginatedOffers = await _offerRepository.GetAllOfferForUnothorizeUserAsync(
+                    request.SearchTerm,
+                    request.PageNumber,
+                    request.PageSize
+                );
+            }
+            else
+            {
+                paginatedOffers = await _offerRepository.GetAllOfferByUserAsync(
+                    request.UserId.Value,
+                    request.SearchTerm,
+                    request.PageNumber,
+                    request.PageSize
+                );
+            }
 
             return Result.Success(paginatedOffers);
         }

@@ -12,6 +12,11 @@ public interface IOfferRepository
         string searchTerm,
         int pageNumber,
         int pageSize
+    ); 
+    Task<PaginatedList<OfferDTO>> GetAllOfferForUnothorizeUserAsync(
+        string searchTerm,
+        int pageNumber,
+        int pageSize
     );
     Task<Offer> GetOfferByIdAsync(int offerId);
     Task AddOfferAsync(Offer offer);

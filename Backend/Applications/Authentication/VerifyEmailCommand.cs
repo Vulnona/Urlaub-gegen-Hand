@@ -1,9 +1,8 @@
 ﻿using MediatR;
-using UGH.Domain.Core;
 
 namespace UGH.Application.Authentication;
 
-public class VerifyEmailCommand : IRequest<Result>
+public class VerifyEmailCommand : IRequest<(string Html, string MimeType)>
 {
     public string Token { get; }
 

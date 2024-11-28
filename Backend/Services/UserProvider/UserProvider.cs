@@ -1,7 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
-using System.Linq;
+﻿using UGHApi.Services.UserProvider;
 using System.Security.Claims;
-using UGHApi.Services.UserProvider;
 
 public class UserProvider : IUserProvider
 {
