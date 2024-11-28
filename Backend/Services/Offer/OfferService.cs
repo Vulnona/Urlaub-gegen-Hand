@@ -200,14 +200,16 @@ public class OfferService : IOfferService
         }
     }
 
-    public async Task<IActionResult> GetOfferApplicationsByHostAsync(Guid hostId)
+    public async Task<IActionResult> GetOfferApplicationsByHostAsync(Guid hostId, int pageNumber, int pageSize)
     {
         try
         {
             var pendingApplications = await _offerRepository.GetOfferApplicationsByHostAsync(
-                hostId
+                hostId,
+                pageNumber,
+                pageSize
             );
-            if (pendingApplications == null || pendingApplications.Count() == 0)
+            if (pendingApplications == null || pendingApplications.TotalCount == 0)
             {
                 return new NotFoundObjectResult(
                     "No pending applications found for the provided Host ID."

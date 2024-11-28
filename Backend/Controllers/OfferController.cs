@@ -216,12 +216,12 @@ public class OfferController : ControllerBase
 
     [Authorize]
     [HttpGet("offer-applications")]
-    public async Task<IActionResult> GetOfferApplicationsByHost()
+    public async Task<IActionResult> GetOfferApplicationsByHost(int pageNumber = 1, int pageSize = 10)
     {
         try
         {
             var hostId = _userProvider.UserId;
-            var query = new GetOfferApplicationsByHostQuery(hostId);
+            var query = new GetOfferApplicationsByHostQuery(hostId, pageNumber, pageSize);
             var result = await _mediator.Send(query);
 
             if (result.IsFailure)

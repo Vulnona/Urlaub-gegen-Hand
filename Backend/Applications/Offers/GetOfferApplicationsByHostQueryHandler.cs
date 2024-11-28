@@ -3,11 +3,12 @@ using UGH.Domain.ViewModels;
 using UGH.Domain.Interfaces;
 using UGH.Domain.Core;
 using MediatR;
+using UGHApi.Shared;
 
 namespace UGH.Application.Offers;
 
 public class GetOfferApplicationsByHostQueryHandler
-    : IRequestHandler<GetOfferApplicationsByHostQuery, Result<List<OfferApplicationDto>>>
+    : IRequestHandler<GetOfferApplicationsByHostQuery, Result<PaginatedList<OfferApplicationDto>>>
 {
     private readonly IOfferRepository _offerRepository;
     private readonly ILogger<GetOfferApplicationsByHostQueryHandler> _logger;
@@ -21,19 +22,20 @@ public class GetOfferApplicationsByHostQueryHandler
         _logger = logger;
     }
 
-    public async Task<Result<List<OfferApplicationDto>>> Handle(
+    public async Task<Result<PaginatedList<OfferApplicationDto>>> Handle(
         GetOfferApplicationsByHostQuery request,
         CancellationToken cancellationToken
     )
     {
         try
         {
-            var applications = await _offerRepository.GetOfferApplicationsByHostAsync(
-                request.HostId
+            var paginatedApplications = await _offerRepository.GetOfferApplicationsByHostAsync(
+                request.HostId,
+                request.PageNumber,
+                request.PageSize
             );
 
-            // Map entities to DTOs
-            var applicationDtos = applications
+            var applicationDtos = paginatedApplications.Items
                 .Select(
                     app =>
                         new OfferApplicationDto
@@ -64,12 +66,12 @@ public class GetOfferApplicationsByHostQueryHandler
                 )
                 .ToList();
 
-            return Result.Success(applicationDtos);
+            return Result.Success(PaginatedList<OfferApplicationDto>.Create(applicationDtos, paginatedApplications.TotalCount, request.PageNumber, request.PageSize));
         }
         catch (Exception ex)
         {
             _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
-            return Result.Failure<List<OfferApplicationDto>>(
+            return Result.Failure<PaginatedList<OfferApplicationDto>>(
                 Errors.General.InvalidOperation(
                     "Something went wrong during fetching offer applications"
                 )

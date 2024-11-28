@@ -252,15 +252,23 @@ public class OfferRepository : IOfferRepository
         await _context.SaveChangesAsync();
     }
 
-    public async Task<List<OfferApplication>> GetOfferApplicationsByHostAsync(Guid hostId)
+    public async Task<PaginatedList<OfferApplication>> GetOfferApplicationsByHostAsync(Guid hostId, int pageNumber, int pageSize)
     {
         try
         {
-            return await _context.offerapplication
+            IQueryable<OfferApplication> query = _context.offerapplication
                 .Include(oa => oa.Offer)
                 .Include(oa => oa.User)
-                .Where(app => app.HostId == hostId)
+                .Where(app => app.HostId == hostId);
+
+            int totalCount = await query.CountAsync();
+
+            var applications = await query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
                 .ToListAsync();
+
+            return PaginatedList<OfferApplication>.Create(applications, totalCount, pageNumber, pageSize);
         }
         catch (Exception)
         {
