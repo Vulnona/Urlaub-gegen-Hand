@@ -96,6 +96,7 @@ public class AdminController : ControllerBase
         }
     }
 
+    [AllowAnonymous]
     [HttpGet("get-user-profile/{userId}")]
     public async Task<IActionResult> GetProfile([Required] Guid userId)
     {
