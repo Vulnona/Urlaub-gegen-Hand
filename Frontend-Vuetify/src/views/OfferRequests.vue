@@ -75,11 +75,11 @@
                 <p class="text-center">No offers found for this user.</p>
               </div>
             </div>
-            
+
           </div>
 
         </div>
-        
+
       </div>
     </div>
 
@@ -121,14 +121,14 @@
         </div>
       </div>
     </div>
-     <!-- Pagination Section -->
-     <div class="pagination">
-              <button class="action-link" @click="changePage(currentPage - 1)" :hidden="currentPage === 1"><i
-                  class="ri-arrow-left-s-line"></i>Previous</button>
-              <span>Page {{ currentPage }} of {{ totalPages }}</span>
-              <button class="action-link" @click="changePage(currentPage + 1)"
-                :hidden="currentPage === totalPages">Next<i class="ri-arrow-right-s-line"></i></button>
-            </div>
+    <!-- Pagination Section -->
+    <div class="pagination">
+      <button class="action-link" @click="changePage(currentPage - 1)" :hidden="currentPage === 1"><i
+          class="ri-arrow-left-s-line"></i>Previous</button>
+      <span>Page {{ currentPage }} of {{ totalPages }}</span>
+      <button class="action-link" @click="changePage(currentPage + 1)" :hidden="currentPage === totalPages">Next<i
+          class="ri-arrow-right-s-line"></i></button>
+    </div>
   </div>
 </template>
 

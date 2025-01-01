@@ -9,7 +9,11 @@ public class Result<TValue> : Result
         : base(isSuccess, error) => _value = value;
 
     public TValue Value =>
-        IsSuccess ? _value! : throw new InvalidOperationException("The value of a failure result can not be accessed.");
+        IsSuccess
+            ? _value!
+            : throw new InvalidOperationException(
+                "The value of a failure result can not be accessed."
+            );
 
     public static implicit operator Result<TValue>(TValue? value) => Create(value);
 }

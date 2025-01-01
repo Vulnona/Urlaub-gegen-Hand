@@ -1,16 +1,17 @@
-﻿using OpenQA.Selenium.Support.UI;
-using OpenQA.Selenium.Chrome;
-using UGH.Domain.Interfaces;
-using UGH.Domain.Entities;
-using UGH.Domain.Core;
-using OpenQA.Selenium;
-using UGHApi.Common;
-using System.Text;
+﻿using System.Text;
 using MediatR;
+using OpenQA.Selenium;
+using OpenQA.Selenium.Chrome;
+using OpenQA.Selenium.Support.UI;
+using UGH.Domain.Core;
+using UGH.Domain.Entities;
+using UGH.Domain.Interfaces;
+using UGHApi.Common;
 
 namespace UGH.Application.Offers;
 
 #pragma warning disable CS4014
+
 public class AddOfferCommandHandler : IRequestHandler<AddOfferCommand, Result>
 {
     private readonly IOfferRepository _offerRepository;
@@ -60,7 +61,9 @@ public class AddOfferCommandHandler : IRequestHandler<AddOfferCommand, Result>
 
             if (!(isLocationProvided ^ isCountryStateCityProvided))
             {
-                return Result.Failure(Errors.General.InvalidOperation("Location or country state city not provided"));
+                return Result.Failure(
+                    Errors.General.InvalidOperation("Location or country state city not provided")
+                );
             }
 
             var offer = new Offer
@@ -68,7 +71,7 @@ public class AddOfferCommandHandler : IRequestHandler<AddOfferCommand, Result>
                 Title = offerViewModel.Title,
                 Description = offerViewModel.Description,
                 Location = offerViewModel.Location,
-                CreatedAt = DateTime.Now,
+                CreatedAt = DateTime.UtcNow,
                 Contact = offerViewModel.Contact,
                 Accomodation = offerViewModel.Accommodation,
                 accomodationsuitable = offerViewModel.AccommodationSuitable,
@@ -126,7 +129,9 @@ public class AddOfferCommandHandler : IRequestHandler<AddOfferCommand, Result>
                 PerformLogin(wait, driver, facebookDetails);
                 _logger.LogInformation("Logged in to the account successfully!");
 
-                driver.Navigate().GoToUrl($"https://mbasic.facebook.com/groups/{facebookDetails.MAIN_GROUP_ID}");
+                driver
+                    .Navigate()
+                    .GoToUrl($"https://mbasic.facebook.com/groups/{facebookDetails.MAIN_GROUP_ID}");
                 _logger.LogInformation("Visited Group!");
 
                 PrepareAndPostOffer(wait, driver, offer);
@@ -143,7 +148,11 @@ public class AddOfferCommandHandler : IRequestHandler<AddOfferCommand, Result>
         }
     }
 
-    private void PerformLogin(WebDriverWait wait, ChromeDriver driver, FacebookDetails facebookDetails)
+    private void PerformLogin(
+        WebDriverWait wait,
+        ChromeDriver driver,
+        FacebookDetails facebookDetails
+    )
     {
         var emailField = wait.Until(
             SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(By.Id("email"))

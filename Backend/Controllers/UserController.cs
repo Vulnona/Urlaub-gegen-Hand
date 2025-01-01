@@ -1,9 +1,10 @@
 using System.ComponentModel.DataAnnotations;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using UGH.Application.Users;
 using UGHApi.Models;
-using MediatR;
+using UGHApi.Services.UserProvider;
 
 namespace UGHApi.Controllers;
 
@@ -12,12 +13,18 @@ namespace UGHApi.Controllers;
 public class UserController : ControllerBase
 {
     private readonly ILogger<UserController> _logger;
+    private readonly IUserProvider _userProvider;
     private readonly IMediator _mediator;
 
-    public UserController(IMediator mediator, ILogger<UserController> logger)
+    public UserController(
+        IMediator mediator,
+        ILogger<UserController> logger,
+        IUserProvider userProvider
+    )
     {
         _mediator = mediator;
         _logger = logger;
+        _userProvider = userProvider;
     }
 
     #region users-info
@@ -73,11 +80,12 @@ public class UserController : ControllerBase
     }
 
     [Authorize]
-    [HttpDelete("delete-user/{userId}")]
-    public async Task<IActionResult> DeleteUser([Required] Guid userId)
+    [HttpDelete("delete-user")]
+    public async Task<IActionResult> DeleteUser()
     {
         try
         {
+            var userId = _userProvider.UserId;
             var command = new DeleteUserCommand(userId);
             var result = await _mediator.Send(command);
 

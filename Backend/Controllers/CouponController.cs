@@ -1,13 +1,19 @@
-﻿/*
-using Azure;
+﻿using MailKit.Search;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using RestSharp;
 using UGH.Domain.Entities;
+using UGH.Domain.Interfaces;
+using UGH.Infrastructure.Services;
+using UGHApi.Applications.Admin;
+using UGHApi.Applications.Coupons;
+using UGHApi.Interfaces;
 using UGHApi.Models;
-using UGHApi.Services;
+using UGHApi.Repositories;
+using UGHApi.Services.HtmlTemplate;
+using UGHApi.Services.UserProvider;
+using static OpenQA.Selenium.PrintOptions;
 
 namespace UGHApi.Controllers
 {
@@ -15,39 +21,62 @@ namespace UGHApi.Controllers
     [ApiController]
     public class CouponController : ControllerBase
     {
-        private readonly Ugh_Context _context;
-        private readonly CouponService _couponService;
+        private readonly IMediator _mediator;
+        private readonly EmailService _emailService;
+        private readonly HtmlTemplateService _htmlTemplateService;
+        private readonly ICouponRepository _couponRepository;
+        private readonly IUserProvider _userProvider;
+        private readonly IUserRepository _userRepository;
         private readonly ILogger<CouponController> _logger;
 
         public CouponController(
-            Ugh_Context context,
-            CouponService couponService,
-            ILogger<CouponController> logger
+            IMediator mediator,
+            ICouponRepository couponRepository,
+            HtmlTemplateService htmlTemplateService,
+            IUserProvider userProvider,
+            IUserRepository userRepository,
+            ILogger<CouponController> logger,
+            EmailService emailService
         )
         {
-            _context = context;
-            _couponService = couponService;
+            _mediator = mediator;
+            _couponRepository = couponRepository;
+            _htmlTemplateService = htmlTemplateService;
+            _userProvider = userProvider;
+            _userRepository = userRepository;
             _logger = logger;
+            _emailService = emailService;
         }
 
         #region Coupon-generation-by-admin
         [HttpPost("admin/add-coupon")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> AddCoupon(UGH.Domain.Entities.Coupon coupon)
+        public async Task<IActionResult> AddCoupon()
         {
             try
             {
-                var existingCoupon = await _context.coupons.FirstOrDefaultAsync(
-                    x => x.Code.Equals(coupon.Code)
+                var result = await _mediator.Send(new AddCouponCommand());
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        [HttpPost("admin/send-coupon")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> SendCoupon([FromBody] SendCouponRequest reuest)
+        {
+            try
+            {
+                var result = await _mediator.Send(
+                    new SendCouponQuery(reuest.UserId, reuest.CouponCode)
                 );
 
-                if (existingCoupon != null)
-                {
-                    return Conflict("Coupon code already exists.");
-                }
-
-                await _couponService.AddCoupon(coupon);
-                return Ok("Coupon inserted successfully.");
+                return Ok(result);
             }
             catch (Exception ex)
             {
@@ -64,7 +93,7 @@ namespace UGHApi.Controllers
             {
                 if (!ModelState.IsValid)
                     return BadRequest(ModelState);
-                await _couponService.UpdateCoupon(updatedCoupon);
+                await _couponRepository.UpdateCoupon(updatedCoupon);
                 return Ok("Coupon updated successfully.");
             }
             catch (CouponNotFoundException)
@@ -84,7 +113,7 @@ namespace UGHApi.Controllers
         {
             try
             {
-                var coupons = await _couponService.GetAllcoupons();
+                var coupons = await _couponRepository.GetAllCoupons();
                 if (coupons.IsNullOrEmpty())
                     return NotFound();
                 return Ok(coupons);
@@ -102,7 +131,7 @@ namespace UGHApi.Controllers
         {
             try
             {
-                await _couponService.DeleteCoupon(couponId);
+                await _couponRepository.DeleteCoupon(couponId);
                 return Ok("Coupon deleted successfully.");
             }
             catch (CouponNotFoundException)
@@ -118,11 +147,14 @@ namespace UGHApi.Controllers
 
         [HttpPost("coupon/redeem")]
         [Authorize]
-        public async Task<IActionResult> RedeemCoupon(string couponCode)
+        public async Task<IActionResult> RedeemCoupon([FromBody] RedeemCouponRequest request)
         {
             try
             {
-                var result = await _couponService.RedeemCoupon(couponCode, User);
+                var userId = _userProvider.UserId;
+                var result = await _mediator.Send(
+                    new RedeemMembershipCommand(userId, 1, request.CouponCode)
+                );
                 return Ok(result);
             }
             catch (CouponNotFoundException)
@@ -142,4 +174,3 @@ namespace UGHApi.Controllers
         #endregion
     }
 }
-*/

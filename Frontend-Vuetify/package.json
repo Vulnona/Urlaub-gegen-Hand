@@ -9,7 +9,6 @@
     "lint": "eslint . --fix --ignore-path .gitignore"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.556.0",
     "@mdi/font": "7.0.96",
     "axios": "^1.6.8",
     "axios-interceptor": "^3.0.15",
@@ -20,7 +19,6 @@
     "dotenv": "^16.4.5",
     "jwt-decode": "^4.0.0",
     "lodash": "^4.17.21",
-    "pinia": "^2.0.0",
     "remixicon": "^4.2.0",
     "roboto-fontface": "*",
     "router": "^1.3.8",
@@ -32,6 +30,7 @@
     "vue-star-rating": "^1.7.0",
     "vue-toastification": "^2.0.0-rc.5",
     "vue3-datepicker": "^0.4.0",
+    "vue3-perfect-scrollbar": "^2.0.0",
     "vuetify": "^3.0.0"
   },
   "devDependencies": {

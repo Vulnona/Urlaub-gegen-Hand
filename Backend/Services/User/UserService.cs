@@ -1,9 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using UGH.Contracts.Authentication;
 using UGH.Domain.Core;
 using UGH.Domain.Entities;
-using UGHApi.Repositories.Interfaces;
+using UGH.Domain.Interfaces;
 
 namespace UGH.Infrastructure.Services;
 
@@ -35,8 +34,8 @@ public class UserService
     {
         try
         {
-            var userId = await _context.emailverificators
-                .Where(x => x.verificationToken.ToString().Equals(token))
+            var userId = await _context
+                .emailverificators.Where(x => x.verificationToken.ToString().Equals(token))
                 .Select(x => x.user_Id)
                 .FirstOrDefaultAsync();
 
@@ -77,7 +76,7 @@ public class UserService
                 return Result.Failure(Errors.General.InvalidOperation("Membership not found."));
             }
 
-            DateTime startDate = DateTime.Now;
+            DateTime startDate = DateTime.UtcNow;
             DateTime expirationDate = startDate.AddDays(membership.DurationDays);
 
             var userMembership = new UserMembership
@@ -85,7 +84,7 @@ public class UserService
                 User_Id = userId,
                 MembershipID = membershipId,
                 StartDate = startDate,
-                Expiration = expirationDate
+                Expiration = expirationDate,
             };
 
             await _userMembershipRepository.AddUserMembershipAsync(userMembership);
@@ -111,8 +110,8 @@ public class UserService
     {
         try
         {
-            var existingMapping = await _context.userrolesmapping.AnyAsync(
-                mapping => mapping.UserId == userId && mapping.RoleId == roleId
+            var existingMapping = await _context.userrolesmapping.AnyAsync(mapping =>
+                mapping.UserId == userId && mapping.RoleId == roleId
             );
 
             if (existingMapping)
@@ -173,8 +172,8 @@ public class UserService
         try
         {
             if (
-                _context.users.Any(
-                    u => u.Email_Address.ToLower().Equals(request.Email_Address.ToLower())
+                _context.users.Any(u =>
+                    u.Email_Address.ToLower().Equals(request.Email_Address.ToLower())
                 )
             )
             {
@@ -204,7 +203,7 @@ public class UserService
                 false,
                 hashPassword,
                 salt,
-                request.Facebook_link,
+                request?.Facebook_link,
                 request.Link_RS,
                 request.Link_VS,
                 request.State
@@ -219,7 +218,7 @@ public class UserService
                 var userRoleMapping = new UserRoleMapping
                 {
                     UserId = newUser.User_Id,
-                    RoleId = defaultUserRole.RoleId
+                    RoleId = defaultUserRole.RoleId,
                 };
                 _context.userrolesmapping.Add(userRoleMapping);
                 _context.SaveChanges();
@@ -237,18 +236,17 @@ public class UserService
     {
         try
         {
-            var userRoles = await _context.users
-                .Where(ur => ur.Email_Address == userEmail)
-                .SelectMany(
-                    ur =>
-                        _context.userrolesmapping
-                            .Where(urm => urm.UserId == ur.User_Id)
-                            .Join(
-                                _context.userroles,
-                                urm => urm.RoleId,
-                                role => role.RoleId,
-                                (urm, role) => role.RoleName
-                            )
+            var userRoles = await _context
+                .users.Where(ur => ur.Email_Address == userEmail)
+                .SelectMany(ur =>
+                    _context
+                        .userrolesmapping.Where(urm => urm.UserId == ur.User_Id)
+                        .Join(
+                            _context.userroles,
+                            urm => urm.RoleId,
+                            role => role.RoleId,
+                            (urm, role) => role.RoleName
+                        )
                 )
                 .ToListAsync();
             if (userRoles.Count == 0)

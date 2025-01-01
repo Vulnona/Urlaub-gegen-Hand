@@ -1,10 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
-using UGH.Domain.Interfaces;
+﻿using Mapster;
+using Microsoft.EntityFrameworkCore;
 using UGH.Domain.Entities;
+using UGH.Domain.Interfaces;
 using UGHApi.Services.AWS;
-using UGHApi.ViewModels;
 using UGHApi.Shared;
-using Mapster;
+using UGHApi.ViewModels;
 
 namespace UGH.Infrastructure.Repositories;
 
@@ -26,13 +26,17 @@ public class UserRepository : IUserRepository
 
     public async Task<User> GetUserForMembershipByIdAsync(Guid userId)
     {
-        return await _context.users.Include(u => u.CurrentMembership).Include(u => u.UserMemberships).FirstOrDefaultAsync(u => u.User_Id == userId);
+        return await _context
+            .users.Include(u => u.CurrentMembership)
+            .Include(u => u.UserMemberships)
+            .FirstOrDefaultAsync(u => u.User_Id == userId);
     }
 
     public async Task<UserDTO> GetUserDetailsByIdAsync(Guid userId)
     {
-        var user = await _context.users
-            .Include(u => u.CurrentMembership)
+        var user = await _context
+            .users.Include(u => u.CurrentMembership)
+            .Include(u => u.UserMemberships)
             .Include(u => u.Offers)
             .ThenInclude(o => o.Reviews)
             .FirstOrDefaultAsync(u => u.User_Id == userId);
@@ -54,26 +58,23 @@ public class UserRepository : IUserRepository
 
     public async Task<User> GetUserWithRatingByIdAsync(Guid userId)
     {
-        return await _context.users
-            .Include(u => u.Offers)
+        return await _context
+            .users.Include(u => u.Offers)
             .ThenInclude(o => o.Reviews)
             .FirstOrDefaultAsync(u => u.User_Id == userId);
     }
 
     public async Task<PaginatedList<UserDTO>> GetAllUsersAsync(int pageNumber, int pageSize)
     {
-        IQueryable<User> query = _context.users
-        .Include(u => u.Offers)
-        .ThenInclude(o => o.Reviews)
-        .OrderBy(u => u.VerificationState)
-        .AsQueryable();
+        IQueryable<User> query = _context
+            .users.Include(u => u.Offers)
+            .ThenInclude(o => o.Reviews)
+            .OrderBy(u => u.VerificationState)
+            .AsQueryable();
 
         int totalCount = await query.CountAsync();
 
-        var users = await query
-            .Skip((pageNumber - 1) * pageSize)
-            .Take(pageSize)
-            .ToListAsync();
+        var users = await query.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
 
         if (users == null || !users.Any())
         {
@@ -113,8 +114,8 @@ public class UserRepository : IUserRepository
 
     public async Task<User> GetUserWithMembershipAsync(Guid userId)
     {
-        return await _context.users
-            .Include(u => u.CurrentMembership)
+        return await _context
+            .users.Include(u => u.CurrentMembership)
             .FirstOrDefaultAsync(u => u.User_Id == userId);
     }
 
@@ -136,8 +137,8 @@ public class UserRepository : IUserRepository
 
     public async Task<User> GetUserByEmailAsync(string email)
     {
-        return await _context.users
-            .Include(u => u.UserMemberships)
+        return await _context
+            .users.Include(u => u.UserMemberships)
             .Include(u => u.CurrentMembership)
             .FirstOrDefaultAsync(u => u.Email_Address == email);
     }

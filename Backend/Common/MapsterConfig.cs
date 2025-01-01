@@ -1,7 +1,7 @@
 ﻿// MapsterConfig.cs
-using Mapster;
 using UGH.Domain.Entities;
 using UGHApi.ViewModels;
+using Mapster;
 
 public static class MapsterConfig
 {

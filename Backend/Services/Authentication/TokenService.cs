@@ -1,11 +1,9 @@
-﻿using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
+﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
 using UGH.Domain.Entities;
 
 namespace UGH.Infrastructure.Services;
@@ -50,15 +48,14 @@ public class TokenService
             var roles = await _userService.GetUserRolesByUserEmail(userName);
 
             // Handle membership status, default to "Inactive" if membership is null
-            var membershipStatus =
-                memberships.Count != 0 ? "Active" : "Inactive";
+            var membershipStatus = memberships.Count != 0 ? "Active" : "Inactive";
 
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
                 new Claim(JwtRegisteredClaimNames.Sub, userName),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim("MembershipStatus", membershipStatus)
+                new Claim("MembershipStatus", membershipStatus),
             };
 
             // Add roles to claims
@@ -72,7 +69,7 @@ public class TokenService
                 _configuration["Jwt:Issuer"],
                 _configuration["Jwt:Audience"],
                 claims,
-                expires: DateTime.Now.AddHours(3),
+                expires: DateTime.UtcNow.AddHours(3),
                 signingCredentials: credentials
             );
 
@@ -101,14 +98,14 @@ public class TokenService
                     IssuerSigningKey = new SymmetricSecurityKey(key),
                     ValidateIssuer = false,
                     ValidateAudience = false,
-                    ClockSkew = TimeSpan.Zero
+                    ClockSkew = TimeSpan.Zero,
                 },
                 out SecurityToken validatedToken
             );
 
             var jwtToken = (JwtSecurityToken)validatedToken;
-            var userIdClaim = jwtToken.Claims.FirstOrDefault(
-                x => x.Type == ClaimTypes.NameIdentifier
+            var userIdClaim = jwtToken.Claims.FirstOrDefault(x =>
+                x.Type == ClaimTypes.NameIdentifier
             );
 
             if (userIdClaim != null && Guid.TryParse(userIdClaim.Value, out Guid userId))
@@ -188,9 +185,9 @@ public class TokenService
         {
             var newVerificator = new UGH.Domain.Entities.EmailVerificator
             {
-                requestDate = DateTime.Now,
+                requestDate = DateTime.UtcNow,
                 user_Id = userId,
-                verificationToken = Guid.NewGuid()
+                verificationToken = Guid.NewGuid(),
             };
 
             _context.emailverificators.Add(newVerificator);

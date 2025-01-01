@@ -1,6 +1,6 @@
 ﻿using MediatR;
-using UGH.Domain.ViewModels;
 using UGH.Domain.Core;
+using UGH.Domain.ViewModels;
 using UGHApi.Shared;
 
 namespace UGH.Application.Offers;

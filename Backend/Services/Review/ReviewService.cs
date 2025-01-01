@@ -1,7 +1,8 @@
 ﻿using Microsoft.Extensions.Logging;
 using UGH.Contracts.Review;
-using UGH.Domain.Interfaces;
 using UGH.Domain.Entities;
+using UGH.Domain.Interfaces;
+using UGHApi.Shared;
 using UGHApi.ViewModels;
 
 namespace UGH.Infrastructure.Services;
@@ -79,7 +80,7 @@ public class ReviewService : IReviewService
             return "A review by this reviewer for this offer already exists.";
         }
 
-        var review = new UGH.Domain.Entities.Review
+        var review = new Review
         {
             OfferId = reviewDto.OfferId,
             RatingValue = reviewDto.RatingValue,
@@ -87,7 +88,7 @@ public class ReviewService : IReviewService
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow,
             ReviewerId = reviewer.User_Id,
-            ReviewedId = reviewedId
+            ReviewedId = reviewedId,
         };
 
         await _repository.AddReviewAsync(review);
@@ -96,9 +97,9 @@ public class ReviewService : IReviewService
         return "Review added successfully.";
     }
 
-    public async Task<IEnumerable<UGH.Domain.Entities.Review>> GetAllReviewsAsync()
+    public async Task<PaginatedList<Review>> GetAllReviewsAsync(int pageNumber, int pageSize)
     {
-        return await _repository.GetAllReviewsAsync();
+        return await _repository.GetAllReviewsAsync(pageNumber, pageSize);
     }
 
     public async Task<string> UpdateReviewAsync(
@@ -139,9 +140,13 @@ public class ReviewService : IReviewService
         return "Review updated successfully.";
     }
 
-    public async Task<IEnumerable<ReviewDto>> GetAllReviewsByUserIdAsync(Guid userId)
+    public async Task<PaginatedList<ReviewDto>> GetAllReviewsByUserIdAsync(
+        Guid userId,
+        int pageNumber,
+        int pageSize
+    )
     {
-        return await _repository.GetAllReviewsByUserIdAsync(userId);
+        return await _repository.GetAllReviewsByUserIdAsync(userId, pageNumber, pageSize);
     }
 
     public async Task<string> DeleteReviewAsync(int reviewId, string email)

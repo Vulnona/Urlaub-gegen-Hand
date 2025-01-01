@@ -31,11 +31,11 @@ public class ReviewController : ControllerBase
 
     [Authorize]
     [HttpGet("get-all-reviews")]
-    public async Task<IActionResult> GetAllReviews()
+    public async Task<IActionResult> GetAllReviews(int pageNumber = 1, int pageSize = 10)
     {
         try
         {
-            var query = new GetAllReviewsQuery();
+            var query = new GetAllReviewsQuery(pageNumber, pageSize);
             var result = await _mediator.Send(query);
 
             if (result.IsFailure)
@@ -133,11 +133,11 @@ public class ReviewController : ControllerBase
 
     [Authorize]
     [HttpGet("get-user-reviews")]
-    public async Task<IActionResult> GetAllReviewsByUserId(Guid userId)
+    public async Task<IActionResult> GetAllReviewsByUserId(Guid userId, int pageNumber = 1, int pageSize = 10)
     {
         try
         {
-            var query = new GetAllReviewsByUserIdQuery(userId);
+            var query = new GetAllReviewsByUserIdQuery(userId, pageNumber, pageSize);
             var result = await _mediator.Send(query);
 
             if (result.IsFailure)
@@ -155,11 +155,34 @@ public class ReviewController : ControllerBase
 
     [Authorize]
     [HttpGet("get-offer-reviews")]
-    public async Task<IActionResult> GetAllReviewsByOfferId(int offerId)
+    public async Task<IActionResult> GetAllReviewsByOfferId(int offerId, int pageNumber = 1, int pageSize = 10)
     {
         try
         {
-            var query = new GetAllReviewsByOfferIdQuery(offerId);
+            var query = new GetAllReviewsByOfferIdQuery(offerId, pageNumber, pageSize);
+            var result = await _mediator.Send(query);
+
+            if (result.IsFailure)
+            {
+                return NotFound(result.Error);
+            }
+
+            return Ok(result.Value);
+        }
+        catch (Exception)
+        {
+            return StatusCode(500, "Internal server error occurred while fetching offer reviews.");
+        }
+    }
+
+    [Authorize(Roles = "Admin")]
+    [HttpGet("get-all-offers-for-reviews-admin")]
+    public async Task<IActionResult> GetAllOffersForReviewsForAdmin(string searchTerm, int pageNumber = 1,
+        int pageSize = 10)
+    {
+        try
+        {
+            var query = new GetAllOffersForReviewsAdminQuery(searchTerm, pageNumber, pageSize);
             var result = await _mediator.Send(query);
 
             if (result.IsFailure)

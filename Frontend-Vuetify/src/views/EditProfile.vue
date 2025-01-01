@@ -115,12 +115,12 @@
                 <span v-if="errors.postCode" class="text-danger">{{ errors.postCode }}</span>
               </div>
             </div>
-            <div class="col-md-8 col-sm-12">
+            <div v-if="profile.facebookLink" class="col-md-8 col-sm-12">
               <!-- Facebook Link -->
               <div class="form-group">
                 <label for="facebookLink">Facebook-Profillink</label>
                 <input type="url" v-model="profile.facebookLink" class="form-control" id="facebookLink"
-                  @blur="validateFacebookLink" />
+                  @blur="validateFacebookLink" disabled/>
                 <span v-if="errors.facebookLink" class="text-danger">{{ errors.facebookLink }}</span>
               </div>
 
@@ -438,10 +438,13 @@ export default {
       return true;
     },
     validateFacebookLink() {
-      const facebookRegex = /^https:\/\/www\.facebook\.com(\/.*)?$/;
-      if (!facebookRegex.test(this.profile.facebookLink)) {
-        this.errors.facebookLink = "Please enter a valid Facebook link (e.g., https://www.facebook.com/anything)";
-        return false;
+      if(this.profile.facebookLink!=''){
+
+        const facebookRegex = /^https:\/\/www\.facebook\.com(\/.*)?$/;
+        if (!facebookRegex.test(this.profile.facebookLink)) {
+          this.errors.facebookLink = "Please enter a valid Facebook link (e.g., https://www.facebook.com/anything)";
+          return false;
+        }
       }
       return true;
     },

@@ -21,12 +21,17 @@
                 </li>
 
                 <!-- Admin-specific Links -->
+                
                 <li v-if="userRole === 'Admin'" class="nav-item">
                   <router-link class="nav-link" to="/admin">
                     <i class="ri-admin-line"></i> Admin
                   </router-link>
                 </li>
-
+                <li v-if="userRole === 'Admin'" class="nav-item">
+                  <router-link class="nav-link" to="/reviews">
+                    <i class="ri-question-answer-line"></i> Reviews
+                  </router-link>
+                </li>
                 <!-- Active Membership-specific Links (for users with active membership) -->
                 <li v-if="isActiveMember && userRole != 'Admin'" class="nav-item">
                   <router-link class="nav-link" to="/my-offers">
@@ -83,7 +88,6 @@ const doLogout = () => {
     router.push("/");
   }
 };
-
 // Navigate to profile
 const openProfile = () => {
   router.push("/profile");

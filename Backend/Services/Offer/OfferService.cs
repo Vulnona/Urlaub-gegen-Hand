@@ -1,8 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using UGH.Domain.Entities;
-using UGH.Domain.ViewModels;
 using UGH.Domain.Interfaces;
-using Microsoft.Extensions.Logging;
+using UGH.Domain.ViewModels;
 
 namespace UGH.Infrastructure.Services;
 
@@ -175,7 +174,7 @@ public class OfferService : IOfferService
                 HostId = offer.HostId,
                 Status = OfferApplicationStatus.Pending,
                 CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
+                UpdatedAt = DateTime.UtcNow,
             };
 
             await _offerRepository.AddOfferApplicationAsync(offerApplication);
@@ -200,7 +199,11 @@ public class OfferService : IOfferService
         }
     }
 
-    public async Task<IActionResult> GetOfferApplicationsByHostAsync(Guid hostId, int pageNumber, int pageSize)
+    public async Task<IActionResult> GetOfferApplicationsByHostAsync(
+        Guid hostId,
+        int pageNumber,
+        int pageSize
+    )
     {
         try
         {

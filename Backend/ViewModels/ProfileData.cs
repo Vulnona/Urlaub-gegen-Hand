@@ -35,9 +35,6 @@ public class ProfileData
     [Required]
     public string Country { get; set; }
 
-    [Required]
-    public string FacebookLink { get; set; }
-
     public string? Hobbies { get; set; }
     public string? Skills { get; set; }
 }

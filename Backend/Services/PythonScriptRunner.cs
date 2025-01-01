@@ -1,5 +1,5 @@
-﻿using Microsoft.Extensions.Options;
-using System.Diagnostics;
+﻿using System.Diagnostics;
+using Microsoft.Extensions.Options;
 using UGHApi.Models;
 
 namespace UGHApi.Services
@@ -11,7 +11,10 @@ namespace UGHApi.Services
         private Process _chromeDriverProcess;
         private readonly TemplateSettings _templateSettings;
 
-        public PythonScriptRunner(ILogger<PythonScriptRunner> logger, IOptions<TemplateSettings> templateSettings)
+        public PythonScriptRunner(
+            ILogger<PythonScriptRunner> logger,
+            IOptions<TemplateSettings> templateSettings
+        )
         {
             _logger = logger;
             _templateSettings = templateSettings.Value;
@@ -30,7 +33,9 @@ namespace UGHApi.Services
             {
                 _logger.LogInformation("Starting ChromeDriver...");
 
-                string chromeDriverPath = Environment.GetEnvironmentVariable("ChromeDriverPath") ?? _templateSettings.ChromeDriverPath;
+                string chromeDriverPath =
+                    Environment.GetEnvironmentVariable("ChromeDriverPath")
+                    ?? _templateSettings.ChromeDriverPath;
                 if (string.IsNullOrEmpty(chromeDriverPath))
                 {
                     _logger.LogError("ChromeDriver path is not set.");
@@ -44,14 +49,16 @@ namespace UGHApi.Services
                         FileName = chromeDriverPath,
                         UseShellExecute = false,
                         RedirectStandardOutput = true,
-                        RedirectStandardError = true
-                    }
+                        RedirectStandardError = true,
+                    },
                 };
                 _chromeDriverProcess.Start();
 
                 _logger.LogInformation("Running Python script...");
 
-                string pythonScriptPath = Environment.GetEnvironmentVariable("FacebookCrawlerScriptPath") ?? _templateSettings.FacebookCrawlerScriptPath;
+                string pythonScriptPath =
+                    Environment.GetEnvironmentVariable("FacebookCrawlerScriptPath")
+                    ?? _templateSettings.FacebookCrawlerScriptPath;
                 if (string.IsNullOrEmpty(pythonScriptPath))
                 {
                     _logger.LogError("Python script path is not set.");
@@ -60,13 +67,12 @@ namespace UGHApi.Services
 
                 ProcessStartInfo start = new ProcessStartInfo
                 {
-                    FileName = "python3", 
+                    FileName = "python3",
                     Arguments = pythonScriptPath,
                     UseShellExecute = false,
                     RedirectStandardOutput = true,
-                    RedirectStandardError = true
+                    RedirectStandardError = true,
                 };
-
 
                 using (Process process = Process.Start(start))
                 {

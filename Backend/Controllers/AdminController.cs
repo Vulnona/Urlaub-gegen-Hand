@@ -1,13 +1,12 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
-using UGHApi.Applications.Admin;
 using Microsoft.AspNetCore.Mvc;
 using UGH.Application.Admin;
-using UGHApi.ViewModels;
 using UGH.Domain.Core;
+using UGHApi.Applications.Admin;
 using UGHApi.Shared;
-using UGHApi.Users;
-using MediatR;
+using UGHApi.ViewModels;
 
 namespace UGHApi.Controllers;
 
@@ -19,10 +18,7 @@ public class AdminController : ControllerBase
     private readonly IMediator _mediator;
     private readonly ILogger<AdminController> _logger;
 
-    public AdminController(
-        ILogger<AdminController> logger,
-        IMediator mediator
-    )
+    public AdminController(ILogger<AdminController> logger, IMediator mediator)
     {
         _mediator = mediator;
         _logger = logger;
@@ -62,7 +58,8 @@ public class AdminController : ControllerBase
     [HttpGet("get-all-users")]
     public async Task<ActionResult<PaginatedList<UserDTO>>> GetAllUsersByAdmin(
         int pageNumber = 1,
-        int pageSize = 10)
+        int pageSize = 10
+    )
     {
         var result = await _mediator.Send(new GetAllUsersByAdminQuery(pageNumber, pageSize));
 
@@ -141,18 +138,17 @@ public class AdminController : ControllerBase
         }
     }
 
-    [HttpPost("assign-membership")]
-    public async Task<IActionResult> AssignMembership(AssignMembershipRequest request)
-    {
-        var command = new AssignMembershipCommand(
-            request.UserId,
-            request.MembershipId);
+    //[HttpPost("assign-membership")]
+    //public async Task<IActionResult> AssignMembership(AssignMembershipRequest request)
+    //{
+    //    var command = new RedeemMembershipCommand(request.UserId, request.MembershipId);
 
-        var result = await _mediator.Send(command);
+    //    var result = await _mediator.Send(command);
 
-        if (!result) return BadRequest("Failed to assign membership");
-        return Ok("Membership assigned successfully.");
-    }
+    //    if (!result)
+    //        return BadRequest("Failed to assign membership");
+    //    return Ok("Membership assigned successfully.");
+    //}
 
     #endregion
 }

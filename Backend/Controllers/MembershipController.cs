@@ -1,10 +1,12 @@
-using MediatR;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
-using RestSharp;
 using UGHApi.Applications.Memberships;
+using Microsoft.EntityFrameworkCore;
+using UGHApi.Services.UserProvider;
+using Microsoft.AspNetCore.Mvc;
+using UGH.Domain.Interfaces;
+using Newtonsoft.Json;
+using MediatR;
+using RestSharp;
 
 namespace UGHApi.Controllers;
 
@@ -13,17 +15,23 @@ namespace UGHApi.Controllers;
 public class MembershipController : ControllerBase
 {
     private readonly Ugh_Context _context;
+    private readonly IUserRepository _userRepository;
     private readonly ILogger<MembershipController> _logger;
     private readonly IMediator _mediator;
+    private readonly IUserProvider _userProvider;
 
     public MembershipController(
         Ugh_Context context,
         IMediator mediator,
+        IUserRepository userRepository,
+        IUserProvider userProvider,
         ILogger<MembershipController> logger
     )
     {
         _context = context;
         _mediator = mediator;
+        _userRepository = userRepository;
+        _userProvider = userProvider;
         _logger = logger;
     }
 
@@ -146,9 +154,21 @@ public class MembershipController : ControllerBase
         return Ok(new { IsActive = isActive });
     }
 
-    private bool MembershipExists(int id)
+    [Authorize]
+    [HttpPost("buy-membership")]
+    public async Task<IActionResult> BuyUserMembership(int membershipId)
     {
-        return (_context.memberships?.Any(e => e.MembershipID == id)).GetValueOrDefault();
+        var userId = _userProvider.UserId;
+
+        var command = new PurchaseMembershipCommand(userId, membershipId);
+        var result = await _mediator.Send(command); 
+
+        if (result.IsFailure)
+        {
+            return BadRequest(result.Error); 
+        }
+
+        return Ok(new { Status = result.Value });
     }
     #endregion
 }

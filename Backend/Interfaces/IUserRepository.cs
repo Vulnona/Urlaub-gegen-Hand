@@ -1,6 +1,6 @@
 ﻿using UGH.Domain.Entities;
-using UGHApi.ViewModels;
 using UGHApi.Shared;
+using UGHApi.ViewModels;
 
 namespace UGH.Domain.Interfaces;
 

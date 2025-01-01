@@ -44,7 +44,7 @@
 
 //            foreach (var reviewLoginUser in reviewLoginUsers)
 //            {
-//                if (reviewLoginUser.CreatedAt.HasValue && reviewLoginUser.CreatedAt.Value.AddDays(14) <= DateTime.Now)
+//                if (reviewLoginUser.CreatedAt.HasValue && reviewLoginUser.CreatedAt.Value.AddDays(14) <= DateTime.UtcNow)
 //                {
 //                    var offerId = reviewLoginUser.OfferId;
 //                    var reviewOfferUser = context.reviewofferusers
@@ -67,7 +67,7 @@
 //                                OfferId = offerId,
 //                                UserId = hostId,
 //                                AddReviewForOfferUser = "Host did not added the review",
-//                                CreatedAt = DateTime.Now
+//                                CreatedAt = DateTime.UtcNow
 //                            };
 
 //                            context.reviewofferusers.Add(nullReviewOfOfferUser);
@@ -86,7 +86,7 @@
 //                        {
 //                            ReviewLoginUserId = reviewLoginUser.Id,
 //                            LoginUserReviewPost = reviewLoginUser.AddReviewForLoginUser,
-//                            CreatedAt = DateTime.Now
+//                            CreatedAt = DateTime.UtcNow
 //                        };
 
 //                        if (reviewOfferUser != null)
@@ -115,7 +115,7 @@
 
 //            foreach (var reviewOfferUser in reviewOfferUsers)
 //            {
-//                if (reviewOfferUser.CreatedAt.HasValue && reviewOfferUser.CreatedAt.Value.AddMinutes(1.1) <= DateTime.Now)
+//                if (reviewOfferUser.CreatedAt.HasValue && reviewOfferUser.CreatedAt.Value.AddMinutes(1.1) <= DateTime.UtcNow)
 //                {
 //                    var offerId = reviewOfferUser.OfferId;
 //                    var reviewLoginUser = context.reviewloginusers
@@ -138,7 +138,7 @@
 //                                OfferId = offerId,
 //                                UserId = loginUserId,
 //                                AddReviewForLoginUser = "User did not added the review",
-//                                CreatedAt = DateTime.Now
+//                                CreatedAt = DateTime.UtcNow
 //                            };
 
 //                            context.reviewloginusers.Add(nullReviewOfLoginUser);
@@ -157,7 +157,7 @@
 //                        {
 //                            ReviewOfferUserId = reviewOfferUser.Id,
 //                            OfferUserReviewPost = reviewOfferUser.AddReviewForOfferUser,
-//                            CreatedAt = DateTime.Now
+//                            CreatedAt = DateTime.UtcNow
 //                        };
 
 //                        if (reviewLoginUser != null)

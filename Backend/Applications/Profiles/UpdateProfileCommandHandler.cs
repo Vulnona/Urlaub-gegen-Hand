@@ -1,8 +1,8 @@
-﻿using UGH.Infrastructure.Services;
-using UGH.Domain.Interfaces;
-using UGH.Domain.Entities;
+﻿using MediatR;
 using UGH.Domain.Core;
-using MediatR;
+using UGH.Domain.Entities;
+using UGH.Domain.Interfaces;
+using UGH.Infrastructure.Services;
 
 namespace UGH.Application.Profile;
 
@@ -54,14 +54,13 @@ public class UpdateProfileCommandHandler : IRequestHandler<UpdateProfileCommand,
                 user.City = profile.City;
                 user.State = profile.State;
                 user.Country = profile.Country;
-                user.Facebook_link = profile.FacebookLink;
                 user.Skills = profile.Skills;
                 user.Hobbies = profile.Hobbies;
 
                 await _userRepository.UpdateUserAsync(user);
             }
 
-            return Result.Success(user);
+            return Result.Success();
         }
         catch (Exception ex)
         {

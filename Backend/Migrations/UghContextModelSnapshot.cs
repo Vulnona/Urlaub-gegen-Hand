@@ -95,17 +95,14 @@ namespace UGHApi.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("longtext");
 
-                    b.Property<decimal>("DiscountAmount")
-                        .HasColumnType("decimal(65,30)");
-
-                    b.Property<DateTime>("EndDate")
+                    b.Property<DateTime?>("EndDate")
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<DateTime>("StartDate")
+                    b.Property<DateTime?>("StartDate")
                         .HasColumnType("datetime(6)");
 
                     b.HasKey("Id");
@@ -664,7 +661,7 @@ namespace UGHApi.Migrations
                         .IsRequired();
 
                     b.HasOne("UGH.Domain.Entities.User", "User")
-                        .WithMany()
+                        .WithMany("UserMemberships")
                         .HasForeignKey("User_Id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -714,6 +711,8 @@ namespace UGHApi.Migrations
             modelBuilder.Entity("UGH.Domain.Entities.User", b =>
                 {
                     b.Navigation("Offers");
+
+                    b.Navigation("UserMemberships");
                 });
 #pragma warning restore 612, 618
         }

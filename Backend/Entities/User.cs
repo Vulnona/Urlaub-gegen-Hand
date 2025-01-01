@@ -64,7 +64,6 @@ public class User
     public Membership CurrentMembership { get; set; }
 
     public ICollection<Offer> Offers { get; set; } = new List<Offer>();
-
     public ICollection<UserMembership> UserMemberships { get; set; } = new List<UserMembership>();
 
     private UserProfile Profile { get; set; }
@@ -79,7 +78,7 @@ public class User
             }
 
             var totalRatings = Offers
-                .SelectMany(o => o.Reviews.Where(r=>r.ReviewedId == User_Id))
+                .SelectMany(o => o.Reviews.Where(r => r.ReviewedId == User_Id))
                 .Select(r => r.RatingValue)
                 .ToList();
 

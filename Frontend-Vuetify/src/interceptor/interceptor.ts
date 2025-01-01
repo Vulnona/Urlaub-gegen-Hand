@@ -2,8 +2,7 @@ import axios from 'axios';
 import CryptoJS from 'crypto-js';
 // Create an Axios instance
 const axiosInstance = axios.create({
-  // Optionally add base URL or other default configs
-  baseURL: process.env.baseURL, // Change this to your API base URL
+  baseURL: process.env.baseURL,
 });
 
 // Interceptor for adding authorization token to headers
@@ -30,7 +29,6 @@ const decryptToken = (encryptedToken) => {
     const bytes = CryptoJS.AES.decrypt(encryptedToken, process.env.SECRET_KEY);
     return bytes.toString(CryptoJS.enc.Utf8);
   } catch (e) {
-    //  console.error('Error decrypting token:', e);
     return null;
   }
 };

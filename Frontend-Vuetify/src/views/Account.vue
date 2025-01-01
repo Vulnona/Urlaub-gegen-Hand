@@ -119,7 +119,7 @@
                   <span class="fw-medium fs-15 d-block mb-3">Social Media:</span>
                   <ul class="d-flex align-items-center flex-wrap">
                     <li class="d-flex align-items-center gap-3">
-                      <button @click="redirectToFacebook(user.facebook_link)" type="button" class="btn social_btn">
+                      <button v-if="user.facebook_link" @click="redirectToFacebook(user.facebook_link)" type="button" class="btn social_btn">
                         <span class="social_link_outer"><i class="ri-facebook-fill"></i></span>
                         <span class="text-info">Facebook</span>
                       </button>
@@ -140,7 +140,7 @@
         <h4 class="card-title">Rating & Reviews</h4>
         <span class="close" @click="showModal = false">&times;</span>
       </div>
-      <div class="modal-body">
+      <div class="modal-body" ref="modalBody" style="" @scroll="handleScroll">
         <div class="review_layout all_reviews_layout">
           <div class="row">
             <div class="col-sm-4">
@@ -223,13 +223,11 @@
 
 </template>
 <script>
-import router from "@/router";
-import CryptoJS from 'crypto-js';
-import VueJwtDecode from 'vue-jwt-decode';
 import axiosInstance from "@/interceptor/interceptor"
 import Navbar from "@/components/navbar/Navbar.vue";
 import Securitybot from '@/services/SecurityBot';
 import toast from "@/components/toaster/toast";
+import { nextTick } from 'vue';
 export default {
   components: {
     Navbar,
@@ -246,6 +244,9 @@ export default {
       userRole: '',
       showModal: false,
       reviews: [],
+      currentPage: 1,
+      totalPages: 1,
+      loading: false,
     };
   },
   watch: {
@@ -258,10 +259,35 @@ export default {
 
   mounted() {
     Securitybot();
+    nextTick(() => {
+      if (this.$refs.modalBody) {
+        this.$refs.modalBody.addEventListener('scroll', this.handleScroll);
+        this.showReviews(sessionStorage.getItem('UserId'));
+      }
+    });
     this.showReviews(sessionStorage.getItem('UserId'));
     this.fetchUserData(sessionStorage.getItem('UserId'));
   },
+  beforeDestroy() {
+    if (this.$refs.modalBody) {
+      this.$refs.modalBody.removeEventListener('scroll', this.handleScroll); // Cleanup
+    }
+  },
   methods: {
+    handleScroll(event) {
+      const bottom = event.target.scrollHeight === event.target.scrollTop + event.target.clientHeight;
+      if (bottom && !this.loading && this.currentPage < this.totalPages) {
+        this.loadMoreReviews();
+      }
+    },
+    loadMoreReviews() {
+      this.loading = true;
+      this.currentPage += 1;
+      this.showReviews(sessionStorage.getItem('UserId')).finally(() => {
+        this.loading = false;
+      });
+    },
+
     redirectToOffer(offerId) {
       this.$router.push({
         name: 'OfferDetail',
@@ -281,10 +307,11 @@ export default {
       const options = { year: 'numeric', month: 'long', day: '2-digit' };
       return new Date(dateString).toLocaleDateString(undefined, options);
     },
-    async showReviews(userid) {
+    async showReviews(userId) {
       try {
-        const response = await axiosInstance.get(`${process.env.baseURL}review/get-user-reviews?userId=${userid}`);
-        this.reviews = response.data.items;
+        const response = await axiosInstance.get(`${process.env.baseURL}review/get-user-reviews?userId=${userId}&page=${this.currentPage}`);
+        this.reviews.push(...response.data.items); // Append new reviews
+        this.totalPages = response.data.totalPages; // Update total pages
       } catch (error) {
         console.error('Error fetching reviews:', error);
       }

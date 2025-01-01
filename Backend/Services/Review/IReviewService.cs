@@ -1,4 +1,6 @@
 ﻿using UGH.Contracts.Review;
+using UGH.Domain.Entities;
+using UGHApi.Shared;
 using UGHApi.ViewModels;
 
 namespace UGH.Infrastructure.Services;
@@ -12,6 +14,10 @@ public interface IReviewService
     );
     Task<string> UpdateReviewAsync(int reviewId, CreateReviewRequest reviewDto, string email);
     Task<string> DeleteReviewAsync(int reviewId, string email);
-    Task<IEnumerable<ReviewDto>> GetAllReviewsByUserIdAsync(Guid userId);
-    Task<IEnumerable<Domain.Entities.Review>> GetAllReviewsAsync();
+    Task<PaginatedList<ReviewDto>> GetAllReviewsByUserIdAsync(
+        Guid userId,
+        int pageNumber,
+        int pageSize
+    );
+    Task<PaginatedList<Review>> GetAllReviewsAsync(int pageNumber, int pageSize);
 }

@@ -183,8 +183,8 @@
                     <div class="custom-form" :class="{ 'has-error': !isValidFacebookLink && showError }">
                       <label for="facebook_link">Facebook-Profillink</label>
                       <input type="text" placeholder="Geben Sie Ihren Facebook-Profillink ein" id="facebook_link"
-                        v-model="facebook_link" required>
-                      <span v-if="!isValidFacebookLink && showError" class="error-message">
+                        v-model="facebook_link">
+                      <span v-if="facebook_link && showError" class="error-message">
                         Ungültiger Facebook-Link. Muss mit https://www.facebook.com/ beginnen
                       </span>
                     </div>
@@ -405,12 +405,13 @@ export default {
         this.errorMessage = "Passwörter stimmen nicht überein.";
         return;
       }
-
-      // Check if Facebook link is valid
-      if (this.facebook_link && !this.isValidFacebookLink) {
-        this.errorMessage = "Ungültiger Facebook-Link. Bitte geben Sie einen gültigen Link ein.";
-        return;
+      if(this.facebook_link!= ''){
+        if (!this.isValidFacebookLink) {
+          this.errorMessage = "Ungültiger Facebook-Link. Bitte geben Sie einen gültigen Link ein.";
+          return;
+        }
       }
+      // Check if Facebook link is valid
 
       // Check if date of birth is valid
       if (!this.isValidDateOfBirth) {

@@ -1,13 +1,13 @@
 ﻿using MediatR;
 using UGH.Domain.Core;
-using UGH.Domain.Entities;
 using UGH.Domain.Interfaces;
+using UGHApi.Shared;
 using UGHApi.ViewModels;
 
 namespace UGHApi.Applications.Reviews;
 
 public class GetAllReviewsByOfferIdQueryHandler
-    : IRequestHandler<GetAllReviewsByOfferIdQuery, Result<List<ReviewDto>>>
+    : IRequestHandler<GetAllReviewsByOfferIdQuery, Result<PaginatedList<ReviewDto>>>
 {
     private readonly IReviewRepository _reviewRepository;
     private readonly ILogger<GetAllReviewsByOfferIdQueryHandler> _logger;
@@ -21,30 +21,34 @@ public class GetAllReviewsByOfferIdQueryHandler
         _logger = logger;
     }
 
-    public async Task<Result<List<ReviewDto>>> Handle(
+    public async Task<Result<PaginatedList<ReviewDto>>> Handle(
         GetAllReviewsByOfferIdQuery request,
         CancellationToken cancellationToken
     )
     {
         try
         {
-            var reviews = await _reviewRepository.GetReviewsByOfferIdAsync(request.OfferId);
+            var paginatedReviews = await _reviewRepository.GetReviewsByOfferIdAsync(
+                request.OfferId,
+                request.PageNumber,
+                request.PageSize
+            );
 
-            if (reviews == null || !reviews.Any())
+            if (paginatedReviews.Items == null || !paginatedReviews.Items.Any())
             {
-                return Result.Failure<List<ReviewDto>>(
-                    Errors.General.InvalidOperation("Review not found!")
+                return Result.Failure<PaginatedList<ReviewDto>>(
+                    Errors.General.InvalidOperation("No reviews found for this offer.")
                 );
             }
 
-            return Result.Success<List<ReviewDto>>(reviews.ToList());
+            return Result.Success(paginatedReviews);
         }
         catch (Exception ex)
         {
             _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
-            return Result.Failure<List<ReviewDto>>(
+            return Result.Failure<PaginatedList<ReviewDto>>(
                 Errors.General.InvalidOperation(
-                    "Internal server error occurred while fetching user reviews."
+                    "Internal server error occurred while fetching offer reviews."
                 )
             );
         }

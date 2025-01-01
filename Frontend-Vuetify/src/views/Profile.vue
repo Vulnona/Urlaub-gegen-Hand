@@ -19,9 +19,9 @@
 
             <span class="avatar avatar-xxl avatar-rounded online mb-3">
               <i v-if="user.verificationState === 'Verified'" @click="editProfilePic"
-                class="ri-pencil-line edit_icon"></i>
+                 class="ri-pencil-line edit_icon"></i>
               <img :src="profileImgSrc || defaultProfileImgSrc" @error="onImageError" class="profile-img"
-                alt="User Profile Picture">
+                   alt="User Profile Picture">
             </span>
             <h5 class="fw-semibold mb-1">{{ user.firstName }} {{ user.lastName }}</h5>
             <span @click="openReviewsModal()" class="action-link fs-13 font-normal">View All Reviews</span>
@@ -29,9 +29,10 @@
         </div>
 
         <div v-if="userRole != 'Admin' && user.userRating != 0"
-          class="rating_block d-flex mb-0 flex-wrap gap-3 p-3 justify-content-center border-bottom border-block-end-dashed">
+             class="rating_block d-flex mb-0 flex-wrap gap-3 p-3 justify-content-center border-bottom border-block-end-dashed">
           <div class="">
-            <p class="card-text text-center mb-0">User Ratings:<span class="average-rating">{{ user.userRating }}</span>
+            <p class="card-text text-center mb-0">
+              User Ratings:<span class="average-rating">{{ user.userRating }}</span>
               {{ " " }} <span class="star ri-star-fill gold"></span>
             </p>
           </div>
@@ -47,22 +48,32 @@
           <ul class="list-group list-group-flush basic_info">
             <li class="list-group-item border-0">
               <div>
-                <span class="fw-medium me-2">Name:</span><span class="text-muted">{{ user.firstName }} {{ user.lastName
-                  }}</span>
+                <span class="fw-medium me-2">Name:</span><span class="text-muted">
+                  {{ user.firstName }} {{
+ user.lastName
+                  }}
+                </span>
               </div>
             </li>
             <li class="list-group-item border-0">
-              <div><span class="fw-medium me-2">DOB:</span><span class="text-muted">{{ user.dateOfBirth }}</span>
+              <div>
+                <span class="fw-medium me-2">DOB:</span><span class="text-muted">{{ user.dateOfBirth }}</span>
               </div>
             </li>
             <li class="list-group-item border-0">
-              <div><span class="fw-medium me-2">Gender:</span><span class="text-muted">{{ user.gender }}</span>
+              <div>
+                <span class="fw-medium me-2">Gender:</span><span class="text-muted">{{ user.gender }}</span>
               </div>
             </li>
           </ul>
           <div class="upload-btn text-center" v-if="user.verificationState != 'Verified'">
-            <a class="btn btn-primary" @click="upload_id">Upload
-              ID</a>
+            <a class="btn btn-primary" @click="upload_id">
+              Upload
+              ID
+            </a>
+          </div>
+          <div class="upload-btn text-center" v-if="user.verificationState == 'Verified' && !isActiveMember">
+            <button class="btn btn-primary" @click="redeemCoupon()">Redeem Coupon</button>
           </div>
         </div>
       </div>
@@ -119,7 +130,7 @@
                 <span class="fw-medium fs-15 d-block mb-3">Social Media:</span>
                 <ul class="d-flex align-items-center flex-wrap">
                   <li class="d-flex align-items-center gap-3 me-2">
-                    <button @click="redirectToFacebook(user.facebookLink)" type="button" class="btn social_btn">
+                    <button v-if="user.facebookLink" @click="redirectToFacebook(user.facebookLink)" type="button" class="btn social_btn">
                       <span class="social_link_outer"><i class="ri-facebook-fill"></i></span>
                       <span class="text-info">Facebook</span>
                     </button>
@@ -130,10 +141,13 @@
           </div>
           <div class="profile_btn">
             <div class="profile_group_btn" v-if="user.verificationState === 'Verified'">
-              <button class="btn  btn-primary rounded" @click="editProfile">Editiere
-                Profil</button>
+              <button class="btn  btn-primary rounded" @click="editProfile">
+                Editiere
+                Profil
+              </button>
             </div>
-            <button class="btn btn-danger" @click="deleteUser()">Löschen
+            <button class="btn btn-danger" @click="deleteUser()">
+              Löschen
             </button>
           </div>
         </div>
@@ -170,36 +184,45 @@
                       <li v-for="userReviews in reviews" :key="userReviews" class="comment">
                         <div>
                           <div class="comment_head">
-                            <h6 @click="redirectToOffer(userReviews.offer.id)" class="clickable-item">{{
-                              userReviews.offer.title }}</h6>
+                            <h6 @click="redirectToOffer(userReviews.offer.id)" class="clickable-item">
+                              {{
+                              userReviews.offer.title
+                              }}
+                            </h6>
                             <div @click="redirectToOffer(userReviews.offer.id)" class="img-thumb clickable-item"
-                              v-if="userReviews.offer.imageData != null"><img
-                                :src="'data:' + userReviews.offer.imageMimeType + ';base64,' + userReviews.offer.imageData">
+                                 v-if="userReviews.offer.imageData != null">
+                              <img :src="'data:' + userReviews.offer.imageMimeType + ';base64,' + userReviews.offer.imageData">
                             </div>
-                            <div class="img-thumb" v-if="userReviews.offer.imageData == null"><img
-                                :src="defaultProfileImgSrc">
+                            <div class="img-thumb" v-if="userReviews.offer.imageData == null">
+                              <img :src="defaultProfileImgSrc">
                             </div>
                           </div>
                           <div class="comment-body">
                             <div class="comment-author vcard" v-if="userReviews.reviewer.profilePicture != null">
                               <img alt="" @click="redirectToProfile(userReviews.reviewer.user_Id)"
-                                :src="'data:' + userReviews.offer.imageMimeType + ';base64,' + userReviews.reviewer.profilePicture"
-                                class="avatar avatar-80 photo clickable-item" height="80" width="80" decoding="async">
+                                   :src="'data:' + userReviews.offer.imageMimeType + ';base64,' + userReviews.reviewer.profilePicture"
+                                   class="avatar avatar-80 photo clickable-item" height="80" width="80" decoding="async">
                             </div>
                             <div class="comment-author vcard" v-if="userReviews.reviewer.profilePicture == null">
                               <img alt="" @click="redirectToProfile(userReviews.reviewer.user_Id)"
-                                :src="defaultProfileImgSrc" class="avatar avatar-80 photo clickable-item" height="80"
-                                width="80" decoding="async">
+                                   :src="defaultProfileImgSrc" class="avatar avatar-80 photo clickable-item" height="80"
+                                   width="80" decoding="async">
                             </div>
                             <div class="comment-content">
                               <div class="comment-head">
                                 <div class="comment-user">
                                   <div @click="redirectToProfile(userReviews.reviewer.user_Id)"
-                                    class="user clickable-item">{{ userReviews.reviewer.firstName }} {{
-                                      userReviews.reviewer.lastName }}</div>
+                                       class="user clickable-item">
+                                    {{ userReviews.reviewer.firstName }} {{
+                                      userReviews.reviewer.lastName
+                                    }}
+                                  </div>
                                   <div class="comment-date">
-                                    <time :datetime="userReviews.createdAt">{{
-                                      formatDate(userReviews.createdAt) }}</time>
+                                    <time :datetime="userReviews.createdAt">
+                                      {{
+                                      formatDate(userReviews.createdAt)
+                                      }}
+                                    </time>
                                   </div>
                                   <div class="comment-rating-stars stars">
                                     <span class="star">
@@ -260,461 +283,512 @@
 </template>
 
 <script>
-import router from "@/router";
-import Swal from 'sweetalert2';
-import axiosInstance from "@/interceptor/interceptor"
-import Navbar from "@/components/navbar/Navbar.vue";
-import userRole from "@/services/CheckUserRole";
-import isActiveMember from "@/services/CheckActiveMembership";
-import Securitybot from "@/services/SecurityBot";
-import getLoggedUserId from "@/services/LoggedInUserId";
-import toast from "@/components/toaster/toast";
+  import router from "@/router";
+  import Swal from 'sweetalert2';
+  import axiosInstance from "@/interceptor/interceptor"
+  import Navbar from "@/components/navbar/Navbar.vue";
+  import userRole from "@/services/CheckUserRole";
+  import isActiveMember from "@/services/CheckActiveMembership";
+  import Securitybot from "@/services/SecurityBot";
+  import getLoggedUserId from "@/services/LoggedInUserId";
+  import toast from "@/components/toaster/toast";
 
-export default {
-  components: {
-    Navbar,
-  },
-  name: "UserCard",
-  data() {
-    return {
-      user: {},
-      profileImgSrc: '',
-      defaultProfileImgSrc: '/defaultprofile.jpg',
-      options: [],
-      hobbies: '',
-      rate: {},
-      userRole: userRole(),
-      isActiveMember: isActiveMember(),
-      showModal: false,
-      showPicModal: false,
-      profilePic: null,
-      selectedFile: null,
-      userId: getLoggedUserId(),
-      reviews: [],
-    };
-  },
-  mounted() {
-    Securitybot();
-    this.fetchUserData();
-  },
-  watch: {
-    profileImgSrc(newVal) {
-      if (!newVal) {
-        this.profileImgSrc = this.defaultProfileImgSrc;
-      }
+  export default {
+    components: {
+      Navbar,
     },
-  },
-  methods: {
-    openReviewsModal(){
-      this.showModal = true;
-      this.showReviews(this.userId);
+    name: "UserCard",
+    data() {
+      return {
+        user: {},
+        profileImgSrc: '',
+        defaultProfileImgSrc: '/defaultprofile.jpg',
+        options: [],
+        hobbies: '',
+        rate: {},
+        userRole: userRole(),
+        isActiveMember: isActiveMember(),
+        showModal: false,
+        showPicModal: false,
+        profilePic: null,
+        selectedFile: null,
+        userId: getLoggedUserId(),
+        reviews: [],
+      };
     },
-    redirectToOffer(offerId) {
-      this.$router.push({
-        name: 'OfferDetail',
-        params: {
-          id: offerId
+    mounted() {
+      Securitybot();
+      this.fetchUserData();
+    },
+    watch: {
+      profileImgSrc(newVal) {
+        if (!newVal) {
+          this.profileImgSrc = this.defaultProfileImgSrc;
         }
-      });
+      },
     },
-    redirectToProfile(userId) {
-      sessionStorage.setItem("UserId", userId);
-      router.push("/account");
-    },
-    formatDate(dateString) {
-      const options = { year: 'numeric', month: 'long', day: '2-digit' };
-      return new Date(dateString).toLocaleDateString(undefined, options);
-    },
-    async showReviews(userid) {
-      try {
-        const response = await axiosInstance.get(`${process.env.baseURL}review/get-user-reviews?userId=${userid}`);
-        this.reviews = response.data.items;
-      } catch (error) {
-        console.error('Error fetching reviews:', error);
-      }
-    },
-    // Preview selected profile picture
-    previewProfilePic(event) {
-      const file = event.target.files[0];
-      if (file) {
-        this.selectedFile = file;
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          this.profilePic = e.target.result;
-        };
-        reader.readAsDataURL(file); 
-      }
-    },
-
-    // Submit the profile picture as Base64 JSON to the API
-    async submitProfilePic() {
-      if (!this.selectedFile) {
-        toast.info("Please Select a profile picture!");
-        return;
-      }
-
-      const reader = new FileReader();
-      reader.onloadend = async () => {
-        const base64String = reader.result.split(',')[1];
-        const requestBody = {
-          ProfilePicture: base64String
-        };
-
+    methods: {
+      async redeemCoupon() {
         try {
-          const response = await axiosInstance.put(`${process.env.baseURL}profile/update-profile-picture`, requestBody, {
-            headers: {
-              'Content-Type': 'application/json'
+          // Step 1: Open SweetAlert for user input
+          const { value: redeemCode } = await Swal.fire({
+            title: 'Redeem Coupon',
+            input: 'text',
+            inputLabel: 'Enter your redeem code',
+            inputPlaceholder: 'Redeem code...',
+            showCancelButton: true,
+            confirmButtonText: 'Submit',
+            cancelButtonText: 'Cancel',
+            inputValidator: (value) => {
+              if (!value) {
+                return 'You need to enter a redeem code!';
+              }
             }
           });
 
-          if (response.status === 200) {
-            toast.success("Profile picture updated successfully!");
-            this.showPicModal = false;
-            this.fetchUserData();
-          } else {
-            toast.info("Failed to update proile picture!");
+          // Step 2: Check if the user entered a redeem code
+          if (redeemCode) {
+            // Post the redeem code to your API
+            const response = await axiosInstance.post('coupon/redeem', {
+              couponCode: redeemCode,
+            });
+            // Step 3: Handle the API response
+            if (response.data.isSuccess == true) {
+              sessionStorage.clear();
+              router.push('/');
+              Swal.fire({
+                icon: 'success',
+                title: 'Coupon Redeemed',
+                text: 'Plesase Login Again!',
+              });
+
+            } else {
+              Swal.fire({
+                icon: '',
+                title: 'Unable To Redeem',
+                text: response.data.error.message || 'Failed to redeem coupon. Please try again.'
+              });
+            }
           }
         } catch (error) {
-          console.error(error);
-          toast.info("An Error Occoured At Our End!");
-        }
-      };
-
-      reader.readAsDataURL(this.selectedFile); 
-    }
-    ,
-    onImageError(event) {
-      event.target.src = this.defaultProfileImgSrc;
-    },
-    redirectToFacebook(fblink) {
-      window.open(fblink);
-    },
-    editProfilePic() {
-      this.showPicModal = true;
-    },
-    upload_id() {
-      router.push("/upload-id").then(() => { });
-    },
-    // Method to delete a user and associated images from S3
-    deleteUser() {
-      Swal.fire({
-        title: "Are you sure?",
-        text: "You want to delete your Data!",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonColor: "#3085d6",
-        cancelButtonColor: "#d33",
-        confirmButtonText: "Yes, delete it!",
-      }).then((result) => {
-        if (result.isConfirmed) {
-          axiosInstance.delete(`${process.env.baseURL}user/delete-user`).then(() => {
-            toast.success("User data deleted successfully!");
-            sessionStorage.clear();
-            router.push("/");
-          }).catch((error) => {
-           // console.log(error);
+          Swal.fire({
+            icon: '',
+            title: 'Oops!',
+            text: 'Something went wrong. Please try again.'
           });
+          console.error(error);
         }
-      });
-    },
-  
-    // Function to fetch user data using API request
-    async fetchUserData() {
-      try {
-        const response = await axiosInstance.get(`${process.env.baseURL}profile/get-user-profile`);
-        this.user = response.data.profile;
-        this.profileImgSrc = `data:image/jpeg;base64,${response.data.profile.profilePicture}`;
-      } catch (error) {
-        toast.info("Benutzerdaten konnten nicht abgerufen werden");
-      }
-    },
-    editProfile() {
-      router.push('/edit-profile');
-    },
-  },
+      },
+      openReviewsModal() {
+        this.showModal = true;
+        this.showReviews(this.userId);
+      },
+      redirectToOffer(offerId) {
+        this.$router.push({
+          name: 'OfferDetail',
+          params: {
+            id: offerId
+          }
+        });
+      },
+      redirectToProfile(userId) {
+        sessionStorage.setItem("UserId", userId);
+        router.push("/account");
+      },
+      formatDate(dateString) {
+        const options = { year: 'numeric', month: 'long', day: '2-digit' };
+        return new Date(dateString).toLocaleDateString(undefined, options);
+      },
+      async showReviews(userid) {
+        try {
+          const response = await axiosInstance.get(`${process.env.baseURL}review/get-user-reviews?userId=${userid}`);
+          this.reviews = response.data.items;
+        } catch (error) {
+          console.error('Error fetching reviews:', error);
+        }
+      },
+      // Preview selected profile picture
+      previewProfilePic(event) {
+        const file = event.target.files[0];
+        if (file) {
+          this.selectedFile = file;
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            this.profilePic = e.target.result;
+          };
+          reader.readAsDataURL(file);
+        }
+      },
 
-  computed: {
-    imageSrc() {
-      return this.profileImgSrc || this.defaultProfileImgSrc;
+      // Submit the profile picture as Base64 JSON to the API
+      async submitProfilePic() {
+        if (!this.selectedFile) {
+          toast.info("Please Select a profile picture!");
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onloadend = async () => {
+          const base64String = reader.result.split(',')[1];
+          const requestBody = {
+            ProfilePicture: base64String
+          };
+
+          try {
+            const response = await axiosInstance.put(`${process.env.baseURL}profile/update-profile-picture`, requestBody, {
+              headers: {
+                'Content-Type': 'application/json'
+              }
+            });
+
+            if (response.status === 200) {
+              toast.success("Profile picture updated successfully!");
+              this.showPicModal = false;
+              this.fetchUserData();
+            } else {
+              toast.info("Failed to update proile picture!");
+            }
+          } catch (error) {
+            console.error(error);
+            toast.info("An Error Occoured At Our End!");
+          }
+        };
+
+        reader.readAsDataURL(this.selectedFile);
+      }
+      ,
+      onImageError(event) {
+        event.target.src = this.defaultProfileImgSrc;
+      },
+      redirectToFacebook(fblink) {
+        window.open(fblink);
+      },
+      editProfilePic() {
+        this.showPicModal = true;
+      },
+      upload_id() {
+        router.push("/upload-id").then(() => { });
+      },
+      // Method to delete a user and associated images from S3
+      deleteUser() {
+        Swal.fire({
+          title: "Are you sure?",
+          text: "You want to delete your Data!",
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "#3085d6",
+          cancelButtonColor: "#d33",
+          confirmButtonText: "Yes, delete it!",
+        }).then((result) => {
+          if (result.isConfirmed) {
+            axiosInstance.delete(`${process.env.baseURL}user/delete-user`).then(() => {
+              toast.success("User data deleted successfully!");
+              sessionStorage.clear();
+              router.push("/");
+            }).catch((error) => {
+              // console.log(error);
+            });
+          }
+        });
+      },
+
+      // Function to fetch user data using API request
+      async fetchUserData() {
+        try {
+          const response = await axiosInstance.get(`${process.env.baseURL}profile/get-user-profile`);
+          this.user = response.data.profile;
+          this.profileImgSrc = `data:image/jpeg;base64,${response.data.profile.profilePicture}`;
+        } catch (error) {
+          toast.info("Benutzerdaten konnten nicht abgerufen werden");
+        }
+      },
+      editProfile() {
+        router.push('/edit-profile');
+      },
     },
-  }
-};
+
+    computed: {
+      imageSrc() {
+        return this.profileImgSrc || this.defaultProfileImgSrc;
+      },
+    }
+  };
 </script>
 
 <style scoped>
-.v-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 20px;
-}
+  .v-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+  }
 
-.account-page {
-  padding: 30px;
-  border-radius: 8px;
-  width: 100%;
-}
+  .account-page {
+    padding: 30px;
+    border-radius: 8px;
+    width: 100%;
+  }
 
-.card {
-  background-color: #fff;
-  border: none;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  width: 100%;
-}
+  .card {
+    background-color: #fff;
+    border: none;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    width: 100%;
+  }
 
-.card-body {
-  padding: 20px;
-}
+  .card-body {
+    padding: 20px;
+  }
 
-.card-title {
-  margin-bottom: 10px;
-  font-size: 24px;
-  font-weight: bold;
-  color: #333;
-  text-align: center;
-}
+  .card-title {
+    margin-bottom: 10px;
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+    text-align: center;
+  }
 
-.card-text-group {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
+  .card-text-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
 
-.card-text {
-  font-size: 16px;
-  color: #555;
-}
+  .card-text {
+    font-size: 16px;
+    color: #555;
+  }
 
-.card-text strong {
-  color: #333;
-}
+    .card-text strong {
+      color: #333;
+    }
 
-.card-text a {
-  color: #007bff;
-  text-decoration: none;
-}
+    .card-text a {
+      color: #007bff;
+      text-decoration: none;
+    }
 
-.card-text a:hover {
-  text-decoration: underline;
-}
+      .card-text a:hover {
+        text-decoration: underline;
+      }
 
-.star {
-  font-size: 1.2em;
-}
+  .star {
+    font-size: 1.2em;
+  }
 
-.gold {
-  color: gold;
-}
+  .gold {
+    color: gold;
+  }
 
-.average-rating {
-  font-size: 0.9em;
-  color: #555;
-  margin-left: 10px;
-}
+  .average-rating {
+    font-size: 0.9em;
+    color: #555;
+    margin-left: 10px;
+  }
 
-.action-link {
-  cursor: pointer;
-}
+  .action-link {
+    cursor: pointer;
+  }
 
-.modal {
-  display: block;
-  position: fixed;
-  z-index: 1;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgb(0, 0, 0);
-  background-color: rgba(0, 0, 0, 0.4);
-  padding: 10px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
+  .modal {
+    display: block;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgb(0, 0, 0);
+    background-color: rgba(0, 0, 0, 0.4);
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
 
-.modal-content {
-  background-color: #fefefe;
-  /* padding: 20px; */
-  width: 100%;
-  max-width: 800px;
-}
+  .modal-content {
+    background-color: #fefefe;
+    /* padding: 20px; */
+    width: 100%;
+    max-width: 800px;
+  }
 
-.close {
-  color: #aaa;
-  float: right;
-  font-size: 28px;
-  font-weight: bold;
-}
+  .close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+  }
 
-.close:hover,
-.close:focus {
-  color: black;
-  text-decoration: none;
-  cursor: pointer;
-}
+    .close:hover,
+    .close:focus {
+      color: black;
+      text-decoration: none;
+      cursor: pointer;
+    }
 
-.profile-content {
-  margin-block-start: -5rem;
-}
-
-
-body .account-page {
-  padding: 0 !important;
-}
-
-.leftBox-content .avatar.avatar-xxl {
-  width: 8rem;
-  height: 8rem;
-  line-height: 5rem;
-  font-size: 1.5rem;
-  display: inline-block;
-  position: relative;
-}
-
-.leftBox-content .avatar img {
-  width: 100%;
-  height: 100%;
-  border-radius: 100px;
-}
-
-.account-page .border,
-.account-page .list-group-item,
-.account-page .border-bottom {
-  border-color: #ecf3fb !important;
-}
-
-.profile-content,
-.profile-content p {
-  font-size: 14px;
-}
-
-.rating_block .star.gold {
-  color: #f6a716;
-}
-
-.basic_info li {
-  padding: 6px 15px;
-}
+  .profile-content {
+    margin-block-start: -5rem;
+  }
 
 
+  body .account-page {
+    padding: 0 !important;
+  }
 
-.social_link_outer {
-  width: 20px;
-  height: 20px;
-  line-height: 20px;
-  display: inline-block;
-  font-size: 12px;
-  text-align: center;
-  background-color: rgb(13 110 253) !important;
-  color: #fff;
-  margin-right: 2px;
-  border-radius: 50px;
-}
+  .leftBox-content .avatar.avatar-xxl {
+    width: 8rem;
+    height: 8rem;
+    line-height: 5rem;
+    font-size: 1.5rem;
+    display: inline-block;
+    position: relative;
+  }
 
-.fw-medium {
-  font-weight: 500;
-}
+  .leftBox-content .avatar img {
+    width: 100%;
+    height: 100%;
+    border-radius: 100px;
+  }
 
-.skills_content .badge {
-  font-size: 12px;
-  font-weight: 500;
-  background: #f0f6fd !important;
-}
+  .account-page .border,
+  .account-page .list-group-item,
+  .account-page .border-bottom {
+    border-color: #ecf3fb !important;
+  }
 
-.basic_info {
-  margin-bottom: 10px;
-}
+  .profile-content,
+  .profile-content p {
+    font-size: 14px;
+  }
 
+  .rating_block .star.gold {
+    color: #f6a716;
+  }
 
-.icon {
-  margin-inline-end: 8px;
-  width: 1.75rem;
-  height: 1.75rem;
-  line-height: 1.65rem;
-  font-size: .85rem;
-  display: inline-block;
-  text-align: center;
-  border-radius: 50px;
-}
+  .basic_info li {
+    padding: 6px 15px;
+  }
 
 
 
-.profile-banner-img {
-  position: relative;
-}
+  .social_link_outer {
+    width: 20px;
+    height: 20px;
+    line-height: 20px;
+    display: inline-block;
+    font-size: 12px;
+    text-align: center;
+    background-color: rgb(13 110 253) !important;
+    color: #fff;
+    margin-right: 2px;
+    border-radius: 50px;
+  }
 
-.icon4 {
-  color: #ff8e6f !important;
-  background-color: rgb(255 142 111 / 10%) !important;
-}
+  .fw-medium {
+    font-weight: 500;
+  }
 
-.icon3 {
-  color: #ff5d9f;
-  background-color: rgb(255 93 159 / 10%);
-}
+  .skills_content .badge {
+    font-size: 12px;
+    font-weight: 500;
+    background: #f0f6fd !important;
+  }
 
-.icon2 {
-  color: rgb(227 84 212) !important;
-  opacity: 1;
-  background-color: rgb(227 84 212 / 10%) !important;
-}
-
-.icon1 {
-  color: #5c67f7 !important;
-  opacity: 1;
-  background-color: rgb(92 103 247 / 10%) !important;
-}
+  .basic_info {
+    margin-bottom: 10px;
+  }
 
 
-.profile-content .card-body {
-  padding: 1rem;
-}
+  .icon {
+    margin-inline-end: 8px;
+    width: 1.75rem;
+    height: 1.75rem;
+    line-height: 1.65rem;
+    font-size: .85rem;
+    display: inline-block;
+    text-align: center;
+    border-radius: 50px;
+  }
 
-.rating_block .star {
-  font-size: 16px;
-}
 
-.themeColor {
-  color: #0f97cb;
-}
 
-.hobbies_content .badge {
-  font-size: 12px;
-  font-weight: 500;
-}
+  .profile-banner-img {
+    position: relative;
+  }
 
-.social_btn {
-  color: rgb(13 110 253) !important;
-  font-size: 14px;
-  padding: 0;
-}
+  .icon4 {
+    color: #ff8e6f !important;
+    background-color: rgb(255 142 111 / 10%) !important;
+  }
 
-.social_btn .text-info {
-  text-decoration: underline;
-}
+  .icon3 {
+    color: #ff5d9f;
+    background-color: rgb(255 93 159 / 10%);
+  }
 
-.inner_banner_layout {
-  position: relative;
-  background: #f1f1f1;
-  min-height: 170px;
-  text-align: center;
-  display: flex;
-  align-items: center;
-  background-size: cover;
-  background-position: 90% center;
-  background-size: cover;
-  background-image: url(/images/profile_banner.webp);
-}
+  .icon2 {
+    color: rgb(227 84 212) !important;
+    opacity: 1;
+    background-color: rgb(227 84 212 / 10%) !important;
+  }
 
-.inner_banner_layout:before {
-  content: "";
-  position: absolute;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.65);
-}
+  .icon1 {
+    color: #5c67f7 !important;
+    opacity: 1;
+    background-color: rgb(92 103 247 / 10%) !important;
+  }
+
+
+  .profile-content .card-body {
+    padding: 1rem;
+  }
+
+  .rating_block .star {
+    font-size: 16px;
+  }
+
+  .themeColor {
+    color: #0f97cb;
+  }
+
+  .hobbies_content .badge {
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  .social_btn {
+    color: rgb(13 110 253) !important;
+    font-size: 14px;
+    padding: 0;
+  }
+
+    .social_btn .text-info {
+      text-decoration: underline;
+    }
+
+  .inner_banner_layout {
+    position: relative;
+    background: #f1f1f1;
+    min-height: 170px;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    background-size: cover;
+    background-position: 90% center;
+    background-size: cover;
+    background-image: url(/images/profile_banner.webp);
+  }
+
+    .inner_banner_layout:before {
+      content: "";
+      position: absolute;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.65);
+    }
 </style>

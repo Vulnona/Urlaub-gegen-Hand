@@ -1,7 +1,7 @@
 ﻿using MediatR;
 using UGH.Domain.Core;
 using UGH.Domain.Entities;
-using UGHApi.Repositories.Interfaces;
+using UGH.Domain.Interfaces;
 
 namespace UGHApi.Applications.Memberships;
 

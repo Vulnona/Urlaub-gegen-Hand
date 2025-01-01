@@ -30,7 +30,7 @@
                         placeholder="Offer 1 for Urlaub Gegen Hand" />
                     </div>
                     <div class="form-group">
-                      <label>Beschreibung</label>
+                      <label>Beschreibung <b style="color: red;">*</b></label>
                       <textarea v-model="offer.description" class="form-control desc-textarea"
                         placeholder="Detailed description about the offer"></textarea>
                     </div>
@@ -330,7 +330,7 @@ export default {
         toast.warning("Image size cannot be greater than 3.5 MB.");
         return;
       }
-      if (!this.offer.title || !this.offer.skills.length || !this.offer.image) {
+      if (!this.offer.title || !this.offer.skills.length || !this.offer.image || !this.offer.description) {
         toast.info("Please fill all the required fields marked with *");
         return;
       }

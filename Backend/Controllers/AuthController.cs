@@ -1,10 +1,10 @@
 using System.ComponentModel.DataAnnotations;
-using UGHApi.Applications.Authentication;
+using MediatR;
+using Microsoft.AspNetCore.Mvc;
 using UGH.Application.Authentication;
 using UGH.Contracts.Authentication;
+using UGHApi.Applications.Authentication;
 using UGHApi.Services.UserProvider;
-using Microsoft.AspNetCore.Mvc;
-using MediatR;
 
 namespace UGHApi.Controllers
 {
@@ -163,12 +163,14 @@ namespace UGHApi.Controllers
         }
 
         [HttpPost("upload-id")]
-        public async Task<IActionResult> UploadFile(IFormFile fileRS, IFormFile fileVS)
+        public async Task<IActionResult> UploadFile(
+            [FromQuery] Guid userId,
+            IFormFile fileRS,
+            IFormFile fileVS
+        )
         {
             try
             {
-                var userId = _userProvider.UserId;
-
                 var command = new UploadFilesCommand(fileRS, fileVS, userId);
                 var result = await _mediator.Send(command);
 

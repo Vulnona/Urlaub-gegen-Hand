@@ -2,11 +2,12 @@
 using UGH.Domain.Core;
 using UGH.Domain.Entities;
 using UGH.Domain.Interfaces;
-using Microsoft.Extensions.Logging;
+using UGHApi.Shared;
 
 namespace UGH.Application.Reviews;
 
-public class GetAllReviewsQueryHandler : IRequestHandler<GetAllReviewsQuery, Result<List<Review>>>
+public class GetAllReviewsQueryHandler
+    : IRequestHandler<GetAllReviewsQuery, Result<PaginatedList<Review>>>
 {
     private readonly IReviewRepository _reviewRepository;
     private readonly ILogger<GetAllReviewsQueryHandler> _logger;
@@ -20,38 +21,45 @@ public class GetAllReviewsQueryHandler : IRequestHandler<GetAllReviewsQuery, Res
         _logger = logger;
     }
 
-    public async Task<Result<List<Review>>> Handle(
+    public async Task<Result<PaginatedList<Review>>> Handle(
         GetAllReviewsQuery request,
         CancellationToken cancellationToken
     )
     {
         try
         {
-            var reviews = await _reviewRepository.GetAllReviewsAsync();
+            var paginatedReviews = await _reviewRepository.GetAllReviewsAsync(
+                request.PageNumber,
+                request.PageSize
+            );
 
-            var reviewDtos = reviews
-                .Select(
-                    r =>
-                        new Review
-                        {
-                            Id = r.Id,
-                            OfferId = r.OfferId,
-                            ReviewerId = r.ReviewerId,
-                            ReviewedId = r.ReviewedId,
-                            RatingValue = r.RatingValue,
-                            ReviewComment = r.ReviewComment,
-                            CreatedAt = r.CreatedAt
-                        }
-                )
+            var reviewDtos = paginatedReviews
+                .Items.Select(r => new Review
+                {
+                    Id = r.Id,
+                    OfferId = r.OfferId,
+                    ReviewerId = r.ReviewerId,
+                    ReviewedId = r.ReviewedId,
+                    RatingValue = r.RatingValue,
+                    ReviewComment = r.ReviewComment,
+                    CreatedAt = r.CreatedAt,
+                })
                 .ToList();
 
-            return Result.Success(reviewDtos);
+            return Result.Success(
+                PaginatedList<Review>.Create(
+                    reviewDtos,
+                    paginatedReviews.TotalCount,
+                    request.PageNumber,
+                    request.PageSize
+                )
+            );
         }
         catch (Exception ex)
         {
             _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
-            return Result.Failure<List<Review>>(
-                Errors.General.InvalidOperation("Something went wrong while fetching the Reviews")
+            return Result.Failure<PaginatedList<Review>>(
+                Errors.General.InvalidOperation("Something went wrong while fetching the reviews.")
             );
         }
     }

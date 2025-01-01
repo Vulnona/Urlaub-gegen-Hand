@@ -19,7 +19,7 @@
             </div>
             <div class="offer_btn">
               <button @click="backtooffers()" class="action-link"><i class="ri-arrow-go-back-line"
-                    aria-hidden="true"></i> Back </button>
+                  aria-hidden="true"></i> Back </button>
             </div>
           </div>
         </div>
@@ -54,25 +54,29 @@
             </div>
           </div>
         </div>
-        
+
         <div class="comments-area">
           <div class="comment-list-wrap">
             <ol class="comment-list">
               <li v-for="(offerReviews, index) in displayedReviews" :key="index" class="comment">
                 <div class="comment-body">
                   <div class="comment-author vcard" v-if="offerReviews.reviewer.profilePicture != null">
-                    <img @click="redirectToProfile(offerReviews.reviewer.user_Id)" alt="" :src="'data:' + offer.imageMimeType + ';base64,' + offerReviews.reviewer.profilePicture" class="avatar avatar-80 photo clickable-item" height="80" width="80" decoding="async">
+                    <img @click="redirectToProfile(offerReviews.reviewer.user_Id)" alt=""
+                      :src="'data:' + offer.imageMimeType + ';base64,' + offerReviews.reviewer.profilePicture"
+                      class="avatar avatar-80 photo clickable-item" height="80" width="80" decoding="async">
                   </div>
                   <div class="comment-author vcard" v-if="offerReviews.reviewer.profilePicture == null">
-                    <img alt="" :src="defaultProfileImgSrc" class="avatar avatar-80 photo" height="80" width="80" decoding="async">
+                    <img alt="" :src="defaultProfileImgSrc" class="avatar avatar-80 photo" height="80" width="80"
+                      decoding="async">
                   </div>
                   <div class="comment-content">
                     <div class="comment-head">
                       <div class="comment-user">
-                        <div @click="redirectToProfile(offerReviews.reviewer.user_Id)" class="user clickable-item">{{ offerReviews.reviewer.firstName }} {{ offerReviews.reviewer.lastName }}
+                        <div @click="redirectToProfile(offerReviews.reviewer.user_Id)" class="user clickable-item">{{
+                          offerReviews.reviewer.firstName }} {{ offerReviews.reviewer.lastName }}
                         </div>
                         <div class="comment-date"> <time :datetime="offerReviews.createdAt">{{
-                            formatDate(offerReviews.createdAt) }}</time>
+                          formatDate(offerReviews.createdAt) }}</time>
                         </div>
                         <div class="comment-rating-stars stars">
                           <span class="star star-1"> <i class="ri-star-fill"></i> {{ offerReviews.ratingValue }}</span>
@@ -88,8 +92,8 @@
             </ol>
             <div class="text-center" v-if="reviews.length > 1">
               <button type="button" @click="toggleShowMore" class="btn outline_Greybtn">
-                  {{ showAllReviews ? "Hide Reviews" : "Show More Reviews" }}
-                </button>
+                {{ showAllReviews ? "Hide Reviews" : "Show More Reviews" }}
+              </button>
             </div>
           </div>
         </div>
@@ -102,122 +106,132 @@
 </template>
 
 <script setup lang="ts">
-  import {
-    ref,
-    onMounted,
-    computed
-  } from 'vue';
-  import {
-    useRoute
-  } from 'vue-router';
-  import Navbar from '@/components/navbar/Navbar.vue';
-  import axiosInstance from '@/interceptor/interceptor';
-  import router from '@/router';
-  const {
-    params
-  } = useRoute();
-  const offer = ref(null);
-  const loading = ref(true);
-  const showAllReviews = ref(false);
-  var reviews = ref([]);
-  const defaultProfileImgSrc = '/defaultprofile.jpg';
-  const redirectToProfile = (userId) => {
-    sessionStorage.setItem("UserId", userId);
-    router.push("/account");
+import {
+  ref,
+  onMounted,
+  computed
+} from 'vue';
+import {
+  useRoute
+} from 'vue-router';
+import Navbar from '@/components/navbar/Navbar.vue';
+import axiosInstance from '@/interceptor/interceptor';
+import router from '@/router';
+
+
+
+const {
+  params
+} = useRoute();
+const offer = ref(null);
+const loading = ref(true);
+const showAllReviews = ref(false);
+var reviews = ref([]);
+const defaultProfileImgSrc = '/defaultprofile.jpg';
+const redirectToProfile = (userId) => {
+  sessionStorage.setItem("UserId", userId);
+  router.push("/account");
+}
+const fetchOfferDetail = async () => {
+  try {
+    fetchReview();
+    const response = await axiosInstance.get(`${process.env.baseURL}offer/get-offer-by-id/${params.id}`);
+    offer.value = response.data;
+  } catch (error) {
+    console.error('Error fetching offer detail:', error);
+  } finally {
+    loading.value = false;
   }
-  const fetchOfferDetail = async() => {
-    try {
-      fetchReview();
-      const response = await axiosInstance.get(`${process.env.baseURL}offer/get-offer-by-id/${params.id}`);
-      offer.value = response.data;
-    } catch (error) {
-      console.error('Error fetching offer detail:', error);
-    } finally {
-      loading.value = false;
-    }
+};
+const formatDate = (dateString) => {
+  const options: Intl.DateTimeFormatOptions = {
+    year: 'numeric',
+    month: 'long',
+    day: '2-digit',
   };
-  const formatDate = (dateString) => {
-    const options: Intl.DateTimeFormatOptions = {
-      year: 'numeric',
-      month: 'long',
-      day: '2-digit',
-    };
-    return new Date(dateString).toLocaleDateString(undefined, options);
-  };
-  const fetchReview = async() => {
-    try {
-      const response = await axiosInstance.get(`${process.env.baseURL}review/get-offer-reviews?offerId=${params.id}`);
-      reviews.value = response.data.items;
-    } catch (error) {
-      console.error('Error fetching reviews:', error);
-    }
-  };
-  const displayedReviews = computed(() => {
-    return showAllReviews.value ? reviews.value : reviews.value.slice(0, 1);
-  });
-  const toggleShowMore = () => {
-    showAllReviews.value = !showAllReviews.value;
-  };
-  const backtooffers = () => {
-    window.history.back();
-  };
-  onMounted(fetchOfferDetail);
+  return new Date(dateString).toLocaleDateString(undefined, options);
+};
+const fetchReview = async () => {
+  try {
+    const response = await axiosInstance.get(`${process.env.baseURL}review/get-offer-reviews?offerId=${params.id}`);
+    reviews.value = response.data.items;
+  } catch (error) {
+    console.error('Error fetching reviews:', error);
+  }
+};
+const displayedReviews = computed(() => {
+  return showAllReviews.value ? reviews.value : reviews.value.slice(0, 1);
+});
+const toggleShowMore = () => {
+  showAllReviews.value = !showAllReviews.value;
+};
+const backtooffers = () => {
+  window.history.back();
+};
+onMounted(fetchOfferDetail);
 </script>
 
 <style scoped lang="scss">
-  .loading {
-    font-size: 1.5rem;
-    color: #888;
-    text-align: center;
-    padding: 40px;
-  }
-  .modal {
-    display: block;
-    position: fixed;
-    z-index: 1;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgb(0, 0, 0);
-    background-color: rgba(0, 0, 0, 0.4);
-    padding: 10px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-  }
-  .modal-content {
-    background-color: #fefefe;
-    width: 100%;
-    max-width: 800px;
-  }
-  .close {
-    color: #aaa;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
-  }
-  .close:hover,
-  .close:focus {
-    color: black;
-    text-decoration: none;
-    cursor: pointer;
-  }
-  .review-item {
-    // padding: 10px;
-    // border: 1px solid #ddd;
-    margin-bottom: 10px;
-  }
-  .outline_Greybtn {
-    /* Example button styling */
-    border: 1px solid grey;
-    background-color: transparent;
-    color: grey;
-    padding: 8px 12px;
-    cursor: pointer;
-  }
-  .reviews {
-    margin-top: 20px;
-  }
+.loading {
+  font-size: 1.5rem;
+  color: #888;
+  text-align: center;
+  padding: 40px;
+}
+
+.modal {
+  display: block;
+  position: fixed;
+  z-index: 1;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgb(0, 0, 0);
+  background-color: rgba(0, 0, 0, 0.4);
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-content {
+  background-color: #fefefe;
+  width: 100%;
+  max-width: 800px;
+}
+
+.close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.review-item {
+  // padding: 10px;
+  // border: 1px solid #ddd;
+  margin-bottom: 10px;
+}
+
+.outline_Greybtn {
+  /* Example button styling */
+  border: 1px solid grey;
+  background-color: transparent;
+  color: grey;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.reviews {
+  margin-top: 20px;
+}
 </style>

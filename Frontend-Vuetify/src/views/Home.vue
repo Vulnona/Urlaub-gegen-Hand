@@ -134,15 +134,16 @@ body .custom-card .card-text strong {
               <br> and knowledgeable travel agents, you can plan the trip of a lifetime with ease.
             </p>
           </div>
-          <div class="offer_search_content">
+          <div class="offer_search_content" ref="searchContent">
             <div class="SearchBox_filter flexBox align-items-center">
               <div class="SearchBox">
                 <i class="ri-search-line"></i>
-                <input type="text" v-model="searchTerm" @input="resetSearch(this.searchTerm)"
-                  placeholder="Search offers / Region / Skills" class="form-control ">
+                <input type="text"  v-model="searchTerm" @input="resetSearch(this.searchTerm)"
+                  placeholder="Search offers / Region / Skills" class="form-control "
+                  @keyup.enter="debouncedSearch">
               </div>
               <div class="btn_outer">
-                <button type="button" @click="debouncedSearch" class="btn themeBtn">Suchen</button>
+                <button type="button"  @click="debouncedSearch" class="btn themeBtn">Suchen</button>
               </div>
             </div>
           </div>
@@ -274,6 +275,16 @@ import router from "@/router";
 import toast from '@/components/toaster/toast';
 import debounce from 'lodash/debounce';
 
+
+function scrollToTargetElement() {
+  const targetElement = document.querySelector('.Offer_search_layout');
+  if (targetElement) {
+    targetElement.scrollIntoView({ behavior: 'smooth' });
+    return true;
+  }
+  return false; 
+}
+
 export default {
   components: {
     Navbar,
@@ -297,7 +308,7 @@ export default {
       currentIndex: 0,
       currentPage: 1,
       totalPages: 1,
-      pageSize: 8,
+      pageSize: 12,
     };
   },
   mounted() {
@@ -332,12 +343,30 @@ export default {
         this.loading = false;
       }
     },
-    changePage(newPage) {
+
+    async changePage(newPage) {
       if (newPage >= 1 && newPage <= this.totalPages) {
         this.currentPage = newPage;
-        this.fetchOffers(); // fetch new data for the selected page
+        await this.fetchOffers(); 
+
+        this.$nextTick(() => {
+          if (!scrollToTargetElement()) {
+            console.log('Starting MutationObserver...');
+            const observer = new MutationObserver((mutations, obs) => {
+              if (scrollToTargetElement()) {
+                console.log('Element found and scrolled. Disconnecting observer.');
+                obs.disconnect(); 
+              }
+            });
+            observer.observe(document.body, {
+              childList: true,
+              subtree: true,
+            });
+          }
+        });
       }
     },
+
     // Method to send request for offer application
     async sendRequest(offerId) {
       const result = await Swal.fire({

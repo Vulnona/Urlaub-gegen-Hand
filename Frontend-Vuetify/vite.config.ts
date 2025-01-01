@@ -14,6 +14,11 @@ export default defineConfig(({ mode }) => {
         usePolling: env.VITE_USE_POLLING === 'true',
       },
     },
+    optimizeDeps: {
+      include: ['vue', 'vue-router', 'sweetalert2', 'crypto-js', 'axios', 'vue-toastification',
+         'vue-jwt-decode', 'lodash/debounce', 'bootstrap/dist/js/bootstrap.min.js', 'vue-multiselect',
+          'crypto-js/aes','vue3-datepicker'], // Pre-bundle these dependencies for better performance
+    },
     plugins: [
       vue({
         template: { transformAssetUrls },
@@ -37,16 +42,10 @@ export default defineConfig(({ mode }) => {
     ],
     define: {
       'process.env': {
-        SECRET_KEY: env.SECRET_KEY, 
-        baseURL: env.BASE_URL, 
-        baseURL_Frontend: env.BASE_URL_FRONTEND, 
-        SecretAccessKey: env.AWS_SECRET_ACCESS_KEY, 
-        AccessKeyId: env.AWS_ACCESS_KEY_ID,
-        Aws_region: env.AWS_REGION, 
-        Aws_Url:env.AWS_URL,
-        S3_BUCKET_NAME: env.S3_BUCKET_NAME, 
-        x_api_key: env.API_KEY, 
-        claims_Url:env.CLAIMS_URL,
+        SECRET_KEY: env.SECRET_KEY,
+        baseURL: env.BASE_URL,
+        baseURL_Frontend: env.BASE_URL_FRONTEND,
+        claims_Url: env.CLAIMS_URL,
       },
     },
     resolve: {

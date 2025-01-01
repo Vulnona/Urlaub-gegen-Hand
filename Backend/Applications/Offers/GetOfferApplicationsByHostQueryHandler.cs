@@ -1,8 +1,7 @@
-﻿using Microsoft.Extensions.Logging;
-using UGH.Domain.ViewModels;
-using UGH.Domain.Interfaces;
+﻿using MediatR;
 using UGH.Domain.Core;
-using MediatR;
+using UGH.Domain.Interfaces;
+using UGH.Domain.ViewModels;
 using UGHApi.Shared;
 
 namespace UGH.Application.Offers;
@@ -35,38 +34,42 @@ public class GetOfferApplicationsByHostQueryHandler
                 request.PageSize
             );
 
-            var applicationDtos = paginatedApplications.Items
-                .Select(
-                    app =>
-                        new OfferApplicationDto
-                        {
-                            OfferId = app.OfferId,
-                            HostId = app.HostId,
-                            Status = app.Status,
-                            CreatedAt = app.CreatedAt,
-                            UpdatedAt = app.UpdatedAt,
-                            Offer = new OfferDto
-                            {
-                                Id = app.Offer.Id,
-                                Title = app.Offer.Title,
-                                ImageData = app.Offer.ImageData,
-                                ImageMimeType = app.Offer.ImageMimeType
-                            },
-                            User = new UserDto
-                            {
-                                User_Id = app.User.User_Id,
-                                ProfilePicture = app.User.ProfilePicture,
-                                FirstName = app.User.FirstName,
-                                LastName = app.User.LastName,
-                                Facebook_link = app.User.Facebook_link ?? "",
-                                DateOfBirth = app.User.DateOfBirth,
-                                Gender = app.User.Gender
-                            }
-                        }
-                )
+            var applicationDtos = paginatedApplications
+                .Items.Select(app => new OfferApplicationDto
+                {
+                    OfferId = app.OfferId,
+                    HostId = app.HostId,
+                    Status = app.Status,
+                    CreatedAt = app.CreatedAt,
+                    UpdatedAt = app.UpdatedAt,
+                    Offer = new OfferDto
+                    {
+                        Id = app.Offer.Id,
+                        Title = app.Offer.Title,
+                        ImageData = app.Offer.ImageData,
+                        ImageMimeType = app.Offer.ImageMimeType,
+                    },
+                    User = new UserDto
+                    {
+                        User_Id = app.User.User_Id,
+                        ProfilePicture = app.User.ProfilePicture,
+                        FirstName = app.User.FirstName,
+                        LastName = app.User.LastName,
+                        Facebook_link = app.User.Facebook_link ?? "",
+                        DateOfBirth = app.User.DateOfBirth,
+                        Gender = app.User.Gender,
+                    },
+                })
                 .ToList();
 
-            return Result.Success(PaginatedList<OfferApplicationDto>.Create(applicationDtos, paginatedApplications.TotalCount, request.PageNumber, request.PageSize));
+            return Result.Success(
+                PaginatedList<OfferApplicationDto>.Create(
+                    applicationDtos,
+                    paginatedApplications.TotalCount,
+                    request.PageNumber,
+                    request.PageSize
+                )
+            );
         }
         catch (Exception ex)
         {

@@ -39,7 +39,7 @@
 
 //            // Find memberships that are expired
 //            var expiredMemberships = context.memberships
-//                .Where(um => um.CreatedAt <= DateTime.Now && um.Status != "Expired")
+//                .Where(um => um.CreatedAt <= DateTime.UtcNow && um.Status != "Expired")
 //                .ToList();
 
 //            foreach (var membership in expiredMemberships)
@@ -47,7 +47,7 @@
 //                // Update status to "Expired"
 //                membership.Status = "Expired";
 //                membership.IsMembershipActive = false;
-//                membership.UpdatedAt = DateTime.Now;
+//                membership.UpdatedAt = DateTime.UtcNow;
 //            }
 
 //            // Save changes to the database

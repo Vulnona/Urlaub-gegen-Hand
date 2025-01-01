@@ -1,6 +1,6 @@
-﻿using UGH.Domain.Interfaces;
+﻿using MediatR;
 using UGH.Domain.Core;
-using MediatR;
+using UGH.Domain.Interfaces;
 
 namespace UGH.Application.Reviews;
 
@@ -58,6 +58,15 @@ public class AddReviewCommandHandler : IRequestHandler<AddReviewCommand, Result>
                 );
             }
 
+            var existingReview = await _reviewRepository.GetReviewByOfferAndUserForHostAsync(
+                request.OfferId,
+                specifiedReviewedId.Value
+            );
+            if (existingReview != null)
+            {
+                return Result.Failure(Errors.General.AlreadyExists("Review", request.OfferId));
+            }
+
             reviewedId = specifiedReviewedId.Value;
         }
         else
@@ -74,15 +83,15 @@ public class AddReviewCommandHandler : IRequestHandler<AddReviewCommand, Result>
             }
 
             reviewedId = offer.HostId;
-        }
 
-        var existingReview = await _reviewRepository.GetReviewByOfferAndUserAsync(
-            request.OfferId,
-            reviewer.User_Id
-        );
-        if (existingReview != null)
-        {
-            return Result.Failure(Errors.General.AlreadyExists("Review", request.OfferId));
+            var existingReview = await _reviewRepository.GetReviewByOfferAndUserAsync(
+                request.OfferId,
+                reviewer.User_Id
+            );
+            if (existingReview != null)
+            {
+                return Result.Failure(Errors.General.AlreadyExists("Review", request.OfferId));
+            }
         }
 
         var review = new Domain.Entities.Review
@@ -93,7 +102,7 @@ public class AddReviewCommandHandler : IRequestHandler<AddReviewCommand, Result>
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow,
             ReviewerId = reviewer.User_Id,
-            ReviewedId = reviewedId
+            ReviewedId = reviewedId,
         };
 
         await _reviewRepository.AddReviewAsync(review);

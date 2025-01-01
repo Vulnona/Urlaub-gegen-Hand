@@ -26,14 +26,29 @@ const routes = [
     component: () => import('@/views/AddOffer.vue'),
   },
   {
+    path: '/show-more',
+    name: 'showMore',
+    component: () => import('@/views/ShowMore.vue'),
+  },
+  {
     path: '/offer/:id',
     name: 'OfferDetail',
     component: () => import('@/views/OfferDetail.vue'),
   },
   {
+    path: '/offer-reviews/:id',
+    name: 'OfferReviews',
+    component: () => import('@/views/Admin/OfferReviews.vue'),
+  },
+  {
     path: '/admin',
     name: 'Admin',
-    component: () => import('@/views/Admin.vue'),
+    component: () => import('@/views/Admin/Admin.vue'),
+  },
+  {
+    path: '/reviews',
+    name: 'Reviews',
+    component: () => import('@/views/Admin/Reviews.vue'),
   },
   {
     path: '/login',
@@ -77,6 +92,11 @@ const routes = [
     path: '/verify-email',
     name: 'verifyemail',
     component: () => import('@/views/VerifyEmail.vue'),
+  },
+  {
+    path: '/buy-plan',
+    name: 'membership',
+    component: () => import('@/views/Membership.vue'),
   },
   {
     path: '/:catchAll(.*)',

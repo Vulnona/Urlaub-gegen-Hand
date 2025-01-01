@@ -18,7 +18,7 @@ public class UserDTO
     public string State { get; set; }
     public string Email_Address { get; set; }
     public bool IsEmailVerified { get; set; }
-    public int MembershipId { get; set; }
+    public int? MembershipId { get; set; }
     public string? Facebook_link { get; set; }
     public string? Link_RS { get; set; }
     public string? Link_VS { get; set; }

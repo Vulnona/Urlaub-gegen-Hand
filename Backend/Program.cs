@@ -1,24 +1,26 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+using System.Reflection;
+using System.Text;
+using Mapster;
+using MediatR;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using UGH.infrastructure.Repositories;
-using UGH.Application.Authentication;
-using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
-using UGHApi.Services.UserProvider;
-using UGHApi.Services.HtmlTemplate;
-using UGH.Infrastructure.Services;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Serilog;
+using Serilog.Events;
+using UGH.Application.Authentication;
 using UGH.Application.Reviews;
 using UGH.Domain.Interfaces;
-using UGHApi.Services.AWS;
+using UGH.infrastructure.Repositories;
+using UGH.Infrastructure.Services;
+using UGHApi.Interfaces;
 using UGHApi.Repositories;
-using System.Reflection;
-using Serilog.Events;
+using UGHApi.Services;
+using UGHApi.Services.AWS;
+using UGHApi.Services.HtmlTemplate;
+using UGHApi.Services.UserProvider;
 using UGHApi.Shared;
-using System.Text;
-using Serilog;
-using MediatR;
-using Mapster;
 
 namespace UGHApi
 {
@@ -45,8 +47,8 @@ namespace UGHApi
 
         private static void ConfigureLogging(WebApplicationBuilder builder)
         {
-            Log.Logger = new LoggerConfiguration().MinimumLevel
-                .Information()
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Information()
                 .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
                 .MinimumLevel.Override("Microsoft.EntityFrameworkCore", LogEventLevel.Warning)
                 .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
@@ -79,9 +81,8 @@ namespace UGHApi
             var config = builder.Configuration;
             MapsterConfig.RegisterMappings();
             var connectionString = config.GetConnectionString("DefaultConnection");
-            builder.Services.AddDbContext<Ugh_Context>(
-                options =>
-                    options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))
+            builder.Services.AddDbContext<Ugh_Context>(options =>
+                options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))
             );
             builder.Services.AddControllers();
             TypeAdapterConfig.GlobalSettings.Scan(Assembly.GetExecutingAssembly());
@@ -111,16 +112,16 @@ namespace UGHApi
         private static void ConfigureAuthentication(WebApplicationBuilder builder)
         {
             var config = builder.Configuration;
-            builder.Services
-                .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+            builder
+                .Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(options =>
                 {
                     options.ExpireTimeSpan = TimeSpan.FromMinutes(20);
                     options.SlidingExpiration = true;
                     options.AccessDeniedPath = "/Forbidden/";
                 });
-            builder.Services
-                .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            builder
+                .Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
                 {
                     options.TokenValidationParameters = new TokenValidationParameters
@@ -133,7 +134,7 @@ namespace UGHApi
                         ValidAudience = config["Jwt:Audience"],
                         IssuerSigningKey = new SymmetricSecurityKey(
                             Encoding.UTF8.GetBytes(config["Jwt:Key"])
-                        )
+                        ),
                     };
                 });
         }
@@ -182,8 +183,8 @@ namespace UGHApi
                     Reference = new OpenApiReference
                     {
                         Id = JwtBearerDefaults.AuthenticationScheme,
-                        Type = ReferenceType.SecurityScheme
-                    }
+                        Type = ReferenceType.SecurityScheme,
+                    },
                 };
                 c.AddSecurityDefinition("Bearer", securityScheme);
                 var securityRequirement = new OpenApiSecurityRequirement
@@ -194,11 +195,11 @@ namespace UGHApi
                             Reference = new OpenApiReference
                             {
                                 Id = "Bearer",
-                                Type = ReferenceType.SecurityScheme
-                            }
+                                Type = ReferenceType.SecurityScheme,
+                            },
                         },
                         new string[] { }
-                    }
+                    },
                 };
                 c.AddSecurityRequirement(securityRequirement);
             });
@@ -215,7 +216,7 @@ namespace UGHApi
             //services.AddScoped<MembershipService>();
             services.AddMemoryCache();
             services.AddScoped<TokenService>();
-            //services.AddTransient<CouponService>();
+            services.AddTransient<ICouponRepository, CouponRepository>();
             services.AddTransient<UGH.Infrastructure.Services.AdminVerificationMailService>();
             services.AddScoped<
                 IReviewRepository,
@@ -226,14 +227,8 @@ namespace UGHApi
             services.AddScoped<IUserRepository, UGH.Infrastructure.Repositories.UserRepository>();
             services.AddScoped<IOfferService, OfferService>();
             services.AddScoped<IUserProfileRepository, UserProfileRepository>();
-            services.AddScoped<
-                Repositories.Interfaces.IUserMembershipRepository,
-                UserMembershipRepository
-            >();
-            services.AddScoped<
-                Repositories.Interfaces.IMembershipRepository,
-                MembershipRepository
-            >();
+            services.AddScoped<IUserMembershipRepository, UserMembershipRepository>();
+            services.AddScoped<IMembershipRepository, MembershipRepository>();
 
             services.AddScoped<IOfferRepository, UGH.Infrastructure.Repositories.OfferRepository>();
             services.AddHttpContextAccessor();
@@ -271,7 +266,7 @@ namespace UGHApi
                     new List<UGH.Domain.Entities.UserRole>
                     {
                         new UGH.Domain.Entities.UserRole { RoleName = "Admin" },
-                        new UGH.Domain.Entities.UserRole { RoleName = "User" }
+                        new UGH.Domain.Entities.UserRole { RoleName = "User" },
                     }
                 );
                 dbContext.SaveChanges();

@@ -16,9 +16,9 @@ public class MembershipService
         //try task.run here.
 
         // Get all expired memberships
-        var expiredMemberships = _context.usermembership
-            .Include(u => u.User)
-            .Where(um => um.Expiration <= DateTime.Now)
+        var expiredMemberships = _context
+            .usermembership.Include(u => u.User)
+            .Where(um => um.Expiration <= DateTime.UtcNow)
             .ToList();
 
         foreach (var membership in expiredMemberships)

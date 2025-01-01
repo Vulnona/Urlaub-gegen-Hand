@@ -1,6 +1,6 @@
 ﻿using UGH.Domain.Entities;
 
-namespace UGHApi.Repositories.Interfaces;
+namespace UGH.Domain.Interfaces;
 
 public interface IMembershipRepository
 {

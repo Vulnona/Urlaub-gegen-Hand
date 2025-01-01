@@ -1,7 +1,7 @@
-﻿using UGH.Domain.Interfaces;
-using UGHApi.ViewModels;
+﻿using MediatR;
+using UGH.Domain.Interfaces;
 using UGHApi.Shared;
-using MediatR;
+using UGHApi.ViewModels;
 
 namespace UGH.Application.Users;
 
@@ -26,7 +26,10 @@ public class GetAllUsersQueryHandler : IRequestHandler<GetAllUsersQuery, Paginat
     {
         try
         {
-            var paginatedUsers = await _userRepository.GetAllUsersAsync(request.PageNumber, request.PageSize);
+            var paginatedUsers = await _userRepository.GetAllUsersAsync(
+                request.PageNumber,
+                request.PageSize
+            );
 
             return paginatedUsers;
         }
