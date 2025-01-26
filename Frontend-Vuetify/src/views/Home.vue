@@ -66,63 +66,6 @@ body .custom-card .card-text strong {
 <template>
   <PublicNav />
   <Navbar />
-  <!--Banner Section Start-->
-  <section class="main_banner">
-    <div class="container">
-      <div class="row">
-        <div class="col-sm-12">
-          <div class="banner_content">
-            <h1>Become part of the community - as <span class="orange_text">a host</span> or <span class="orange_text">
-                traveler</span>.</h1>
-            <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the
-              industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and
-              scrambled it to make a type specimen book.
-              It has survived not only five centuries, but also the leap into electronic typesetting, remaining
-              essentially unchanged. </p>
-            <div>
-              <button type="button" class="btn themeBtn">Read More</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-  <section class="section_space chooseUs_layout">
-    <div class="container">
-      <div class="row">
-        <div class="col-sm-12">
-          <div class="text-center main_center_title">
-            <h2>Why Choose Us?</h2>
-            <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. <br> standard dummy text ever
-              since the 1500s.</p>
-          </div>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col-sm-4">
-          <div class="chooseUs_option">
-            <img src="images/Worldwide-Location.webp" alt="image">
-            <h4>World Class Service</h4>
-            <p>Lorem ipsum dolor sit amet, consect adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa</p>
-          </div>
-        </div>
-        <div class="col-sm-4">
-          <div class="chooseUs_option">
-            <img src="images/flexible.webp" alt="image">
-            <h4>Best Price Guarantee</h4>
-            <p>Lorem ipsum dolor sit amet, consect adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa</p>
-          </div>
-        </div>
-        <div class="col-sm-4">
-          <div class="chooseUs_option">
-            <img src="images/Icon.webp" alt="image">
-            <h4>Flexibility, freedom, fun</h4>
-            <p>Lorem ipsum dolor sit amet, consect adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
   <section class="section_space  Offer_search_layout">
     <div class="offer_search_overlay"></div>
     <div class="container">
