@@ -489,7 +489,7 @@ Indem Sie fortfahren, stimmen Sie der Erfassung und Verwendung Ihrer Daten für 
          <label for="gdpr-consent-checkbox">Ich akzeptiere</label>`,
       showCancelButton: true,
       confirmButtonText: 'akzeptieren',
-      cancelButtonText: 'Abfall',
+      cancelButtonText: 'abbrechen',
       allowOutsideClick: false,
       customClass: {
         popup: 'custom-consent-modal',
