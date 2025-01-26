@@ -82,7 +82,7 @@ body .custom-card .card-text strong {
               <div class="SearchBox">
                 <i class="ri-search-line"></i>
                 <input type="text"  v-model="searchTerm" @input="resetSearch(this.searchTerm)"
-                  placeholder="Search offers / Region / Skills" class="form-control "
+                  placeholder="Suche Angebote / Regionen / Skills" class="form-control "
                   @keyup.enter="debouncedSearch">
               </div>
               <div class="btn_outer">
