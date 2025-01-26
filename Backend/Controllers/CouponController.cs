@@ -19,6 +19,7 @@ namespace UGHApi.Controllers
 {
     [Route("api")]
     [ApiController]
+    [Authorize(Roles = "Admin")]
     public class CouponController : ControllerBase
     {
         private readonly IMediator _mediator;

@@ -154,7 +154,7 @@ public class MembershipController : ControllerBase
         return Ok(new { IsActive = isActive });
     }
 
-    [Authorize]
+    /*    [Authorize]
     [HttpPost("buy-membership")]
     public async Task<IActionResult> BuyUserMembership(int membershipId)
     {
@@ -169,6 +169,6 @@ public class MembershipController : ControllerBase
         }
 
         return Ok(new { Status = result.Value });
-    }
+        }*/
     #endregion
 }

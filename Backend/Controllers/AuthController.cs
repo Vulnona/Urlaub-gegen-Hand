@@ -63,6 +63,7 @@ namespace UGHApi.Controllers
             {
                 if (!ModelState.IsValid)
                 {
+                    _logger.LogError($"Bad request: {ModelState}");
                     return BadRequest(ModelState);
                 }
 
@@ -70,6 +71,7 @@ namespace UGHApi.Controllers
 
                 if (response.IsFailure)
                 {
+                    _logger.LogError($"unauthorized: {response.Error.Message}");
                     return Unauthorized(
                         new { Code = response.Error.Code, Message = response.Error.Message }
                     );
