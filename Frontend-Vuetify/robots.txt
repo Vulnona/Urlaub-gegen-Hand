@@ -2,4 +2,4 @@ User-agent: *
 Disallow: /api/
 Allow: /
 
-Sitemap: http://ugh.csdevhub.com:3000/sitemap.xml
+Sitemap: https://alreco.de/sitemap.xml

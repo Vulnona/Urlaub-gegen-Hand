@@ -148,7 +148,7 @@ namespace UGHApi
                     policy =>
                     {
                         policy
-                            .WithOrigins("http://3.68.218.22:3000", "https://alreco.de", "http://localhost:3000")
+                            .WithOrigins("http://3.68.218.22:80", "https://alreco.de:80", "http://localhost:80")
                             .AllowAnyMethod()
                             .AllowAnyHeader()
                             .AllowCredentials();
