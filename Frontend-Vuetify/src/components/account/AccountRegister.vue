@@ -64,13 +64,20 @@
               </svg>
             </div>
             <div class="login-main-text">
-              <h2><span>Let's Get</span> Started</h2>
-              <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et
-                dolore magna aliqua. Ut enim ad minim veniam,
-                quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. </p>
+              <h2><span>Willkommen bei Urlaub gegen Hand</span></h2>
+
+    <p>Durch Ihre Registrierung öffnen Sie die Tür zu einzigartigen Reiseerfahrungen und kulturellem Austausch. Bevor Sie Teil unserer Community werden, benötigen wir Ihre Zustimmung:
+    <p><ul style="display: inline-block; text-align: left;">
+<li>Wir erfassen einige persönliche Daten, um Ihr Konto einzurichten und Ihnen die besten Möglichkeiten für Ihren Urlaub gegen Hand zu bieten.</li>    
+<li>Ihre Daten werden vertraulich behandelt und nur für plattformbezogene Zwecke verwendet.</li>    
+<li> Mit der Registrierung stimmen Sie unseren Nutzungsbedingungen und der Datenschutzerklärung zu.</li>
+<li> Sie erklären sich bereit, respektvoll mit Gastgebern und anderen Reisenden zu interagieren.</li>
+</ul></p>
+Durch Klicken auf "Registrieren" bestätigen Sie, dass Sie diese Bedingungen akzeptieren.
+    </p>
             </div>
             <div class="login-bottom-text">
-              Let's start exploring...
+              Entdecken Sie die Welt, teilen Sie Fähigkeiten, schaffen Sie unvergessliche Erlebnisse!
             </div>
           </div>
         </div>
@@ -483,8 +490,13 @@ export default {
     Swal.fire({
       title: 'Zustimmung erforderlich',
       html: `
-         <p>Wir nehmen Ihre Privatsphäre ernst. Um Ihr Konto zu erstellen, müssen wir einige Ihrer Daten erfassen.
-Indem Sie fortfahren, stimmen Sie der Erfassung und Verwendung Ihrer Daten für die Kontoerstellung und wesentliche Plattformfunktionen zu.</p>
+         <p>Ihre Privatsphäre ist uns wichtig. Um Ihr Konto zu erstellen, müssen wir einige Ihrer Daten erfassen. Mit dem Fortfahren stimmen Sie zu:    
+    <p><ul style="display: inline-block; text-align: left; padding-left: 50px;">
+    <li>Der Erfassung und Nutzung Ihrer Daten für die Kontoerstellung</li>
+    <li>Den wesentlichen Funktionen unserer Plattform</li>
+    <li>Unseren Nutzungsbedingungen und Datenschutzrichtlinien</li>
+    </ul>
+    </p>
          <input type="checkbox" id="gdpr-consent-checkbox">
          <label for="gdpr-consent-checkbox">Ich akzeptiere</label>`,
       showCancelButton: true,
