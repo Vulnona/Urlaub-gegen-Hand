@@ -66,15 +66,16 @@
             <div class="login-main-text">
               <h2><span>Willkommen bei Urlaub gegen Hand</span></h2>
 
-    <p>Durch Ihre Registrierung öffnen Sie die Tür zu einzigartigen Reiseerfahrungen und kulturellem Austausch. Bevor Sie Teil unserer Community werden, benötigen wir Ihre Zustimmung:
-    <p><ul style="display: inline-block; text-align: left;">
+    <p>Durch Ihre Registrierung öffnen Sie die Tür zu einzigartigen Reiseerfahrungen und kulturellem Austausch. Bevor Sie Teil unserer Community werden, benötigen wir Ihre Zustimmung:</p>
+    <ul style="display: inline-block; text-align: left;">
 <li>Wir erfassen einige persönliche Daten, um Ihr Konto einzurichten und Ihnen die besten Möglichkeiten für Ihren Urlaub gegen Hand zu bieten.</li>    
 <li>Ihre Daten werden vertraulich behandelt und nur für plattformbezogene Zwecke verwendet.</li>    
 <li> Mit der Registrierung stimmen Sie unseren Nutzungsbedingungen und der Datenschutzerklärung zu.</li>
 <li> Sie erklären sich bereit, respektvoll mit Gastgebern und anderen Reisenden zu interagieren.</li>
-</ul></p>
+</ul>
+<p>
 Durch Klicken auf "Registrieren" bestätigen Sie, dass Sie diese Bedingungen akzeptieren.
-    </p>
+</p> 
             </div>
             <div class="login-bottom-text">
               Entdecken Sie die Welt, teilen Sie Fähigkeiten, schaffen Sie unvergessliche Erlebnisse!
@@ -191,7 +192,7 @@ Durch Klicken auf "Registrieren" bestätigen Sie, dass Sie diese Bedingungen akz
                       <label for="facebook_link">Facebook-Profillink</label>
                       <input type="text" placeholder="Geben Sie Ihren Facebook-Profillink ein" id="facebook_link"
                         v-model="facebook_link">
-                      <span v-if="facebook_link && showError" class="error-message">
+                      <span v-if="!isFacebookLinkValid && showError" class="error-message">
                         Ungültiger Facebook-Link. Muss mit https://www.facebook.com/ beginnen
                       </span>
                     </div>
@@ -284,6 +285,7 @@ export default {
       cityName: '',
       showError: false,
       isPasswordValid: true,
+      isFacebookLinkValid: true,
     };
   },
 
@@ -295,7 +297,8 @@ export default {
     },
     isValidFacebookLink() {
       const facebookPattern = /^https:\/\/www\.facebook\.com\/.+$/;
-      return facebookPattern.test(this.facebook_link);
+      this.isFacebookLinkValid = facebookPattern.test(this.facebook_link);
+      return this.isFacebookLinkValid;
     },
     isValidDateOfBirth() {
       if (!this.dateOfBirth) return false;
@@ -491,12 +494,11 @@ export default {
       title: 'Zustimmung erforderlich',
       html: `
          <p>Ihre Privatsphäre ist uns wichtig. Um Ihr Konto zu erstellen, müssen wir einige Ihrer Daten erfassen. Mit dem Fortfahren stimmen Sie zu:    
-    <p><ul style="display: inline-block; text-align: left; padding-left: 50px;">
+    <ul style="display: inline-block; text-align: left; padding-left: 50px;">
     <li>Der Erfassung und Nutzung Ihrer Daten für die Kontoerstellung</li>
     <li>Den wesentlichen Funktionen unserer Plattform</li>
     <li>Unseren Nutzungsbedingungen und Datenschutzrichtlinien</li>
-    </ul>
-    </p>
+    </ul>   
          <input type="checkbox" id="gdpr-consent-checkbox">
          <label for="gdpr-consent-checkbox">Ich akzeptiere</label>`,
       showCancelButton: true,
