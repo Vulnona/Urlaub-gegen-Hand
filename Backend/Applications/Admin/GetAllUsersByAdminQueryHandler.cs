@@ -1,13 +1,10 @@
-﻿using UGH.Domain.Interfaces;
-using UGHApi.ViewModels;
+﻿using MediatR;
 using UGH.Domain.Core;
-using UGHApi.Shared;
-using MediatR;
+using UGH.Domain.Interfaces;
 
 namespace UGH.Application.Admin;
 
-public class GetAllUsersByAdminQueryHandler
-    : IRequestHandler<GetAllUsersByAdminQuery, Result<PaginatedList<UserDTO>>>
+public class GetAllUsersByAdminQueryHandler : IRequestHandler<GetAllUsersByAdminQuery, Result>
 {
     private readonly IUserRepository _userRepository;
     private readonly ILogger<GetAllUsersByAdminQueryHandler> _logger;
@@ -21,7 +18,7 @@ public class GetAllUsersByAdminQueryHandler
         _logger = logger;
     }
 
-    public async Task<Result<PaginatedList<UserDTO>>> Handle(
+    public async Task<Result> Handle(
         GetAllUsersByAdminQuery request,
         CancellationToken cancellationToken
     )
@@ -29,23 +26,22 @@ public class GetAllUsersByAdminQueryHandler
         try
         {
             var paginatedUsers = await _userRepository.GetAllUsersAsync(
-                request.PageNumber,
-                request.PageSize
+                new UGHApi.Repositories.UserQueryParameters
+                {
+                    SortBy = request.SortBy,
+                    SortDirection = request.SortDirection,
+                    SearchTerm = request.SearchTerm,
+                    PageNumber = request.PageNumber,
+                    PageSize = request.PageSize,
+                }
             );
 
-            if (paginatedUsers == null)
-            {
-                return Result.Failure<PaginatedList<UserDTO>>(
-                    Errors.General.NotFound("NoUserFound", paginatedUsers)
-                );
-            }
-
-            return Result<PaginatedList<UserDTO>>.Success(paginatedUsers);
+            return Result.Success(paginatedUsers);
         }
         catch (Exception ex)
         {
             _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
-            return Result.Failure<PaginatedList<UserDTO>>(
+            return Result.Failure(
                 Errors.General.InvalidOperation("Something went wrong while fetching users")
             );
         }

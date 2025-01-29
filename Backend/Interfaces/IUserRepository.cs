@@ -1,4 +1,5 @@
 ﻿using UGH.Domain.Entities;
+using UGHApi.Repositories;
 using UGHApi.Shared;
 using UGHApi.ViewModels;
 
@@ -8,7 +9,7 @@ public interface IUserRepository
 {
     Task<User> GetUserByIdAsync(Guid userId);
     Task<UserDTO> GetUserDetailsByIdAsync(Guid userId);
-    Task<PaginatedList<UserDTO>> GetAllUsersAsync(int pageNumber, int pageSize);
+    Task<PaginatedList<UserDTO>> GetAllUsersAsync(UserQueryParameters parameters);
     Task<User> AddUserAsync(User user);
     Task UpdateUserAsync(User user);
     Task DeleteUserAsync(Guid userId);

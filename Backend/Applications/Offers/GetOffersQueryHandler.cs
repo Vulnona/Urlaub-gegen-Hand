@@ -1,13 +1,12 @@
-﻿using UGH.Domain.ViewModels;
-using UGH.Domain.Interfaces;
+﻿using MediatR;
 using UGH.Domain.Core;
+using UGH.Domain.Interfaces;
+using UGH.Domain.ViewModels;
 using UGHApi.Shared;
-using MediatR;
 
 namespace UGH.Application.Offers;
 
-public class GetAllOffersQueryHandler
-    : IRequestHandler<GetOffersQuery, Result<PaginatedList<OfferDTO>>>
+public class GetAllOffersQueryHandler : IRequestHandler<GetOffersQuery, Result>
 {
     private readonly IOfferRepository _offerRepository;
     private readonly ILogger<GetAllOffersQueryHandler> _logger;
@@ -21,10 +20,7 @@ public class GetAllOffersQueryHandler
         _logger = logger;
     }
 
-    public async Task<Result<PaginatedList<OfferDTO>>> Handle(
-    GetOffersQuery request,
-    CancellationToken cancellationToken
-)
+    public async Task<Result> Handle(GetOffersQuery request, CancellationToken cancellationToken)
     {
         try
         {
@@ -53,7 +49,7 @@ public class GetAllOffersQueryHandler
         catch (Exception ex)
         {
             _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
-            return Result.Failure<PaginatedList<OfferDTO>>(Errors.General.UnexpectedError());
+            return Result.Failure(Errors.General.UnexpectedError());
         }
     }
 }

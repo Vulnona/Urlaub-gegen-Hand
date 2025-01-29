@@ -5,8 +5,6 @@ using Microsoft.AspNetCore.Mvc;
 using UGH.Application.Admin;
 using UGH.Domain.Core;
 using UGHApi.Applications.Admin;
-using UGHApi.Shared;
-using UGHApi.ViewModels;
 
 namespace UGHApi.Controllers;
 
@@ -56,19 +54,26 @@ public class AdminController : ControllerBase
     }
 
     [HttpGet("get-all-users")]
-    public async Task<ActionResult<PaginatedList<UserDTO>>> GetAllUsersByAdmin(
+    public async Task<ActionResult> GetAllUsersByAdmin(
+        string searchTerm,
+        string sortBy,
+        string sortDirection = "asc",
         int pageNumber = 1,
         int pageSize = 10
     )
     {
-        var result = await _mediator.Send(new GetAllUsersByAdminQuery(pageNumber, pageSize));
+        var result = await _mediator.Send(
+            new GetAllUsersByAdminQuery
+            {
+                PageNumber = pageNumber,
+                PageSize = pageSize,
+                SearchTerm = searchTerm,
+                SortBy = sortBy,
+                SortDirection = sortDirection,
+            }
+        );
 
-        if (result.IsSuccess)
-        {
-            return Ok(result.Value);
-        }
-
-        return StatusCode(500, result);
+        return Ok(result);
     }
 
     [HttpGet("get-user-by-id/{userId}")]

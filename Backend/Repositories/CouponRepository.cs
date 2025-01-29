@@ -1,6 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Mapster;
+using Microsoft.EntityFrameworkCore;
 using UGH.Domain.Entities;
 using UGHApi.Interfaces;
+using UGHApi.Shared;
+using UGHApi.ViewModels;
 
 namespace UGHApi.Repositories;
 
@@ -14,11 +17,12 @@ public class CouponRepository : ICouponRepository
     }
 
     #region coupons
-    public async Task AddCoupon(Coupon coupon)
+    public async Task<Coupon> AddCoupon(Coupon coupon)
     {
         coupon.CreatedDate = DateTime.UtcNow;
         _context.coupons.Add(coupon);
         await _context.SaveChangesAsync();
+        return coupon;
     }
 
     public async Task UpdateCoupon(Coupon updatedCoupon)
@@ -33,30 +37,69 @@ public class CouponRepository : ICouponRepository
         existingCoupon.Name = updatedCoupon.Name;
         existingCoupon.Description = updatedCoupon.Description;
         existingCoupon.CreatedDate = DateTime.UtcNow;
-        existingCoupon.EndDate = updatedCoupon.EndDate;
-        existingCoupon.StartDate = updatedCoupon.StartDate;
 
         _context.Entry(existingCoupon).State = EntityState.Modified;
         await _context.SaveChangesAsync();
     }
 
-    public async Task<List<Coupon>> GetAllCoupons()
+    public async Task<PaginatedList<CouponDto>> GetAllCoupons(int pageNumber, int pageSize)
     {
-        return await _context.coupons.ToListAsync();
+        int totalCount = await _context.coupons.CountAsync();
+
+        var couponsWithRedemptions = await _context
+            .coupons.Include(c => c.CreatedByUser)
+            .Include(c => c.Redemption)
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        var couponDtos = couponsWithRedemptions
+            .Select(coupon =>
+            {
+                var couponDto = coupon.Adapt<CouponDto>();
+                couponDto.IsRedeemed = coupon.Redemption != null;
+                return couponDto;
+            })
+            .ToList();
+
+        return PaginatedList<CouponDto>.Create(couponDtos, totalCount, pageNumber, pageSize);
     }
 
     public async Task<bool> IsCouponExists(string couponCode)
     {
+        if (await _context.coupons.FirstOrDefaultAsync(c => c.Code == couponCode) is Coupon)
+            return true;
+        else
+        {
+            return false;
+        }
+    }
+
+    public async Task<bool> IsCouponRedeemed(int couponId)
+    {
         if (
-            await _context.coupons.FirstOrDefaultAsync(c =>
-                c.Code == couponCode && c.StartDate == null
-            ) is Coupon
+            await _context.redemptions.FirstOrDefaultAsync(c => c.CouponId == couponId)
+            is Redemption
         )
             return true;
         else
         {
             return false;
         }
+    }
+
+    public async Task<Coupon> GetCouponById(int couponId)
+    {
+        var coupon = await _context
+            .coupons.Include(c => c.CreatedByUser)
+            .FirstOrDefaultAsync(c => c.Id == couponId);
+
+        if (coupon == null)
+        {
+            throw new CouponNotFoundException();
+        }
+
+        return coupon;
     }
 
     public async Task DeleteCoupon(int couponId)
@@ -71,31 +114,11 @@ public class CouponRepository : ICouponRepository
         await _context.SaveChangesAsync();
     }
 
-    public async Task RedeemCoupon(string couponCode, Guid userId)
+    public async Task RedeemCoupon(Coupon coupon, Guid userId)
     {
         try
         {
-            var coupon = await _context.coupons.FirstOrDefaultAsync(c =>
-                c.Code == couponCode.Trim()
-            );
-
-            if (coupon == null)
-            {
-                throw new CouponNotFoundException();
-            }
-
-            if (coupon.StartDate?.Date != null)
-            {
-                throw new CouponRedeemException("Coupon has already been redeemed.");
-            }
-
             var currentDate = DateTime.UtcNow;
-            var couponExpiry = currentDate.AddDays(365);
-
-            coupon.StartDate = currentDate;
-            coupon.EndDate = couponExpiry;
-
-            _context.Update(coupon);
 
             var redemption = new Redemption
             {
@@ -107,36 +130,34 @@ public class CouponRepository : ICouponRepository
             _context.redemptions.Add(redemption);
             await _context.SaveChangesAsync();
         }
-        catch (CouponNotFoundException)
-        {
-            throw new CouponNotFoundException();
-        }
-        catch (CouponRedeemException)
-        {
-            throw new CouponRedeemException("Coupon redemption failed!");
-        }
         catch (Exception ex)
         {
             throw new Exception("An unexpected error occurred while redeeming the coupon.", ex);
         }
     }
-}
 
-public class CouponNotFoundException : Exception
-{
-    public CouponNotFoundException()
-        : base("Coupon not found.") { }
-}
+    public async Task SaveChangesAsync()
+    {
+        await _context.SaveChangesAsync();
+    }
 
-public class UserNotFoundException : Exception
-{
-    public UserNotFoundException()
-        : base("User not found.") { }
-}
+    public async Task<Coupon> GetCouponByCode(string couponCode)
+    {
+        return await _context
+            .coupons.Include(c => c.Membership)
+            .FirstOrDefaultAsync(c => c.Code == couponCode.ToUpper().Trim());
+    }
 
-public class CouponRedeemException : Exception
-{
-    public CouponRedeemException(string message)
-        : base(message) { }
+    public class CouponNotFoundException : Exception
+    {
+        public CouponNotFoundException()
+            : base("Coupon not found.") { }
+    }
+
+    public class CouponRedeemException : Exception
+    {
+        public CouponRedeemException(string message)
+            : base(message) { }
+    }
 }
     #endregion

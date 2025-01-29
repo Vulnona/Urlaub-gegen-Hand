@@ -1,10 +1,10 @@
 ﻿using System.Text.RegularExpressions;
-using UGH.Contracts.Authentication;
-using UGH.Infrastructure.Services;
-using UGH.Domain.Interfaces;
-using UGH.Domain.Entities;
-using UGH.Domain.Core;
 using MediatR;
+using UGH.Contracts.Authentication;
+using UGH.Domain.Core;
+using UGH.Domain.Entities;
+using UGH.Domain.Interfaces;
+using UGH.Infrastructure.Services;
 
 namespace UGH.Application.Authentication;
 
@@ -15,13 +15,13 @@ public class RegisterUserCommandHandler
     private readonly IUserRepository _userRepository;
     private readonly TokenService _tokenService;
     private readonly PasswordService _passwordService;
-    private readonly UGH.Infrastructure.Services.EmailService _emailService;
+    private readonly EmailService _emailService;
     private readonly ILogger<RegisterUserCommandHandler> _logger;
 
     public RegisterUserCommandHandler(
         UserService userService,
         TokenService tokenService,
-        UGH.Infrastructure.Services.EmailService emailService,
+        EmailService emailService,
         IUserRepository userRepository,
         PasswordService passwordService,
         ILogger<RegisterUserCommandHandler> logger
@@ -92,11 +92,10 @@ public class RegisterUserCommandHandler
                 Link_RS = request.Link_RS,
                 Link_VS = request.Link_VS,
                 State = request.State,
-                VerificationState = UGH_Enums.VerificationState.IsNew
+                VerificationState = UGH_Enums.VerificationState.IsNew,
             };
 
             var savedUser = await _userRepository.AddUserAsync(newUser);
-
 
             var defaultUserRole = await _userService.GetDefaultUserRoleAsync();
 
@@ -111,12 +110,11 @@ public class RegisterUserCommandHandler
                 verificationToken
             );
 
-            // Return a success result with the created user response
             var response = new RegisterUserResponse
             {
                 Email = savedUser.Email_Address,
                 UserId = savedUser.User_Id,
-                FirstName = savedUser.FirstName
+                FirstName = savedUser.FirstName,
             };
 
             return Result.Success(response);

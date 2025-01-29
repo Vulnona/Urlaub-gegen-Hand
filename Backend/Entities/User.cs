@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using UGH.Domain.Core;
+using UGHApi.Entities;
 
 namespace UGH.Domain.Entities;
 
@@ -64,6 +65,8 @@ public class User
     public Membership CurrentMembership { get; set; }
 
     public ICollection<Offer> Offers { get; set; } = new List<Offer>();
+    public ICollection<Coupon> Coupons { get; set; } = new List<Coupon>();
+    public ICollection<Transaction> Transactions { get; set; } = new List<Transaction>();
     public ICollection<UserMembership> UserMemberships { get; set; } = new List<UserMembership>();
 
     private UserProfile Profile { get; set; }

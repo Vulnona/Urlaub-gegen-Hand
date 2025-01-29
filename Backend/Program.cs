@@ -19,6 +19,7 @@ using UGHApi.Repositories;
 using UGHApi.Services;
 using UGHApi.Services.AWS;
 using UGHApi.Services.HtmlTemplate;
+using UGHApi.Services.Stripe;
 using UGHApi.Services.UserProvider;
 using UGHApi.Shared;
 
@@ -81,6 +82,7 @@ namespace UGHApi
             var config = builder.Configuration;
             MapsterConfig.RegisterMappings();
             var connectionString = config.GetConnectionString("DefaultConnection");
+            builder.Services.AddHttpClient();
             builder.Services.AddDbContext<Ugh_Context>(options =>
                 options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))
             );
@@ -223,9 +225,12 @@ namespace UGHApi
                 UGH.Infrastructure.Repositories.ReviewRepository
             >();
             services.AddScoped<IReviewService, ReviewService>();
+            services.AddTransient<IStripeService, StripeService>();
             services.AddScoped<IUserProvider, UserProvider>();
+            services.AddScoped<ITransactionRepository, TransactionRepository>();
             services.AddScoped<IUserRepository, UGH.Infrastructure.Repositories.UserRepository>();
             services.AddScoped<IOfferService, OfferService>();
+            services.AddScoped<IShopItemRepository, ShopItemRepository>();
             services.AddScoped<IUserProfileRepository, UserProfileRepository>();
             services.AddScoped<IUserMembershipRepository, UserMembershipRepository>();
             services.AddScoped<IMembershipRepository, MembershipRepository>();

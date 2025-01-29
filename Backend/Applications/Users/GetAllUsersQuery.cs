@@ -1,17 +1,14 @@
-﻿using UGHApi.ViewModels;
+﻿using MediatR;
 using UGHApi.Shared;
-using MediatR;
+using UGHApi.ViewModels;
 
 namespace UGH.Application.Users;
 
 public class GetAllUsersQuery : IRequest<PaginatedList<UserDTO>>
 {
-    public int PageNumber { get; set; }
-    public int PageSize { get; set; }
-
-    public GetAllUsersQuery(int pageNumber, int pageSize)
-    {
-        PageNumber = pageNumber;
-        PageSize = pageSize;
-    }
+    public int PageNumber { get; set; } = 1;
+    public int PageSize { get; set; } = 10;
+    public string? SortBy { get; set; }
+    public string? SortDirection { get; set; } = "asc";
+    public string? SearchTerm { get; set; }
 }

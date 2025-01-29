@@ -1,5 +1,7 @@
+using System.Reflection;
 using Microsoft.EntityFrameworkCore;
 using UGH.Domain.Entities;
+using UGHApi.Entities;
 
 public class Ugh_Context : DbContext
 {
@@ -7,6 +9,8 @@ public class Ugh_Context : DbContext
         : base(options) { }
 
     public DbSet<User> users { get; set; }
+    public DbSet<ShopItem> shopitems { get; set; }
+    public DbSet<Transaction> transaction { get; set; }
     public DbSet<UserProfile> userprofiles { get; set; }
     public DbSet<Membership> memberships { get; set; }
     public DbSet<UserMembership> usermembership { get; set; }
@@ -35,5 +39,12 @@ public class Ugh_Context : DbContext
             .Build();
         var connectionString = configuration.GetConnectionString("DefaultConnection");
         optionsBuilder.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
+    }
+
+    protected override void OnModelCreating(ModelBuilder builder)
+    {
+        base.OnModelCreating(builder);
+
+        builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
     }
 }

@@ -19,9 +19,8 @@
                     <i class="ri-home-4-line"></i> Home <span class="sr-only">(current)</span>
                   </router-link>
                 </li>
-
-                <!-- Admin-specific Links -->
                 
+                <!-- Admin-specific Links -->
                 <li v-if="userRole === 'Admin'" class="nav-item">
                   <router-link class="nav-link" to="/admin">
                     <i class="ri-admin-line"></i> Admin
@@ -30,6 +29,11 @@
                 <li v-if="userRole === 'Admin'" class="nav-item">
                   <router-link class="nav-link" to="/reviews">
                     <i class="ri-question-answer-line"></i> Reviews
+                  </router-link>
+                </li>
+                <li v-if="userRole === 'Admin'" class="nav-item">
+                  <router-link class="nav-link" to="/coupons">
+                    <i class="ri-coupon-line"></i> Coupons
                   </router-link>
                 </li>
                 <!-- Active Membership-specific Links (for users with active membership) -->
@@ -43,6 +47,11 @@
                     <i class="ri-mail-line"></i> Offer Request
                   </router-link>
                 </li>
+                <li v-if="userRole !== 'Admin'" class="nav-item">
+                  <router-link class="nav-link" to="/store">
+                    <i class="ri-store-line"></i> Store
+                  </router-link>
+                </li>
 
                 <!-- User Account and Logout (common for all roles) -->
                 <li class="nav-item dropdown border rounded">
@@ -51,8 +60,11 @@
                     <i class="ri-user-3-line"></i> {{ username }}
                   </span>
                   <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
-                    <a class="dropdown-item" @click="openProfile">
+                    <a v-if="userRole != 'Admin'" class="dropdown-item" @click="openProfile">
                       <i class="ri-file-user-line"></i> Profile
+                    </a>
+                    <a v-if="userRole != 'Admin'" class="dropdown-item" @click="openPurchaseHistory">
+                      <i class="ri-money-dollar-box-line"></i> Purchases
                     </a>
                     <a class="dropdown-item" @click.prevent="doLogout">
                       <i class="ri-logout-circle-r-line"></i> Logout
@@ -83,7 +95,7 @@ const isActiveMember = ref(false);
 const doLogout = () => {
   sessionStorage.clear();
   if (router.currentRoute.value.path === '/home') {
-    router.go(0); 
+    router.go(0);
   } else {
     router.push("/");
   }
@@ -92,6 +104,10 @@ const doLogout = () => {
 const openProfile = () => {
   router.push("/profile");
 };
+
+const openPurchaseHistory=()=>{
+  router.push("/purchase-history");
+}
 
 onMounted(async () => {
   userRole.value = CheckUserRole() || '';

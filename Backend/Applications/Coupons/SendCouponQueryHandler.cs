@@ -34,9 +34,10 @@ public class SendCouponQueryHandler : IRequestHandler<SendCouponQuery, Result>
     {
         var requestCode = request.CouponCode.Trim();
         var coupon = await _couponRepository.IsCouponExists(requestCode);
+
         if (!coupon)
         {
-            return Result.Failure(Errors.General.NotFound("Coupon", requestCode));
+            return Result.Failure(new Error("CouponNotExist", "Coupon does not exists."));
         }
 
         var user = await _userRepository.GetUserByIdAsync(request.UserId);

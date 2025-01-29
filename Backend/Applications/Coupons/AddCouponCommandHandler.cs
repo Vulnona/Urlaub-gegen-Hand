@@ -1,24 +1,20 @@
 ﻿using MediatR;
 using UGH.Domain.Core;
 using UGH.Domain.Entities;
-using UGH.Domain.Interfaces;
 using UGHApi.Interfaces;
 
 namespace UGHApi.Applications.Coupons;
 
 public class AddCouponCommandHandler : IRequestHandler<AddCouponCommand, Result>
 {
-    private readonly IUserRepository _userRepository;
     private readonly ICouponRepository _couponRepository;
     private readonly ILogger<AddCouponCommandHandler> _logger;
 
     public AddCouponCommandHandler(
-        IUserRepository userRepository,
         ICouponRepository couponRepository,
         ILogger<AddCouponCommandHandler> logger
     )
     {
-        _userRepository = userRepository;
         _couponRepository = couponRepository;
         _logger = logger;
     }
@@ -30,8 +26,11 @@ public class AddCouponCommandHandler : IRequestHandler<AddCouponCommand, Result>
             var newCoupon = new Coupon
             {
                 Code = Ulid.NewUlid().ToString(),
-                Name = "Membership Coupon",
+                Name = "Admin Issued Coupon",
                 Description = string.Empty,
+                CreatedBy = request.UserId,
+                MembershipId = 1, //Statically stored for now.
+                Duration = UGH_Enums.CouponDuration.ThreeMonths,
             };
 
             await _couponRepository.AddCoupon(newCoupon);

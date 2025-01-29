@@ -8,7 +8,7 @@ namespace UGHApi.Applications.Memberships;
 public class PurchaseMembershipCommandHandler
     : IRequestHandler<PurchaseMembershipCommand, Result<bool>>
 {
-    private readonly UGH.Domain.Interfaces.IUserRepository _userRepository;
+    private readonly IUserRepository _userRepository;
     private readonly IMembershipRepository _membershipRepository;
 
     public PurchaseMembershipCommandHandler(
@@ -60,7 +60,7 @@ public class PurchaseMembershipCommandHandler
         await _userRepository.AddUserMembership(newUserMembership);
         await _userRepository.SaveChangesAsync();
 
-        if (user.CurrentMembership == null || !user.CurrentMembership.IsActive)
+        if (user.CurrentMembership == null)
         {
             user.CurrentMembership = newMembership;
             await _userRepository.UpdateUserAsync(user);

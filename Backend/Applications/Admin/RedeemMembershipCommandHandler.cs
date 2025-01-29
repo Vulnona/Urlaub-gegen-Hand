@@ -3,7 +3,6 @@ using UGH.Domain.Core;
 using UGH.Domain.Entities;
 using UGH.Domain.Interfaces;
 using UGHApi.Interfaces;
-using UGHApi.Repositories;
 
 namespace UGHApi.Applications.Admin;
 
@@ -11,16 +10,13 @@ public class RedeemMembershipCommandHandler : IRequestHandler<RedeemMembershipCo
 {
     private readonly IUserRepository _userRepository;
     private readonly ICouponRepository _couponRepository;
-    private readonly IMembershipRepository _membershipRepository;
 
     public RedeemMembershipCommandHandler(
         IUserRepository userRepository,
-        IMembershipRepository membershipRepository,
         ICouponRepository couponRepository
     )
     {
         _userRepository = userRepository;
-        _membershipRepository = membershipRepository;
         _couponRepository = couponRepository;
     }
 
@@ -31,7 +27,27 @@ public class RedeemMembershipCommandHandler : IRequestHandler<RedeemMembershipCo
     {
         try
         {
+            var coupon = await _couponRepository.GetCouponByCode(request.CouponCode);
+
+            if (coupon == null)
+            {
+                return Result.Failure(
+                    new Error("CouponNotFound", "The specified coupon code does not exist.")
+                );
+            }
+
+            if (await _couponRepository.IsCouponRedeemed(coupon.Id))
+            {
+                return Result.Failure(
+                    new Error(
+                        "CouponAlreadyRedeemed",
+                        "The specified coupon code has already been redeemed."
+                    )
+                );
+            }
+
             var user = await _userRepository.GetUserForMembershipByIdAsync(request.UserId);
+
             if (user == null)
             {
                 return Result.Failure(
@@ -42,37 +58,28 @@ public class RedeemMembershipCommandHandler : IRequestHandler<RedeemMembershipCo
             var existingActiveMembership = user.UserMemberships.FirstOrDefault(um =>
                 um.IsMembershipActive
             );
+
             if (existingActiveMembership != null)
             {
                 return Result.Failure(
-                    new Error("ActiveMembershipExists", "The user already has active memberships.")
+                    new Error(
+                        "ActiveMembershipExists",
+                        "The user already has an active membership."
+                    )
                 );
             }
 
-            await _couponRepository.RedeemCoupon(request.CouponCode, request.UserId);
+            await _couponRepository.RedeemCoupon(coupon, request.UserId);
 
-            var membership = await _membershipRepository.GetMembershipByIdAsync(
-                request.MembershipId
-            );
-            if (membership == null)
-            {
-                return Result.Failure(
-                    new Error("MembershipNotFound", "The specified membership does not exist.")
-                );
-            }
-
-            if (existingActiveMembership == null)
-            {
-                user.SetMembershipId(membership.MembershipID);
-                await _userRepository.UpdateUserAsync(user);
-            }
+            user.SetMembershipId(coupon.MembershipId);
+            await _userRepository.UpdateUserAsync(user);
 
             var userMembership = new UserMembership
             {
-                User_Id = request.UserId,
-                MembershipID = request.MembershipId,
+                User_Id = user.User_Id,
+                MembershipID = coupon.MembershipId,
                 StartDate = DateTime.UtcNow,
-                Expiration = DateTime.UtcNow.AddDays(membership.DurationDays),
+                Expiration = DateTime.UtcNow.AddDays(coupon.Membership.DurationDays),
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow,
             };
@@ -82,17 +89,19 @@ public class RedeemMembershipCommandHandler : IRequestHandler<RedeemMembershipCo
 
             return Result.Success("Coupon Redeemed Successfully");
         }
-        catch (CouponNotFoundException ex)
+        catch (Repositories.CouponRepository.CouponNotFoundException ex)
         {
             return Result.Failure(new Error("CouponNotFound", ex.Message));
         }
-        catch (CouponRedeemException ex)
+        catch (Repositories.CouponRepository.CouponRedeemException ex)
         {
-            return Result.Failure(new Error("CouponRedemptionFailed", ex.Message));
+            return Result.Failure(new Error("CouponRedemptionFailed", ex.Message)); // Provide more details here
         }
         catch (Exception ex)
         {
-            return Result.Failure(new Error("InternalError", "An unexpected error occurred."));
+            return Result.Failure(
+                new Error("InternalError", $"An unexpected error occurred: {ex.Message}.")
+            );
         }
     }
 }

@@ -1,19 +1,13 @@
-﻿using UGH.Domain.Core;
-using MediatR;
-using UGHApi.ViewModels;
-using UGHApi.Shared;
+﻿using MediatR;
+using UGH.Domain.Core;
 
 namespace UGH.Application.Admin;
 
-public class GetAllUsersByAdminQuery : IRequest<Result<PaginatedList<UserDTO>>>
+public class GetAllUsersByAdminQuery : IRequest<Result>
 {
-    public int PageNumber { get; set; }
-    public int PageSize { get; set; }
-
-    public GetAllUsersByAdminQuery(int pageNumber, int pageSize)
-    {
-        PageNumber = pageNumber;
-        PageSize = pageSize;
-    }
+    public int PageNumber { get; set; } = 1;
+    public int PageSize { get; set; } = 10;
+    public string SortBy { get; set; } = null;
+    public string SortDirection { get; set; } = "asc";
+    public string SearchTerm { get; set; } = null;
 }
-

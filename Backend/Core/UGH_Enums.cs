@@ -7,7 +7,21 @@ public class UGH_Enums
         IsNew,
         VerificationPending,
         VerificationFailed,
-        Verified
+        Verified,
     }
- 
+
+    public enum CouponDuration
+    {
+        ThreeMonths,
+        SixMonths,
+        OneYear,
+        TwoYears,
+    }
+
+    public enum TransactionStatus
+    {
+        Pending = 0,
+        Complete = 1,
+        Failed = 2,
+    }
 }

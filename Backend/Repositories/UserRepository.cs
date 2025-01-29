@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using UGH.Domain.Entities;
 using UGH.Domain.Interfaces;
+using UGHApi.Repositories;
 using UGHApi.Services.AWS;
 using UGHApi.Shared;
 using UGHApi.ViewModels;
@@ -64,17 +65,36 @@ public class UserRepository : IUserRepository
             .FirstOrDefaultAsync(u => u.User_Id == userId);
     }
 
-    public async Task<PaginatedList<UserDTO>> GetAllUsersAsync(int pageNumber, int pageSize)
+    public async Task<PaginatedList<UserDTO>> GetAllUsersAsync(UserQueryParameters parameters)
     {
         IQueryable<User> query = _context
             .users.Include(u => u.Offers)
             .ThenInclude(o => o.Reviews)
-            .OrderBy(u => u.VerificationState)
+            .Where(u => u.User_Id != Guid.Parse("08dcd23c-d4eb-45db-88e4-73837709fada"))
             .AsQueryable();
 
-        int totalCount = await query.CountAsync();
+        if (!string.IsNullOrEmpty(parameters.SearchTerm))
+        {
+            query = query.Where(u => u.Email_Address.Contains(parameters.SearchTerm));
+        }
 
-        var users = await query.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
+        if (!string.IsNullOrEmpty(parameters.SortBy))
+        {
+            var propertyInfo = typeof(User).GetProperty(parameters.SortBy);
+            if (propertyInfo != null)
+            {
+                query =
+                    parameters.SortDirection.ToLower() == "desc"
+                        ? query.OrderByDescending(e => EF.Property<object>(e, parameters.SortBy))
+                        : query.OrderBy(e => EF.Property<object>(e, parameters.SortBy));
+            }
+        }
+
+        int totalCount = await query.CountAsync();
+        var users = await query
+            .Skip((parameters.PageNumber - 1) * parameters.PageSize)
+            .Take(parameters.PageSize)
+            .ToListAsync();
 
         if (users == null || !users.Any())
         {
@@ -90,7 +110,12 @@ public class UserRepository : IUserRepository
 
         var userDtoList = users.Adapt<List<UserDTO>>();
 
-        return PaginatedList<UserDTO>.Create(userDtoList, totalCount, pageNumber, pageSize);
+        return PaginatedList<UserDTO>.Create(
+            userDtoList,
+            totalCount,
+            parameters.PageNumber,
+            parameters.PageSize
+        );
     }
 
     private static List<string?> SplitAndTrim(string? input)

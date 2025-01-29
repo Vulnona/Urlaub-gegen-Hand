@@ -27,8 +27,11 @@ public class GetAllUsersQueryHandler : IRequestHandler<GetAllUsersQuery, Paginat
         try
         {
             var paginatedUsers = await _userRepository.GetAllUsersAsync(
-                request.PageNumber,
-                request.PageSize
+                new UGHApi.Repositories.UserQueryParameters
+                {
+                    PageNumber = request.PageNumber,
+                    PageSize = request.PageSize,
+                }
             );
 
             return paginatedUsers;

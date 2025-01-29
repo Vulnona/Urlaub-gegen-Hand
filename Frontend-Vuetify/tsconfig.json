@@ -15,10 +15,12 @@
     "strictNullChecks": false,
     "noImplicitAny": false,
     "allowJs": true,
+    "skipLibCheck": true,
     "lib": ["esnext", "dom"],
     "types": [
       "node",
-      "vuetify"
+      "vuetify",
+      "vite/client"
     ],
     "paths": {
       "@/*": ["src/*"]
@@ -30,5 +32,8 @@
     "src/**/*.tsx",
     "src/**/*.vue",
     "vite.config.ts"
+  ],
+  "exclude": [
+    "node_modules"
   ]
 }

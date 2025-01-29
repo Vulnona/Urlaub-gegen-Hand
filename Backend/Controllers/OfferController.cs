@@ -1,11 +1,11 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
-using UGHApi.Services.UserProvider;
-using UGH.Infrastructure.Services;
 using Microsoft.AspNetCore.Mvc;
 using UGH.Application.Offers;
 using UGH.Domain.ViewModels;
-using MediatR;
+using UGH.Infrastructure.Services;
+using UGHApi.Services.UserProvider;
 
 namespace UGHApi.Controllers;
 
@@ -60,7 +60,7 @@ public class OfferController : ControllerBase
                     result.Value.TotalCount,
                     result.Value.PageNumber,
                     result.Value.PageSize,
-                    result.Value.TotalPages
+                    result.Value.TotalPages,
                 }
             );
         }
@@ -70,11 +70,13 @@ public class OfferController : ControllerBase
             return StatusCode(500, $"Internal server error: {ex.Message}");
         }
     }
-   
+
     [HttpGet("get-offer-by-user")]
-    public async Task<IActionResult> GetOfferAsync(string searchTerm,
+    public async Task<IActionResult> GetOfferAsync(
+        string searchTerm,
         int pageNumber = 1,
-        int pageSize = 10)
+        int pageSize = 10
+    )
     {
         try
         {
@@ -127,11 +129,10 @@ public class OfferController : ControllerBase
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-
             var userId = _userProvider.UserId;
 
             var command = new AddOfferCommand(offerViewModel, userId);
-            var result = await _mediator.Send(command); 
+            var result = await _mediator.Send(command);
 
             if (result.IsFailure)
             {
@@ -216,7 +217,10 @@ public class OfferController : ControllerBase
 
     [Authorize]
     [HttpGet("offer-applications")]
-    public async Task<IActionResult> GetOfferApplicationsByHost(int pageNumber = 1, int pageSize = 10)
+    public async Task<IActionResult> GetOfferApplicationsByHost(
+        int pageNumber = 1,
+        int pageSize = 10
+    )
     {
         try
         {

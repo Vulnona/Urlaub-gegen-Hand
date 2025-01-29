@@ -89,23 +89,30 @@ namespace UGHApi.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("char(36)");
+
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("Description")
                         .HasColumnType("longtext");
 
-                    b.Property<DateTime?>("EndDate")
-                        .HasColumnType("datetime(6)");
+                    b.Property<int>("Duration")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MembershipId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<DateTime?>("StartDate")
-                        .HasColumnType("datetime(6)");
-
                     b.HasKey("Id");
+
+                    b.HasIndex("CreatedBy");
+
+                    b.HasIndex("MembershipId");
 
                     b.ToTable("coupons");
                 });
@@ -269,7 +276,8 @@ namespace UGHApi.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CouponId");
+                    b.HasIndex("CouponId")
+                        .IsUnique();
 
                     b.ToTable("redemptions");
                 });
@@ -567,6 +575,84 @@ namespace UGHApi.Migrations
                     b.ToTable("userrolesmapping");
                 });
 
+            modelBuilder.Entity("UGHApi.Entities.ShopItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("Duration")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("shopitems");
+                });
+
+            modelBuilder.Entity("UGHApi.Entities.Transaction", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<int?>("CouponId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ShopItemId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("TransactionDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("TransactionId")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("char(36)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CouponId");
+
+                    b.HasIndex("ShopItemId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("transaction");
+                });
+
+            modelBuilder.Entity("UGH.Domain.Entities.Coupon", b =>
+                {
+                    b.HasOne("UGH.Domain.Entities.User", "CreatedByUser")
+                        .WithMany("Coupons")
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("UGH.Domain.Entities.Membership", "Membership")
+                        .WithMany()
+                        .HasForeignKey("MembershipId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("Membership");
+                });
+
             modelBuilder.Entity("UGH.Domain.Entities.Offer", b =>
                 {
                     b.HasOne("UGH.Domain.Entities.User", "User")
@@ -608,8 +694,8 @@ namespace UGHApi.Migrations
             modelBuilder.Entity("UGH.Domain.Entities.Redemption", b =>
                 {
                     b.HasOne("UGH.Domain.Entities.Coupon", "Coupon")
-                        .WithMany()
-                        .HasForeignKey("CouponId")
+                        .WithOne("Redemption")
+                        .HasForeignKey("UGH.Domain.Entities.Redemption", "CouponId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -701,6 +787,91 @@ namespace UGHApi.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("UGHApi.Entities.ShopItem", b =>
+                {
+                    b.OwnsOne("UGHApi.Entities.Money", "Price", b1 =>
+                        {
+                            b1.Property<int>("ShopItemId")
+                                .HasColumnType("int");
+
+                            b1.Property<decimal>("Amount")
+                                .HasPrecision(18, 2)
+                                .HasColumnType("decimal(18,2)")
+                                .HasColumnName("Price_Amount");
+
+                            b1.Property<string>("Currency")
+                                .IsRequired()
+                                .HasMaxLength(3)
+                                .HasColumnType("varchar(3)")
+                                .HasColumnName("Price_Currency");
+
+                            b1.HasKey("ShopItemId");
+
+                            b1.ToTable("shopitems");
+
+                            b1.WithOwner()
+                                .HasForeignKey("ShopItemId");
+                        });
+
+                    b.Navigation("Price");
+                });
+
+            modelBuilder.Entity("UGHApi.Entities.Transaction", b =>
+                {
+                    b.HasOne("UGH.Domain.Entities.Coupon", "Coupon")
+                        .WithMany()
+                        .HasForeignKey("CouponId");
+
+                    b.HasOne("UGHApi.Entities.ShopItem", "ShopItem")
+                        .WithMany()
+                        .HasForeignKey("ShopItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("UGH.Domain.Entities.User", "User")
+                        .WithMany("Transactions")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.OwnsOne("UGHApi.Entities.Money", "Amount", b1 =>
+                        {
+                            b1.Property<int>("TransactionId")
+                                .HasColumnType("int");
+
+                            b1.Property<decimal>("Amount")
+                                .HasPrecision(18, 2)
+                                .HasColumnType("decimal(18,2)")
+                                .HasColumnName("Amount_Value");
+
+                            b1.Property<string>("Currency")
+                                .IsRequired()
+                                .HasMaxLength(3)
+                                .HasColumnType("varchar(3)")
+                                .HasColumnName("Amount_Currency");
+
+                            b1.HasKey("TransactionId");
+
+                            b1.ToTable("transaction");
+
+                            b1.WithOwner()
+                                .HasForeignKey("TransactionId");
+                        });
+
+                    b.Navigation("Amount");
+
+                    b.Navigation("Coupon");
+
+                    b.Navigation("ShopItem");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("UGH.Domain.Entities.Coupon", b =>
+                {
+                    b.Navigation("Redemption");
+                });
+
             modelBuilder.Entity("UGH.Domain.Entities.Offer", b =>
                 {
                     b.Navigation("OfferApplications");
@@ -710,7 +881,11 @@ namespace UGHApi.Migrations
 
             modelBuilder.Entity("UGH.Domain.Entities.User", b =>
                 {
+                    b.Navigation("Coupons");
+
                     b.Navigation("Offers");
+
+                    b.Navigation("Transactions");
 
                     b.Navigation("UserMemberships");
                 });

@@ -18,6 +18,11 @@ public class MembershipRepository : IMembershipRepository
         return await _context.memberships.ToListAsync();
     }
 
+    public async Task<Membership> GetMembershipByDurationDaysAsync(int durationDays)
+    {
+        return await _context.memberships.FirstOrDefaultAsync(m => m.DurationDays == durationDays);
+    }
+
     public async Task<Membership> GetMembershipByIdAsync(int membershipId)
     {
         return await _context.memberships.FindAsync(membershipId);
@@ -50,6 +55,6 @@ public class MembershipRepository : IMembershipRepository
 
     public async Task<IEnumerable<Membership>> GetActiveMembershipsAsync()
     {
-        return await _context.memberships.Where(m => m.IsActive).ToListAsync();
+        return await _context.memberships.ToListAsync();
     }
 }

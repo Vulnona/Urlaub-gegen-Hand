@@ -1,8 +1,8 @@
-﻿using UGH.Contracts.Authentication;
-using UGH.Infrastructure.Services;
-using UGH.Domain.Interfaces;
+﻿using MediatR;
+using UGH.Contracts.Authentication;
 using UGH.Domain.Core;
-using MediatR;
+using UGH.Domain.Interfaces;
+using UGH.Infrastructure.Services;
 
 namespace UGH.Application.Authentication;
 
@@ -34,17 +34,18 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, Result<LoginRes
         try
         {
             var userValid = _userService.ValidateUser(request.Email, request.Password);
+
             if (!userValid.IsValid)
             {
                 return Result.Failure<LoginResponse>(
-                    Errors.Email.EmailNotVerified()
+                    Errors.General.InvalidOperation(userValid.ErrorMessage)
                 );
             }
 
             var user = await _userRepository.GetUserByEmailAsync(request.Email);
 
-            var activeMemberships = user.UserMemberships
-                .Where(um => um.IsMembershipActive)
+            var activeMemberships = user
+                .UserMemberships.Where(um => um.IsMembershipActive)
                 .ToList();
 
             if (activeMemberships.Any())
@@ -80,7 +81,7 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, Result<LoginRes
                     RefreshToken = refreshToken,
                     Email = request.Email,
                     UserId = user.User_Id,
-                    FirstName = user.FirstName
+                    FirstName = user.FirstName,
                 }
             );
         }

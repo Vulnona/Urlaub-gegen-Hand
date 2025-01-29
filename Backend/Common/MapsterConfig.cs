@@ -1,7 +1,8 @@
-﻿// MapsterConfig.cs
+﻿using Mapster;
 using UGH.Domain.Entities;
+using UGHApi.Entities;
+using UGHApi.Extensions;
 using UGHApi.ViewModels;
-using Mapster;
 
 public static class MapsterConfig
 {
@@ -12,6 +13,26 @@ public static class MapsterConfig
             .NewConfig()
             .Map(dest => dest.Hobbies, src => SplitAndTrim(src.Hobbies))
             .Map(dest => dest.Skills, src => SplitAndTrim(src.Skills));
+
+        TypeAdapterConfig<Coupon, CouponDto>
+            .NewConfig()
+            .Map(dest => dest.Duration, src => src.Duration.ToDays())
+            .Map(dest => dest.CreatedBy, src => src.CreatedByUser.Email_Address);
+
+        TypeAdapterConfig<Transaction, TransactionDto>
+            .NewConfig()
+            .Map(dest => dest.CouponCode, src => src.Coupon != null ? src.Coupon.Code : null)
+            .Map(dest => dest.ShopItemName, src => src.ShopItem != null ? src.ShopItem.Name : null)
+            .Map(dest => dest.TransactionDate, src => src.TransactionDate)
+            .Map(dest => dest.Amount, src => src.Amount)
+            .Map(
+                dest => dest.CouponStatus,
+                src =>
+                    src.Coupon == null ? "Failed"
+                    : src.Coupon.Redemption == null ? "Available"
+                    : "Redeemed"
+            )
+            .Map(dest => dest.Status, src => src.Status);
     }
 
     private static List<string?> SplitAndTrim(string? input)

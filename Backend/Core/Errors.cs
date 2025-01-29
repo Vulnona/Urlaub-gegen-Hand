@@ -5,7 +5,7 @@ public static class Errors
     public static class General
     {
         public static Error InvalidOperation(string operation) =>
-            new("General.InvalidOperation", $"The operation '{operation}' is invalid.");
+            new("General.InvalidOperation", $"{operation}");
 
         public static Error NullOrEmpty(string fieldName) =>
             new("General.NullOrEmpty", $"The field '{fieldName}' cannot be null or empty.");
@@ -47,6 +47,9 @@ public static class Errors
     public static class Email
     {
         public static Error EmailNotVerified() =>
-            new("Email.NotVerified", "User's email not verified, Please verify your email to login.");
+            new(
+                "Email.NotVerified",
+                "User's email not verified, Please verify your email to login."
+            );
     }
 }
