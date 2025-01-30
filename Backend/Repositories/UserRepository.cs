@@ -9,6 +9,8 @@ using UGHApi.ViewModels;
 
 namespace UGH.Infrastructure.Repositories;
 
+#pragma warning disable CS8632
+
 public class UserRepository : IUserRepository
 {
     private readonly Ugh_Context _context;

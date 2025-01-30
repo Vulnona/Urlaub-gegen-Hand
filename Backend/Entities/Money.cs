@@ -1,5 +1,7 @@
 ﻿namespace UGHApi.Entities;
 
+#pragma warning disable CS8632
+
 public class Money : IEquatable<Money>
 {
     public decimal Amount { get; }
