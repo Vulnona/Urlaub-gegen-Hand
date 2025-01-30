@@ -6,7 +6,8 @@ using UGHApi.Shared;
 
 namespace UGH.Application.Offers;
 
-public class GetAllOffersQueryHandler : IRequestHandler<GetOffersQuery, Result>
+public class GetAllOffersQueryHandler
+    : IRequestHandler<GetOffersQuery, Result<PaginatedList<OfferDTO>>>
 {
     private readonly IOfferRepository _offerRepository;
     private readonly ILogger<GetAllOffersQueryHandler> _logger;
@@ -20,7 +21,10 @@ public class GetAllOffersQueryHandler : IRequestHandler<GetOffersQuery, Result>
         _logger = logger;
     }
 
-    public async Task<Result> Handle(GetOffersQuery request, CancellationToken cancellationToken)
+    public async Task<Result<PaginatedList<OfferDTO>>> Handle(
+        GetOffersQuery request,
+        CancellationToken cancellationToken
+    )
     {
         try
         {
@@ -49,7 +53,7 @@ public class GetAllOffersQueryHandler : IRequestHandler<GetOffersQuery, Result>
         catch (Exception ex)
         {
             _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
-            return Result.Failure(Errors.General.UnexpectedError());
+            return Result.Failure<PaginatedList<OfferDTO>>(Errors.General.UnexpectedError());
         }
     }
 }
