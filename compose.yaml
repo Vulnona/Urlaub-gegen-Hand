@@ -18,7 +18,7 @@ services:
     environment:
       - APP_ENV=dev
     ports:
-      - '3000:3000'
+      - '80:80'
     volumes:
       - ./Frontend-Vuetify:/app/frontend
       - /app/frontend/node_modules

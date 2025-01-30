@@ -26,7 +26,7 @@
             <div class="SearchBox">
               <i class="ri-search-line"></i>
               <input type="text" v-model="searchTerm" @input="debouncedSearch"
-                placeholder="Search offers / Region / Skills" class="form-control ">
+                placeholder="Suche Angebote / Regionen / Skills" class="form-control ">
             </div>
             <div class="add-new-offer">
               <router-link class="btn themeBtn" to="/add-offer"><i class="ri-add-circle-line"></i> Add New Offer

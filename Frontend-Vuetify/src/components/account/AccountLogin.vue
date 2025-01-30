@@ -65,13 +65,10 @@
               </svg>
             </div>
             <div class="login-main-text">
-              <h2><span>Let's Get</span> Started</h2>
-              <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et
-                dolore magna aliqua. Ut enim ad minim veniam,
-                quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. </p>
-            </div>
-            <div class="login-bottom-text">
-              Let's start exploring...
+              <h2><span>Entdecke neue Möglichkeiten des Reisens</span></h2>
+              <p>Finde dein perfektes "Urlaub gegen Hand" Abenteuer auf unserer innovativen Plattform. Bei uns profitierst du von der direkten Verbindung zur größten deutschsprachigen Community mit über 200.000 aktiven Mitgliedern auf Facebook. Jedes Angebot und Gesuch wird automatisch in beiden Netzwerken geteilt - das maximiert deine Chancen auf den idealen Match.</p>
+
+<p>Egal ob du eine Unterkunft suchst oder anbietest, bei uns findest du vielfältige Möglichkeiten: von der Mithilfe auf Bauernhöfen über Haustiersitting bis hin zu handwerklichen Projekten. Registriere dich kostenlos und werde Teil einer wachsenden Community von Gleichgesinnten, die Reisen neu definiert. </p>
             </div>
           </div>
         </div>

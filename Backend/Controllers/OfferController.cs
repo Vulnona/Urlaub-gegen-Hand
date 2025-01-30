@@ -11,6 +11,7 @@ namespace UGHApi.Controllers;
 
 [Route("api/offer")]
 [ApiController]
+[Authorize]
 public class OfferController : ControllerBase
 {
     private readonly Ugh_Context _context;

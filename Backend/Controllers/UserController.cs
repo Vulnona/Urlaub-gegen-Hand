@@ -79,7 +79,8 @@ public class UserController : ControllerBase
         }
     }
 
-    [Authorize]
+    // This function is to be used by the admin. A self delete function should has not been implemented yet.
+    [Authorize(Roles = "Admin")]
     [HttpDelete("delete-user")]
     public async Task<IActionResult> DeleteUser()
     {

@@ -12,10 +12,10 @@
           <div class="offer-content">
             <h1 class="offer-title">{{ offer.title }}</h1>
             <div class="offer-details">
-              <p><strong>Skills:</strong> {{ offer.skills }}</p>
-              <p><strong>Accommodation:</strong> {{ offer.accomodation }}</p>
-              <p><strong>Suitable for:</strong> {{ offer.accomodationsuitable }}</p>
-              <p><strong>Location/Region:</strong> {{ offer.location }} {{ offer.state }}</p>
+              <p><strong>Fähigkeiten:</strong> {{ offer.skills }}</p>
+              <p><strong>Annehmlichkeiten:</strong> {{ offer.accomodation }}</p>
+              <p><strong>Geeignet für:</strong> {{ offer.accomodationsuitable }}</p>
+              <p><strong>Ort/Region:</strong> {{ offer.location }} {{ offer.state }}</p>
             </div>
             <div class="offer_btn">
               <button @click="backtooffers()" class="action-link"><i class="ri-arrow-go-back-line"

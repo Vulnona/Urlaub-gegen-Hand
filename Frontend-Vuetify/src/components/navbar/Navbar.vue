@@ -39,12 +39,12 @@
                 <!-- Active Membership-specific Links (for users with active membership) -->
                 <li v-if="isActiveMember && userRole != 'Admin'" class="nav-item">
                   <router-link class="nav-link" to="/my-offers">
-                    <i class="ri-gift-line"></i> My Offers
+                    <i class="ri-gift-line"></i> Meine Angebote
                   </router-link>
                 </li>
                 <li v-if="isActiveMember && userRole != 'Admin'" class="nav-item">
                   <router-link class="nav-link" to="/offer-request">
-                    <i class="ri-mail-line"></i> Offer Request
+                    <i class="ri-mail-line"></i> Anfragen
                   </router-link>
                 </li>
                 <li v-if="userRole !== 'Admin'" class="nav-item">
