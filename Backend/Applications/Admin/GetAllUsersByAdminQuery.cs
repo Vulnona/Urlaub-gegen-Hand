@@ -1,9 +1,11 @@
 ﻿using MediatR;
 using UGH.Domain.Core;
+using UGHApi.Shared;
+using UGHApi.ViewModels;
 
 namespace UGH.Application.Admin;
 
-public class GetAllUsersByAdminQuery : IRequest<Result>
+public class GetAllUsersByAdminQuery : IRequest<Result<PaginatedList<UserDTO>>>
 {
     public int PageNumber { get; set; } = 1;
     public int PageSize { get; set; } = 10;

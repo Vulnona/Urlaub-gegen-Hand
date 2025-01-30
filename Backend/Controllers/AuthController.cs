@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Mvc;
 using UGH.Application.Authentication;
 using UGH.Contracts.Authentication;
 using UGHApi.Applications.Authentication;
-using UGHApi.Services.UserProvider;
 
 namespace UGHApi.Controllers
 {
@@ -12,22 +11,13 @@ namespace UGHApi.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private readonly IConfiguration _configuration;
         private readonly ILogger<AuthController> _logger;
         private readonly IMediator _mediator;
-        private readonly IUserProvider _userProvider;
 
-        public AuthController(
-            IConfiguration configuration,
-            ILogger<AuthController> logger,
-            IMediator mediator,
-            IUserProvider userProvider
-        )
+        public AuthController(ILogger<AuthController> logger, IMediator mediator)
         {
-            _configuration = configuration;
             _logger = logger;
             _mediator = mediator;
-            _userProvider = userProvider;
         }
 
         #region user-authorization
@@ -178,7 +168,7 @@ namespace UGHApi.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, "An error occurred while uploading files.");
+                return StatusCode(500, $"An error occurred while uploading files. Error: {ex}");
             }
         }
 

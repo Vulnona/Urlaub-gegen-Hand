@@ -34,7 +34,7 @@ namespace UGHApi.Controllers
                 new GetUserTransactionQuery(userId, pageNumber, pageSize)
             );
 
-            return Ok(result);
+            return Ok(result.Value);
         }
 
         [HttpPost("get-payment-intent")]

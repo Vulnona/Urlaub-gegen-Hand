@@ -32,22 +32,15 @@ public class DeleteUserCommandHandler : IRequestHandler<DeleteUserCommand, Resul
                 return Result.Failure(Errors.General.InvalidOperation("User not found."));
             }
 
-            string linkRS = user.Link_RS;
-            string linkVS = user.Link_VS;
+            var deleteTasks = new List<Task>();
 
-            if (!string.IsNullOrEmpty(linkRS))
-            {
-                var keyRS = ExtractKeyFromUrl(linkRS);
-                var resultRS = await _s3Service.DeleteFileAsync(keyRS);
-                _logger.LogInformation($"Deleted RS link from S3: {resultRS}");
-            }
+            if (!string.IsNullOrEmpty(user.Link_RS))
+                deleteTasks.Add(_s3Service.DeleteFileAsync(ExtractKeyFromUrl(user.Link_RS)));
 
-            if (!string.IsNullOrEmpty(linkVS))
-            {
-                var keyVS = ExtractKeyFromUrl(linkVS);
-                var resultVS = await _s3Service.DeleteFileAsync(keyVS);
-                _logger.LogInformation($"Deleted VS link from S3: {resultVS}");
-            }
+            if (!string.IsNullOrEmpty(user.Link_VS))
+                deleteTasks.Add(_s3Service.DeleteFileAsync(ExtractKeyFromUrl(user.Link_VS)));
+
+            await Task.WhenAll(deleteTasks);
 
             await _userRepository.DeleteUserAsync(user.User_Id);
 
@@ -66,6 +59,6 @@ public class DeleteUserCommandHandler : IRequestHandler<DeleteUserCommand, Resul
     private string ExtractKeyFromUrl(string url)
     {
         var uri = new Uri(url);
-        return uri.AbsolutePath.TrimStart('/');
+        return uri.LocalPath.TrimStart('/');
     }
 }

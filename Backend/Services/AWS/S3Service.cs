@@ -1,9 +1,9 @@
-﻿using Microsoft.Extensions.Options;
-using Amazon.S3.Transfer;
-using UGHApi.Shared;
+﻿using Amazon;
 using Amazon.S3;
-using Amazon;
 using Amazon.S3.Model;
+using Amazon.S3.Transfer;
+using Microsoft.Extensions.Options;
+using UGHApi.Shared;
 
 public class S3Service
 {
@@ -18,7 +18,11 @@ public class S3Service
         _bucketName = awsConfig.BucketName;
         _awsUrl = awsConfig.AWS_Url;
 
-        _s3Client = new AmazonS3Client(awsConfig.AccessKey, awsConfig.SecretKey, RegionEndpoint.GetBySystemName(awsConfig.Region));
+        _s3Client = new AmazonS3Client(
+            awsConfig.AccessKey,
+            awsConfig.SecretKey,
+            RegionEndpoint.GetBySystemName(awsConfig.Region)
+        );
     }
 
     public async Task<string> UploadFileAsync(byte[] fileData, string keyName, string contentType)
@@ -34,7 +38,7 @@ public class S3Service
                     InputStream = stream,
                     Key = keyName,
                     BucketName = _bucketName,
-                    ContentType = contentType
+                    ContentType = contentType,
                 };
 
                 await fileTransferUtility.UploadAsync(uploadRequest);
@@ -80,7 +84,7 @@ public class S3Service
             var deleteObjectRequest = new DeleteObjectRequest
             {
                 BucketName = _bucketName,
-                Key = keyName
+                Key = keyName,
             };
 
             var response = await _s3Client.DeleteObjectAsync(deleteObjectRequest);

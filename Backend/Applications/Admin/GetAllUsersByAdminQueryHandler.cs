@@ -1,10 +1,13 @@
 ﻿using MediatR;
 using UGH.Domain.Core;
 using UGH.Domain.Interfaces;
+using UGHApi.Shared;
+using UGHApi.ViewModels;
 
 namespace UGH.Application.Admin;
 
-public class GetAllUsersByAdminQueryHandler : IRequestHandler<GetAllUsersByAdminQuery, Result>
+public class GetAllUsersByAdminQueryHandler
+    : IRequestHandler<GetAllUsersByAdminQuery, Result<PaginatedList<UserDTO>>>
 {
     private readonly IUserRepository _userRepository;
     private readonly ILogger<GetAllUsersByAdminQueryHandler> _logger;
@@ -18,7 +21,7 @@ public class GetAllUsersByAdminQueryHandler : IRequestHandler<GetAllUsersByAdmin
         _logger = logger;
     }
 
-    public async Task<Result> Handle(
+    public async Task<Result<PaginatedList<UserDTO>>> Handle(
         GetAllUsersByAdminQuery request,
         CancellationToken cancellationToken
     )
@@ -41,7 +44,7 @@ public class GetAllUsersByAdminQueryHandler : IRequestHandler<GetAllUsersByAdmin
         catch (Exception ex)
         {
             _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
-            return Result.Failure(
+            return Result.Failure<PaginatedList<UserDTO>>(
                 Errors.General.InvalidOperation("Something went wrong while fetching users")
             );
         }

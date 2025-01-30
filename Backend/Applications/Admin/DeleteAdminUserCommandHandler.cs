@@ -1,6 +1,6 @@
-﻿using UGH.Domain.Interfaces;
+﻿using MediatR;
 using UGH.Domain.Core;
-using MediatR;
+using UGH.Domain.Interfaces;
 
 namespace UGHApi.Applications.Admin;
 
@@ -10,14 +10,21 @@ public class DeleteAdminUserCommandHandler : IRequestHandler<DeleteAdminUserComm
     private readonly ILogger<DeleteAdminUserCommandHandler> _logger;
     private readonly S3Service _s3Service;
 
-    public DeleteAdminUserCommandHandler(IUserRepository userRepository, ILogger<DeleteAdminUserCommandHandler> logger, S3Service s3Service)
+    public DeleteAdminUserCommandHandler(
+        IUserRepository userRepository,
+        ILogger<DeleteAdminUserCommandHandler> logger,
+        S3Service s3Service
+    )
     {
         _userRepository = userRepository;
         _logger = logger;
         _s3Service = s3Service;
     }
 
-    public async Task<Result> Handle(DeleteAdminUserCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(
+        DeleteAdminUserCommand request,
+        CancellationToken cancellationToken
+    )
     {
         try
         {
@@ -28,20 +35,15 @@ public class DeleteAdminUserCommandHandler : IRequestHandler<DeleteAdminUserComm
                 return Result.Failure(Errors.General.InvalidOperation("User not found."));
             }
 
-            string linkRS = user.Link_RS;
-            string linkVS = user.Link_VS;
+            var deleteTasks = new List<Task>();
 
-            if (!string.IsNullOrEmpty(linkRS))
-            {
-                var keyRS = ExtractKeyFromUrl(linkRS);
-                await _s3Service.DeleteFileAsync(keyRS);
-            }
+            if (!string.IsNullOrEmpty(user.Link_RS))
+                deleteTasks.Add(_s3Service.DeleteFileAsync(ExtractKeyFromUrl(user.Link_RS)));
 
-            if (!string.IsNullOrEmpty(linkVS))
-            {
-                var keyVS = ExtractKeyFromUrl(linkVS);
-                await _s3Service.DeleteFileAsync(keyVS);
-            }
+            if (!string.IsNullOrEmpty(user.Link_VS))
+                deleteTasks.Add(_s3Service.DeleteFileAsync(ExtractKeyFromUrl(user.Link_VS)));
+
+            await Task.WhenAll(deleteTasks);
 
             await _userRepository.DeleteUserAsync(user.User_Id);
             _logger.LogInformation("Admin deleted user successfully.");
@@ -51,14 +53,17 @@ public class DeleteAdminUserCommandHandler : IRequestHandler<DeleteAdminUserComm
         catch (Exception ex)
         {
             _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
-            return Result.Failure(Errors.General.InvalidOperation("An error occurred while deleting the user."));
+            return Result.Failure(
+                Errors.General.InvalidOperation("An error occurred while deleting the user.")
+            );
         }
     }
 
     private string ExtractKeyFromUrl(string url)
     {
-        var uri = new Uri(url);
-        return uri.AbsolutePath.TrimStart('/');
+        if (string.IsNullOrWhiteSpace(url))
+            return string.Empty;
+
+        return new Uri(url).LocalPath.TrimStart('/');
     }
 }
-

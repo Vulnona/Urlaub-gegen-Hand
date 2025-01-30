@@ -155,6 +155,12 @@ public class UserRepository : IUserRepository
         var user = await _context.users.FindAsync(userId);
         if (user != null)
         {
+            var transactions = _context.transaction.Where(t => t.UserId == user.User_Id);
+            var coupons = _context.coupons.Where(t => t.CreatedBy == user.User_Id);
+
+            _context.transaction.RemoveRange(transactions);
+            _context.coupons.RemoveRange(coupons);
+
             _context.users.Remove(user);
             await _context.SaveChangesAsync();
         }

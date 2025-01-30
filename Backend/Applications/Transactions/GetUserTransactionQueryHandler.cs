@@ -6,7 +6,8 @@ using UGHApi.ViewModels;
 
 namespace UGHApi.Applications.Transactions;
 
-public class GetUserTransactionQueryHandler : IRequestHandler<GetUserTransactionQuery, Result>
+public class GetUserTransactionQueryHandler
+    : IRequestHandler<GetUserTransactionQuery, Result<PaginatedList<TransactionDto>>>
 {
     private readonly ITransactionRepository _transactionRepository;
     private readonly ILogger<GetUserTransactionQueryHandler> _logger;
@@ -20,7 +21,7 @@ public class GetUserTransactionQueryHandler : IRequestHandler<GetUserTransaction
         _logger = logger;
     }
 
-    public async Task<Result> Handle(
+    public async Task<Result<PaginatedList<TransactionDto>>> Handle(
         GetUserTransactionQuery request,
         CancellationToken cancellationToken
     )

@@ -73,7 +73,7 @@ public class AdminController : ControllerBase
             }
         );
 
-        return Ok(result);
+        return Ok(result.Value);
     }
 
     [HttpGet("get-user-by-id/{userId}")]
