@@ -497,7 +497,7 @@ export default {
     <ul style="display: inline-block; text-align: left; padding-left: 50px;">
     <li>Der Erfassung und Nutzung Ihrer Daten für die Kontoerstellung</li>
     <li>Den wesentlichen Funktionen unserer Plattform</li>
-    <li>Unseren Nutzungsbedingungen und Datenschutzrichtlinien</li>
+    <li>Unseren Nutzungsbedingungen und <a href="https://alreco.de/datenschutz" target="_blank"> Datenschutzrichtlinien</a></li>
     </ul>   
          <input type="checkbox" id="gdpr-consent-checkbox">
          <label for="gdpr-consent-checkbox">Ich akzeptiere</label>`,
