@@ -12,6 +12,11 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/views/Home.vue'),
   },
   {
+    path: '/datenschutz',
+    name: 'Datenschutzerklärung',
+    component: () => import('@/views/Datenschutz.vue'),
+  }, 
+  {
     path: '/my-offers',
     name: 'MyOffers',
     component: () => import('@/views/MyOffers.vue'),
