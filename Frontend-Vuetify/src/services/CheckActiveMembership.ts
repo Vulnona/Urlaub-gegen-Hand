@@ -1,5 +1,6 @@
 import CryptoJS from 'crypto-js';
-import VueJwtDecode from 'vue-jwt-decode';
+import { jwtDecode } from 'jwt-decode';
+
 // Function to decrypt token using CryptoJS.
 const decryptToken = (encryptedToken) => {
   try {
@@ -16,7 +17,7 @@ const isActiveMembership = () => {
     if (token) {
       const decryptedToken = decryptToken(token);
       if (decryptedToken) {
-        const decodedToken = VueJwtDecode.decode(decryptedToken);
+        const decodedToken = jwtDecode(decryptedToken); // Replaced VueJwtDecode with jwtDecode
         const membershipStatus = decodedToken['MembershipStatus'] || '';
         if (membershipStatus === 'Active') {
           return true;
@@ -33,6 +34,5 @@ const isActiveMembership = () => {
   }
   return false;
 };
-
 
 export default isActiveMembership;

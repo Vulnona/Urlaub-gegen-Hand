@@ -19,7 +19,7 @@
         </div>
         <div class="card-body">
           <!-- Add a wrapper with overflow-x: auto -->
-          <div v-if="coupons" class="table-responsive">
+          <div v-if="coupons.length" class="table-responsive">
             <table class="table theme_table">
               <thead>
                 <tr>
@@ -60,6 +60,9 @@
                 </tr>
               </tbody>
             </table>
+          </div>
+          <div v-else>
+            <h2 class="text-center">No Transactions</h2>
           </div>
         </div>
       </div>
@@ -112,6 +115,9 @@ export default {
     const urlParams = new URLSearchParams(window.location.search);
   if (urlParams.get('success') === 'true') {
     toast.success("Payment completed successfully!");
+    setTimeout(() => {
+      this.getdata();
+    }, 2000);
   } else if (urlParams.get('canceled') === 'true') {
     toast.info("Payment was canceled.");
   }
@@ -143,13 +149,33 @@ export default {
       }
     },
     copyToClipboard(text) {
-  navigator.clipboard.writeText(text).then(() => {
-    toast.success("Coupon code copied to clipboard!");
-  }).catch(err => {
-    toast.error("Failed to copy coupon code.");
-    console.error("Error copying text: ", err);
-  });
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text)
+      .then(() => {
+        toast.success("Coupon code copied to clipboard!");
+      })
+      .catch(err => {
+        toast.error("Failed to copy coupon code.");
+        console.error("Error copying text: ", err);
+      });
+  } else {
+    // Fallback for insecure contexts
+    const textarea = document.createElement("textarea");
+    textarea.value = text;
+    textarea.style.position = "fixed"; // Prevent scrolling to bottom
+    document.body.appendChild(textarea);
+    textarea.select();
+    try {
+      document.execCommand("copy");
+      toast.success("Coupon code copied to clipboard!");
+    } catch (err) {
+      toast.error("Failed to copy coupon code.");
+      console.error("Fallback copy failed: ", err);
+    }
+    document.body.removeChild(textarea);
+  }
 },
+
     // Method to navigate to the home page
     goHome() {
       router.push('/home');

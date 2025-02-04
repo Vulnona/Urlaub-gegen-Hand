@@ -16,7 +16,7 @@ export default defineConfig(({ mode }) => {
     },
     optimizeDeps: {
       include: ['vue', 'vue-router', 'sweetalert2', 'crypto-js', 'axios', 'vue-toastification',
-        'vue-jwt-decode', 'lodash/debounce', 'bootstrap/dist/js/bootstrap.min.js', 'vue-multiselect',
+        'jwt-decode', 'lodash/debounce', 'bootstrap/dist/js/bootstrap.min.js', 'vue-multiselect',
         'crypto-js/aes', 'vue3-datepicker','@stripe/stripe-js'],
     },
     plugins: [

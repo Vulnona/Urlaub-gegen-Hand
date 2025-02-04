@@ -149,12 +149,21 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   const userRole = CheckUserRole(); 
   const requiredRoles = to.meta.roles as string[];
-
-  if (requiredRoles && !requiredRoles.includes(userRole || '')) {
-    next({ name: 'Error' }); // Redirect to error page if role is not authorized
+console.log(requiredRoles);
+  if (requiredRoles) {
+    if (!userRole) {
+      // No user role means user is not logged in, redirect to login
+      next({ name: 'Login' });
+    } else if (!requiredRoles.includes(userRole)) {
+      // User is logged in but lacks permissions
+      next({ name: 'Error' });
+    } else {
+      next(); // User is authorized, proceed
+    }
   } else {
-    next(); // Proceed to the route
+    next(); // No role required, allow access
   }
 });
+
 
 export default router;

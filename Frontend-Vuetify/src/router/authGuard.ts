@@ -1,12 +1,12 @@
 import { NavigationGuardNext, RouteLocationNormalized } from 'vue-router';
 import { ref } from 'vue';
-import VueJwtDecode from 'vue-jwt-decode';
+import { jwtDecode } from 'jwt-decode'; // Replace VueJwtDecode with jwtDecode
 import CryptoJS from 'crypto-js';
 
 const userRole = ref('');
 
 // Function to decrypt token using AES encryption
-const decryptToken = (encryptedToken: string) => {
+const decryptToken = (encryptedToken: string): string | null => {
   try {
     const bytes = CryptoJS.AES.decrypt(encryptedToken, process.env.SECRET_KEY!);
     return bytes.toString(CryptoJS.enc.Utf8);
@@ -20,15 +20,15 @@ const decryptToken = (encryptedToken: string) => {
 const decryptedToken = decryptToken(sessionStorage.getItem('token') || '');
 
 // Function to check login status
-const checkLoginStatus = () => {
+const checkLoginStatus = (): void => {
   if (decryptedToken) {
-    const decodedToken = VueJwtDecode.decode(decryptedToken) as Record<string, any>;
+    const decodedToken = jwtDecode(decryptedToken); // Use jwtDecode instead of VueJwtDecode
     userRole.value = decodedToken[`${process.env.claims_Url}`] || '';
   }
 };
 
 // Auth Guard
-export default function authGuard(to: RouteLocationNormalized, from: RouteLocationNormalized, next: NavigationGuardNext) {
+export default function authGuard(to: RouteLocationNormalized, from: RouteLocationNormalized, next: NavigationGuardNext): void {
   const token = sessionStorage.getItem('token');
 
   // Call login status check before proceeding

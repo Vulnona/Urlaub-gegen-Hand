@@ -128,13 +128,33 @@ export default {
       return dayjs(date).format("MMMM D, YYYY h:mm A"); // Example: January 21, 2025 1:23 PM
     },
     copyToClipboard(text) {
-      navigator.clipboard.writeText(text).then(() => {
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text)
+      .then(() => {
         toast.success("Coupon code copied to clipboard!");
-      }).catch(err => {
+      })
+      .catch(err => {
         toast.error("Failed to copy coupon code.");
         console.error("Error copying text: ", err);
       });
-    },
+  } else {
+    // Fallback for insecure contexts
+    const textarea = document.createElement("textarea");
+    textarea.value = text;
+    textarea.style.position = "fixed"; // Prevent scrolling to bottom
+    document.body.appendChild(textarea);
+    textarea.select();
+    try {
+      document.execCommand("copy");
+      toast.success("Coupon code copied to clipboard!");
+    } catch (err) {
+      toast.error("Failed to copy coupon code.");
+      console.error("Fallback copy failed: ", err);
+    }
+    document.body.removeChild(textarea);
+  }
+},
+
     toggleReveal(index, code) {
       const codeIndex = this.revealedCodes.indexOf(index);
       if (codeIndex === -1) {
