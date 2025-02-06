@@ -18,7 +18,7 @@ services:
     environment:
       - APP_ENV=dev
     ports:
-      - '80:80'
+      - '3000:3000'
     volumes:
       - ./Frontend-Vuetify:/app/frontend
       - /app/frontend/node_modules
@@ -76,7 +76,7 @@ services:
       - ConnectionStrings__DefaultConnection=Server=db;User ID=root;Password=password;Database=db;SSL Mode=None
     depends_on:
       - db
-
+    
 volumes:
   db-data2:
 

@@ -9,10 +9,8 @@ export default defineConfig(({ mode }) => {
   return {
     server: {
       host: '0.0.0.0',
-      port: 80,
-      watch: {
-        usePolling: env.VITE_USE_POLLING === 'true',
-      },
+      port: 3000,
+      allowedHosts: ['localhost'],
     },
     optimizeDeps: {
       include: ['vue', 'vue-router', 'sweetalert2', 'crypto-js', 'axios', 'vue-toastification',
