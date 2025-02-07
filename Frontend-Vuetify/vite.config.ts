@@ -46,6 +46,13 @@ export default defineConfig(({ mode }) => {
         },
       }),
     ],
+    css: {
+      preprocessorOptions: {
+        scss: {
+          additionalData: `@use "sass:math";`,
+        },
+      },
+    },  
     define: {
       'process.env': {
         SECRET_KEY: env.SECRET_KEY,

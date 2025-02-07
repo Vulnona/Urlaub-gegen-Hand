@@ -24,7 +24,7 @@
     "remixicon": "^4.2.0",
     "roboto-fontface": "*",
     "router": "^2.0.0",
-    "sass-loader": "^10.5.2",
+    "sass": "^1.84.0",
     "sweetalert2": "^11.15.10",
     "vue": "^3.2.0",
     "vue-multiselect": "^3.0.0",
@@ -36,17 +36,27 @@
   },
   "devDependencies": {
     "@babel/types": "^7.21.4",
-    "@types/date-fns": "^2.5.3",
+    "@eslint/config-array": "^0.19.2",
+    "@eslint/object-schema": "^2.1.6",
     "@types/node": "^18.15.0",
+    "@typescript-eslint/eslint-plugin": "^8.23.0",
+    "@typescript-eslint/parser": "^8.23.0",
     "@vitejs/plugin-vue": "^4.0.0",
-    "@vue/eslint-config-typescript": "^11.0.0",
-    "eslint": "^8.56.0",
-    "eslint-plugin-vue": "^9.21.1",
-    "sass": "^1.83.4",
+    "@vue/eslint-config-typescript": "^14.3.0",
+    "eslint": "^9.19.0",
+    "eslint-plugin-vue": "^9.32.0",
+    "glob": "^11.0.1",
+    "rimraf": "^6.0.1",
     "typescript": "^5.0.0",
     "unplugin-fonts": "^1.0.3",
     "vite": "^4.2.0",
     "vite-plugin-vuetify": "^1.0.0",
     "vue-tsc": "^2.2.0"
+  },
+  "overrides": {
+    "rimraf": "^6.0.1",
+    "glob": "^11.0.1",
+    "inflight": "^1.0.7"
   }
 }
+ 
