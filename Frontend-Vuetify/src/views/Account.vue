@@ -119,7 +119,7 @@
                   <span class="fw-medium fs-15 d-block mb-3">Social Media:</span>
                   <ul class="d-flex align-items-center flex-wrap">
                     <li class="d-flex align-items-center gap-3">
-                      <button v-if="user.facebook_link" @click="redirectToFacebook(user.facebook_link)" type="button" class="btn social_btn">
+                      <button v-if="user.facebookLink" @click="redirectToFacebook(user.facebookLink)" type="button" class="btn social_btn">
                         <span class="social_link_outer"><i class="ri-facebook-fill"></i></span>
                         <span class="text-info">Facebook</span>
                       </button>
@@ -322,7 +322,7 @@ export default {
     // Method to fetch user data
     async fetchUserData(id) {
       try {
-        const response = await axiosInstance.get(`${process.env.baseURL}admin/get-user-profile/${id}`);
+        const response = await axiosInstance.get(`${process.env.baseURL}profile/get-user-profile/${id}`);
         this.user = response.data;
         this.profileImgSrc = `data:image/jpeg;base64,${response.data.profilePicture}`;
       } catch (error) {
