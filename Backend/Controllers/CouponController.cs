@@ -15,7 +15,7 @@ namespace UGHApi.Controllers
 {
     [Route("api")]
     [ApiController]
-    [Authorize(Roles = "Admin")]
+    [Authorize]
     public class CouponController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -160,9 +160,10 @@ namespace UGHApi.Controllers
         [Authorize]
         public async Task<IActionResult> RedeemCoupon([FromBody] RedeemCouponRequest request)
         {
+            _logger.LogInformation($"Coupon wird eingelöst userid:{_userProvider.UserId}, code:{request.CouponCode}");
             try
             {
-                var userId = _userProvider.UserId;
+                var userId = _userProvider.UserId;                
                 var result = await _mediator.Send(
                     new RedeemMembershipCommand(userId, request.CouponCode)
                 );
@@ -182,7 +183,7 @@ namespace UGHApi.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
-
+        
         [HttpPost("create-payment-intent")]
         public async Task<IActionResult> CreatePaymentIntent(
             [FromBody] CreatePaymentIntentRequest request

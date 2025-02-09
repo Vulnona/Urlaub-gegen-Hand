@@ -13,16 +13,15 @@
                             <span class="navbar-toggler-icon"></span>
                         </button>
                         <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                            <ul class="navbar-nav ml-auto">
-                                <!-- Common Home Link -->
-                                <li class="nav-item">
-                                    <router-link class="nav-link" to="/home">
-                                        <i class="ri-home-4-line"></i> Home <span class="sr-only">(current)</span>
-                                    </router-link>
-                                </li>
+                            <ul class="navbar-nav ml-auto">                                
                                 <li class="nav-item">
                                     <router-link class="nav-link" to="/login">
                                         <i class="ri-login-box-line"></i> Login
+                                    </router-link>
+                                </li>
+                                <li class="nav-item">
+                                    <router-link class="nav-link" to="/register">
+                                        <i class="ri-login-box-line"></i> Registrieren
                                     </router-link>
                                 </li>
                             </ul>
