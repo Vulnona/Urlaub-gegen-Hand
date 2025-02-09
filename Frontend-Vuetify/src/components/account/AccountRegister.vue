@@ -31,7 +31,8 @@ Durch Klicken auf "Registrieren" bestätigen Sie, dass Sie diese Bedingungen akz
                 
                 <form class="form-border" @submit.prevent="register">
 
-                  <div class="register-form-fields">
+                  <div class="register-form-fields" :class="{ 'register-form-fields-mobile': isMobile }">
+
 
                     <div class="custom-form" :class="{ 'has-error': !firstName && showError }">
                       <label for="firstName">Vorname</label>
@@ -185,7 +186,7 @@ import axiosInstance from '@/interceptor/interceptor';
 import toast from '../toaster/toast';
 
 import PublicNav from '@/components/navbar/PublicNav.vue';
-    
+            
 export default {
   components: {
     Datepicker,
@@ -228,7 +229,9 @@ export default {
   },
 
   computed: {
-
+    isMobile () {
+      return screen.width <= 760;
+    },   
     isValidPassword() {
       const passwordPattern = /^(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,20}$/;
       return passwordPattern.test(this.password);
@@ -254,6 +257,7 @@ export default {
     }
   },
   methods: {
+    
     togglePasswordVisibility() {
       this.showPassword = !this.showPassword;
     },

@@ -1007,6 +1007,9 @@ body .multiselect__option--highlight::after, body .multiselect__option--highligh
 .register-form-fields .custom-form {
    width: 32%;
 }
+.register-form-fields-mobile .custom-form {
+   width: 100%;
+}
 .loginmain-bg .social-login .btn {
    cursor: pointer;
    background: transparent;
