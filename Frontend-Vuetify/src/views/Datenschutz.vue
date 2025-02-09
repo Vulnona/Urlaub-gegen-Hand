@@ -51,7 +51,7 @@ ALRECO GmbH
 <li> Widerspruch gegen die Verarbeitung Ihrer personenbezogenen Daten einzulegen (Art. 21 DSGVO) </li>
 <li> Ihre personenbezogenen Daten in einem strukturierten, gängigen und maschinenlesbaren Format zu erhalten oder die Übermittlung an einen anderen Verantwortlichen zu verlangen (Art. 20 DSGVO). </li></ul>
 <h3> 8. Widerruf Ihrer Einwilligung </h3>
-<ul><li>Sofern Sie eine Einwilligung zur Verarbeitung Ihrer personenbezogenen Daten erteilt haben, können Sie diese jederzeit mit Wirkung für die Zukunft widerrufen. Der Widerruf ist per E-Mail an [datenschutz@alreco.de](mailto:datenschutz@alreco.de) zu richten. </li></ul>
+<ul><li>Sofern Sie eine Einwilligung zur Verarbeitung Ihrer personenbezogenen Daten erteilt haben, können Sie diese jederzeit mit Wirkung für die Zukunft widerrufen. Der Widerruf ist per E-Mail an <a href="mailto:datenschutz@alreco.de">datenschutz@alreco.de</a> zu richten. </li></ul>
 <h3> 9. Änderungen dieser Datenschutzerklärung </h3>
 <ul><li>Wir behalten uns das Recht vor, diese Datenschutzerklärung jederzeit zu ändern. Änderungen werden auf der Website veröffentlicht und treten mit ihrer Veröffentlichung in Kraft.</li></ul>
 <h4>Durch die Nutzung von ALRECO erklären Sie sich mit dieser Datenschutzerklärung einverstanden. Bei Fragen oder Anliegen wenden Sie sich bitte an unseren Datenschutzbeauftragten unter E-Mail: <a href="mailto:datenschutz@alreco.de">datenschutz@alreco.de</a>.</h4>
