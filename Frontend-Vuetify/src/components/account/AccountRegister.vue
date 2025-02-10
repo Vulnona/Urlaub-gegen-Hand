@@ -65,9 +65,8 @@ Durch Klicken auf "Registrieren" bestätigen Sie, dass Sie diese Bedingungen akz
                     </div>
                     <div class="custom-form" :class="{ 'has-error': !isValidDateOfBirth && showError }">
                       <label for="dateOfBirth">Geburtsdatum</label>
-                      <Datepicker v-model="dateOfBirth" :format="'yyyy-MM-dd'" :enable-time-picker="false"
-                        :auto-apply="true" placeholder="YYYY-MM-DD" :typeable="true" :text-input="true"
-                        input-class-name="datepicker-input" @update:model-value="validateDate" />
+                      <Datepicker date v-model="dateOfBirth" :enable-time-picker="false"
+                        :auto-apply="true" placeholder="dd.mm.yyyy" :typeable="true" input-class-name="datepicker-input" startingView='year'  inputFormat="dd.MM.yyyy"/>
                       <span v-if="!isValidDateOfBirth && showError" class="error-message">
                         Alter muss zwischen 14 und 120 Jahren liegen
                       </span>
