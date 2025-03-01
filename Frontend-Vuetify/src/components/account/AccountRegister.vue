@@ -142,7 +142,7 @@ Durch Klicken auf "Registrieren" bestätigen Sie, dass Sie diese Bedingungen akz
                       </div>
                       <span v-if="(!password && showError) || !isPasswordValid" class="error-message">
                         Passwort muss mindestens einen Großbuchstaben, eine Zahl, ein
-                        Sonderzeichen enthalten und zwischen 8 und 20 Zeichen lang sein.
+                        Sonderzeichen <a style="font-weight: bold;"> !@#$%^&* </a> enthalten und zwischen 8 und 20 Zeichen lang sein.
                       </span>
                     </div>
                     <div class="custom-form" :class="{ 'has-error': !confirmPassword && showError }">
@@ -230,10 +230,6 @@ export default {
   computed: {
     isMobile () {
       return screen.width <= 760;
-    },   
-    isValidPassword() {
-      const passwordPattern = /^(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,20}$/;
-      return passwordPattern.test(this.password);
     },
     isValidFacebookLink() {
       const facebookPattern = /^https:\/\/www\.facebook\.com\/.+$/;
@@ -264,8 +260,7 @@ export default {
       this.showPassword = !this.showPassword;
     },
     validatePassword() {
-      const passwordRegex =
-        /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,20}$/;
+      const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,20}$/;
       this.isPasswordValid = passwordRegex.test(this.password);
     },
     //getall countries
