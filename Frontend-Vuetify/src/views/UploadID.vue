@@ -136,7 +136,11 @@ const uploadImages = async () => {
           sessionStorage.clear();
           router.push('/');
       } catch (error) {
+        if (err.response.status == 413) {
+            toast.error("Bilddateien zu groß.");
+        } else {
         toast.error("Upload nicht erfolgreich");
+        }
       } finally {
         isLoading.value = false; 
       }
