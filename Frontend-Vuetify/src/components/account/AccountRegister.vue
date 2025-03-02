@@ -79,7 +79,7 @@ Durch Klicken auf "Registrieren" bestätigen Sie, dass Sie diese Bedingungen akz
                     </div>
                     <div class="custom-form" :class="{ 'has-error': !stateName && showError }">
                       <label for="state">Region/Bundesland</label>
-                      <input type="text" placeholder="Region/Bundesland" id="region" v-model="regionName">
+                      <input type="text" placeholder="Region/Bundesland" id="region" v-model="stateName">
                       <span v-if="!stateId && showError" class="error-message">Bundesland ist erforderlich</span>
                     </div>                    
                     
