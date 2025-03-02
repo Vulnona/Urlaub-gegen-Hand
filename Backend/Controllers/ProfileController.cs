@@ -7,6 +7,7 @@ using UGH.Application.Profile;
 using UGH.Domain.ViewModels;
 using UGH.Contracts.Profile;
 using MediatR;
+using UGH.Domain.Interfaces;
 
 using UGH.Domain.Entities;
 using UGH.Domain.Core;
@@ -23,13 +24,15 @@ public class ProfileController : ControllerBase
     private readonly ILogger<ProfileController> _logger;
     private readonly IMediator _mediator;
     private readonly IUserProvider _userProvider;
-
+    private readonly IUserRepository _userRepository;
+    
     public ProfileController(
         Ugh_Context context,
         IMediator mediator,
         TokenService tokenService,
         ILogger<ProfileController> logger,
-        IUserProvider userProvider
+        IUserProvider userProvider,
+        IUserRepository userRepository
     )
     {
         _context = context;
@@ -37,6 +40,7 @@ public class ProfileController : ControllerBase
         _logger = logger;
         _mediator = mediator;
         _userProvider = userProvider;
+        _userRepository = userRepository;
     }
 
     #region user-profile
@@ -65,20 +69,63 @@ public class ProfileController : ControllerBase
 
     [Authorize]
     [HttpPut("update-profile")]
-    public async Task<IActionResult> UpdateProfile([FromBody] ProfileData profile)
+    public async Task<IActionResult> UpdateProfile([FromBody] UserProfile profile)
     {
         var userId = _userProvider.UserId;
-        var command = new UpdateProfileCommand(userId, profile);
-        var result = await _mediator.Send(command);
-
-        if (result.IsSuccess)
+        try
         {
-            return Ok(result);
+            var user = await _userRepository.GetUserByIdAsync(userId);
+            if (user is null)
+                return StatusCode(500, "User is Null");
+            if (profile != null)
+            {
+                user.Skills = profile.Skills;
+                user.Hobbies = profile.Hobbies;                
+                await _userRepository.UpdateUserAsync(user);
+            }
         }
-
-        return StatusCode(500, result.Error);
+        catch (Exception ex)
+        {
+            _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+            return StatusCode(500, "Error updating User Data.");
+        }
+        return Ok("User Profile updated successfully");
     }
 
+    [Authorize]
+    [HttpPut("update-user-data")]
+    public async Task<IActionResult> UpdateProfile([FromBody] UserData profile)
+    {
+        var userId = _userProvider.UserId;
+        try
+        {
+            var user = await _userRepository.GetUserByIdAsync(userId);
+            if (user is null)
+                return StatusCode(500, "User is Null");
+            if (profile != null)
+            {
+                user.FirstName = profile.FirstName;
+                user.LastName = profile.LastName;
+                user.DateOfBirth = profile.DateOfBirth;
+                user.Gender = profile.Gender;
+                user.Street = profile.Street;
+                user.HouseNumber = profile.HouseNumber;
+                user.PostCode = profile.PostCode;
+                user.City = profile.City;
+                user.State = profile.State;
+                user.Country = profile.Country;
+                user.VerificationState = UGH_Enums.VerificationState.IsNew;
+                await _userRepository.UpdateUserAsync(user);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+            return StatusCode(500, "Error updating User Data.");
+        }
+        return Ok("User Data updated successfully");
+    }
+    
     [Authorize]
     [HttpPut("update-profile-picture")]
     public async Task<IActionResult> UpdateProfilePicture(ProfilePictureUpdateRequest request)

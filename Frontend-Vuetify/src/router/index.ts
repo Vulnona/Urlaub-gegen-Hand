@@ -98,6 +98,12 @@ const routes: RouteRecordRaw[] = [
     meta: { roles: ['User'] },
   },
   {
+    path: '/edit-user-data',
+    name: 'EditUserData',
+    component: () => import('@/views/EditUserData.vue'),
+    meta: { roles: ['User'] },
+  },
+  {
     path: '/upload-id',
     name: 'UploadID',
     component: () => import('@/views/UploadID.vue'),

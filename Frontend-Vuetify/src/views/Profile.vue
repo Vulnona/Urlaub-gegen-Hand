@@ -146,6 +146,10 @@
                 Profil
               </button>
             </div>
+            <div class="profile_group_btn" v-if="user.verificationState === 'Verified'">
+              <button class="btn  btn-primary rounded" @click="editUserData">
+                Editiere Userdaten              </button>
+            </div>
             <button class="btn btn-danger" @click="deleteUser()">
               Löschen
             </button>
@@ -505,6 +509,9 @@
       editProfile() {
         router.push('/edit-profile');
       },
+        editUserData() {
+            router.push('/edit-user-data');
+        }
     },
 
     computed: {

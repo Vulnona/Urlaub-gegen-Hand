@@ -15,116 +15,7 @@
     <div class="col-md-7 mx-auto">
       <div class="card">
         <form @submit.prevent="saveProfile" class="profile-form">
-          <div class="row">
-            <div class="col-md-4 col-sm-6">
-              <!-- First Name -->
-              <div class="form-group">
-                <label for="firstName">Vorname</label>
-                <input type="text" v-model="profile.firstName" class="form-control" id="firstName" />
-                <span v-if="errors.firstName" class="text-danger">{{ errors.firstName }}</span>
-              </div>
-            </div>
-            <div class="col-md-4 col-sm-6">
-              <!-- Last Name -->
-              <div class="form-group">
-                <label for="lastName">Nachname</label>
-                <input type="text" v-model="profile.lastName" class="form-control" id="lastName" />
-                <span v-if="errors.lastName" class="text-danger">{{ errors.lastName }}</span>
-              </div>
-            </div>
-            <div class="col-md-4 col-sm-6">
-              <div class="form-group">
-                <label for="gender">Geschlecht</label>
-                <select v-model="profile.gender" class="form-control" id="gender">
-                  <option value="">Select Gender</option>
-                  <option value="Male">Männlich</option>
-                  <option value="Female">Weiblich</option>
-                  <option value="Other">Möchte ich nicht bekannt geben</option>
-                </select>
-                <span v-if="errors.gender" class="text-danger">{{ errors.gender }}</span>
-              </div>
-            </div>
-            <div class="col-md-4 col-sm-6">
-              <!-- Date of Birth -->
-              <div class="form-group">
-                <label for="dateOfBirth">Geburtsdatum</label>
-                <input type="date" v-model="profile.dateOfBirth" class="form-control" id="dateOfBirth"
-                  @change="validateDateOfBirth" />
-                <span v-if="errors.dateOfBirth" class="text-danger">{{ errors.dateOfBirth }}</span>
-              </div>
-            </div>
-            <div class="col-md-4 col-sm-6">
-              <!-- Street -->
-              <div class="form-group">
-                <label for="street">Straße</label>
-                <input type="text" v-model="profile.street" class="form-control" id="street" />
-                <span v-if="errors.street" class="text-danger">{{ errors.street }}</span>
-              </div>
-            </div>
-            <div class="col-md-4 col-sm-6">
-              <!-- House Number -->
-              <div class="form-group">
-                <label for="houseNumber">Hausnummer</label>
-                <input type="text" v-model="profile.houseNumber" class="form-control" id="houseNumber" />
-                <span v-if="errors.houseNumber" class="text-danger">{{ errors.houseNumber }}</span>
-              </div>
-            </div>
-            <div class="col-md-4 col-sm-6">
-              <!-- Country -->
-              <div class="form-group">
-                <label for="country">Land</label>
-                <!-- <div>Current: {{ profile.countryName }}</div> -->
-                <select v-model="selectedCountry" class="form-control" id="country" @change="onCountryChange">
-                  <option value="">Select Country</option>
-                  <option v-for="country in countries" :key="country.country_ID" :value="country">
-                    {{ country.countryName }}
-                  </option>
-                </select>
-                <span v-if="errors.country" class="text-danger">{{ errors.country }}</span>
-              </div>
-            </div>
-            <div class="col-md-4 col-sm-6">
-              <!-- State -->
-              <div class="form-group">
-                <label for="state">Region/Bundesland</label>
-                <!-- <div>Current: {{ profile.stateName }}</div> -->
-                <select v-model="selectedState" class="form-control" id="state" @change="onStateChange">
-                  <option value="">Select State</option>
-                  <option v-for="state in states" :key="state.id" :value="state">{{ state.name }}</option>
-                </select>
-                <span v-if="errors.state" class="text-danger">{{ errors.state }}</span>
-              </div>
-            </div>
-            <div class="col-md-4 col-sm-6">
-              <!-- City -->
-              <div class="form-group">
-                <label for="city">Stadt</label>
-                <!-- <div>Current: {{ profile.cityName }}</div> -->
-                <select v-model="selectedCity" class="form-control" id="city">
-                  <option value="">Select City</option>
-                  <option v-for="city in cities" :key="city.id" :value="city">{{ city.name }}</option>
-                </select>
-                <span v-if="errors.city" class="text-danger">{{ errors.city }}</span>
-              </div>
-            </div>
-            <div class="col-md-4 col-sm-6">
-              <!-- Post Code -->
-              <div class="form-group">
-                <label for="postCode">Postleitzahl</label>
-                <input type="text" v-model="profile.postCode" class="form-control" id="postCode" />
-                <span v-if="errors.postCode" class="text-danger">{{ errors.postCode }}</span>
-              </div>
-            </div>
-            <div v-if="profile.facebookLink" class="col-md-8 col-sm-12">
-              <!-- Facebook Link -->
-              <div class="form-group">
-                <label for="facebookLink">Facebook-Profillink</label>
-                <input type="url" v-model="profile.facebookLink" class="form-control" id="facebookLink"
-                  @blur="validateFacebookLink" disabled/>
-                <span v-if="errors.facebookLink" class="text-danger">{{ errors.facebookLink }}</span>
-              </div>
-
-            </div>
+          <div class="row">            
             <div class="col-sm-12">
               <div class="form-group">
                 <label>Fertigkeiten </label>
@@ -185,20 +76,6 @@ export default {
   data() {
     return {
       profile: {
-        firstName: "",
-        lastName: "",
-        gender: "",
-        dateOfBirth: "",
-        street: "",
-        houseNumber: "",
-        postCode: "",
-        country: "",
-        state: "",
-        city: "",
-        facebookLink: "",
-        countryName: "",
-        stateName: "",
-        cityName: "",
         skills: [],
         hobbies: [],
       },
@@ -213,9 +90,6 @@ export default {
       selectedCity: null,
       errors: {},
       formIsValid: true,
-      countries: [],
-      states: [],
-      cities: [],
     };
   },
   mounted() {
@@ -243,35 +117,11 @@ export default {
       } catch (error) {
       }
     },
-    async fetchCountries() {
-      try {
-        const response = await axiosInstance.get(`${process.env.baseURL}region/get-all-countries`);
-        this.countries = response.data;
-        this.selectedCountry = this.countries.find(country => country.countryName === this.profile.countryName) || null;
-        if (this.selectedCountry) {
-          this.fetchStates(this.selectedCountry.country_ID);
-        }
-      } catch (error) {
-        toast.error("Failed to fetch countries");
-      }
-    },
-    getLocationNames() {
-      return {
-        country: this.selectedCountry ? this.selectedCountry.countryName : this.profile.countryName,
-        state: this.selectedState ? this.selectedState.name : this.profile.stateName,
-        city: this.selectedCity ? this.selectedCity.name : this.profile.cityName
-      };
-    },
     async fetchUserProfile() {
       try {
         const response = await axiosInstance.get(`${process.env.baseURL}profile/get-user-profile`);
         if (response.data.profile) {
           this.profile = response.data.profile;
-          this.profile.countryName = this.profile.country;
-          this.profile.stateName = this.profile.state;
-          this.profile.cityName = this.profile.city;
-
-          this.fetchCountries();
           this.profile.skills = Array.isArray(this.profile.skills) ? this.profile.skills : [];
           this.profile.hobbies = Array.isArray(this.profile.hobbies) ? this.profile.hobbies :
             (typeof this.profile.hobbies === 'string' ? this.profile.hobbies.split(', ') : []);
@@ -286,53 +136,12 @@ export default {
         toast.info("Failed to fetch user profile!");
       }
     },
-    async fetchStates(countryId) {
-      try {
-        const response = await axiosInstance.get(`${process.env.baseURL}region/get-state-by-countryId/${countryId}`);
-        this.states = response.data;
-        this.selectedState = this.states.find(state => state.name === this.profile.stateName) || null;
-        if (this.selectedState) {
-          this.fetchCities(this.selectedState.id);
-        }
-      } catch (error) {
-        toast.error("Failed to fetch states");
-      }
-    },
-    async fetchCities(stateId) {
-      try {
-        const response = await axiosInstance.get(`${process.env.baseURL}region/get-city-by-stateId/${stateId}`);
-        this.cities = response.data;
-        this.selectedCity = this.cities.find(city => city.name === this.profile.cityName) || null;
-      } catch (error) {
-        toast.error("Failed to fetch cities");
-      }
-    },
-    onCountryChange() {
-      this.selectedState = null;
-      this.selectedCity = null;
-      this.states = [];
-      this.cities = [];
-      if (this.selectedCountry) {
-        this.fetchStates(this.selectedCountry.country_ID);
-      }
-    },
-    onStateChange() {
-      this.selectedCity = null;
-      this.cities = [];
-      if (this.selectedState) {
-        this.fetchCities(this.selectedState.id);
-      }
-    },
     saveProfile() {
-      if (this.validateForm()) {
-        const locationNames = this.getLocationNames();
+      if (this.validateForm()) {        
         const skillsString = this.profile.skills.join(', ');
         const hobbiesString = this.profile.hobbies.join(', ');
         const updatedProfile = {
           ...this.profile,
-          country: locationNames.country,
-          state: locationNames.state,
-          city: locationNames.city,
           skills: skillsString,
           hobbies: hobbiesString
         };
@@ -349,15 +158,7 @@ export default {
         const response = await axiosInstance.put(`${process.env.baseURL}profile/update-profile`, updatedProfile);
         if (response.status === 200) {
           toast.success("Profile saved successfully!");
-          if (response.data && response.data.profile) {
-            this.profile = response.data.profile;
-            this.profile.countryName = this.profile.country;
-            this.profile.stateName = this.profile.state;
-            this.profile.cityName = this.profile.city;
-            this.selectedCountry = this.countries.find(country => country.countryName === this.profile.country) || null;
-            this.selectedState = this.states.find(state => state.name === this.profile.state) || null;
-            this.selectedCity = this.cities.find(city => city.name === this.profile.city) || null;
-
+          if (response.data && response.data.profile) {            
             this.profile.skills = Array.isArray(this.profile.skills) ? this.profile.skills :
               (typeof this.profile.skills === 'string' ? this.profile.skills.split(', ') : []);
             this.profile = {
@@ -390,22 +191,6 @@ export default {
           this.formIsValid = false;
         }
       });
-      const locationNames = this.getLocationNames();
-      if (!locationNames.country) {
-        this.errors.country = "Country is required";
-        this.formIsValid = false;
-      }
-      if (!locationNames.state) {
-        this.errors.state = "State is required";
-        this.formIsValid = false;
-      }
-      if (!locationNames.city) {
-        this.errors.city = "City is required";
-        this.formIsValid = false;
-      }
-      if (!this.validateDateOfBirth()) {
-        this.formIsValid = false;
-      }
       if (!this.profile.skills || this.profile.skills.length === 0) {
         this.errors.skills = "At least one skill is required";
         this.formIsValid = false;
@@ -422,32 +207,7 @@ export default {
         delete this.errors.hobbies;
       }
       return this.formIsValid;
-    },
-    validateDateOfBirth() {
-      const today = new Date();
-      const dob = new Date(this.profile.dateOfBirth);
-      let age = today.getFullYear() - dob.getFullYear();
-      const monthDiff = today.getMonth() - dob.getMonth();
-      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
-        age--;
-      }
-      if (age < 14 || age > 120) {
-        this.errors.dateOfBirth = "Date of birth must indicate age between 14 and 120.";
-        return false;
-      }
-      return true;
-    },
-    validateFacebookLink() {
-      if(this.profile.facebookLink!=''){
-
-        const facebookRegex = /^https:\/\/www\.facebook\.com(\/.*)?$/;
-        if (!facebookRegex.test(this.profile.facebookLink)) {
-          this.errors.facebookLink = "Please enter a valid Facebook link (e.g., https://www.facebook.com/anything)";
-          return false;
-        }
-      }
-      return true;
-    },
+    }
   },
 };
 </script>
