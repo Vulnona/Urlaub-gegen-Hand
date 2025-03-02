@@ -32,7 +32,7 @@ Durch Klicken auf "Registrieren" bestätigen Sie, dass Sie diese Bedingungen akz
                 <form class="form-border" @submit.prevent="register">
 
                   <div class="register-form-fields" :class="{ 'register-form-fields-mobile': isMobile }">
-
+                    
 
                     <div class="custom-form" :class="{ 'has-error': !firstName && showError }">
                       <label for="firstName">Vorname</label>
@@ -73,37 +73,23 @@ Durch Klicken auf "Registrieren" bestätigen Sie, dass Sie diese Bedingungen akz
                     </div>
                     <div class="custom-form" :class="{ 'has-error': !countryName && showError }">
                       <label for="country">Land</label>
-                      <select class="form-group p-2" style="width: 100%;" id="country" v-model="countryId"
-                        @change="loadStates">
-                        <option value="">Bitte wählen Sie ein Land</option>
-                        <option v-for="c in countries" :key="c.country_ID" :value="c.country_ID">{{
-                          c.countryName }}</option>
-                      </select>
+                      <input type="text" placeholder="Land" id="country" v-model="countryName">
                       <span v-if="!countryName && showError" class="error-message">Land ist
                         erforderlich</span>
                     </div>
-                    <div class="custom-form" :class="{ 'has-error': !stateId && showError }">
+                    <div class="custom-form" :class="{ 'has-error': !stateName && showError }">
                       <label for="state">Region/Bundesland</label>
-                      <select class="form-group p-2" style="width: 100%;" id="state" v-model="stateId"
-                        @change="updateStateSelection">
-                        <option value="">Bitte wählen Sie ein Bundesland</option>
-                        <option v-for="s in states" :key="s.id" :value="s.id">
-                          {{ s.name }}
-                        </option>
-                      </select>
+                      <input type="text" placeholder="Region/Bundesland" id="region" v-model="regionName">
                       <span v-if="!stateId && showError" class="error-message">Bundesland ist erforderlich</span>
+                    </div>                    
+                    
+                    <div class="custom-form" :class="{ 'has-error': !cityName && showError }">
+                      <label for="cityName">Stadt</label>
+                      <input type="text" placeholder="Stadt" id="city" v-model="cityName">
+                      <span v-if="!cityName && showError" class="error-message">Stadt ist
+                        erforderlich</span>
                     </div>
-                    <div class="custom-form" :class="{ 'has-error': !cityId && showError }">
-                      <label for="city">Stadt</label>
-                      <select class="form-group p-2" style="width: 100%;" id="city" v-model="cityId"
-                        @change="updateCitySelection">
-                        <option value="">Bitte wählen Sie eine Stadt</option>
-                        <option v-for="c in cities" :key="c.id" :value="c.id">
-                          {{ c.name }}
-                        </option>
-                      </select>
-                      <span v-if="!cityId && showError" class="error-message">Stadt ist erforderlich</span>
-                    </div>
+                    
                     <div class="custom-form" :class="{ 'has-error': !street && showError }">
                       <label for="street">Straße</label>
                       <input type="text" placeholder="Geben Sie Ihre Straße ein" id="street" v-model="street">
