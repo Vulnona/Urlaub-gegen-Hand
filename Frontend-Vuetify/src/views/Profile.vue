@@ -291,8 +291,8 @@
   import Swal from 'sweetalert2';
   import axiosInstance from "@/interceptor/interceptor"
   import Navbar from "@/components/navbar/Navbar.vue";
-  import userRole from "@/services/CheckUserRole";
-  import isActiveMember from "@/services/CheckActiveMembership";
+  import {GetUserRole} from "@/services/GetUserPrivileges";
+  import {isActiveMembership} from "@/services/GetUserPrivileges";
   import Securitybot from "@/services/SecurityBot";
   import getLoggedUserId from "@/services/LoggedInUserId";
   import toast from "@/components/toaster/toast";
@@ -310,8 +310,8 @@
         options: [],
         hobbies: '',
         rate: {},
-        userRole: userRole(),
-        isActiveMember: isActiveMember(),
+        userRole: GetUserRole(),
+        isActiveMember: isActiveMembership(),
         showModal: false,
         showPicModal: false,
         profilePic: null,

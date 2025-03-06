@@ -37,12 +37,12 @@
                   </router-link>
                 </li>
                 <!-- Active Membership-specific Links (for users with active membership) -->
-                <li v-if="isActiveMember && userRole != 'Admin'" class="nav-item">
+                <li v-if="userRole != 'Admin'" class="nav-item">
                   <router-link class="nav-link" to="/my-offers">
                     <i class="ri-gift-line"></i> Meine Angebote
                   </router-link>
                 </li>
-                <li v-if="isActiveMember && userRole != 'Admin'" class="nav-item">
+                <li v-if="userRole != 'Admin'" class="nav-item">
                   <router-link class="nav-link" to="/offer-request">
                     <i class="ri-mail-line"></i> Anfragen
                   </router-link>
@@ -83,13 +83,11 @@
 <script lang="ts" setup>
 import { ref, onMounted } from 'vue';
 import router from "@/router";
-import CheckUserRole from '@/services/CheckUserRole';
-import isActiveMembership from '@/services/CheckActiveMembership';
-
+import {GetUserRole} from "@/services/GetUserPrivileges";
+import {isActiveMembership} from "@/services/GetUserPrivileges";
 const isLoggedIn = ref(false);
 const username = ref(sessionStorage.getItem("firstName"));
 const userRole = ref('');
-const isActiveMember = ref(false);
 
 // Handle logout and session clearing
 const doLogout = () => {
@@ -110,8 +108,7 @@ const openPurchaseHistory=()=>{
 }
 
 onMounted(async () => {
-  userRole.value = CheckUserRole() || '';
-  isActiveMember.value = await isActiveMembership();
+  userRole.value = GetUserRole() || '';
   isLoggedIn.value = !!sessionStorage.getItem("token");
 });
 </script>

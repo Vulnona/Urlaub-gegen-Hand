@@ -90,7 +90,7 @@ import "bootstrap/dist/js/bootstrap.min.js";
 import axiosInstance from "@/interceptor/interceptor"
 import Navbar from "@/components/navbar/Navbar.vue";
 import Securitybot from "@/services/SecurityBot";
-import UserRole from "@/services/CheckUserRole";
+import {GetUserRole} from "@/services/GetUserPrivileges";
 import toast from "@/components/toaster/toast";
 import dayjs from "dayjs";
 export default {
@@ -105,7 +105,7 @@ export default {
       totalPages: 1,
       pageSize: 10,
       coupons: [],
-      userRole: UserRole(),
+      userRole: GetUserRole(),
       userdata: null,
     };
   },

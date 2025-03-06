@@ -95,9 +95,9 @@ import {
 import Navbar from '@/components/navbar/Navbar.vue';
 import axiosInstance from '@/interceptor/interceptor';
 import router from '@/router';
-import UserRole from "@/services/CheckUserRole";
+import {GetUserRole} from "@/services/GetUserPrivileges";
 import Errorpage from "../Errorpage.vue";
-const userRole = UserRole();
+const userRole = GetUserRole();
 const {
   params
 } = useRoute();

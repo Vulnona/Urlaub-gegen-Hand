@@ -1,5 +1,6 @@
-import CheckUserRole from '@/services/CheckUserRole';
+import {GetUserPrivileges} from '@/services/GetUserPrivileges';
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router';
+import toast from '@/components/toaster/toast';
 
 const routes: RouteRecordRaw[] = [
   {
@@ -12,6 +13,11 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/views/Home.vue'),
   },
   {
+    path: '/privileges',
+    name: 'Privileges',
+    component: () => import('@/views/Privileges.vue'),
+  },
+  {
     path: '/datenschutz',
     name: 'Datenschutzerklärung',
     component: () => import('@/views/Datenschutz.vue'),
@@ -20,7 +26,7 @@ const routes: RouteRecordRaw[] = [
     path: '/my-offers',
     name: 'MyOffers',
     component: () => import('@/views/MyOffers.vue'),
-    meta: { roles: ['User'] },
+    meta: { roles: ['User'], membershipStatus: ['Active'], verification: ['ok'] },
   },
   {
     path: '/account',
@@ -31,7 +37,7 @@ const routes: RouteRecordRaw[] = [
     path: '/add-offer',
     name: 'AddOffer',
     component: () => import('@/views/AddOffer.vue'),
-    meta: { roles: ['User'] },
+    meta: { roles: ['User'], membershipStatus: ['Active'], verification: ['ok'] },
   },
   {
     path: '/show-more',
@@ -42,7 +48,7 @@ const routes: RouteRecordRaw[] = [
     path: '/offer/:id',
     name: 'OfferDetail',
     component: () => import('@/views/OfferDetail.vue'),
-  },
+  },    
   {
     path: '/offer-reviews/:id',
     name: 'OfferReviews',
@@ -83,7 +89,7 @@ const routes: RouteRecordRaw[] = [
     path: '/offer-request',
     name: 'OfferRequest',
     component: () => import('@/views/OfferRequests.vue'),
-    meta: { roles: ['User'] },
+    meta: { roles: ['User'], membershipStatus: ['Active'], verification: ['ok'] },      
   },
   {
     path: '/profile',
@@ -153,10 +159,15 @@ const router = createRouter({
 
 // Global role-based navigation guard
 router.beforeEach((to, from, next) => {
-  const userRole = CheckUserRole(); 
+  const privileges = GetUserPrivileges();
+  console.log(privileges);
   const requiredRoles = to.meta.roles as string[];
-console.log(requiredRoles);
+  const requiredMembership = to.meta.membershipStatus as string[];
+  const requiredVerification = to.meta.verification as string[];
   if (requiredRoles) {
+    const userRole = privileges.userRole;
+    const membership = privileges.membershipStatus;
+    const verification = privileges.verification;
     if (!userRole) {
       // No user role means user is not logged in, redirect to login
       next({ name: 'Login' });
@@ -164,11 +175,22 @@ console.log(requiredRoles);
       // User is logged in but lacks permissions
       next({ name: 'Error' });
     } else {
+      // Check for verification and Memberships
+      if(requiredMembership || requiredVerification){
+        if(!requiredMembership.includes(membership) || !requiredVerification.includes(verification)){
+            console.log(requiredVerification);
+            console.log(verification);
+        toast.error('Mitgliedschaft oder Verifizierung fehlt.');
+        next({ name: 'Privileges' });
+        return;
+        }
+    } 
       next(); // User is authorized, proceed
     }
   } else {
     next(); // No role required, allow access
   }
+
 });
 
 

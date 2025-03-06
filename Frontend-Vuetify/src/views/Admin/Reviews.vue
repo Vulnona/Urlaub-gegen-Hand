@@ -69,7 +69,7 @@
 import Navbar from '@/components/navbar/Navbar.vue';
 import axiosInstance from "@/interceptor/interceptor"
 import Securitybot from '@/services/SecurityBot';
-import UserRole from "@/services/CheckUserRole";
+import {GetUserRole} from "@/services/GetUserPrivileges";
 import Errorpage from "../Errorpage.vue";
 
 window.FontAwesomeConfig = {
@@ -83,7 +83,7 @@ export default {
   },
   data() {
     return {
-      userRole: UserRole(),
+      userRole: GetUserRole(),
       loading: true,
       offers: [],
       searchTerm: '',

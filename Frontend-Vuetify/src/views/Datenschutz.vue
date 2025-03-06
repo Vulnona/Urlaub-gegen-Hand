@@ -63,10 +63,8 @@ ALRECO GmbH
 import Navbar from '@/components/navbar/Navbar.vue';
 import axiosInstance from '@/interceptor/interceptor';
 import PublicNav from '@/components/navbar/PublicNav.vue';
-import isActiveMembership from '@/services/CheckActiveMembership';
 import getLoggedUserId from '@/services/LoggedInUserId';
 import Swal from "sweetalert2";
-import CheckUserRole from "@/services/CheckUserRole";
 import router from "@/router";
 import toast from '@/components/toaster/toast';
 import debounce from 'lodash/debounce';

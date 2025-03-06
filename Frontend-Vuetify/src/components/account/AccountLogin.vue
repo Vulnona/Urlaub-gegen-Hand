@@ -66,8 +66,7 @@ import PublicNav from '@/components/navbar/PublicNav.vue';
     
 import router from '@/router';
 import AES from 'crypto-js/aes';
-import CheckUserRole from '@/services/CheckUserRole';
-import isActiveMembership from '@/services/CheckActiveMembership';
+import {GetUserRole} from "@/services/GetUserPrivileges";
 import axiosInstance from '@/interceptor/interceptor';
 import toast from '../toaster/toast';
 export default {
@@ -110,12 +109,9 @@ export default {
         sessionStorage.setItem('logId', encryptedLogId);
         sessionStorage.setItem('firstName', firstName);
 
-        if (CheckUserRole() == 'Admin') {
+        if (GetUserRole() == 'Admin') {
           router.push('/admin');
-        } else if (CheckUserRole() == 'User' && isActiveMembership()) {
-          router.push('/my-offers');
-        }
-        else {
+        } else {
           router.push('/home');
         }
       } catch (error) {

@@ -81,7 +81,6 @@ import router from '@/router';
 import CryptoJS from 'crypto-js';
 import axiosInstance from '@/interceptor/interceptor';
 import toast from '@/components/toaster/toast';
-import isActiveMembership from '@/services/CheckActiveMembership';
 
 const frontIdFile = ref<File | null>(null);
 const backIdFile = ref<File | null>(null);
@@ -179,22 +178,6 @@ const decryptlogID = (encryptedItem: string | null) => {
   }
 };
 
-const membershipPopup=()=>{
-  if(!isActiveMembership()){
-  Swal.fire({
-        title: 'Buy Membership Plan',
-        text: 'Get access to premium features!',
-        // icon: 'info',
-        showCancelButton: true,
-        confirmButtonText: 'Buy Now',
-        cancelButtonText: 'Skip',
-      }).then((result) => {
-        if (result.isConfirmed) {
-          window.location.href = '/my-offers'; 
-        }
-      });
-    }
-};
 onMounted(() => {
   Securitybot();
   //membershipPopup();

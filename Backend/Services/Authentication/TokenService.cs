@@ -5,6 +5,7 @@ using System.Text;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.IdentityModel.Tokens;
 using UGH.Domain.Entities;
+using UGH.Domain.Core;
 
 namespace UGH.Infrastructure.Services;
 
@@ -50,12 +51,24 @@ public class TokenService
             // Handle membership status, default to "Inactive" if membership is null
             var membershipStatus = memberships.Count != 0 ? "Active" : "Inactive";
 
+            // Should be combined with other db requests
+            var user = await _userService.GetUserByEmailAsync(userName);
+            var verificationStatus = user.VerificationState;
+            
+            String verified;
+
+            if(verificationStatus == UGH_Enums.VerificationState.Verified)
+                verified = "ok";
+            else
+                verified = "not";
+            
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
                 new Claim(JwtRegisteredClaimNames.Sub, userName),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 new Claim("MembershipStatus", membershipStatus),
+                new Claim("VerificationStatus", verified)
             };
 
             // Add roles to claims

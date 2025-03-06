@@ -11,8 +11,7 @@ const decryptToken = (encryptedToken: string): string | null => {
   }
 };
 
-// Method to check the login status of the user
-const CheckUserRole = (): string | null => {
+export const GetUserPrivileges = (): {userRole: string, membershipStatus: string} | null => {
   try {
     const token = sessionStorage.getItem("token");
     if (token) {
@@ -20,7 +19,7 @@ const CheckUserRole = (): string | null => {
       if (decryptedToken) {
         const decodedToken = jwtDecode(decryptedToken); // Corrected import usage
         const userRole = (decodedToken as any)[process.env.claims_Url || ''] || ''; // Type assertion
-        return userRole;
+        return {userRole: userRole, membershipStatus:decodedToken.MembershipStatus, verification:decodedToken.VerificationStatus};
       } else {
         sessionStorage.removeItem('token');
       }
@@ -31,4 +30,18 @@ const CheckUserRole = (): string | null => {
   return null;
 };
 
-export default CheckUserRole;
+export const isActiveMembership = () => {
+    const privileges = GetUserPrivileges();
+    if (privileges && privileges.membership === 'Active')
+        return true;
+    else 
+        return false;       
+};
+    
+export const GetUserRole = (): string | null => {
+    const privileges = GetUserPrivileges();    
+    if(privileges)
+        return privileges.userRole;
+    else
+        return null;
+};
