@@ -13,22 +13,17 @@ public class UpdateVerifyStateCommandHandler : IRequestHandler<UpdateVerifyState
     private readonly IUserRepository _userRepository;
     private readonly UserService _userService;
     private readonly S3Service _s3Service;
-    private readonly AdminVerificationMailService _mailService;
     private readonly ILogger<UpdateVerifyStateCommandHandler> _logger;
+    private readonly EmailService _mailService;
 
-    public UpdateVerifyStateCommandHandler(
-        IUserRepository userRepository,
-        UserService userService,
-        S3Service s3Service,
-        AdminVerificationMailService mailService,
-        ILogger<UpdateVerifyStateCommandHandler> logger
-    )
+    public UpdateVerifyStateCommandHandler(IUserRepository userRepository, UserService userService, S3Service s3Service,
+                                           EmailService mailService, ILogger<UpdateVerifyStateCommandHandler> logger)
     {
         _userRepository = userRepository;
         _s3Service = s3Service;
         _userService = userService;
-        _mailService = mailService;
         _logger = logger;
+        _mailService = mailService;
     }
 
     public async Task<Result> Handle(
@@ -46,24 +41,9 @@ public class UpdateVerifyStateCommandHandler : IRequestHandler<UpdateVerifyState
 
             user.VerificationState = request.VerificationState;
             await _userRepository.UpdateUserAsync(user);
-
-            if (request.VerificationState == UGH_Enums.VerificationState.VerificationFailed)
-            {
-                _ = SendVerificationEmailAsync(
-                    user,
-                    "Verification Failed",
-                    delay: TimeSpan.FromMinutes(5),
-                    cancellationToken
-                );
-            }
-            else
-            {
-                _ = SendVerificationEmailAsync(
-                    user,
-                    "Verified",
-                    cancellationToken: cancellationToken
-                );
-            }
+            string status = request.VerificationState == UGH_Enums.VerificationState.VerificationFailed ? "Verification Failed" : "Verified";
+            if (request.VerificationState != UGH_Enums.VerificationState.IsNew)
+                await _mailService.SendTemplateEmailAsync(user.Email_Address, status, user.FirstName);
             //Delete from AWS after failed
             var deleteTasks = new List<Task>();
 
@@ -105,37 +85,5 @@ public class UpdateVerifyStateCommandHandler : IRequestHandler<UpdateVerifyState
             return string.Empty;
 
         return new Uri(url).LocalPath.TrimStart('/');
-    }
-
-    private async Task SendVerificationEmailAsync(
-        User user,
-        string status,
-        TimeSpan? delay = null,
-        CancellationToken cancellationToken = default
-    )
-    {
-        try
-        {
-            if (delay.HasValue)
-            {
-                await Task.Delay(delay.Value, cancellationToken);
-            }
-
-            var confirmationRequest = new ConfirmationRequest
-            {
-                toEmail = user.Email_Address,
-                userName = $"{user.FirstName} {user.LastName}",
-                status = status,
-            };
-
-            await _mailService.SendConfirmationEmailAsync(confirmationRequest);
-            _logger.LogInformation(
-                $"Verification email '{status}' sent successfully to {user.Email_Address}"
-            );
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError($"Failed to send verification email: {ex.Message} | {ex.StackTrace}");
-        }
     }
 }

@@ -1,121 +1,107 @@
-using System.Text.RegularExpressions;
-using MailKit.Net.Smtp;
+using Microsoft.Extensions.Options;
 using MimeKit;
+using MailKit.Net.Smtp;
+using System.Text.RegularExpressions;
+using UGHApi.Models;
 
 namespace UGH.Infrastructure.Services;
 
 public class EmailService
 {
-    private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IConfiguration _configuration;
+    private readonly TemplateSettings _templateSettings;
     private readonly ILogger<EmailService> _logger;
 
-    public EmailService(
-        IConfiguration configuration,
-        ILogger<EmailService> logger,
-        IHttpContextAccessor httpContextAccessor
-    )
+    public EmailService(IConfiguration configuration, IOptions<TemplateSettings> templateSettings, ILogger<EmailService> logger)
     {
-        _httpContextAccessor = httpContextAccessor;
         _configuration = configuration;
-        _logger = logger;
+        _templateSettings = templateSettings.Value;
+        _logger = logger;        
     }
-
     #region email-services
     public async Task SendEmailAsync(string recipientEmail, string subject, string body)
     {
         try
         {
             var emailMessage = new MimeMessage();
-            emailMessage.From.Add(
-                new MailboxAddress(
-                    _configuration["MailSettings:DisplayName"],
-                    _configuration["MailSettings:Mail"]
-                )
-            );
+            emailMessage.From.Add(new MailboxAddress(_configuration["MailSettings:DisplayName"], _configuration["MailSettings:Mail"]));
             emailMessage.To.Add(new MailboxAddress("", recipientEmail));
             emailMessage.Subject = subject;
             emailMessage.Body = new TextPart("html") { Text = body };
 
             using (var client = new SmtpClient())
             {
-                await client.ConnectAsync(
-                    _configuration["MailSettings:Host"],
-                    Convert.ToInt32(_configuration["MailSettings:Port"]),
-                    false
-                );
-                await client.AuthenticateAsync(
-                    _configuration["MailSettings:Mail"],
-                    _configuration["MailSettings:Password"]
-                );
+                await client.ConnectAsync(_configuration["MailSettings:Host"], Convert.ToInt32(_configuration["MailSettings:Port"]), false);
+                await client.AuthenticateAsync(_configuration["MailSettings:Mail"], _configuration["MailSettings:Password"]);
                 await client.SendAsync(emailMessage);
                 await client.DisconnectAsync(true);
             }
         }
         catch (Exception ex)
         {
-            _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+           _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
             throw new Exception(ex.Message);
         }
     }
-
     public async Task<bool> SendVerificationEmailAsync(string email, Guid verificationToken)
     {
         try
         {
-            var currentRequest = _httpContextAccessor.HttpContext?.Request;
-            if (currentRequest == null)
-            {
-                throw new InvalidOperationException("HttpContext is not available.");
-            }
-
-            string currentScheme = currentRequest.Scheme;
-            string currentHost = currentRequest.Host.Value;
-
-            var message = new MimeMessage();
-            message.From.Add(
-                new MailboxAddress(
-                    _configuration["MailSettings:DisplayName"],
-                    _configuration["MailSettings:Mail"]
-                )
-            );
-            message.To.Add(new MailboxAddress(email, email));
-            message.Subject = "Verify your email address";
-            var bodyBuilder = new BodyBuilder
-            {
-                HtmlBody =
-                    $@"
-                    <h2>Please 
-                        <a href='{currentScheme}://{currentHost}/api/authenticate/verify-email?token={verificationToken}'>
-                            click here
-                        </a> 
-                    to verify your email address.</h2>",
-            };
-            message.Body = bodyBuilder.ToMessageBody();
-            using (var client = new SmtpClient())
-            {
-                await client.ConnectAsync(
-                    _configuration["MailSettings:Host"],
-                    Convert.ToInt32(_configuration["MailSettings:Port"]),
-                    false
-                );
-                await client.AuthenticateAsync(
-                    _configuration["MailSettings:Mail"],
-                    _configuration["MailSettings:Password"]
-                );
-                await client.SendAsync(message);
-                await client.DisconnectAsync(true);
-            }
-            _logger.LogInformation(
-                "Verification Email Sent Successfully To The User: {email}",
-                email
-            );
+            String htmlBody = $"<h2>Please <a href='{_configuration["BaseUrl"]}/api/authenticate/verify-email?token={verificationToken}'>click here</h2> </a>to verify your email address.</p>";
+            await SendEmailAsync(email,"Verify your email address", htmlBody); 
+            _logger.LogInformation("Verification Email Sent Successfully To The User: {email}",email);
             return true;
         }
         catch (Exception ex)
         {
-            _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+           _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
             return false;
+        }
+    }
+    public async Task SendTemplateEmailAsync(string RecipientEmail, string Template, string FirstName, String ExpirationDate = "", int DaysRemaining=0)
+    {
+        try
+        {
+            string subject;
+            string templatePath;
+            switch(Template){
+                case string str when str.Equals("Verified"):
+                    subject="Dein Account wurde verifiziert.";
+                    templatePath = _templateSettings.SuccessTemplate;
+                    break;
+                case string str when str.Equals("Verification Failed"):
+                    subject="Die Verifikation deines Accounts wurde abgelehnt.";
+                    templatePath = _templateSettings.FailedTemplate;
+                    break;
+                    //                case string str when str.Equals("ExpirationWarning"):
+                    //subject="Deine Mitgliedschaft läuft in " + DaysRemaining + " Tagen ab.";
+                    //templatePath = _templateSettings.ExpirationWarningTemplate;
+                    //break;
+                    //                case string str when str.Equals("Expired"):
+                    //subject="Deine Mitgliedschaft ist abgelaufen.";
+                    //templatePath = _templateSettings.ExpiredTemplate;
+                    //break;
+                default:
+                    throw new Exception($"Invalid Call parameter for function SendTemplateEmailAsync: '{Template}'.");
+            }
+            if (!string.IsNullOrEmpty(templatePath))
+            {
+                string body = await File.ReadAllTextAsync(templatePath);
+                body = body.Replace("FirstName", FirstName);
+                // if there is no ExpirationDate in the body, replace won't do anything (the cost is probably neglectable)
+                body = body.Replace("ExpirationDate", ExpirationDate);
+                await SendEmailAsync(RecipientEmail, subject, body); 
+                _logger.LogInformation("{1} Email sent successfully", Template);
+            }
+            else
+            {
+                throw new FileNotFoundException($"Template file for status '{Template}' not found.");
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+            throw new Exception(ex.Message);
         }
     }
 
