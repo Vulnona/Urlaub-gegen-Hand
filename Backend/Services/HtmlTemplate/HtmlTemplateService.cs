@@ -10,7 +10,7 @@ public class HtmlTemplateService
     public HtmlTemplateService(IConfiguration configuration)
     {
         _configuration = configuration;
-        _baseUrl = _configuration.GetValue<string>("FrontendBaseUrl");
+        _baseUrl = _configuration.GetValue<string>("BaseUrlFrontend");
     }
 
     public string GetEmailVerifiedHtml()

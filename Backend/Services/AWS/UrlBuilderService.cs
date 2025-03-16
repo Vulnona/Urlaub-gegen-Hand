@@ -21,6 +21,6 @@ public class UrlBuilderService : IUrlBuilderService
 
         var currentHost = _httpContextAccessor.HttpContext.Request.Host;
         var fileEndpointPrefix = _configuration["FileEndpoints:FileEndpointPrefix"];
-        return $"{currentScheme}://{currentHost}{fileEndpointPrefix}/{key}";
+        return $"{_configuration["BaseUrl"]}{fileEndpointPrefix}/{key}";
     }
 }

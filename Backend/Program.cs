@@ -219,7 +219,6 @@ namespace UGHApi
             services.AddMemoryCache();
             services.AddScoped<TokenService>();
             services.AddTransient<ICouponRepository, CouponRepository>();
-            services.AddTransient<UGH.Infrastructure.Services.AdminVerificationMailService>();
             services.AddScoped<
                 IReviewRepository,
                 UGH.Infrastructure.Repositories.ReviewRepository
