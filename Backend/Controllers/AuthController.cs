@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 using UGH.Application.Authentication;
 using UGH.Contracts.Authentication;
 using UGHApi.Applications.Authentication;
+using UGH.Infrastructure.Services;
+using UGH.Domain.Interfaces;
 
 namespace UGHApi.Controllers
 {
@@ -13,11 +15,17 @@ namespace UGHApi.Controllers
     {
         private readonly ILogger<AuthController> _logger;
         private readonly IMediator _mediator;
+        private readonly IUserRepository _userRepository;
+        private readonly TokenService _tokenService;
+        private readonly EmailService _emailService;
 
-        public AuthController(ILogger<AuthController> logger, IMediator mediator)
+        public AuthController(ILogger<AuthController> logger, IMediator mediator, TokenService tokenService, IUserRepository userRepository, EmailService emailService)
         {
             _logger = logger;
             _mediator = mediator;
+            _tokenService = tokenService;
+            _emailService = emailService;
+            _userRepository = userRepository;
         }
 
         #region user-authorization
@@ -117,35 +125,26 @@ namespace UGHApi.Controllers
         }
 
         [HttpPost("resend-email-verification")]
-        public async Task<IActionResult> ResendVerificationEmail(
-            [FromBody] ResendEmailVerification resendUrl
-        )
+        public async Task<IActionResult> ResendVerificationEmail([FromBody] ResendEmailVerification resendUrl)
         {
             try
             {
-                if (!ModelState.IsValid)
-                {
+                if (!ModelState.IsValid)                
                     return BadRequest(ModelState);
-                }
+                
+                if (string.IsNullOrEmpty(resendUrl.Email) || !_emailService.IsValidEmail(resendUrl.Email))
+                    return BadRequest();
+                
+                var user = await _userRepository.GetUserByEmailAsync(resendUrl.Email);
+                if (user == null)
+                    return NotFound();
+                
+                var verificationToken = _tokenService.GenerateNewEmailVerificator(user.User_Id);
+                var emailSent = await _emailService.SendVerificationEmailAsync(resendUrl.Email, verificationToken);
+                if (!emailSent)
+                    return StatusCode(500, "Failed to send verification email.");
 
-                var command = new ResendVerificationEmailCommand(resendUrl.Email);
-                var result = await _mediator.Send(command);
-
-                if (result.IsFailure)
-                {
-                    if (result.Error.Message.Contains("InvalidEmail"))
-                        return BadRequest();
-
-                    if (result.Error.Message.Contains("UserNotFound"))
-                        return NotFound();
-
-                    if (result.Error.Message.Contains("EmailSendFailed"))
-                        return StatusCode(500, "Email sent failed");
-
-                    return StatusCode(500, "Internal server error.");
-                }
-
-                return Ok(result);
+                return Ok("Verification email sent successfully.");
             }
             catch (Exception ex)
             {
