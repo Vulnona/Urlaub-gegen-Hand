@@ -76,7 +76,8 @@ export default {
             axiosInstance.put(`${process.env.baseURL}authenticate/change-password`, passwordData)
                 .then(response => {
                     Swal.close();
-                    toast.success('Passwort erfolgreich geändert.');                                        
+                    toast.success('Passwort erfolgreich geändert.');
+                    this.$router.push('/login');
                 })
                 .catch(error => {
                     Swal.close();
