@@ -19,6 +19,7 @@ public class Ugh_Context : DbContext
     public DbSet<Region> regions { get; set; }
     public DbSet<Country> countries { get; set; }
     public DbSet<EmailVerificator> emailverificators { get; set; }
+    public DbSet<PasswordResetToken> passwordresettokens { get; set; }
     public DbSet<UserRole> userroles { get; set; }
     public DbSet<UserRoleMapping> userrolesmapping { get; set; }
     public DbSet<Coupon> coupons { get; set; }

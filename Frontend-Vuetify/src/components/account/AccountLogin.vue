@@ -46,8 +46,8 @@
                   <div v-if="errorMessage" class="error-message">{{ errorMessage }}</div>
                   <div class="back-login flexBox_btn">
                     <a href="/home"><i class="ri-arrow-left-double-fill"></i> Back to home</a>
-                    <a href="/verify-email" previewlistener="true"><i class="ri-shield-check-fill"></i> E-Mail
-                      bestätigen</a>
+                    <a href="/reset-password" previewlistener="true"><i class="ri-shield-check-fill"></i>Passwort zurücksetzen</a>
+                    <a href="/verify-email" previewlistener="true"><i class="ri-shield-check-fill"></i> E-Mail bestätigen</a>
                   </div>
 
                 </form>

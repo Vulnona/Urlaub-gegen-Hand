@@ -4,8 +4,10 @@ using Microsoft.AspNetCore.Mvc;
 using UGH.Application.Authentication;
 using UGH.Contracts.Authentication;
 using UGHApi.Applications.Authentication;
+using UGHApi.Services.UserProvider;
 using UGH.Infrastructure.Services;
 using UGH.Domain.Interfaces;
+using UGH.Domain.Entities;
 
 namespace UGHApi.Controllers
 {
@@ -13,19 +15,27 @@ namespace UGHApi.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
+        private readonly Ugh_Context _context;
         private readonly ILogger<AuthController> _logger;
         private readonly IMediator _mediator;
         private readonly IUserRepository _userRepository;
+        private readonly IUserProvider _userProvider;
         private readonly TokenService _tokenService;
         private readonly EmailService _emailService;
+        private readonly PasswordService _passwordService;
+        private readonly UserService _userService;        
 
-        public AuthController(ILogger<AuthController> logger, IMediator mediator, TokenService tokenService, IUserRepository userRepository, EmailService emailService)
+        public AuthController(Ugh_Context context, ILogger<AuthController> logger, IMediator mediator, TokenService tokenService, IUserRepository userRepository, EmailService emailService, PasswordService passwordService,IUserProvider userProvider, UserService userService)
         {
+            _context = context;
             _logger = logger;
             _mediator = mediator;
             _tokenService = tokenService;
             _emailService = emailService;
             _userRepository = userRepository;
+            _passwordService = passwordService;
+            _userProvider = userProvider;
+            _userService = userService;
         }
 
         #region user-authorization
@@ -153,6 +163,62 @@ namespace UGHApi.Controllers
             }
         }
 
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResendEmailVerification resendUrl)
+        {
+            try
+            {
+                if (!ModelState.IsValid)                
+                    return BadRequest(ModelState);
+                
+                if (string.IsNullOrEmpty(resendUrl.Email) || !_emailService.IsValidEmail(resendUrl.Email))
+                    return BadRequest();
+                
+                var user = await _userRepository.GetUserByEmailAsync(resendUrl.Email);
+                if (user == null)
+                    return NotFound();
+                
+                var token = _tokenService.GenerateNewPasswordResetToken(user.User_Id);
+                var emailSent = await _emailService.SendResetPasswordEmailAsync(resendUrl.Email, token);
+                if (!emailSent)
+                    return StatusCode(500, "Failed to send email.");
+
+                return Ok("Password reset token send successfully.");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        public class Password{
+            public String NewPassword{get; set;}
+            public String Token{get; set;}
+        }
+
+        [HttpPut("change-password")]
+        public async Task<IActionResult> ChangePassword([FromBody] Password pw)
+        {            
+            var userId = _userProvider.UserId;
+            User user = await _context.users.FindAsync(userId);
+            if (user == null)
+                user = await _userService.GetUserByPasswordResetTokenAsync(pw.Token);            
+            if (user == null)
+                return BadRequest();                           
+            try {                
+                var salt = _passwordService.GenerateSalt();
+                user.Password =  _passwordService.HashPassword(pw.NewPassword, salt);
+                user.SaltKey = salt;
+                await _userRepository.UpdateUserAsync(user);
+                return Ok("Passwort erfolgreich geändert");
+            } catch {
+                return StatusCode(500, new { Message = "Error"});
+            }            
+        }
+
+        
+        
         [HttpPost("upload-id")]
         public async Task<IActionResult> UploadFile(
             [FromQuery] Guid userId,

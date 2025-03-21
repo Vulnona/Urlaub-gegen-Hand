@@ -214,5 +214,24 @@ public class TokenService
         }
     }
 
+    public Guid GenerateNewPasswordResetToken(Guid userId) {
+        try {
+            var newToken = new UGH.Domain.Entities.PasswordResetToken
+            {
+                requestDate = DateTime.UtcNow,
+                user_Id = userId,
+                Token = Guid.NewGuid(),
+            };
+
+            _context.passwordresettokens.Add(newToken);
+            _context.SaveChanges();
+            return newToken.Token;
+        }
+        catch (Exception ex) {
+            _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+            throw new InvalidOperationException(ex.Message);
+        }
+    }
+
     #endregion
 }

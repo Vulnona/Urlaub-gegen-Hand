@@ -22,6 +22,8 @@ services:
     volumes:
       - ./Frontend-Vuetify:/app/frontend
       - /app/frontend/node_modules
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
 
   backend:
     build:
@@ -39,7 +41,9 @@ services:
       - db
     volumes:
     - /home/docker/UGH-Main/Backend/logs:/app/logs
-
+    - /etc/timezone:/etc/timezone:ro
+    - /etc/localtime:/etc/localtime:ro
+    
   db:
     image: mysql:5.7
     restart: unless-stopped

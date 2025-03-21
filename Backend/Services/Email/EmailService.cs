@@ -47,8 +47,8 @@ public class EmailService
     {
         try
         {
-            String htmlBody = $"<h2>Please <a href='{_configuration["BaseUrl"]}/api/authenticate/verify-email?token={verificationToken}'>click here</h2> </a>to verify your email address.</p>";
-            await SendEmailAsync(email,"Verify your email address", htmlBody); 
+            String htmlBody = $"<h2><a href='{_configuration["BaseUrl"]}/api/authenticate/verify-email?token={verificationToken}'>Klicke hier</h2> </a>um deine Emailadresse zu verifizieren.</p>";
+            await SendEmailAsync(email,"Verifiziere deine Emailadresse", htmlBody); 
             _logger.LogInformation("Verification Email Sent Successfully To The User: {email}",email);
             return true;
         }
@@ -58,6 +58,23 @@ public class EmailService
             return false;
         }
     }
+    
+        public async Task<bool> SendResetPasswordEmailAsync(string email, Guid verificationToken)
+    {
+        try
+        {
+            String htmlBody = $"<h2><a href='{_configuration["BaseUrlFrontend"]}/change-password?token={verificationToken}'>Klicke hier</h2> </a>um dein Passwort neu zu setzen.</p>";
+            await SendEmailAsync(email,"Passwort-Reset-Link", htmlBody); 
+            _logger.LogInformation("Password-Reset-Link Sent Successfully To The User: {email}",email);
+            return true;
+        }
+        catch (Exception ex)
+        {
+           _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+            return false;
+        }
+    }
+    
     public async Task SendTemplateEmailAsync(string RecipientEmail, string Template, string FirstName, String ExpirationDate = "", int DaysRemaining=0)
     {
         try

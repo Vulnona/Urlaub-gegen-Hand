@@ -6,7 +6,7 @@
           <div class="login-right-content-heading form-act">
             <div class="login-form-section" id="login-content">
               <div class="signin-tabs">
-                <h2>Neue Bestätigungsmail anfordern</h2>
+                <h2>Neue Passwort anfordern</h2>
               </div>
               <div class="auth-card">
                 <form class="form-border" @submit.prevent="VerificationEmail">
@@ -20,7 +20,7 @@
                       <button type="submit" class="btn" :disabled="loading">
                         <!-- Show loader or text based on loading status -->
                         <span v-if="loading">Sending...</span>
-                        <span v-else>Versende Bestätigungs-Email</span>
+                        <span v-else>Passwort-Link anfordern</span>
                       </button>
                     </div>
                     <div class="back-login">
@@ -61,7 +61,7 @@ export default {
     async VerificationEmail() {
       this.loading = true; // Disable the button
       try {
-        const response = await axiosInstance.post(`${process.env.baseURL}authenticate/resend-email-verification`, {
+        const response = await axiosInstance.post(`${process.env.baseURL}authenticate/reset-password`, {
           email: this.email
         });
         this.message = response.data.value;
@@ -83,4 +83,75 @@ export default {
 
 </script>
 
+<style scoped>
+.resend-email-verification {
+  max-width: 600px;
+  margin: auto;
+  padding: 30px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
 
+h2 {
+  text-align: center;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.form-container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+label {
+  font-weight: bold;
+  margin-bottom: 5px;
+  color: #555;
+}
+
+input[type="email"] {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 16px;
+}
+
+input[type="email"]:focus {
+  border-color: #007BFF;
+  outline: none;
+}
+
+.submit-button {
+  padding: 10px;
+  background-color: #007BFF;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.submit-button:hover {
+  background-color: #0056b3;
+}
+
+.error-message {
+  color: #ff4d4d;
+  text-align: center;
+  margin-top: 20px;
+}
+
+.success-message {
+  color: #28a745;
+  text-align: center;
+  margin-top: 20px;
+}
+</style>

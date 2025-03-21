@@ -55,6 +55,35 @@ public class UserService
             throw new InvalidOperationException(ex.Message);
         }
     }
+    
+    public async Task<User> GetUserByPasswordResetTokenAsync(string tokenString)
+    {
+        try
+        {
+            var token = await _context
+                .passwordresettokens.Where(x => x.Token.ToString().Equals(tokenString))                
+                .FirstOrDefaultAsync();
+            if (token == null)
+                return null;
+            bool valid = (DateTime.Compare(token.requestDate.AddHours(2), (DateTime.Now))) > 0;            
+            UGH.Domain.Entities.User user = null;
+            if (token.user_Id != Guid.Empty)
+                user = await _context.users.FirstOrDefaultAsync(x => x.User_Id == token.user_Id);
+            else
+                valid = false;
+            _context.Remove(_context.passwordresettokens.Single(x => x.Token.ToString().Equals(tokenString)));
+            _context.SaveChanges();
+            if (valid)
+                return user;
+            else
+                return null;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+            return null;
+        }
+    }
 
     public async Task<UserRole> GetDefaultUserRoleAsync()
     {
