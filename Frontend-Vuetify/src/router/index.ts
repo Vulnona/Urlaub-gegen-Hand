@@ -110,17 +110,25 @@ const routes: RouteRecordRaw[] = [
     meta: { roles: ['User'] },
   },
   {
+    path: '/change-password',
+    name: 'ChangePassword',
+    component: () => import('@/views/ChangePassword.vue'),
+  },  
+  {
     path: '/upload-id',
     name: 'UploadID',
     component: () => import('@/views/UploadID.vue'),
-    // meta: { roles: ['User'] },
   },
   {
     path: '/verify-email',
     name: 'VerifyEmail',
     component: () => import('@/views/VerifyEmail.vue'),
-    // meta: { roles: ['User'] },
   },
+  {
+    path: '/reset-password',
+    name: 'ResetPassword',
+    component: () => import('@/views/ResetPassword.vue'),
+  }, 
   {
     path: '/store',
     name: 'Store',
@@ -160,7 +168,6 @@ const router = createRouter({
 // Global role-based navigation guard
 router.beforeEach((to, from, next) => {
   const privileges = GetUserPrivileges();
-  console.log(privileges);
   const requiredRoles = to.meta.roles as string[];
   const requiredMembership = to.meta.membershipStatus as string[];
   const requiredVerification = to.meta.verification as string[];
