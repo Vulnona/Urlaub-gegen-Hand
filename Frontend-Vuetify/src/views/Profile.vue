@@ -150,6 +150,10 @@
               <button class="btn  btn-primary rounded" @click="editUserData">
                 Editiere Userdaten              </button>
             </div>
+            <div class="profile_group_btn">
+              <button class="btn  btn-primary rounded" @click="changePassword">
+                Passwort ändern</button>
+            </div>
             <button class="btn btn-danger" @click="deleteUser()">
               Löschen
             </button>
@@ -511,6 +515,9 @@
       },
         editUserData() {
             router.push('/edit-user-data');
+        },
+         changePassword() {
+            router.push('/change-password');
         }
     },
 
