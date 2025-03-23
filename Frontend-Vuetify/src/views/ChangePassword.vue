@@ -14,7 +14,7 @@
            style="position: absolute; right: 10px; top: 10px; cursor: pointer;">
         </i>
       </div>
-      <span v-if="(!password && showError) || !isPasswordValid" class="error-message">
+      <span v-if="(!password && showError) || (showError && !isPasswordValid)" class="error-message">
         Passwort muss mindestens einen Großbuchstaben, eine Zahl, ein Sonderzeichen <a style="font-weight: bold;"> !@#$%^&* </a> enthalten und zwischen 8 und 20 Zeichen lang sein.
       </span>
       <label for="confirmPassword">Passwort bestätigen</label>
@@ -98,7 +98,7 @@ export default {
             showPassword: false,              
             password: '',
             confirmPassword: '',
-            isPasswordValid: true,
+            isPasswordValid: false,
             showError: false,
         };
     }
