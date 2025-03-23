@@ -32,7 +32,7 @@ export const GetUserPrivileges = (): {userRole: string, membershipStatus: string
 
 export const isActiveMembership = () => {
     const privileges = GetUserPrivileges();
-    if (privileges && privileges.membership === 'Active')
+    if (privileges && privileges.membershipStatus === 'Active')
         return true;
     else 
         return false;       
