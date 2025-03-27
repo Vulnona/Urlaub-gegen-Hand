@@ -41,90 +41,23 @@ public class OfferRepository : IOfferRepository
     {
         return await _context.offers.Include(o => o.User).FirstOrDefaultAsync(o => o.Id == offerId);
     }
-
-    public async Task<PaginatedList<OfferDTO>> GetUserOffersAsync(
+    
+    public async Task<PaginatedList<OfferDTO>> GetOffersAsync(
         Guid userId,
+        string searchTerm = null,
         int pageNumber = 1,
-        int pageSize = 10,
-        string searchTerm = null
-    )
-    {
-        IQueryable<Offer> query = _context
-            .offers.Include(o => o.Reviews)
-            .Include(o => o.OfferApplications)
-            .Where(o => o.HostId == userId);
-
-        if (!string.IsNullOrEmpty(searchTerm))
-        {
-            query = query.Where(o =>
-                o.Title.Contains(searchTerm)
-                || o.skills.Contains(searchTerm)
-                || o.Location.Contains(searchTerm)
-                || o.state.Contains(searchTerm)
-            );
-        }
-
-        int totalCount = await query.CountAsync();
-
-        var offers = await query.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
-
-        var offerDTOs = offers
-            .Select(o =>
-            {
-                var firstApplication = o.OfferApplications.FirstOrDefault(oa =>
-                    oa.UserId == userId
-                );
-                string appliedStatus;
-
-                if (firstApplication == null)
-                {
-                    appliedStatus = "CanApply";
-                }
-                else
-                {
-                    appliedStatus = firstApplication.Status switch
-                    {
-                        OfferApplicationStatus.Pending => "Applied",
-                        OfferApplicationStatus.Approved => "Approved",
-                        OfferApplicationStatus.Rejected => "Rejected",
-                        _ => "Unknown",
-                    };
-                }
-
-                return new OfferDTO
-                {
-                    Id = o.Id,
-                    ImageData = o.ImageData,
-                    Title = o.Title,
-                    Accomodation = o.Accomodation,
-                    Accomodationsuitable = o.accomodationsuitable,
-                    Skills = o.skills,
-                    HostId = o.HostId,
-                    AverageRating = o.AverageRating,
-                    Location = o.Location ?? "",
-                    Region = o.state ?? "",
-                    AppliedStatus = appliedStatus,
-                };
-            })
-            .ToList();
-
-        return PaginatedList<OfferDTO>.Create(offerDTOs, totalCount, pageNumber, pageSize);
-    }
-
-    public async Task<PaginatedList<OfferDTO>> GetAllOfferByUserAsync(
-        Guid userId,
-        string searchTerm,
-        int pageNumber,
-        int pageSize
-    )
-    {
+        int pageSize =10,
+        bool forUser = false
+    ) {    
         IQueryable<Offer> query = _context
             .offers.Include(o => o.User)
             .Include(o => o.Reviews)
-            .Include(o => o.OfferApplications);
+            .Include(o => o.OfferApplications)
+        .OrderBy(o => o.CreatedAt);
 
-        if (!string.IsNullOrEmpty(searchTerm))
-        {
+         if (forUser)
+             query = query.Where(o => o.HostId == userId);
+        if (!string.IsNullOrEmpty(searchTerm)) {
             query = query.Where(o =>
                 o.Title.Contains(searchTerm)
                 || o.skills.Contains(searchTerm)
@@ -134,86 +67,12 @@ public class OfferRepository : IOfferRepository
         }
 
         int totalCount = await query.CountAsync();
-
         var offers = await query.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
-
         var offerDTOs = offers
-            .Select(o =>
-            {
-                var firstApplication = o.OfferApplications.FirstOrDefault(oa =>
-                    oa.UserId == userId
-                );
-                string appliedStatus =
-                    firstApplication == null
-                        ? "CanApply"
-                        : firstApplication.Status switch
-                        {
-                            OfferApplicationStatus.Pending => "Applied",
-                            OfferApplicationStatus.Approved => "Approved",
-                            OfferApplicationStatus.Rejected => "Rejected",
-                            _ => "Unknown",
-                        };
-
-                return new OfferDTO
-                {
-                    Id = o.Id,
-                    ImageData = o.ImageData,
-                    Title = o.Title,
-                    Accomodation = o.Accomodation,
-                    Accomodationsuitable = o.accomodationsuitable,
-                    Skills = o.skills,
-                    HostId = o.HostId,
-                    HostName = $"{o.User.FirstName} {o.User.LastName}",
-                    AverageRating = o.AverageRating,
-                    Location = o.Location ?? "",
-                    Region = o.state ?? "",
-                    AppliedStatus = appliedStatus,
-                };
-            })
-            .ToList();
-
-        return PaginatedList<OfferDTO>.Create(offerDTOs, totalCount, pageNumber, pageSize);
-    }
-
-    public async Task<PaginatedList<OfferDTO>> GetAllOfferForUnothorizeUserAsync(
-        string searchTerm,
-        int pageNumber,
-        int pageSize
-    )
-    {
-        IQueryable<Offer> query = _context.offers.Include(o => o.User).Include(o => o.Reviews);
-
-        if (!string.IsNullOrEmpty(searchTerm))
-        {
-            query = query.Where(o =>
-                o.Title.Contains(searchTerm)
-                || o.skills.Contains(searchTerm)
-                || o.Location.Contains(searchTerm)
-                || o.state.Contains(searchTerm)
-            );
-        }
-
-        int totalCount = await query.CountAsync();
-
-        var offers = await query.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
-
-        var offerDTOs = offers
-            .Select(o => new OfferDTO
-            {
-                Id = o.Id,
-                ImageData = o.ImageData,
-                Title = o.Title,
-                Accomodation = o.Accomodation,
-                Accomodationsuitable = o.accomodationsuitable,
-                Skills = o.skills,
-                HostId = null,
-                HostName = o.User != null ? $"{o.User.FirstName} {o.User.LastName}" : "Unknown",
-                AverageRating = o.AverageRating,
-                Location = o.Location ?? "",
-                Region = o.state ?? "",
-                AppliedStatus = null,
-            })
-            .ToList();
+            .Select(o => {
+                var firstApplication = o.OfferApplications.FirstOrDefault(oa => oa.UserId == userId);                
+                return new OfferDTO(o ,o.User, firstApplication);
+            }).ToList();
 
         return PaginatedList<OfferDTO>.Create(offerDTOs, totalCount, pageNumber, pageSize);
     }
@@ -288,43 +147,19 @@ public class OfferRepository : IOfferRepository
         }
     }
 
-    public async Task<OfferResponse> GetOfferDetailsByIdAsync(int offerId)
+    public async Task<OfferDTO> GetOfferDetailsByIdAsync(int offerId, Guid userId)
     {
         var offer = await _context
             .offers.Include(o => o.User)
             .Include(o => o.Reviews)
+            .Include(o => o.OfferApplications)
             .FirstOrDefaultAsync(o => o.Id == offerId);
 
         if (offer == null)
-        {
             return null;
-        }
 
-        var offerResponse = new OfferResponse
-        {
-            Id = offer.Id,
-            Title = offer.Title,
-            Description = offer.Description,
-            Location = offer.Location,
-            ImageData = offer.ImageData,
-            ImageMimeType = offer.ImageMimeType,
-            Contact = offer.Contact,
-            Accomodation = offer.Accomodation,
-            AccomodationSuitable = offer.accomodationsuitable,
-            Skills = offer.skills,
-            Country = offer.country,
-            State = offer.state,
-            City = offer.city,
-            AverageRating = offer.AverageRating,
-            User = new UserResponse
-            {
-                User_Id = offer.User.User_Id,
-                FirstName = offer.User.FirstName,
-                LastName = offer.User.LastName,
-            },
-        };
-
-        return offerResponse;
+        var firstApplication = offer.OfferApplications.FirstOrDefault(oa => oa.UserId == userId);                
+        return new OfferDTO(offer ,offer.User, firstApplication);
     }
 
     public async Task<PaginatedList<ReviewOfferDTO>> GetAllOffersForReviewsAsync(

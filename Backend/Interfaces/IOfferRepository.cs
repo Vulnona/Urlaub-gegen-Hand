@@ -4,23 +4,19 @@ using UGHApi.Shared;
 using UGHApi.ViewModels;
 
 namespace UGH.Domain.Interfaces;
-
+#nullable enable
 public interface IOfferRepository
 {
     Task<List<Offer>> GetAllOffersAsync(string searchTerm, Guid userId);
-    Task<PaginatedList<OfferDTO>> GetAllOfferByUserAsync(
+    Task<PaginatedList<OfferDTO>> GetOffersAsync(
         Guid userId,
-        string searchTerm,
+        string? searchTerm,
         int pageNumber,
-        int pageSize
+        int pageSize,
+        bool forUser
     );
 
     Task<PaginatedList<ReviewOfferDTO>> GetAllOffersForReviewsAsync(
-        string searchTerm,
-        int pageNumber,
-        int pageSize
-    );
-    Task<PaginatedList<OfferDTO>> GetAllOfferForUnothorizeUserAsync(
         string searchTerm,
         int pageNumber,
         int pageSize
@@ -29,12 +25,6 @@ public interface IOfferRepository
     Task AddOfferAsync(Offer offer);
     Task RemoveOfferAsync(int offerId);
     Task<OfferApplication> GetOfferApplicationAsync(int offerId, Guid userId);
-    Task<PaginatedList<OfferDTO>> GetUserOffersAsync(
-        Guid userId,
-        int pageNumber = 1,
-        int pageSize = 10,
-        string searchTerm = null
-    );
     Task AddOfferApplicationAsync(OfferApplication application);
     Task<PaginatedList<OfferApplication>> GetOfferApplicationsByHostAsync(
         Guid hostId,
@@ -42,5 +32,6 @@ public interface IOfferRepository
         int pageSize
     );
     Task<bool> UpdateOfferApplicationAsync(OfferApplication offerApplication);
-    Task<OfferResponse> GetOfferDetailsByIdAsync(int offerId);
+    Task<OfferDTO> GetOfferDetailsByIdAsync(int offerId, Guid userId);
 }
+#nullable disable

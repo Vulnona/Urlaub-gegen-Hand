@@ -6,6 +6,8 @@ using UGH.Application.Offers;
 using UGH.Domain.ViewModels;
 using UGH.Infrastructure.Services;
 using UGHApi.Services.UserProvider;
+using UGH.Domain.Interfaces;
+using UGHApi.Shared;
 
 namespace UGHApi.Controllers;
 
@@ -19,13 +21,15 @@ public class OfferController : ControllerBase
     private readonly EmailService _emailService;
     private readonly IUserProvider _userProvider;
     private readonly IMediator _mediator;
+    private readonly IOfferRepository _offerRepository;
 
     public OfferController(
         Ugh_Context context,
         ILogger<OfferController> logger,
         IMediator mediator,
         EmailService emailService,
-        IUserProvider userProvider
+        IUserProvider userProvider,
+        IOfferRepository offerRepository
     )
     {
         _context = context;
@@ -33,35 +37,28 @@ public class OfferController : ControllerBase
         _mediator = mediator;
         _emailService = emailService;
         _userProvider = userProvider;
+        _offerRepository = offerRepository;
     }
 
     #region offers
     [HttpGet("get-all-offers")]
-    public async Task<IActionResult> GetOffersAsync(
-        string searchTerm,
-        int pageNumber = 1,
-        int pageSize = 10
-    )
-    {
-        try
-        {
+    public async Task<IActionResult> GetOffersAsync(string searchTerm, int pageNumber = 1, int pageSize = 10) {
+        try {
             var userId = _userProvider.UserId;
-            var query = new GetOffersQuery(searchTerm, userId, pageNumber, pageSize);
-            var result = await _mediator.Send(query);
-
-            if (result.IsFailure)
+            PaginatedList<OfferDTO> paginatedOffers =await _offerRepository.GetOffersAsync(userId, searchTerm, pageNumber, pageSize ,false);
+            if (paginatedOffers == null)
             {
-                return NotFound(new { Code = result.Error.Code, Message = result.Error.Message });
+                return NotFound();
             }
 
             return Ok(
                 new
                 {
-                    result.Value.Items,
-                    result.Value.TotalCount,
-                    result.Value.PageNumber,
-                    result.Value.PageSize,
-                    result.Value.TotalPages,
+                    paginatedOffers.Items,
+                    paginatedOffers.TotalCount,
+                    paginatedOffers.PageNumber,
+                    paginatedOffers.PageSize,
+                    paginatedOffers.TotalPages,
                 }
             );
         }
@@ -72,25 +69,17 @@ public class OfferController : ControllerBase
         }
     }
 
+    [Authorize]
     [HttpGet("get-offer-by-user")]
-    public async Task<IActionResult> GetOfferAsync(
-        string searchTerm,
-        int pageNumber = 1,
-        int pageSize = 10
-    )
-    {
-        try
-        {
+    public async Task<IActionResult> GetOfferAsync(string searchTerm, int pageNumber = 1, int pageSize = 10) {
+        try {
             var userId = _userProvider.UserId;
-            var query = new GetOfferByUserQuery(userId, searchTerm, pageNumber, pageSize);
-            var result = await _mediator.Send(query);
+            var offers = await _offerRepository.GetOffersAsync(userId, searchTerm, pageNumber, pageSize, true);
 
-            if (result.IsFailure)
-            {
-                return NotFound(new { Code = result.Error.Code, Message = result.Error.Message });
-            }
+            if (offers == null)           
+                return NotFound();           
 
-            return Ok(result.Value);
+            return Ok(offers);
         }
         catch (Exception ex)
         {
@@ -99,23 +88,19 @@ public class OfferController : ControllerBase
         }
     }
 
+    [Authorize]
     [HttpGet("get-offer-by-id/{OfferId:int}")]
     public async Task<IActionResult> GetOffer([Required] int OfferId)
     {
-        try
-        {
-            var query = new GetOfferByIdQuery(OfferId);
-            var result = await _mediator.Send(query);
+        try {
+            var userId = _userProvider.UserId;
+            var offer = await _offerRepository.GetOfferDetailsByIdAsync(OfferId, userId);            
+            if (offer == null)
+                return NotFound();
 
-            if (result.IsFailure)
-            {
-                return NotFound(new { Code = result.Error.Code, Message = result.Error.Message });
-            }
-
-            return Ok(result.Value);
+            return Ok(offer);
         }
-        catch (Exception ex)
-        {
+        catch (Exception ex) {
             _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
             return StatusCode(500, $"Internal server error: {ex.Message}");
         }
