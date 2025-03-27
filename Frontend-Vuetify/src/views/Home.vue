@@ -137,16 +137,8 @@ body .custom-card .card-text strong {
                         <span class="vertical_middle">{{ offer.averageRating }} </span>
                       </div>
                     </div>
-                    <div v-if="isActiveMember && offer.hostId != logId && userRole != 'Admin'">
-                      <button v-if="offer.appliedStatus === 'CanApply'" @click="sendRequest(offer.id)"
-                        class="btn btn-success OfferButtons">Apply</button>
-                      <button v-else-if="offer.appliedStatus === 'Applied'" class="btn btn-info OfferButtons"
-                        disabled>Applied</button>
-                      <button v-else-if="offer.appliedStatus === 'Rejected'" class="btn btn-danger OfferButtons"
-                        disabled>Rejected</button>
-                      <button v-else-if="offer.appliedStatus === 'Approved'" @click="showUserDetails(offer.hostId)"
-                        class="btn btn-primary OfferButtons">View Host Details</button>
-                    </div>
+                    <Apply :offer=offer :isActiveMember=isActiveMember :logId=logId />
+                    
                   </div>
                 </div>
               </div>
@@ -208,6 +200,7 @@ body .custom-card .card-text strong {
 
 <script>
 import Navbar from '@/components/navbar/Navbar.vue';
+import Apply from '@/components/Apply.vue';
 import axiosInstance from '@/interceptor/interceptor';
 import PublicNav from '@/components/navbar/PublicNav.vue';
 import {isActiveMembership,GetUserRole} from '@/services/GetUserPrivileges';
@@ -230,7 +223,8 @@ function scrollToTargetElement() {
 export default {
   components: {
     Navbar,
-    PublicNav
+      PublicNav,
+      Apply
   },
   data() {
     return {
@@ -262,10 +256,6 @@ export default {
       if (search == '') {
         this.fetchOffers();
       }
-    },
-    showUserDetails(userId) {
-      sessionStorage.setItem("UserId", userId);
-      router.push("/account")
     },
     async fetchOffers() {
       this.loading = true;

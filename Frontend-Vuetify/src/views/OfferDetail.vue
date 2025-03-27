@@ -1,5 +1,5 @@
 <template>
-  <Navbar />
+<Navbar />
   <section class="offer-detail-container offer_detail_layout section_space" v-if="!loading">
     <div class="container">
       <div class="row">
@@ -16,7 +16,7 @@
               <p><strong>Annehmlichkeiten:</strong> {{ offer.accomodation }}</p>
               <p><strong>Geeignet für:</strong> {{ offer.accomodationsuitable }}</p>
               <p><strong>Ort/Region:</strong> {{ offer.location }} {{ offer.state }}</p>
-            </div>
+            </div>            
             <div class="offer_btn">
               <button @click="backtooffers()" class="action-link"><i class="ri-arrow-go-back-line"
                   aria-hidden="true"></i> Back </button>
@@ -31,6 +31,7 @@
           </div>
         </div>
       </div>
+      <Apply :offer=offer :isActiveMember=isActiveMember :logId=logId />
       <!--Review-->
       <div class="review_layout">
         <div class="row">
@@ -117,8 +118,9 @@ import {
 import Navbar from '@/components/navbar/Navbar.vue';
 import axiosInstance from '@/interceptor/interceptor';
 import router from '@/router';
-
-
+import {isActiveMembership} from '@/services/GetUserPrivileges';
+import Apply from '@/components/Apply.vue';
+import getLoggedUserId from '@/services/LoggedInUserId';
 
 const {
   params
@@ -132,11 +134,12 @@ const redirectToProfile = (userId) => {
   sessionStorage.setItem("UserId", userId);
   router.push("/account");
 }
+
 const fetchOfferDetail = async () => {
   try {
     fetchReview();
     const response = await axiosInstance.get(`${process.env.baseURL}offer/get-offer-by-id/${params.id}`);
-    offer.value = response.data;
+      offer.value = response.data;
   } catch (error) {
     console.error('Error fetching offer detail:', error);
   } finally {
@@ -169,6 +172,17 @@ const backtooffers = () => {
   window.history.back();
 };
 onMounted(fetchOfferDetail);
+</script>
+
+<script lang="ts">    
+export default {
+    data() {
+        return{
+            isActiveMember: isActiveMembership(),
+            logId: getLoggedUserId(),
+        };
+}
+}
 </script>
 
 <style scoped lang="scss">
