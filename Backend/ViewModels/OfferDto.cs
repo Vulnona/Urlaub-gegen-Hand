@@ -17,6 +17,7 @@ public class OfferDTO
     public string AppliedStatus { get; set; }
     public string Region { get; set; }
     public string Location { get; set; }
+    public string Description {get; set; }
 
     public OfferDTO(Offer o, User u, OfferApplication oa){
         string appliedStatus = oa == null ? "CanApply" : oa.Status switch {
@@ -37,5 +38,6 @@ public class OfferDTO
         Location = o.Location ?? "";
         Region = o.state ?? "";
         AppliedStatus = appliedStatus;
+        Description = o.Description;
     }
 }

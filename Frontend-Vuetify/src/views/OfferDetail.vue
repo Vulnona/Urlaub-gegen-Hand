@@ -15,11 +15,12 @@
               <p><strong>Fähigkeiten:</strong> {{ offer.skills }}</p>
               <p><strong>Annehmlichkeiten:</strong> {{ offer.accomodation }}</p>
               <p><strong>Geeignet für:</strong> {{ offer.accomodationsuitable }}</p>
-              <p><strong>Ort/Region:</strong> {{ offer.location }} {{ offer.state }}</p>
-            </div>            
+              <p><strong>Ort/Region:</strong> {{ offer.location }}</p>
+            </div>
+            <Apply :offer=offer :isActiveMember=isActiveMember :logId=logId />
             <div class="offer_btn">
               <button @click="backtooffers()" class="action-link"><i class="ri-arrow-go-back-line"
-                  aria-hidden="true"></i> Back </button>
+                  aria-hidden="true"></i> Zurück </button>
             </div>
           </div>
         </div>
@@ -31,7 +32,6 @@
           </div>
         </div>
       </div>
-      <Apply :offer=offer :isActiveMember=isActiveMember :logId=logId />
       <!--Review-->
       <div class="review_layout">
         <div class="row">
