@@ -5,13 +5,13 @@ using UGH.Domain.Interfaces;
 using UGH.Domain.ViewModels;
 using UGHApi.Shared;
 using UGHApi.ViewModels;
+using UGHApi.ViewModels.UserComponent;
 
 namespace UGH.Infrastructure.Repositories;
 
 public class OfferRepository : IOfferRepository
 {
-    private readonly Ugh_Context _context;
-
+    private readonly Ugh_Context _context;    
     public OfferRepository(Ugh_Context context)
     {
         _context = context;
@@ -114,7 +114,7 @@ public class OfferRepository : IOfferRepository
         await _context.SaveChangesAsync();
     }
 
-    public async Task<PaginatedList<OfferApplication>> GetOfferApplicationsByHostAsync(
+    public async Task<PaginatedList<OfferApplicationDto>> GetOfferApplicationsByHostAsync(
         Guid hostId,
         int pageNumber,
         int pageSize
@@ -134,16 +134,40 @@ public class OfferRepository : IOfferRepository
                 .Take(pageSize)
                 .ToListAsync();
 
-            return PaginatedList<OfferApplication>.Create(
-                applications,
-                totalCount,
-                pageNumber,
-                pageSize
+            var applicationDtos = applications
+                .Select(app => new OfferApplicationDto
+                {
+                    OfferId = app.OfferId,
+                    HostId = app.HostId,
+                    Status = app.Status,
+                    CreatedAt = app.CreatedAt,
+                    UpdatedAt = app.UpdatedAt,
+                    Offer = new OfferDto
+                    {
+                        Id = app.Offer.Id,
+                        Title = app.Offer.Title,
+                        ImageData = app.Offer.ImageData,
+                        ImageMimeType = app.Offer.ImageMimeType,
+                    },
+                    User = new UserC
+                    {
+                        User_Id = app.User.User_Id,
+                        ProfilePicture = app.User.ProfilePicture,
+                        FirstName = app.User.FirstName,
+                        LastName = app.User.LastName,
+                    },
+                })
+                .ToList();
+            return PaginatedList<OfferApplicationDto>.Create(
+                    applicationDtos,
+                    totalCount,
+                    pageNumber,
+                    pageSize
             );
         }
         catch (Exception)
         {
-            throw;
+            return null;
         }
     }
 

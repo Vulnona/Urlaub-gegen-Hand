@@ -26,7 +26,7 @@ public interface IOfferRepository
     Task RemoveOfferAsync(int offerId);
     Task<OfferApplication> GetOfferApplicationAsync(int offerId, Guid userId);
     Task AddOfferApplicationAsync(OfferApplication application);
-    Task<PaginatedList<OfferApplication>> GetOfferApplicationsByHostAsync(
+    Task<PaginatedList<OfferApplicationDto>> GetOfferApplicationsByHostAsync(
         Guid hostId,
         int pageNumber,
         int pageSize

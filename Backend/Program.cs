@@ -92,14 +92,9 @@ namespace UGHApi
             builder.Services.AddSwaggerGen();
             //builder.Services.AddHostedService<MembershipStatusUpdaterService>();
             builder.Services.AddMediatR(
-                typeof(AddReviewCommandHandler).Assembly,
                 typeof(VerifyEmailCommandHandler).Assembly
             );
             builder.Services.Configure<AwsOptions>(builder.Configuration.GetSection("AwsOptions"));
-            builder.Services.AddMediatR(
-                Assembly.GetExecutingAssembly(),
-                typeof(AddReviewCommandHandler).Assembly
-            );
             //builder.Services.AddHostedService<PythonScriptRunner>();
             //builder.Services.AddTransient<DatabaseIntegrityChecker>();
             ConfigureAuthentication(builder);
@@ -223,12 +218,10 @@ namespace UGHApi
                 IReviewRepository,
                 UGH.Infrastructure.Repositories.ReviewRepository
             >();
-            services.AddScoped<IReviewService, ReviewService>();
             services.AddTransient<IStripeService, StripeService>();
             services.AddScoped<IUserProvider, UserProvider>();
             services.AddScoped<ITransactionRepository, TransactionRepository>();
             services.AddScoped<IUserRepository, UGH.Infrastructure.Repositories.UserRepository>();
-            services.AddScoped<IOfferService, OfferService>();
             services.AddScoped<IShopItemRepository, ShopItemRepository>();
             services.AddScoped<IUserProfileRepository, UserProfileRepository>();
             services.AddScoped<IUserMembershipRepository, UserMembershipRepository>();
@@ -276,28 +269,5 @@ namespace UGHApi
                 dbContext.SaveChanges();
             }
         }
-        //private static async void CreateAutoAdminUser(UserService userService)
-        //{
-        //    var user = await userService.GetUserByEmailAsync("admin@example.com");
-        //    if (user == null)
-        //    {
-        //        var adminUser = new RegisterRequest
-        //        {
-        //            FirstName = "Admin",
-        //            LastName = "User",
-        //            DateOfBirth = "1990-01-01",
-        //            Gender = "Male",
-        //            Street = "Admin Street",
-        //            HouseNumber = "123",
-        //            PostCode = "12345",
-        //            City = "Admin City",
-        //            Country = "Admin Country",
-        //            State = "Admin State",
-        //            Email_Address = "admin@example.com",
-        //            Password = "Admin@12345"
-        //        };
-        //        userService.CreateAdmin(adminUser);
-        //    }
-        //}
     }
 }

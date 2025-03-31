@@ -5,8 +5,9 @@ using UGHApi.Applications.Reviews;
 using UGH.Infrastructure.Services;
 using Microsoft.AspNetCore.Mvc;
 using UGH.Application.Reviews;
-using UGH.Contracts.Review;
 using MediatR;
+using UGH.Domain.Interfaces;
+
 
 namespace UGHApi.Controllers;
 
@@ -14,43 +15,36 @@ namespace UGHApi.Controllers;
 [ApiController]
 public class ReviewController : ControllerBase
 {
-    private readonly IReviewService _reviewService;
     private readonly IMediator _mediator;
     private readonly IUserProvider _userProvider;
-
+    private readonly IReviewRepository _reviewRepository;
+    
     public ReviewController(
-        IReviewService reviewService,
         IMediator mediator,
-        IUserProvider userProvider
+        IUserProvider userProvider,
+        IReviewRepository reviewRepository
     )
     {
-        _reviewService = reviewService;
         _mediator = mediator;
         _userProvider = userProvider;
+        _reviewRepository = reviewRepository;
     }
 
-    [Authorize]
-    [HttpGet("get-all-reviews")]
-    public async Task<IActionResult> GetAllReviews(int pageNumber = 1, int pageSize = 10)
-    {
-        try
-        {
-            var query = new GetAllReviewsQuery(pageNumber, pageSize);
-            var result = await _mediator.Send(query);
+public class CreateReviewRequest
+{
+#pragma warning disable CS8632
+    [Required(ErrorMessage = "OfferId is required.")]
+    [Range(1, int.MaxValue, ErrorMessage = "OfferId cannot be zero or negative.")]
+    public int offerId { get; set; }
 
-            if (result.IsFailure)
-            {
-                return StatusCode(500, result.Error.Message);
-            }
+    [Required(ErrorMessage = "RatingValue is required.")]
+    [Range(1, 5, ErrorMessage = "RatingValue must be between 1 and 5.")]
+    public int ratingValue { get; set; }
 
-            return Ok(result.Value);
-        }
-        catch (Exception)
-        {
-            return StatusCode(500, "Internal server error occurred while fetching all reviews.");
-        }
-    }
+    public string? reviewComment { get; set; }
+    public Guid? reviewedUserId { get; set; } = null;
 
+}
     [Authorize]
     [HttpPost("add-review")]
     public async Task<IActionResult> AddReview([FromBody] CreateReviewRequest review)
@@ -59,49 +53,13 @@ public class ReviewController : ControllerBase
         {
             return BadRequest(new { message = "Invalid input parameters or model state." });
         }
-
         var userId = _userProvider.UserId;
-
-        var command = new AddReviewCommand(
-            review.OfferId,
-            review.RatingValue,
-            review.ReviewComment,
-            userId,
-            review.ReviewedUserId
-        );
-        var result = await _mediator.Send(command);
-
-        if (result.IsSuccess)
-        {
+        String result = await _reviewRepository.AddReview(review.offerId, review.ratingValue, review.reviewComment, userId, review.reviewedUserId);
+        
+        if (result == "Review added successfully.")
             return Ok(new { message = "Review added successfully." });
-        }
         else
-        {
-            return BadRequest(new { message = result.Error.Message.ToString() });
-        }
-    }
-
-    [Authorize]
-    [HttpPut("update-review")]
-    public async Task<IActionResult> UpdateReview([FromBody] UpdateReviewRequest updateReviewData)
-    {
-        try
-        {
-            var userId = _userProvider.UserId;
-            var command = new UpdateReviewCommand(updateReviewData, userId);
-            var result = await _mediator.Send(command);
-
-            if (result.IsFailure)
-            {
-                return BadRequest(result.Error);
-            }
-
-            return Ok(result);
-        }
-        catch (Exception )
-        {
-            return StatusCode(500, "Internal server error occurred while updating the review.");
-        }
+            return BadRequest(new { message = result });
     }
 
     [Authorize]
@@ -137,15 +95,13 @@ public class ReviewController : ControllerBase
     {
         try
         {
-            var query = new GetAllReviewsByUserIdQuery(userId, pageNumber, pageSize);
-            var result = await _mediator.Send(query);
-
-            if (result.IsFailure)
+            var reviews = await _reviewRepository.GetAllReviewsByUserIdAsync(userId, pageNumber, pageSize);
+            if (reviews == null)
             {
-                return NotFound(result.Error);
+                return NotFound();
             }
 
-            return Ok(result.Value);
+            return Ok(reviews);
         }
         catch (Exception)
         {
@@ -159,15 +115,14 @@ public class ReviewController : ControllerBase
     {
         try
         {
-            var query = new GetAllReviewsByOfferIdQuery(offerId, pageNumber, pageSize);
-            var result = await _mediator.Send(query);
-
-            if (result.IsFailure)
+            var reviews = await _reviewRepository.GetReviewsByOfferIdAsync(offerId, pageNumber, pageSize);
+            
+            if (reviews == null)
             {
-                return NotFound(result.Error);
+                return NotFound();
             }
 
-            return Ok(result.Value);
+            return Ok(reviews);
         }
         catch (Exception)
         {

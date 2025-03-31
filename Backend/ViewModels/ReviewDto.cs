@@ -1,5 +1,5 @@
 ﻿using UGH.Domain.Entities;
-
+using UGHApi.ViewModels.UserComponent;
 namespace UGHApi.ViewModels;
 
 public class ReviewDto
@@ -11,15 +11,7 @@ public class ReviewDto
     public string? ReviewComment { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
-    public UserDto Reviewer { get; set; }
-    public UserDto Reviewed { get; set; }
+    public UserC Reviewer { get; set; }
+    public UserC Reviewed { get; set; }
     public Offer Offer { get; set; }
-}
-
-public class UserDto
-{
-    public Guid User_Id { get; set; }
-    public string FirstName { get; set; }
-    public string LastName { get; set; }
-    public byte[]? ProfilePicture { get; set; }
 }
