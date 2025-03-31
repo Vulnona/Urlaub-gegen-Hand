@@ -7,7 +7,7 @@ using UGHApi.ViewModels;
 
 namespace UGH.Infrastructure.Repositories;
 
-public class ReviewRepository : IReviewRepository
+public class ReviewRepository
 {
     private readonly Ugh_Context _context;
 

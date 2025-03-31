@@ -211,15 +211,9 @@ public class OfferController : ControllerBase
         try
         {
             var hostId = _userProvider.UserId;
-            //var query = new GetOfferApplicationsByHostQuery(hostId, pageNumber, pageSize);
-            //var result = await _mediator.Send(query);
             var offers = await _offerRepository.GetOfferApplicationsByHostAsync(hostId, pageNumber, pageSize);
-            
             if (offers == null)
-            {
                 return NotFound();
-            }
-
             return Ok(offers);
         }
         catch (Exception ex)

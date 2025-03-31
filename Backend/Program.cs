@@ -213,10 +213,7 @@ namespace UGHApi
             services.AddMemoryCache();
             services.AddScoped<TokenService>();
             services.AddTransient<ICouponRepository, CouponRepository>();
-            services.AddScoped<
-                IReviewRepository,
-                UGH.Infrastructure.Repositories.ReviewRepository
-            >();
+            services.AddScoped<UGH.Infrastructure.Repositories.ReviewRepository>();
             services.AddTransient<IStripeService, StripeService>();
             services.AddScoped<IUserProvider, UserProvider>();
             services.AddScoped<ITransactionRepository, TransactionRepository>();

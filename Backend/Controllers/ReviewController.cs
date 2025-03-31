@@ -1,13 +1,11 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Authorization;
 using UGHApi.Services.UserProvider;
-using UGHApi.Applications.Reviews;
 using UGH.Infrastructure.Services;
+using UGH.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using UGH.Application.Reviews;
-using MediatR;
 using UGH.Domain.Interfaces;
-
 
 namespace UGHApi.Controllers;
 
@@ -15,19 +13,19 @@ namespace UGHApi.Controllers;
 [ApiController]
 public class ReviewController : ControllerBase
 {
-    private readonly IMediator _mediator;
     private readonly IUserProvider _userProvider;
-    private readonly IReviewRepository _reviewRepository;
+    private readonly ReviewRepository _reviewRepository;
+    private readonly IOfferRepository _offerRepository;
     
     public ReviewController(
-        IMediator mediator,
         IUserProvider userProvider,
-        IReviewRepository reviewRepository
+        ReviewRepository reviewRepository,
+        IOfferRepository offerRepository
     )
     {
-        _mediator = mediator;
         _userProvider = userProvider;
         _reviewRepository = reviewRepository;
+        _offerRepository = offerRepository;
     }
 
 public class CreateReviewRequest
@@ -60,33 +58,6 @@ public class CreateReviewRequest
             return Ok(new { message = "Review added successfully." });
         else
             return BadRequest(new { message = result });
-    }
-
-    [Authorize]
-    [HttpDelete("delete-review")]
-    public async Task<IActionResult> DeleteReview([Required] int reviewId, [Required] string email)
-    {
-        if (string.IsNullOrEmpty(email))
-        {
-            return BadRequest("Email is required.");
-        }
-
-        try
-        {
-            var command = new DeleteReviewCommand(reviewId, email);
-            var result = await _mediator.Send(command);
-
-            if (result.IsFailure)
-            {
-                return BadRequest(result.Error);
-            }
-
-            return Ok(result);
-        }
-        catch (Exception)
-        {
-            return StatusCode(500, "Internal server error occurred while deleting the review.");
-        }
     }
 
     [Authorize]
@@ -137,15 +108,10 @@ public class CreateReviewRequest
     {
         try
         {
-            var query = new GetAllOffersForReviewsAdminQuery(searchTerm, pageNumber, pageSize);
-            var result = await _mediator.Send(query);
-
-            if (result.IsFailure)
-            {
-                return NotFound(result.Error);
-            }
-
-            return Ok(result.Value);
+            var reviews = await _offerRepository.GetAllOffersForReviewsAsync(searchTerm, pageNumber, pageSize);
+            if (reviews == null)
+                return NotFound();
+            return Ok(reviews);
         }
         catch (Exception)
         {
