@@ -96,7 +96,6 @@ namespace UGHApi
             );
             builder.Services.Configure<AwsOptions>(builder.Configuration.GetSection("AwsOptions"));
             //builder.Services.AddHostedService<PythonScriptRunner>();
-            //builder.Services.AddTransient<DatabaseIntegrityChecker>();
             ConfigureAuthentication(builder);
             ConfigureCors(builder);
             ConfigureMailSettings(builder);
