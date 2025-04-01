@@ -108,7 +108,7 @@ public class ReviewRepository
             reviewedId = offer.HostId;
             guestId = UserId;
         }
-        existingReview =  await _context.reviews.FirstOrDefaultAsync(r => r.OfferId == OfferId && r.ReviewerId == UserId);
+        existingReview =  await _context.reviews.FirstOrDefaultAsync(r => r.OfferId == OfferId && r.ReviewerId == UserId && r.ReviewedId == reviewedId);
         if (existingReview != null)
             return "Review already exists.";        
         
