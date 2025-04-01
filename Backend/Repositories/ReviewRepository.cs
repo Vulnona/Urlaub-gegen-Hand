@@ -53,7 +53,7 @@ public class ReviewRepository
         try {
             IQueryable<Review> query = _context
                 .reviews.Include(r => r.Offer)
-                .Where(r => r.OfferId == offerId);
+                .Where(r => r.OfferId == offerId && r.Offer.HostId == r.ReviewedId);
 
             int totalCount = await query.CountAsync();
 
