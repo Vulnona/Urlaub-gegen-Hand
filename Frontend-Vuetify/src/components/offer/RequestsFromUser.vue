@@ -61,6 +61,7 @@ import toast from '@/components/toaster/toast';
 import axiosInstance from '@/interceptor/interceptor';
 import TableEntryUser from '@/components/offer/TableEntryUser.vue';
 import Rate from '@/components/offer/Rate.vue';
+import router from "@/router";
 
 let loading = ref(true)
 let offers = []
@@ -75,7 +76,7 @@ let ratedUser = ref(null)
 onMounted(() => {
     fetchOffers(1);
 })
-
+const redirectToOfferDetail = (offerId) => {router.push({ name: 'OfferDetail', params: { id: offerId } })}
 const changePage = (newPage:Number) => {
     if (newPage >= 1 && newPage <= totalPages) {
         currentPage = newPage;        

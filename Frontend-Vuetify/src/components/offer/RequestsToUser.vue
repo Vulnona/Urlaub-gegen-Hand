@@ -121,6 +121,7 @@ const showAddRatingModal = (offerId:Number, userId:String, index:Number) => {
     ratedOffer.value = offers[index].offer;
     ratedUser.value = offers[index].user;
 }
+const redirectToOfferDetail = (offerId) => {router.push({ name: 'OfferDetail', params: { id: offerId } })}
 onMounted(() => {
     fetchOffers(1);
 })
