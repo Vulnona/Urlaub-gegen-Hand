@@ -10,7 +10,6 @@ using Microsoft.OpenApi.Models;
 using Serilog;
 using Serilog.Events;
 using UGH.Application.Authentication;
-using UGH.Application.Reviews;
 using UGH.Domain.Interfaces;
 using UGH.infrastructure.Repositories;
 using UGH.Infrastructure.Services;

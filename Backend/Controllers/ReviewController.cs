@@ -4,7 +4,6 @@ using UGHApi.Services.UserProvider;
 using UGH.Infrastructure.Services;
 using UGH.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Mvc;
-using UGH.Application.Reviews;
 using UGH.Domain.Interfaces;
 
 namespace UGHApi.Controllers;
