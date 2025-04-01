@@ -1,7 +1,7 @@
 <template>
 <Navbar />
 <div class="create-offer-wrapper bg-ltgrey">
-  <Banner />
+  <Banner n="Erstelle Angebot" />
   <div class="bg-ltgrey pt-40 pb-40">
     <form @submit.prevent="createOffer">
       <div class="container">
@@ -89,7 +89,7 @@
 
 <script setup lang="ts">
   import { ref, defineExpose, onMounted, onUpdated } from "vue";
-  import Banner from '@/components/form/Banner.vue';
+  import Banner from '@/components/Banner.vue';
   import Input from '@/components/form/Input.vue';
   import Navbar from '@/components/navbar/Navbar.vue';
 </script>

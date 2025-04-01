@@ -8,7 +8,6 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, defineExpose, onMounted, onUpdated } from "vue";
   const props = defineProps({n:String, p:String, t:Boolean, req:Boolean})
   const input = defineModel()
 </script>

@@ -108,62 +108,50 @@ public class OfferRepository : IOfferRepository
         }
     }
 
-    public async Task AddOfferApplicationAsync(OfferApplication application)
-    {
+    public async Task AddOfferApplicationAsync(OfferApplication application) {
         await _context.offerapplication.AddAsync(application);
         await _context.SaveChangesAsync();
     }
 
-    public async Task<PaginatedList<OfferApplicationDto>> GetOfferApplicationsByHostAsync(
-        Guid hostId,
-        int pageNumber,
-        int pageSize
-    )
-    {
-        try
-        {
+    public async Task<PaginatedList<OfferApplicationDto>> GetOfferApplicationsByUserAsync(Guid requestingUserId, int pageNumber, int pageSize, bool isHost) {
+        try {
             IQueryable<OfferApplication> query = _context
                 .offerapplication.Include(oa => oa.Offer)
-                .Include(oa => oa.User)
-                .Where(app => app.HostId == hostId);
+                .Include(oa => oa.User).Include(oa => oa.Host);
+            if (isHost)
+                query = query.Where(app => app.HostId == requestingUserId);
+            else
+                query = query.Where(app => app.UserId == requestingUserId);
 
             int totalCount = await query.CountAsync();
-
             var applications = await query
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
-
+            
             var applicationDtos = applications
-                .Select(app => new OfferApplicationDto
-                {
+                .Select(app => new OfferApplicationDto {
                     OfferId = app.OfferId,
                     HostId = app.HostId,
                     Status = app.Status,
                     CreatedAt = app.CreatedAt,
                     UpdatedAt = app.UpdatedAt,
-                    Offer = new OfferDto
-                    {
+                    Offer = new OfferDto {
                         Id = app.Offer.Id,
                         Title = app.Offer.Title,
                         ImageData = app.Offer.ImageData,
                         ImageMimeType = app.Offer.ImageMimeType,
                     },
-                    User = new UserC
-                    {
-                        User_Id = app.User.User_Id,
-                        ProfilePicture = app.User.ProfilePicture,
-                        FirstName = app.User.FirstName,
-                        LastName = app.User.LastName,
-                    },
+                    User = new UserC {
+                        User_Id = isHost ? app.User.User_Id : app.Host.User_Id,
+                        ProfilePicture = isHost ? app.User.ProfilePicture : app.Host.ProfilePicture,
+                        FirstName = isHost ? app.User.FirstName : app.Host.FirstName,
+                        LastName = isHost ? app.User.LastName : app.Host.LastName,
+                    },                    
                 })
                 .ToList();
             return PaginatedList<OfferApplicationDto>.Create(
-                    applicationDtos,
-                    totalCount,
-                    pageNumber,
-                    pageSize
-            );
+                    applicationDtos, totalCount, pageNumber, pageSize);
         }
         catch (Exception)
         {

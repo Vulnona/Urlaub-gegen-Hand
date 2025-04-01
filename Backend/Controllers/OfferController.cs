@@ -203,15 +203,12 @@ public class OfferController : ControllerBase
 
     [Authorize]
     [HttpGet("offer-applications")]
-    public async Task<IActionResult> GetOfferApplicationsByHost(
-        int pageNumber = 1,
-        int pageSize = 10
-    )
-    {
+    public async Task<IActionResult> GetOfferApplicationsByHost(int pageNumber, int pageSize, bool isHost) {
         try
         {
             var hostId = _userProvider.UserId;
-            var offers = await _offerRepository.GetOfferApplicationsByHostAsync(hostId, pageNumber, pageSize);
+            var offers = await _offerRepository.
+                GetOfferApplicationsByUserAsync(hostId, pageNumber, pageSize, isHost);
             if (offers == null)
                 return NotFound();
             return Ok(offers);
