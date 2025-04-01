@@ -207,8 +207,7 @@ public class OfferController : ControllerBase
         try
         {
             var hostId = _userProvider.UserId;
-            var offers = await _offerRepository.
-                GetOfferApplicationsByUserAsync(hostId, pageNumber, pageSize, isHost);
+            var offers = await _offerRepository.GetOfferApplicationsByUserAsync(hostId, pageNumber, pageSize, isHost);
             if (offers == null)
                 return NotFound();
             return Ok(offers);

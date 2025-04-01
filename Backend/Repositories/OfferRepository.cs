@@ -128,14 +128,11 @@ public class OfferRepository : IOfferRepository
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
-            
-            var applicationDtos = applications
-                .Select(app => new OfferApplicationDto {
+            var applicationDtos = applications.Select(app => new OfferApplicationDto {
                     OfferId = app.OfferId,
                     HostId = app.HostId,
                     Status = app.Status,
-                    CreatedAt = app.CreatedAt,
-                    UpdatedAt = app.UpdatedAt,
+                    CreatedAt = app.CreatedAt.ToString("dd.MM.yyyy"),
                     Offer = new OfferDto {
                         Id = app.Offer.Id,
                         Title = app.Offer.Title,
@@ -155,7 +152,7 @@ public class OfferRepository : IOfferRepository
         }
         catch (Exception)
         {
-            return null;
+            throw;
         }
     }
 

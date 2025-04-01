@@ -16,6 +16,7 @@
                   <tr>
                     <th>Gast</th>
                     <th>Angebotstitel</th>
+                    <th>Datum</th>
                     <th>Aktion</th>
                   </tr>
                 </thead>
@@ -26,6 +27,7 @@
                       <a class="view_user" style="cursor: pointer;" @click="redirectToOfferDetail(item.offer.id)">{{
                         item.offer.title }}</a>
                     </td>
+                    <td><a class="view_user" style="cursor: pointer;">{{item.createdAt}} </a></td>
                     <td>
                       <div class="btn_flexBox now_wrap buttons_text">
                         <button v-if="item.status === 0" @click="respondToOffer(item.offer.id, item.user.user_Id, true)"

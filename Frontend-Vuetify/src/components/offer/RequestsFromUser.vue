@@ -16,6 +16,7 @@
                   <tr>
                     <th>Gastgeber</th>
                     <th>Angebot</th>
+                    <th>Datum</th>
                     <th>Status</th>
                   </tr>
                 </thead>
@@ -23,9 +24,9 @@
                   <tr v-for="(item, index) in offers" :key="item.id">
                     <TableEntryUser :item="item" />
                     <td>
-                      <a class="view_user" style="cursor: pointer;" @click="redirectToOfferDetail(item.offer.id)">{{
-                        item.offer.title }}</a>
-                    </td>                    
+                      <a class="view_user" style="cursor: pointer;" @click="redirectToOfferDetail(item.offer.id)">{{item.offer.title }}</a>
+                    </td>
+                    <td><a class="view_user" style="cursor: pointer;">{{item.createdAt}} </a></td>
                   <td>
                       <div class="btn_flexBox now_wrap buttons_text">
                         <button v-if="item.status === 0" class="icon_btn bg_ltgreen" disabled >Ausstehend </button>

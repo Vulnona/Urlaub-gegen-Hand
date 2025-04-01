@@ -10,8 +10,7 @@ public class OfferApplicationDto
     public OfferDto Offer { get; set; }
     public UserC User { get; set; }
     public OfferApplicationStatus Status { get; set; }
-    public DateTime CreatedAt { get; set; }
-    public DateTime UpdatedAt { get; set; }
+    public String CreatedAt { get; set; }
 }
 
 public class OfferDto
