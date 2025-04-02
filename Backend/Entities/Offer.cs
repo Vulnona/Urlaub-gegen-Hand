@@ -40,12 +40,12 @@ public class Offer
     {
         get
         {
-            if (Reviews == null || !Reviews.Any())
+            if (Reviews == null || !Reviews.Where(r => r.ReviewedId == HostId).Any())
             {
                 return 0.0;
             }
 
-            return Math.Round(Reviews.Average(r => r.RatingValue), 1);
+            return Math.Round(Reviews.Where(r => r.ReviewedId == HostId).Average(r => r.RatingValue), 1);
         }
     }
 
