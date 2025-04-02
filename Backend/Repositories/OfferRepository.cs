@@ -113,6 +113,24 @@ public class OfferRepository : IOfferRepository
         await _context.SaveChangesAsync();
     }
 
+    private async Task<bool> hasReview(int OfferId, bool isHost, Guid Guest, Guid Host){
+        try {
+            Guid reviewer, reviewed;
+            if (isHost) {
+                reviewer = Host;
+                reviewed = Guest;
+            } else {
+                reviewer = Guest;
+                reviewed = Host;
+            }                                
+            Review review = await _context.reviews.FirstOrDefaultAsync(r => r.OfferId == OfferId && r.ReviewerId == reviewer && r.ReviewedId == reviewed);
+            if(review != null)
+                return true;
+            else
+                return false;
+        }
+        catch {throw;}
+    }
     public async Task<PaginatedList<OfferApplicationDto>> GetOfferApplicationsByUserAsync(Guid requestingUserId, int pageNumber, int pageSize, bool isHost) {
         try {
             IQueryable<OfferApplication> query = _context
@@ -128,27 +146,31 @@ public class OfferRepository : IOfferRepository
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
-            var applicationDtos = applications.Select(app => new OfferApplicationDto {
-                    OfferId = app.OfferId,
-                    HostId = app.HostId,
-                    Status = app.Status,
-                    CreatedAt = app.CreatedAt.ToString("dd.MM.yyyy"),
-                    Offer = new OfferDto {
-                        Id = app.Offer.Id,
-                        Title = app.Offer.Title,
-                        ImageData = app.Offer.ImageData,
-                        ImageMimeType = app.Offer.ImageMimeType,
-                    },
-                    User = new UserC {
-                        User_Id = isHost ? app.User.User_Id : app.Host.User_Id,
-                        ProfilePicture = isHost ? app.User.ProfilePicture : app.Host.ProfilePicture,
-                        FirstName = isHost ? app.User.FirstName : app.Host.FirstName,
-                        LastName = isHost ? app.User.LastName : app.Host.LastName,
-                    },                    
-                })
-                .ToList();
-            return PaginatedList<OfferApplicationDto>.Create(
-                    applicationDtos, totalCount, pageNumber, pageSize);
+            List<OfferApplicationDto> applicationDtos = new List<OfferApplicationDto>();
+            // select would be more performant but would need a way to call an async-function
+            foreach(OfferApplication app in applications) {
+                OfferApplicationDto o = new OfferApplicationDto {
+                     OfferId = app.OfferId,
+                     HostId = app.HostId,
+                     Status = app.Status,
+                     CreatedAt = app.CreatedAt.ToString("dd.MM.yyyy"),
+                     HasReview = await hasReview(app.Offer.Id, isHost, app.User.User_Id, app.Host.User_Id),
+                     Offer = new OfferDto {
+                         Id = app.Offer.Id,
+                         Title = app.Offer.Title,
+                         ImageData = app.Offer.ImageData,
+                         ImageMimeType = app.Offer.ImageMimeType,
+                     },
+                     User = new UserC {
+                         User_Id = isHost ? app.User.User_Id : app.Host.User_Id,
+                         ProfilePicture = isHost ? app.User.ProfilePicture : app.Host.ProfilePicture,
+                         FirstName = isHost ? app.User.FirstName : app.Host.FirstName,
+                         LastName = isHost ? app.User.LastName : app.Host.LastName,
+                     }                    
+                };
+                applicationDtos.Add(o);
+            }
+            return PaginatedList<OfferApplicationDto>.Create(applicationDtos, totalCount, pageNumber, pageSize);
         }
         catch (Exception)
         {

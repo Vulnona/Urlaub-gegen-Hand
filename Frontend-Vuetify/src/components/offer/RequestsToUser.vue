@@ -36,10 +36,10 @@
                                 class="icon_btn bg_ltred">Ablehnen </button>
                         <button v-if="item.status === 2" class="icon_btn bg_ltred" disabled
                                 title="Rejected">Abgelehnt</button>
-                        <button v-if="item.status === 1"
-                                @click="showAddRatingModal(item.offer.id, item.user.user_Id, index)"
-                                class="icon_btn bg_ltblue">Bewerten
+                        <button v-if="item.status === 1 && item.hasReview === false"
+                                @click="showAddRatingModal(item.offer.id, item.HostId, index)" class="icon_btn bg_ltblue">Bewerten
                         </button>
+                        <button v-if="item.status === 1 && item.hasReview" class="icon_btn bg_ltblue">Bereits bewertet. </button>
                       </div>
                     </td>
                   </tr>
@@ -51,7 +51,7 @@
         </div>
       </div>
     </div>
-    <Rate :active="showModal" @update:active="$event => (showModal = $event)" :offer="ratedOffer" :user="ratedUser" :key="showModal.active" />
+    <Rate :active="showModal" @update:active="$event => (showModal = $event)" @update:refresh="fetchOffers(currentPage)" :offer="ratedOffer" :user="ratedUser" :key="showModal.active" />
     <!-- Pagination Section -->
     <div class="pagination">
       <button class="action-link" @click="changePage(currentPage - 1)" :hidden="currentPage === 1"><i class="ri-arrow-left-s-line"></i>Previous</button>
@@ -117,9 +117,9 @@ const respondToOffer = async (reviewId:Number, userId:Number, approve:Boolean) =
     }
 }
 const showAddRatingModal = (offerId:Number, userId:String, index:Number) => {
-    showModal.value = true;
     ratedOffer.value = offers[index].offer;
     ratedUser.value = offers[index].user;
+    showModal.value = true;
 }
 const redirectToOfferDetail = (offerId) => {router.push({ name: 'OfferDetail', params: { id: offerId } })}
 onMounted(() => {

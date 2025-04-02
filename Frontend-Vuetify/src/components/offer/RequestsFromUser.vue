@@ -31,9 +31,10 @@
                       <div class="btn_flexBox now_wrap buttons_text">
                         <button v-if="item.status === 0" class="icon_btn bg_ltgreen" disabled >Ausstehend </button>
                         <button v-if="item.status === 2" class="icon_btn bg_ltred" disabled title="Rejected">Abgelehnt</button>
-                        <button v-if="item.status === 1"
+                        <button v-if="item.status === 1 && item.hasReview === false"
                                 @click="showAddRatingModal(item.offer.id, item.HostId, index)" class="icon_btn bg_ltblue">Bewerten
                         </button>
+                         <button v-if="item.status === 1 && item.hasReview" class="icon_btn bg_ltblue">Bereits bewertet. </button>
                       </div>
                   </td>
                   </tr>
@@ -52,7 +53,7 @@
       <button class="action-link" @click="changePage(currentPage + 1)" :hidden="currentPage === totalPages">Next<i class="ri-arrow-right-s-line"></i></button>
     </div>
 </div>
-<Rate :active="showModal" @update:active="$event => (showModal = $event)" :offer="ratedOffer" :user="ratedUser" :key="showModal.active" />
+<Rate :active="showModal" @update:active="$event => (showModal = $event)" @update:refresh="fetchOffers(currentPage)" :offer="ratedOffer" :user="ratedUser" :key="showModal.active" />
 </template>
 
 <script setup lang="ts">

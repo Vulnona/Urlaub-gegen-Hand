@@ -39,17 +39,19 @@
 </template>
 
 <script setup lang="ts">
-import {ref,onUpdated, getCurrentInstance} from "vue";
+import {ref,onUpdated, getCurrentInstance, nextTick} from "vue";
 import toast from '@/components/toaster/toast';
 import axiosInstance from '@/interceptor/interceptor';
 
 const props = defineProps({active: Boolean, offer: Object, user: Object})
-const emit = defineEmits(['update:active']);
+const emit = defineEmits(['update:active', "update:refresh"]);
 let selectedRating = ref(0)
-let reviewText = ref('')
+let reviewText = ""
 const cancelRating = () => {reviewText = ''; selectedRating=ref(0); emit('update:active', false);}
 const submitRating = async () => {
-    if (selectedRating.value > 0) {        
+    const text = "";
+    if (selectedRating.value > 0) {
+        await nextTick();
           try {
               const response = await axiosInstance.post(`${process.env.baseURL}review/add-review`, {
                   offerId: props.offer.id,
@@ -58,15 +60,11 @@ const submitRating = async () => {
                   reviewedUserId: props.user.user_Id,
               });
         if (response.status === 200) {
-          toast.success("Dein Rating wurde erfolgreich hinzugefügt.");
+            toast.success("Dein Rating wurde erfolgreich hinzugefügt.");
+            emit('update:refresh');
         }
       } catch (error) {
-          if (error) {
-          toast.info("Du hast bereits ein Rating abgegeben.");
-        }
-          else {
           toast.error("Fehler beim Absenden der Bewertungen!");
-        }
       }
           cancelRating();
       } else {

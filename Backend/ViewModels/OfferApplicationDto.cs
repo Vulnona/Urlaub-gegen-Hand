@@ -11,6 +11,7 @@ public class OfferApplicationDto
     public UserC User { get; set; }
     public OfferApplicationStatus Status { get; set; }
     public String CreatedAt { get; set; }
+    public bool HasReview { get; set; }
 }
 
 public class OfferDto
