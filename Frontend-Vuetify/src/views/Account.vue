@@ -28,7 +28,7 @@
           <div v-if="user.userRating != 0"
             class="rating_block d-flex mb-0 flex-wrap gap-3 p-3 justify-content-center border-bottom border-block-end-dashed">
             <div class="">
-              <p class="card-text text-center mb-0">User Ratings:<span class="average-rating">{{ user.averageRating
+              <p class="card-text text-center mb-0">Bewertungen:<span class="average-rating">{{ user.averageRating
                   }}</span>
                 {{ " " }} <span class="star ri-star-fill gold"></span>
               </p>
@@ -306,20 +306,6 @@ export default {
 
     redirectToFacebook(fblink) {
       window.open(fblink);
-    },
-    // Method to fetch user rating
-    async fetchUserRating(id) {
-      try {
-        const response = await axiosInstance.get(`${process.env.baseURL}user-rating/get-rating-by-user-id/${id}`);
-        this.rate = response.data;
-        if (this.rate.averageRating != null) {
-          this.rate.averageRating = parseFloat(response.data.averageRating).toFixed(1);
-          this.user.averageRating = parseFloat(response.data.averageRating).toFixed(1);
-          this.user.ratingsCount = response.data.ratingsCount;
-        }
-      } catch (error) {
-
-      }
     },
     starClass(star) {
       return {

@@ -51,8 +51,7 @@ public class GetUserByIdQueryHandler : IRequestHandler<GetUserByIdQuery, UserDat
             Link_RS = _urlBuilderService.BuildAWSFileUrl(user.Link_RS),
             Link_VS = _urlBuilderService.BuildAWSFileUrl(user.Link_VS),
             VerificationState = (int)user.VerificationState,
-            CurrentMembership = user.CurrentMembership,
-            AverageRating = user.AverageRating
+            CurrentMembership = user.CurrentMembership
         };
 
         return userData;

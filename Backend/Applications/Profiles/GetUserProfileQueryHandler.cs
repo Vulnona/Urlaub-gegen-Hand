@@ -54,7 +54,6 @@ public class GetUserProfileQueryHandler : IRequestHandler<GetUserProfileQuery, U
                 Link_VS = user.Link_VS,
                 Hobbies = user?.Hobbies?.Split(',').ToList(),
                 Skills = user?.Skills?.Split(',').ToList(),
-                UserRating = user.AverageRating,
                 VerificationState = user.VerificationState.ToString()
             };
 

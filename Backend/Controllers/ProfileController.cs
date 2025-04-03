@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
 using UGHApi.Services.UserProvider;
 using UGH.Infrastructure.Services;
 using UGH.Application.Profiles;
@@ -170,6 +171,11 @@ public class ProfileController : ControllerBase
             if (user == null) {
                 throw new Exception("User not found.");
             }
+            // todo: move to more suitable location
+            double averageRating = 0;            
+            var reviews = await _context.reviews.AsQueryable().Where(r => r.Reviewed.User_Id == user.User_Id).ToListAsync();
+            if (reviews.Count() > 0)                
+                averageRating= Math.Round(reviews.Average(r => r.RatingValue), 1);
             var profile = new VisibleProfile
             {
                 UserId = user.User_Id,
@@ -182,7 +188,7 @@ public class ProfileController : ControllerBase
                 Country = user.Country,
                 State = user.State,
                 FacebookLink = user.Facebook_link,
-                AverageRating = user.AverageRating
+                AverageRating = averageRating,
             };
             if (user.Hobbies != null)
                 profile.Hobbies = user.Hobbies.Split(',').Select(h => h.Trim()).ToList() ?? new List<string>();

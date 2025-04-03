@@ -71,24 +71,6 @@ public class User
 
     private UserProfile Profile { get; set; }
 
-    public double AverageRating
-    {
-        get
-        {
-            if (Offers == null || !Offers.Any())
-            {
-                return 0.0;
-            }
-
-            var totalRatings = Offers
-                .SelectMany(o => o.Reviews.Where(r => r.ReviewedId == User_Id))
-                .Select(r => r.RatingValue)
-                .ToList();
-
-            return totalRatings.Any() ? Math.Round(totalRatings.Average(), 1) : 0.0;
-        }
-    }
-
     public void SetProfilePicture(byte[] picture)
     {
         ProfilePicture = picture;
