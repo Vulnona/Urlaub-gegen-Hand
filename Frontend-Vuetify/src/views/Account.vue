@@ -67,7 +67,7 @@
                 <li class="list-group-item p-3">
                   <div class="text-muted">
                     <p class="mb-3">
-                      <span class="fw-medium text-default">&#8962;: {{ user.city }} / {{user.state}}</span> 
+                      <span class="fw-medium text-default"><span style="font-size: x-large">&#8962;</span> : {{ user.city }} / {{user.state}}</span> 
                     </p>
                   </div>
                 </li>
