@@ -172,17 +172,18 @@ public class ProfileController : ControllerBase
             }
             var profile = new VisibleProfile
             {
-            FirstName = user.FirstName,
-            LastName = user.LastName,
-            ProfilePicture = user.ProfilePicture,
-            DateOfBirth = user.DateOfBirth,
-            Gender = user.Gender,
-            City = user.City,
-            Country = user.Country,
-            State = user.State,
-            FacebookLink = user.Facebook_link,
-            AverageRating = user.AverageRating
-        };
+                UserId = user.User_Id,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                ProfilePicture = user.ProfilePicture,
+                Age =  (int.Parse(DateTime.Today.ToString("yyyyMMdd")) - int.Parse(user.DateOfBirth.ToString("yyyyMMdd")))/10000,
+                Gender = user.Gender,
+                City = user.City,
+                Country = user.Country,
+                State = user.State,
+                FacebookLink = user.Facebook_link,
+                AverageRating = user.AverageRating
+            };
             if (user.Hobbies != null)
                 profile.Hobbies = user.Hobbies.Split(',').Select(h => h.Trim()).ToList() ?? new List<string>();
             if (user.Skills != null)

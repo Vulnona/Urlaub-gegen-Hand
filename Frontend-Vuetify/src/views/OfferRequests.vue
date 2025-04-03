@@ -1,15 +1,14 @@
 <template>
 <Navbar />
 <Banner n="Anfragen" />
-<RequestsToUser />
-<RequestsFromUser />
+<ListOfOffers :isHost="true" />
+<ListOfOffers :isHost="false" />
 </template>
 
 <script setup lang="ts">
 import Banner from '@/components/Banner.vue';
 import Navbar from '@/components/navbar/Navbar.vue';
-import RequestsToUser from '@/components/offer/RequestsToUser.vue';
-import RequestsFromUser from '@/components/offer/RequestsFromUser.vue';
+import ListOfOffers from '@/components/offer/ListOfOffers.vue';
 import Securitybot from '@/services/SecurityBot';
 </script>
 

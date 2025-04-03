@@ -16,8 +16,7 @@
       <div class="col-xl-3">
         <div class="card custom-card overflow-hidden border p-0 leftBox-content">
           <div class="card-body border-bottom border-block-end-dashed">
-            <div class="text-center">
-
+            <div class="text-center">              
               <span class="avatar avatar-xxl avatar-rounded online mb-3">
                 <img :src="profileImgSrc || defaultProfileImgSrc" @error="onImageError" class="profile-img"
                   alt="User Profile Picture">
@@ -26,7 +25,6 @@
               <span @click="showModal = true" class="action-link fs-13 font-normal">View All Reviews</span>
             </div>
           </div>
-
           <div v-if="user.userRating != 0"
             class="rating_block d-flex mb-0 flex-wrap gap-3 p-3 justify-content-center border-bottom border-block-end-dashed">
             <div class="">
@@ -34,14 +32,9 @@
                   }}</span>
                 {{ " " }} <span class="star ri-star-fill gold"></span>
               </p>
-
-
             </div>
           </div>
           <div class="p-3 pb-1 d-flex flex-wrap justify-content-between">
-            <div class="fw-medium fs-15 themeColor">
-              Basic Info:
-            </div>
           </div>
           <div class="card-body border-bottom border-block-end-dashed p-0">
             <ul class="list-group list-group-flush basic_info">
@@ -53,7 +46,7 @@
                 </div>
               </li>
               <li class="list-group-item border-0">
-                <div><span class="fw-medium me-2">DOB:</span><span class="text-muted">{{ user.dateOfBirth }}</span>
+                <div><span class="fw-medium me-2">Alter:</span><span class="text-muted">{{ user.age }}</span>
                 </div>
               </li>
               <li class="list-group-item border-0">
@@ -67,33 +60,14 @@
       <div class="col-xl-9">
         <div class="card custom-card overflow-hidden border p-0">
           <div class="card-body">
-
             <div>
               <div class="back_link"><a href="#" @click="back()"><i class="ri-arrow-left-double-fill"></i> Back</a>
               </div>
               <ul class="list-group list-group-flush border rounded-3">
                 <li class="list-group-item p-3">
-                  <span class="fw-medium fs-15 d-block mb-3">General Info:</span>
                   <div class="text-muted">
                     <p class="mb-3">
-                      <span class="icon icon2">
-                        <i class="ri-map-pin-line align-middle fs-15"></i>
-                      </span>
-                      <span class="fw-medium text-default">House Number: </span> {{ user.houseNumber }}
-                    </p>
-                    <p class="mb-3">
-                      <span class="icon icon3">
-                        <i class="ri-building-line align-middle fs-15"></i>
-                      </span>
-                      <span class="fw-medium text-default">Address: </span>{{ user.street }}, {{ user.city }}, {{
-                        user.state }},
-                      {{ user.country }}
-                    </p>
-                    <p class="mb-0">
-                      <span class="icon icon4">
-                        <i class="ri-phone-line align-middle fs-15"></i>
-                      </span>
-                      <span class="fw-medium text-default">Postal code: </span> {{ user.postCode }}
+                      <span class="fw-medium text-default">&#8962;: {{ user.city }} / {{user.state}}</span> 
                     </p>
                   </div>
                 </li>
