@@ -156,10 +156,10 @@ namespace UGHApi.Controllers
             }
         }
 
+        public class RedeemCouponRequest{ public string CouponCode { get; set; }}
         [HttpPost("coupon/redeem")]
         [Authorize]
-        public async Task<IActionResult> RedeemCoupon([FromBody] RedeemCouponRequest request)
-        {
+        public async Task<IActionResult> RedeemCoupon([FromBody] RedeemCouponRequest request) {
             _logger.LogInformation($"Coupon wird eingelöst userid:{_userProvider.UserId}, code:{request.CouponCode}");
             try
             {
