@@ -1,7 +1,6 @@
 ﻿using Mapster;
 using Microsoft.EntityFrameworkCore;
 using UGH.Domain.Entities;
-using UGH.Domain.Interfaces;
 using UGH.Domain.ViewModels;
 using UGHApi.Shared;
 using UGHApi.ViewModels;
@@ -9,7 +8,7 @@ using UGHApi.ViewModels.UserComponent;
 
 namespace UGH.Infrastructure.Repositories;
 
-public class OfferRepository : IOfferRepository
+public class OfferRepository
 {
     private readonly Ugh_Context _context;    
     public OfferRepository(Ugh_Context context)
@@ -77,12 +76,6 @@ public class OfferRepository : IOfferRepository
         return PaginatedList<OfferDTO>.Create(offerDTOs, totalCount, pageNumber, pageSize);
     }
 
-    public async Task AddOfferAsync(Offer offer)
-    {
-        _context.offers.Add(offer);
-        await _context.SaveChangesAsync();
-    }
-
     public async Task<OfferApplication> GetOfferApplicationAsync(int offerId, Guid userId)
     {
         return await _context
@@ -90,12 +83,6 @@ public class OfferRepository : IOfferRepository
             .FirstOrDefaultAsync(application =>
                 application.OfferId == offerId && application.UserId == userId
             );
-    }
-
-    public async Task<bool> UpdateOfferApplicationAsync(OfferApplication offerApplication)
-    {
-        _context.offerapplication.Update(offerApplication);
-        return await _context.SaveChangesAsync() > 0;
     }
 
     public async Task RemoveOfferAsync(int offerId)

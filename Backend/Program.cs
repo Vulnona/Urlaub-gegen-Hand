@@ -222,7 +222,7 @@ namespace UGHApi
             services.AddScoped<IUserMembershipRepository, UserMembershipRepository>();
             services.AddScoped<IMembershipRepository, MembershipRepository>();
 
-            services.AddScoped<IOfferRepository, UGH.Infrastructure.Repositories.OfferRepository>();
+            services.AddScoped<UGH.Infrastructure.Repositories.OfferRepository>();
             services.AddHttpContextAccessor();
         }
 

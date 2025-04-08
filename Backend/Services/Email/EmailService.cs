@@ -36,11 +36,12 @@ public class EmailService
                 await client.SendAsync(emailMessage);
                 await client.DisconnectAsync(true);
             }
+             _logger.LogInformation($"Email sent successfully to {recipientEmail}");
         }
         catch (Exception ex)
         {
-           _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
-            throw new Exception(ex.Message);
+           _logger.LogError($"Exception occurred sending Mail: {ex.Message} | StackTrace: {ex.StackTrace}");
+           // will usually not be awaited. Throwing would be useless.
         }
     }
     public async Task<bool> SendVerificationEmailAsync(string email, Guid verificationToken)

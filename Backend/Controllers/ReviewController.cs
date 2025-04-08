@@ -14,12 +14,12 @@ public class ReviewController : ControllerBase
 {
     private readonly IUserProvider _userProvider;
     private readonly ReviewRepository _reviewRepository;
-    private readonly IOfferRepository _offerRepository;
+    private readonly OfferRepository _offerRepository;
     
     public ReviewController(
         IUserProvider userProvider,
         ReviewRepository reviewRepository,
-        IOfferRepository offerRepository
+        OfferRepository offerRepository
     )
     {
         _userProvider = userProvider;
@@ -63,14 +63,10 @@ public class CreateReviewRequest
     [HttpGet("get-user-reviews")]
     public async Task<IActionResult> GetAllReviewsByUserId(Guid userId, int pageNumber = 1, int pageSize = 10)
     {
-        try
-        {
+        try {
             var reviews = await _reviewRepository.GetAllReviewsByUserIdAsync(userId, pageNumber, pageSize);
             if (reviews == null)
-            {
                 return NotFound();
-            }
-
             return Ok(reviews);
         }
         catch (Exception)
@@ -88,9 +84,7 @@ public class CreateReviewRequest
             var reviews = await _reviewRepository.GetReviewsByOfferIdAsync(offerId, pageNumber, pageSize);
             
             if (reviews == null)
-            {
                 return NotFound();
-            }
 
             return Ok(reviews);
         }

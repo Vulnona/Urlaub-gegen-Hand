@@ -15,7 +15,6 @@ public interface IUserRepository
     Task DeleteUserAsync(Guid userId);
     Task SaveChangesAsync();
     Task<User> GetUserByEmailAsync(string email);
-    Task<User> GetUserWithMembershipAsync(Guid userId);
     Task<User> GetUserWithRatingByIdAsync(Guid userId);
     Task AddUserMembership(UserMembership userMembership);
     Task<User> GetUserForMembershipByIdAsync(Guid userId);
