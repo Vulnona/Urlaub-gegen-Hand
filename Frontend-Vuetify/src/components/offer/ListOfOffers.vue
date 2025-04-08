@@ -114,7 +114,7 @@ const fetchOffers = async(newPage:Number) => {
 }
 const respondToOffer = async (reviewId:Number, userId:Number, approve:Boolean) => {
     try {
-        const response = await axiosInstance.put(`${process.env.baseURL}offer/update-application-status?offerId=${reviewId}&isApprove=${approve}&userId=${userId}`);
+        const response = await axiosInstance.put(`${process.env.baseURL}offer/update-application-status?offerId=${reviewId}&isApproved=${approve}&userId=${userId}`);
         const index = offers.findIndex(item => item.id === reviewId);
         if (index !== -1) {
             if(approve)
