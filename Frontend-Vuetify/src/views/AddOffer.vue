@@ -189,6 +189,7 @@ const onFileChange = (event) => {
     }
 
 onMounted(async () => {
+    Securitybot();
     loading.value = true;
     accommodations = (await axiosInstance.get(`${process.env.baseURL}accommodation/get-all-accommodations`)).data;
     suitableAccommodations = (await axiosInstance.get(`${process.env.baseURL}accommodation-suitability/get-all-suitable-accommodations`)).data;
