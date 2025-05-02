@@ -5,14 +5,14 @@ FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build-env
 ENV PATH $PATH:/root/.dotnet/tools
 
 # Install dotnet-ef tool globally
-RUN dotnet tool install -g dotnet-ef --version 7.0.10
+RUN dotnet tool install -g dotnet-ef --version 7.0.20
 
 WORKDIR /app
 
 # run the dotnet restore as a seperate step to allow docker to cache the result
 COPY ./Backend/UGHApi.csproj /app/Backend/UGHApi.csproj
 RUN dotnet restore /app/Backend/UGHApi.csproj
-
+    
 # Copy backend source code
 COPY ./Backend /app/Backend
 
@@ -26,4 +26,5 @@ RUN dotnet build --no-restore
 RUN dotnet tool restore
 
 # Entry point to execute database migrations
-ENTRYPOINT ["dotnet", "ef", "database", "update"]
+#ENTRYPOINT ["dotnet", "ef", "database", "update"]
+ENTRYPOINT ["sleep", "infinity"]

@@ -1,9 +1,13 @@
-using Microsoft.AspNetCore.Mvc;
-using UGHModels;
-using UGHApi.Services;
-using UGHApi.Models;
-using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
+using MediatR;
+using Microsoft.AspNetCore.Mvc;
+using UGH.Application.Authentication;
+using UGH.Contracts.Authentication;
+using UGHApi.Applications.Authentication;
+using UGHApi.Services.UserProvider;
+using UGH.Infrastructure.Services;
+using UGH.Domain.Interfaces;
+using UGH.Domain.Entities;
 
 namespace UGHApi.Controllers
 {
@@ -11,27 +15,32 @@ namespace UGHApi.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private readonly UghContext _context;
-        private readonly UserService _userService;
+        private readonly Ugh_Context _context;
+        private readonly ILogger<AuthController> _logger;
+        private readonly IMediator _mediator;
+        private readonly IUserRepository _userRepository;
+        private readonly IUserProvider _userProvider;
+        private readonly TokenService _tokenService;
         private readonly EmailService _emailService;
         private readonly PasswordService _passwordService;
-        private readonly IConfiguration _configuration;
-        private readonly TokenService _tokenService;
-        private readonly ILogger<AuthController> _logger;
+        private readonly UserService _userService;        
 
-        public AuthController(UghContext context, EmailService emailService, UserService userService, PasswordService passwordService, IConfiguration configuration, TokenService tokenService, ILogger<AuthController> logger)
+        public AuthController(Ugh_Context context, ILogger<AuthController> logger, IMediator mediator, TokenService tokenService, IUserRepository userRepository, EmailService emailService, PasswordService passwordService,IUserProvider userProvider, UserService userService)
         {
             _context = context;
-            _emailService = emailService;
-            _userService = userService;
-            _passwordService = passwordService;
-            _configuration = configuration;
-            _tokenService = tokenService;
             _logger = logger;
+            _mediator = mediator;
+            _tokenService = tokenService;
+            _emailService = emailService;
+            _userRepository = userRepository;
+            _passwordService = passwordService;
+            _userProvider = userProvider;
+            _userService = userService;
         }
+
         #region user-authorization
         [HttpPost("register")]
-        public async Task<ActionResult> Register([FromBody] RegisterRequest request)
+        public async Task<IActionResult> Register([FromBody] RegisterUserCommand command)
         {
             try
             {
@@ -40,128 +49,66 @@ namespace UGHApi.Controllers
                     return BadRequest(ModelState);
                 }
 
-                else if (await _context.users.AnyAsync(u => u.Email_Address.ToLower().Equals(request.Email_Address.ToLower())))
+                var response = await _mediator.Send(command);
+
+                if (response.IsFailure)
                 {
-                    return Conflict("E-Mail Adresse existiert bereits");
+                    return BadRequest(new { Error = response.Error });
                 }
-
-                DateTime parsedDateOfBirth = DateTime.Parse(request.DateOfBirth);
-                DateOnly dateOnly = new DateOnly(parsedDateOfBirth.Year, parsedDateOfBirth.Month, parsedDateOfBirth.Day);
-
-                var salt = _passwordService.GenerateSalt();
-                var hashPassword = _passwordService.HashPassword(request.Password, salt);
-
-                var newUser = new User(
-                    request.FirstName,
-                    request.LastName,
-                    dateOnly,
-                    request.Gender,
-                    request.Street,
-                    request.HouseNumber,
-                    request.PostCode,
-                    request.City,
-                    request.Country,
-                    request.Email_Address,
-                    false,
-                    hashPassword,
-                    salt,
-                    request.Facebook_link,
-                    request.Link_RS,
-                    request.Link_VS,
-                    request.State
-                );
-
-                newUser.VerificationState = UGH_Enums.VerificationState.IsNew;
-
-                await _context.users.AddAsync(newUser);
-                await _context.SaveChangesAsync();
-                _logger.LogInformation("New user registered successfully. UserName:{Email}", newUser.Email_Address);
-                var getRegisteredUser = await _context.users.FirstOrDefaultAsync(u => u.Email_Address == request.Email_Address);
-                var newUserProfile = new UserProfile
-                {
-                    User_Id = getRegisteredUser.User_Id,
-                };
-
-                await _context.userprofiles.AddAsync(newUserProfile);
-                await _context.SaveChangesAsync();
-
-                var defaultUserRole = await _context.userroles.FirstOrDefaultAsync(r => r.RoleName == "User");
-                if (defaultUserRole != null)
-                {
-                    var userRoleMapping = new UserRoleMapping
-                    {
-                        UserId = newUser.User_Id,
-                        RoleId = defaultUserRole.RoleId
-                    };
-                    await _context.userrolesmapping.AddAsync(userRoleMapping);
-                    await _context.SaveChangesAsync();
-                }
-
-                var verificationToken = _tokenService.GenerateNewEmailVerificator(newUser.User_Id);
-                await _emailService.SendVerificationEmailAsync(newUser.Email_Address, verificationToken);
-
-                return Ok(newUser);
+                return Ok(response);
             }
             catch (Exception ex)
             {
-                _logger.LogInformation("Errors while registering UserName:{Email}", request.Email_Address);
-                _logger.LogInformation(ex.Message,$"{ex.StackTrace}");
-                return StatusCode(400, $"Bad Request {ex.Message}");
-            }
-        }
-
-        [HttpGet("verify-email")]
-        public async Task<IActionResult> Verify([Required]string token)
-        {
-            try
-            {
-                var user = await _userService.GetUserByTokenAsync(token);
-                if (user == null)
-                {
-                    return NotFound("Invalid token");
-                }
-
-                user.IsEmailVerified = true;
-                await _context.SaveChangesAsync();
-                return Ok("Email verified successfully");
-            }
-            catch (Exception ex)
-            {
-               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
-                return StatusCode(500, $"Internal server error: {ex.Message}");
+                _logger.LogWarning($"Conflict: {ex.Message}");
+                return Conflict(new { errorMessage = ex.Message });
             }
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login(LoginModel model)
+        public async Task<IActionResult> Login([FromBody] LoginCommand command)
         {
             try
             {
                 if (!ModelState.IsValid)
                 {
+                    _logger.LogError($"Bad request: {ModelState}");
                     return BadRequest(ModelState);
                 }
-                var userValid = _userService.ValidateUser(model.Email, model.Password);
 
-                var user = await _context.users.FirstOrDefaultAsync(u => u.Email_Address == model.Email);
-                if (userValid.IsValid)
-                {
-                    var accessToken = await _tokenService.GenerateJwtToken(model.Email, user.User_Id.ToString());
-                    var refreshToken = _tokenService.GenerateRefreshToken();
-                    _tokenService.StoreRefreshToken(refreshToken, model.Email);
+                var response = await _mediator.Send(command);
 
-                    return Ok(new { accessToken, refreshToken, model.Email, user.User_Id, user.FirstName });
-                }
-                else
+                if (response.IsFailure)
                 {
-                    return Unauthorized(new { errorMessage = userValid.ErrorMessage });
+                    _logger.LogError($"unauthorized: {response.Error.Message}");
+                    return Unauthorized(
+                        new { Code = response.Error.Code, Message = response.Error.Message }
+                    );
                 }
+
+                return Ok(response.Value);
             }
             catch (Exception ex)
             {
-               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
                 return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
 
+        [HttpGet("verify-email")]
+        public async Task<IActionResult> Verify([Required] string token)
+        {
+            try
+            {
+                var (htmlContent, mimeType) = await _mediator.Send(new VerifyEmailCommand(token));
+                return Content(htmlContent, mimeType);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Exception: {ex.Message} | {ex.StackTrace}");
+                return Content(
+                    $"<html><body><h1>Internal Server Error</h1><p>{ex.Message}</p></body></html>",
+                    "text/html"
+                );
             }
         }
 
@@ -170,56 +117,128 @@ namespace UGHApi.Controllers
         {
             try
             {
-                if (!_tokenService.TryGetUserEmail(request.RefreshToken, out var Email))
+                var command = new RefreshTokenCommand(request.RefreshToken);
+                var result = await _mediator.Send(command);
+
+                if (result.IsFailure)
                 {
-                    return Unauthorized();
+                    return Unauthorized(result.Error);
                 }
 
-                var accessToken = await _tokenService.GenerateJwtToken(Email, string.Empty); 
-                return Ok(new { accessToken });
+                return Ok(result);
             }
             catch (Exception ex)
             {
-               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
 
         [HttpPost("resend-email-verification")]
-        public async Task<IActionResult> ResendVerificationEmail([FromBody] ResendEmailVerification resentUrl)
+        public async Task<IActionResult> ResendVerificationEmail([FromBody] ResendEmailVerification resendUrl)
         {
             try
             {
-                if (!ModelState.IsValid)
-                {
+                if (!ModelState.IsValid)                
                     return BadRequest(ModelState);
-                }
-                if (string.IsNullOrEmpty(resentUrl.Email) || !_emailService.IsValidEmail(resentUrl.Email))
-                {
-                    return BadRequest("Invalid email address.");
-                }
-                var user = await _userService.GetUserByEmailAsync(resentUrl.Email);
+                
+                if (string.IsNullOrEmpty(resendUrl.Email) || !_emailService.IsValidEmail(resendUrl.Email))
+                    return BadRequest();
+                
+                var user = await _userRepository.GetUserByEmailAsync(resendUrl.Email);
                 if (user == null)
-                {
-                    return NotFound("User not found.");
-                }
+                    return NotFound();
+                
                 var verificationToken = _tokenService.GenerateNewEmailVerificator(user.User_Id);
-
-                // Send verification email asynchronously
-                var emailSent = await _emailService.SendVerificationEmailAsync(resentUrl.Email, verificationToken);
+                var emailSent = await _emailService.SendVerificationEmailAsync(resendUrl.Email, verificationToken);
                 if (!emailSent)
-                {
                     return StatusCode(500, "Failed to send verification email.");
-                }
 
                 return Ok("Verification email sent successfully.");
             }
             catch (Exception ex)
             {
-               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResendEmailVerification resendUrl)
+        {
+            try
+            {
+                if (!ModelState.IsValid)                
+                    return BadRequest(ModelState);
+                
+                if (string.IsNullOrEmpty(resendUrl.Email) || !_emailService.IsValidEmail(resendUrl.Email))
+                    return BadRequest();
+                
+                var user = await _userRepository.GetUserByEmailAsync(resendUrl.Email);
+                if (user == null)
+                    return NotFound();
+                
+                var token = _tokenService.GenerateNewPasswordResetToken(user.User_Id);
+                var emailSent = await _emailService.SendResetPasswordEmailAsync(resendUrl.Email, token);
+                if (!emailSent)
+                    return StatusCode(500, "Failed to send email.");
+
+                return Ok("Password reset token send successfully.");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        public class Password{
+            public String NewPassword{get; set;}
+            public String Token{get; set;}
+        }
+
+        [HttpPut("change-password")]
+        public async Task<IActionResult> ChangePassword([FromBody] Password pw)
+        {            
+            var userId = _userProvider.UserId;
+            User user = await _context.users.FindAsync(userId);
+            if (user == null)
+                user = await _userService.GetUserByPasswordResetTokenAsync(pw.Token);            
+            if (user == null)
+                return BadRequest();                           
+            try {                
+                var salt = _passwordService.GenerateSalt();
+                user.Password =  _passwordService.HashPassword(pw.NewPassword, salt);
+                user.SaltKey = salt;
+                await _userRepository.UpdateUserAsync(user);
+                return Ok("Passwort erfolgreich geändert");
+            } catch {
+                return StatusCode(500, new { Message = "Error"});
+            }            
+        }
+
+        
+        
+        [HttpPost("upload-id")]
+        public async Task<IActionResult> UploadFile(
+            [FromQuery] Guid userId,
+            IFormFile fileRS,
+            IFormFile fileVS
+        )
+        {
+            try
+            {
+                var command = new UploadFilesCommand(fileRS, fileVS, userId);
+                var result = await _mediator.Send(command);
+
+                return Ok(new { result.LinkRS, result.LinkVS });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred while uploading files. Error: {ex}");
+            }
+        }
+
         #endregion
     }
 }

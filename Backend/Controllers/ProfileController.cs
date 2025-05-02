@@ -1,126 +1,206 @@
-using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
-using System.ComponentModel.DataAnnotations;
-using UGHApi.Models;
-using UGHApi.Services;
+using UGHApi.Services.UserProvider;
+using UGH.Infrastructure.Services;
+using UGH.Application.Profiles;
+using Microsoft.AspNetCore.Mvc;
+using UGH.Application.Profile;
+using UGH.Domain.ViewModels;
+using UGH.Contracts.Profile;
+using MediatR;
+using UGH.Domain.Interfaces;
 
-namespace UGHApi.Controllers
+using UGH.Domain.Entities;
+using UGH.Domain.Core;
+
+namespace UGHApi.Controllers;
+
+[Route("api/profile")]
+[ApiController]
+[Authorize]
+public class ProfileController : ControllerBase
 {
-    [Route("api/profile")]
-    [ApiController]
-    public class ProfileController : ControllerBase
+    private readonly Ugh_Context _context;
+    private readonly TokenService _tokenService;
+    private readonly ILogger<ProfileController> _logger;
+    private readonly IMediator _mediator;
+    private readonly IUserProvider _userProvider;
+    private readonly IUserRepository _userRepository;
+    
+    public ProfileController(
+        Ugh_Context context,
+        IMediator mediator,
+        TokenService tokenService,
+        ILogger<ProfileController> logger,
+        IUserProvider userProvider,
+        IUserRepository userRepository
+    )
     {
-        private readonly UghContext _context;
-        private readonly TokenService _tokenService;
-        private readonly ILogger<ProfileController> _logger;
-
-        public ProfileController(UghContext context, TokenService tokenService, ILogger<ProfileController> logger)
-        {
-            _context = context;
-            _tokenService = tokenService;
-            _logger = logger;
-        }
-        #region user-profile
-        [HttpGet("get-user-profile")]
-        public async Task<IActionResult> GetProfile([Required]string token)
-        {
-            try
-            {
-                var userAccessId = await _tokenService.GetUserIdFromToken(token);
-                if (userAccessId == null)
-                {
-                    return Unauthorized();
-                }
-                var userId = userAccessId.Value;
-                var userProfile = await _context.userprofiles.Include(u => u.User).FirstOrDefaultAsync(p => p.User_Id == userId);
-                if (userProfile == null)
-                {
-                    var newUserProfile = new UserProfile
-                    {
-                        User_Id = userId,
-                    };
-
-                    _context.userprofiles.Add(newUserProfile);
-                    await _context.SaveChangesAsync();
-                    userProfile = await _context.userprofiles.Include(u => u.User).FirstOrDefaultAsync(p => p.User_Id == userId);
-                }
-
-                return Ok(new { Profile = userProfile });
-            }
-            catch (Exception ex)
-            {
-               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
-        }
-
-        [HttpPut("add-or-update-profile")]
-        public async Task<IActionResult> UpdateProfile([Required]string token, [FromBody] UserProfile profile)
-        {
-            try
-            {
-                if (!ModelState.IsValid)
-                {
-                    return BadRequest(ModelState);
-                }
-                var accessUserId = await _tokenService.GetUserIdFromToken(token);
-
-                if (accessUserId == null)
-                {
-                    return Unauthorized();
-                }
-
-                var userId = accessUserId.Value;
-
-                if (profile == null || profile.User_Id != userId)
-                {
-                    return BadRequest();
-                }
-
-                var existingProfile = await _context.userprofiles.Include(p => p.User).FirstOrDefaultAsync(p => p.User_Id == userId);
-                if (existingProfile == null)
-                {
-                    _context.userprofiles.Add(profile);
-                    await _context.SaveChangesAsync();
-                    return Ok(profile);
-                }
-
-                existingProfile.Hobbies = profile.Hobbies;
-                existingProfile.Options = profile.Options;
-                if (profile.UserPic != null)
-                {
-                    existingProfile.UserPic = profile.UserPic;
-                }
-
-                if (profile.User != null)
-                {
-                    existingProfile.User.FirstName = profile.User.FirstName;
-                    existingProfile.User.LastName = profile.User.LastName;
-                    existingProfile.User.DateOfBirth = profile.User.DateOfBirth;
-                    existingProfile.User.Gender = profile.User.Gender;
-                    existingProfile.User.Street = profile.User.Street;
-                    existingProfile.User.HouseNumber = profile.User.HouseNumber;
-                    existingProfile.User.PostCode = profile.User.PostCode;
-                    existingProfile.User.City = profile.User.City;
-                    existingProfile.User.State = profile.User.State;
-                    existingProfile.User.Country = profile.User.Country;
-                    existingProfile.User.Facebook_link = profile.User.Facebook_link;
-                    existingProfile.User.Link_RS = profile.User.Link_RS;
-                    existingProfile.User.Link_VS = profile.User.Link_VS;
-                }
-
-                _context.userprofiles.Update(existingProfile);
-                _context.users.Update(existingProfile.User);
-                await _context.SaveChangesAsync();
-
-                return Ok(existingProfile);
-            }
-            catch (Exception ex)
-            {
-               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
-        }
-        #endregion
+        _context = context;
+        _tokenService = tokenService;
+        _logger = logger;
+        _mediator = mediator;
+        _userProvider = userProvider;
+        _userRepository = userRepository;
     }
+
+    #region user-profile
+    [Authorize]
+    [HttpGet("get-user-profile")]
+    public async Task<IActionResult> GetProfile()
+    {
+        try
+        {
+            var userId = _userProvider.UserId;
+            var query = new GetUserProfileQuery(userId);
+            var userProfile = await _mediator.Send(query);
+
+            return Ok(new { Profile = userProfile });
+        }
+        catch (UnauthorizedAccessException)
+        {
+            return Unauthorized();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+            return StatusCode(500, $"Internal server error: {ex.Message}");
+        }
+    }
+
+    [Authorize]
+    [HttpPut("update-profile")]
+    public async Task<IActionResult> UpdateProfile([FromBody] UserProfile profile)
+    {
+        var userId = _userProvider.UserId;
+        try
+        {
+            var user = await _userRepository.GetUserByIdAsync(userId);
+            if (user is null)
+                return StatusCode(500, "User is Null");
+            if (profile != null)
+            {
+                user.Skills = profile.Skills;
+                user.Hobbies = profile.Hobbies;                
+                await _userRepository.UpdateUserAsync(user);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+            return StatusCode(500, "Error updating User Data.");
+        }
+        return Ok("User Profile updated successfully");
+    }
+
+    [Authorize]
+    [HttpPut("update-user-data")]
+    public async Task<IActionResult> UpdateProfile([FromBody] UserData profile)
+    {
+        var userId = _userProvider.UserId;
+        try
+        {
+            var user = await _userRepository.GetUserByIdAsync(userId);
+            if (user is null)
+                return StatusCode(500, "User is Null");
+            if (profile != null)
+            {
+                user.FirstName = profile.FirstName;
+                user.LastName = profile.LastName;
+                user.DateOfBirth = profile.DateOfBirth;
+                user.Gender = profile.Gender;
+                user.Street = profile.Street;
+                user.HouseNumber = profile.HouseNumber;
+                user.PostCode = profile.PostCode;
+                user.City = profile.City;
+                user.State = profile.State;
+                user.Country = profile.Country;
+                user.VerificationState = UGH_Enums.VerificationState.IsNew;
+                await _userRepository.UpdateUserAsync(user);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+            return StatusCode(500, "Error updating User Data.");
+        }
+        return Ok("User Data updated successfully");
+    }
+    
+    [Authorize]
+    [HttpPut("update-profile-picture")]
+    public async Task<IActionResult> UpdateProfilePicture(ProfilePictureUpdateRequest request)
+    {
+        try
+        {
+            var userId = _userProvider.UserId;
+            var command = new UpdateProfilePictureCommand(userId, request.ProfilePicture);
+            var result = await _mediator.Send(command);
+
+            if (result.IsFailure)
+            {
+                return BadRequest(result.Error);
+            }
+
+            return Ok("Profile picture updated successfully.");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+            return StatusCode(500, $"Internal server error: {ex.Message}");
+        }
+    }
+    // get another users profile.
+    [HttpGet("get-user-profile/{userId}")]
+    public async Task<IActionResult> GetProfile(Guid userId)
+    {
+        var callerId = _userProvider.UserId;
+         // implement as generell user verification check helper function
+         try {            
+             User caller = await _context.users.FindAsync(callerId);
+             if (caller.VerificationState != UGH_Enums.VerificationState.Verified){
+                 _logger.LogWarning($"Unverified User:{_userProvider.UserId} attempts to access the profile of {userId}");
+                 return StatusCode(403, "forbidden"); 
+             }
+         } catch {
+             _logger.LogError($"Error checking the verification status of {_userProvider.UserId}");
+             return StatusCode(500, new { Message = "Authentication Error"});
+         }
+         try {
+            User user = await _context.users.FindAsync(userId);
+            if (user == null) {
+                throw new Exception("User not found.");
+            }
+            // todo: move to more suitable location
+            double averageRating = 0;            
+            var reviews = await _context.reviews.AsQueryable().Where(r => r.Reviewed.User_Id == user.User_Id).ToListAsync();
+            if (reviews.Count() > 0)                
+                averageRating= Math.Round(reviews.Average(r => r.RatingValue), 1);
+            var profile = new VisibleProfile
+            {
+                UserId = user.User_Id,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                ProfilePicture = user.ProfilePicture,
+                Age =  (int.Parse(DateTime.Today.ToString("yyyyMMdd")) - int.Parse(user.DateOfBirth.ToString("yyyyMMdd")))/10000,
+                Gender = user.Gender,
+                City = user.City,
+                Country = user.Country,
+                State = user.State,
+                FacebookLink = user.Facebook_link,
+                AverageRating = averageRating,
+            };
+            if (user.Hobbies != null)
+                profile.Hobbies = user.Hobbies.Split(',').Select(h => h.Trim()).ToList() ?? new List<string>();
+            if (user.Skills != null)
+                profile.Skills = user.Skills.Split(',').Select(h => h.Trim()).ToList() ?? new List<string>();
+            return Ok(profile);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+            return StatusCode(500, new { Message = "Internal server error", Details = ex.Message });
+        }
+    }
+    #endregion
 }

@@ -1,463 +1,345 @@
+<style>
+body .custom-card {
+  padding: 0;
+}
+
+body .custom-card .card-title {
+  font-size: 20px;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+body .custom-card .card-text {
+  font-size: 14px;
+}
+
+body .custom-card .button-container .btn {
+  padding: 5px 9px;
+  font-size: 14px !important;
+}
+
+/*
+  .rating-buttons {
+    margin-bottom: 20px;
+  }
+  */
+.rating-modal-content {
+  padding: 0;
+  border: none;
+}
+
+.swal2-textarea {
+  margin: 0;
+  width: 100%;
+}
+
+.user-info {
+  width: 100%;
+  margin: auto;
+}
+
+.user-details-container {
+  font-size: 16px;
+}
+
+.user-info a {
+  width: 250px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: inline-block;
+  white-space: nowrap;
+  vertical-align: bottom;
+}
+
+.card-offer {
+  cursor: pointer;
+}
+
+.card-offer:hover .card-title {
+  color: rgb(0, 189, 214);
+}
+
+body .custom-card .card-text strong {
+  font-weight: 500;
+}
+</style>
 <template>
-  <div class="bg-ltgrey pt-40 pb-40">
+  <PublicNav />
+  <Navbar />
+  <section class="section_space  Offer_search_layout">
+    <div class="offer_search_overlay"></div>
     <div class="container">
       <div class="row">
         <div class="col-sm-12">
-          <div class="SearchBox_filter flexBox justify-content-center align-items-center">
-            <label class="f-14 mb-0">Suchen Sie nach Angeboten</label>
-            <div class="SearchBox">
-              <i class="ri-search-line"></i>
-              <input type="text" v-model="searchTerm" @input="searchOffers"
-                placeholder="Search offers / Region / Skills" class="form-control ">
-            </div>
-            <div class="btn_outer">
-              <button type="button" class="btn themeBtn">Suchen</button>
-            </div>
+          <div class="text-center main_center_title">
+            <h2>Suchen Sie nach Angeboten</h2>
+            <p>Looking for your dream vacation destination but don't know where to start? With the help of experienced
+              <br> and knowledgeable travel agents, you can plan the trip of a lifetime with ease.
+            </p>
           </div>
-        </div>
-      </div>
-      <div v-if="offers">
-        <div v-if="loading" class="text-center">Lädt...</div>
-        <div v-else class="row">
-          <div v-for="offer in filteredOffers" :key="offer.id" class="col-md-4 mb-4">
-            <div class="card">
-              <img @click="redirectToOfferDetail(offer.id)" v-if="offer.imageData"
-                :src="'data:' + offer.imageMimeType + ';base64,' + offer.imageData" class="card-img-top"
-                alt="Offer Image">
-              <div class="card-body">
-                <div @click="redirectToOfferDetail(offer.id)">
-                  <h3 class="card-title">{{ offer.title }}</h3>
-                  <p class="card-text">{{ truncateDescription(offer.description) }}</p>
-                  <p class="card-text"><strong>Fähigkeiten:</strong> {{ offer.skills }}</p>
-                  <p class="card-text"><strong>Unterbringung:</strong> {{ offer.accomodation }}</p>
-                  <p class="card-text"><strong>Geeignet für:</strong> {{ offer.accomodationsuitable }}</p>
-                  <p class="card-text"><strong>Ort:</strong> {{ offer.state }}</p>
-                </div>
-                <div v-if="offer.user.user_Id != logId">
-                  <div class="button-container" v-if="userRole != 'Admin'">
-                    <button :class="['btn', getButtonColor(offer.id)]" @click.stop="handleButtonClick(offer)">
-                      {{ getStatusText(offer) }}
-                    </button>
-                    <button v-if="getStatus(offer.id) === 'ViewDetails'" class="btn btn-secondary"
-                      @click.stop="showAddReviewModal(offer)">
-                      Add Review
-                    </button>
-                    <button v-if="getStatus(offer.id) === 'ViewDetails'"
-                      @click="showAddRatingModal(offer.id, currentUserId)" class="btn themeCancelBtn m-0"><i
-                        class="ri-star-line"></i></button>
-                  </div>
-                </div>
+          <div class="offer_search_content" ref="searchContent">
+            <div class="SearchBox_filter flexBox align-items-center">
+              <div class="SearchBox">
+                <i class="ri-search-line"></i>
+                <input type="text"  v-model="searchTerm" @input="resetSearch(this.searchTerm)"
+                  placeholder="Suche Angebote / Regionen / Skills" class="form-control "
+                  @keyup.enter="debouncedSearch">
+              </div>
+              <div class="btn_outer">
+                <button type="button"  @click="debouncedSearch" class="btn themeBtn">Suchen</button>
               </div>
             </div>
           </div>
         </div>
       </div>
-      <div v-else>
-        <h2 class="text-center">No Offers Found!</h2>
+    </div>
+  </section>
+  <section class="section_space">
+    <div class="container">
+      <div class="row">
+        <div class="col-sm-12">
+          <div v-if="offers" class="offers_group">
+            <div v-if="loading" class="spinner-container text-center">
+              <div class="spinner"></div>
+            </div>
+            <div v-else class="row">
+              <div v-for="(offer, index) in offers" :key="offer.id" class="col-md-3 mb-4">
+                <OfferCard :offer=offer :logId=logId :isActiveMember=isActiveMember />
+              </div>
+            </div>
+            <!-- Pagination Section -->
+            <div class="pagination">
+              <button class="action-link" @click="changePage(currentPage - 1)" :hidden="currentPage === 1"><i
+                  class="ri-arrow-left-s-line"></i>Previous</button>
+              <span>Page {{ currentPage }} of {{ totalPages }}</span>
+              <button class="action-link" @click="changePage(currentPage + 1)"
+                :hidden="currentPage === totalPages">Next<i class="ri-arrow-right-s-line"></i></button>
+            </div>
+          </div>
+          <div v-else>
+            <h2 class="text-center">No Offers Found!</h2>
+          </div>
+        </div>
       </div>
     </div>
-    <div id="rating-modal" v-if="showModal">
-      <div class="modal-content">
-        <h3>Bewertung hinzufügen</h3>
-        <div id="rating-stars">
-          <span class="star rating-star" v-for="n in 5" :key="n" :data-value="n" @click="selectStar(n)"
-            :class="{ 'selected': n <= selectedRating }"></span>
+  </section>
+  <div v-if="showRatingModal" class="overlay"></div>
+  <div id="rating-modal" class="rating-modal" v-if="showRatingModal">
+    <div class="modal-content rating-modal-content">
+      <div class="review_rating_layout">
+        <div class="review_header">
+          <div class="photo">
+            <img
+              :src="'data:' + offers[this.currentIndex].imageMimetype + ';base64,' + offers[this.currentIndex].imageData"
+              alt="Offer Image" />
+          </div>
+          <div class="rightSideBox">
+            <h5>{{ offers[this.currentIndex].title }}</h5>
+            <p class="hostName"> {{ offers[this.currentIndex].hostName }}</p>
+          </div>
         </div>
-        <button @click="submitRating">Submit</button>
-        <button @click="cancelRating">Cancel</button>
+        <div class="rating_flexBox">
+          <p>Add Rating</p>
+          <div id="rating-stars">
+            <span class="star ri-star-fill" v-for="n in 5" :key="n" :data-value="n" @click="selectStar(n)"
+              :class="{ 'selected': n <= selectedRating }"></span>
+          </div>
+        </div>
+        <div class="review_box">
+          <p>Write a review</p>
+          <textarea class="textarea form-control" style="height: 120px;" v-model="reviewText">
+                        Bitte gebt die gegenseitige Bewertung erst ab, nachdem diese terminlich abgeschlossen ist.
+                      </textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <div class="rating-buttons">
+        <button @click="submitRating" class="btn common-btn themeBtn">Submit</button>
+        <button @click="cancelRating" class="btn common-btn btn-cancel">Cancel</button>
       </div>
     </div>
   </div>
 </template>
-<script>
-import router from '@/router';
-import axios from 'axios';
-import Swal from 'sweetalert2';
-import VueJwtDecode from 'vue-jwt-decode';
-import CryptoJS from 'crypto-js';
 
-window.FontAwesomeConfig = { autoReplaceSvg: false };
-let globalLogid = '';
-let globalEmail = '';
-let globalrating = '';
-let globalIsTrue = '';
-let globalRole = '';
+<script setup lang="ts">
+import OfferCard from '@/components/offer/OfferCard.vue';
+</script>
+<script lang="ts">
+import Navbar from '@/components/navbar/Navbar.vue';
+import axiosInstance from '@/interceptor/interceptor';
+import PublicNav from '@/components/navbar/PublicNav.vue';
+import {isActiveMembership,GetUserRole} from '@/services/GetUserPrivileges';
+import getLoggedUserId from '@/services/LoggedInUserId';
+import Swal from "sweetalert2";
+import router from "@/router";
+import toast from '@/components/toaster/toast';
+import debounce from 'lodash/debounce';
+
+
+function scrollToTargetElement() {
+  const targetElement = document.querySelector('.Offer_search_layout');
+  if (targetElement) {
+    targetElement.scrollIntoView({ behavior: 'smooth' });
+    return true;
+  }
+  return false; 
+}
+
 export default {
+  components: {
+    Navbar,
+      PublicNav,
+  },
   data() {
     return {
       loading: true,
       offers: [],
       searchTerm: '',
       statusMap: {},
-      logId: '',
+      logId: getLoggedUserId(),
       showModal: false,
       selectedRating: 0,
       currentOfferId: null,
-      userRole: ''
+      userRole: GetUserRole(),
+      isActiveMember: isActiveMembership(),
+      searchTimeout: null,
+      reviewText: '',
+      showRatingModal: false,
+      currentIndex: 0,
+      currentPage: 1,
+      totalPages: 1,
+      pageSize: 12,
     };
   },
   mounted() {
-    this.checkLoginStatus(); 
-    this.fetchOffers(); 
-    this.Securitybot(); 
-    //  this.isActiveMembership();
+    this.debouncedSearchOffers = debounce(this.searchOffers, 300);
+    this.fetchOffers();
   },
   methods: {
-    // Method to check login status and decrypt relevant data
-    checkLoginStatus() {
-      const token = sessionStorage.getItem("token");
-      if (token) {
-        const testlogid = this.decryptlogID(sessionStorage.getItem("logId"));
-        globalLogid = testlogid;
-        this.logId = testlogid;
-        globalEmail = this.decryptToken(sessionStorage.getItem("logEmail"));
-        const decryptedToken = this.decryptToken(token);
-        if (decryptedToken) {
-          const decodedToken = VueJwtDecode.decode(decryptedToken);
-          this.userRole = decodedToken[`${process.env.claims_Url}`] || '';
-          globalRole = this.userRole;
-        } else {
-          sessionStorage.removeItem('token');
-        }
+    resetSearch(search) {
+      if (search == '') {
+        this.fetchOffers();
       }
     },
-    // Method to decrypt AES encrypted token
-    decryptToken(encryptedToken) {
-      try {
-        const bytes = CryptoJS.AES.decrypt(encryptedToken, process.env.SECRET_KEY);
-        return bytes.toString(CryptoJS.enc.Utf8);
-      } catch (e) {
-        console.error('Error decrypting token:', e);
-        return null;
-      }
-    },
-    // Method to decrypt AES encrypted logID
-    decryptlogID(encryptedItem) {
-      try {
-        const bytes = CryptoJS.AES.decrypt(encryptedItem, process.env.SECRET_KEY);
-        const decryptedString = bytes.toString(CryptoJS.enc.Utf8);
-        return parseInt(decryptedString, 10).toString();
-      } catch (e) {
-        console.error('Error decrypting item:', e);
-        return null;
-      }
-    },
-    // Method to enforce security by verifying token existence
-    Securitybot() {
-      if (!sessionStorage.getItem("token")) {
-        Swal.fire({
-          title: 'You are not logged In!',
-          text: 'Login First to continue.',
-          icon: 'info',
-          confirmButtonText: 'OK'
-        });
-        router.push('/login'); 
-      }
-    },
-
-    async isActiveMembership() {
-      if (globalRole != 'Admin') {
-        try {
-          const decLogId = this.decryptlogID(sessionStorage.getItem("logId"));
-          const response = await axios.get(`${process.env.baseURL}membership/check-active-membership-byuserId/${decLogId}`);
-
-          globalIsTrue = response.data.isActive;
-          if (globalIsTrue != true) {
-            setTimeout(() => {
-              Swal.fire({
-                title: 'Mitgliedschaft abgelaufen!',
-                text: 'Deine Mitgliedschaft ist abgelaufen. Bitte erneuere deine Mitgliedschaft.',
-                html: `
-          <p>Deine Mitgliedschaft ist abgelaufen. Bitte erneuere deine Mitgliedschaft.</p>
-              <input type="text" id="swal-input1" class="swal2-input" placeholder="Subscription ID">
-            <a href="https://alreco.company.site/" target="_blank" class="swal2-confirm swal2-styled" style="display: inline-block; margin-top: 10px;">Klicke, um eine Mitgliedschaft zu kaufen</a>
-        `,
-                icon: 'error',
-                confirmButtonText: 'Senden',
-                confirmButtonText: 'OK'
-              }).then(() => {
-                router.push('/login'); 
-                sessionStorage.clear();
-                setTimeout(() => {
-                  window.location.reload();
-                }, 500);
-              });
-            }, 500);
-            router.push('/login'); 
-          } else {
-            // console.log("Active membership");
-          }
-
-        } catch (error) {
-          if (error.response) {
-            console.error("Error response:", error.response.data);
-            Swal.fire({
-              title: 'Keine Mitgliedschaft gefunden!',
-              html: `
-          <p>Es konnte keine Mitgliedschaft gefunden werden. Bitte kaufe eine Mitgliedschaft.</p>
-            
-            <a href="https://alreco.company.site/" target="_blank" class="swal2-confirm swal2-styled" style="display: inline-block; margin-top: 10px;">Klicken, um Mitgliedschaft zu kaufen</a>
-        `,
-              text: 'Es konnte keine Mitgliedschaft gefunden werden. Bitte kaufe eine Mitgliedschaft.',
-              icon: 'error',
-              confirmButtonText: 'OK'
-            }).then(() => {
-              sessionStorage.clear();
-              router.push('/login'); 
-              window.location.reload();
-            });
-          } else if (error.request) {
-            console.error("No response received:", error.request);
-          } else {
-            console.error("Error:", error.message);
-          }
-        }
-      }
-    },
-    // Method to fetch all offers based on search term
     async fetchOffers() {
+      this.loading = true;
       try {
-        const response = await axios.get(`${process.env.baseURL}offer/get-all-offers`, {
+        const response = await axiosInstance.get(`${process.env.baseURL}offer/get-all-offers`, {
           params: {
-            searchTerm: this.searchTerm
+            searchTerm: this.searchTerm,
+            pageSize: this.pageSize,
+            pageNumber: this.currentPage
           }
         });
-        this.offers = response.data; 
-        await this.checkAllReviewStatuses(); 
+        this.offers = response.data.items;
+        this.totalPages = Math.ceil(response.data.totalCount / this.pageSize);
       } catch (error) {
-        console.error('Error fetching offers:', error);
+        console.error(error);
       } finally {
-        this.loading = false; 
+        this.loading = false;
       }
     },
-    // Method to check review status for all offers asynchronously
-    async checkAllReviewStatuses() {
-      const promises = this.offers.map(offer => this.checkReviewStatus(offer.id));
-      await Promise.all(promises);
-    },
-    // Method to check review status for a specific offer
-    async checkReviewStatus(offerId) {
-      try {
-        const response = await axios.get(`${process.env.baseURL}review/check-review-status`, {
-          params: {
-            userId: globalLogid,
-            offerId: offerId
+
+    async changePage(newPage) {
+      if (newPage >= 1 && newPage <= this.totalPages) {
+        this.currentPage = newPage;
+        await this.fetchOffers(); 
+
+        this.$nextTick(() => {
+          if (!scrollToTargetElement()) {
+            console.log('Starting MutationObserver...');
+            const observer = new MutationObserver((mutations, obs) => {
+              if (scrollToTargetElement()) {
+                console.log('Element found and scrolled. Disconnecting observer.');
+                obs.disconnect(); 
+              }
+            });
+            observer.observe(document.body, {
+              childList: true,
+              subtree: true,
+            });
           }
         });
-        this.statusMap[offerId] = response.data.status; 
-      } catch (error) {
-        console.error(`Error checking review status for offer ${offerId}:`, error);
       }
     },
-    // Method to get status from status map based on offerId
-    getStatus(offerId) {
-      return this.statusMap[offerId];
-    },
-    // Method to get text representation of status based on offer status
-    getStatusText(offer) {
-      const status = this.getStatus(offer.id);
-      switch (status) {
-        case 'Applied':
-          return 'Applied';
-        case 'ViewDetails':
-          return 'View Details';
-        default:
-          return 'Apply';
-      }
-    },
-    // Method to get button color based on offer status
-    getButtonColor(offerId) {
-      const status = this.getStatus(offerId);
-      switch (status) {
-        case 'Apply':
-          return 'btn-success';
-        case 'Applied':
-          return 'btn-warning';
-        case 'ViewDetails':
-          return 'btn-primary';
-        default:
-          return 'btn-primary';
-      }
-    },
-    // Method to handle button click actions based on offer status
-    async handleButtonClick(offer) {
-      const status = this.getStatus(offer.id);
-      if (status === 'Apply') {
-        await this.sendRequest(offer.id, globalLogid); 
-      } else if (status === 'ViewDetails') {
-        await this.fetchUsersByOfferId(offer.id);
-      } else {
-      }
-    },
+
     // Method to send request for offer application
-    async sendRequest(offerId, userId) {
+    async sendRequest(offerId) {
       const result = await Swal.fire({
         title: 'Bist du sicher?',
         text: 'Möchtest du diese Anfrage senden?',
-        icon: 'success',
+        icon: '',
         showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
-        confirmButtonText: 'Yes, send it!'
+        confirmButtonText: 'Apply',
+        customClass: {
+          popup: 'custom-apply-modal dialog_box',
+          confirmButton: 'themeBtn',
+          cancelButton: 'Cancel_btn',
+        }
       });
       if (result.isConfirmed) {
         try {
-          await axios.post(`${process.env.baseURL}review/add-review?email=${globalEmail}`, {
-            offerId,
-            userId,
-            status: 0,
-          });
-          Swal.fire('Erfolg!', 'Deine Anfrage wurde gesendet.', 'success');
-          await this.checkReviewStatus(offerId); 
+          await axiosInstance.post(`${process.env.baseURL}offer/apply-offer?offerId=${offerId}`);
+          toast.success("Deine Anfrage wurde gesendet.!");
+          // await this.checkReviewStatus(offerId);
+          this.fetchOffers();
         } catch (error) {
-          Swal.fire('Sorry', 'Leider konnte deine Anfrage nicht versendet werden!', '');
-          console.error(error);
+          toast.info("Leider konnte deine Anfrage nicht versendet werden!");
         }
-      }
-    },
-    // Method to fetch users details based on offerId
-    async fetchUsersByOfferId(offerId) {
-      try {
-        const response = await axios.get(`${process.env.baseURL}review/get-user-by-offerId/${offerId}`);
-        let users = response.data;
-        if (!Array.isArray(users)) {
-          users = [users];
-        }
-        if (users.length > 0) {
-          let userDetails = users.map(user => {
-            return `
-          <div class="user-detail">
-            <div class="user-info">
-              <b>Name:</b> ${user.firstName} ${user.lastName}
-            </div>
-            <div class="user-info">
-              <b>Email:</b> ${user.email_Address}
-            </div>
-            <div class="user-info">
-              <b>Gender:</b> ${user.gender}
-            </div>
-            <div class="user-info">
-              <b>Date of Birth:</b> ${user.dateOfBirth}
-            </div>
-            <div class="user-info">
-              <b>Facebook Link:</b> <a href="${response.data.facebook_link}" target="_blank">${response.data.facebook_link}</a>
-            </div>
-          </div>
-        `;
-          }).join('<br>');
-          Swal.fire({
-            title: 'User Details',
-            html: `<div class="user-details-container">${userDetails}</div>`,
-            icon: 'info',
-            width: '600px',
-            customClass: {
-              container: 'custom-swal-container',
-              title: 'custom-swal-title',
-              htmlContainer: 'custom-swal-html-container',
-            },
-            showCloseButton: true,
-            showConfirmButton: false,
-          });
-        } else {
-          Swal.fire({
-            title: 'No Users Found',
-            text: 'No users found for this offer.',
-            icon: 'info',
-          });
-        }
-      } catch (error) {
-        Swal.fire('Error!', 'Failed to fetch users: ' + error.message, 'error');
-        console.error(error);
-      }
-    },
-    // Method to show add review modal using Swal
-    async showAddReviewModal(offer) {
-      const { value: review, dismiss: dismissAction } = await Swal.fire({
-        title: 'Review hinzufügen',
-        html: `<textarea id="reviewTextArea" class="swal2-textarea" placeholder="Dein Review" readonly>Bitte gebt die gegenseitige Bewertung erst ab, nachdem diese terminlich abgeschlossen ist.</textarea>`,
-        showCancelButton: true,
-        cancelButtonText: 'Abbrechen',
-        confirmButtonText: 'Einreichen',
-        preConfirm: () => {
-          return document.getElementById('reviewTextArea').value;
-        },
-      });
-      if (review !== undefined) {
-        const reviewText = "Bitte gebt die gegenseitige Bewertung erst ab, nachdem diese terminlich abgeschlossen ist.";
-        this.addReview(offer.id, reviewText); 
-      } else if (dismissAction === Swal.DismissReason.cancel) {
-      }
-    },
-    // Method to add review for a specific offer
-    async addReview(offerId, reviewText) {
-      try {
-        const response = await axios.post(`${process.env.baseURL}review-login-user/create-review`, {
-          offerId,
-          userId: globalLogid,
-          addReviewForLoginUser: reviewText,
-        });
-        if (response.status === 200) {
-          Swal.fire('Review hinzugefügt', 'Dein Review wurde erfolgreich hinzugefügt.', 'success');
-        } else {
-          Swal.fire('Error', 'Das Review konnte nicht hinzugefügt werden.', 'error');
-        }
-      } catch (error) {
-        Swal.fire('Bereits hinzugefügt', 'Du hast bereits ein Review hinzugefügt!', '');
       }
     },
     // Method to search offers based on the searchTerm
     searchOffers() {
       this.loading = true;
-      this.fetchOffers(); 
+      this.fetchOffers();
     },
-    // Method to redirect to offer detail page
-    redirectToOfferDetail(offerId) {
-      this.$router.push({ name: 'OfferDetail', params: { id: offerId } });
+    debouncedSearch() {
+      this.currentPage = 1;
+      this.debouncedSearchOffers();
     },
-    truncateDescription(description) {
-      if (!description) return '';
-      const words = description.split(' ');
-      return words.slice(0, 15).join(' ') + (words.length > 15 ? '...' : '');
-    },
-    // Method to show add rating modal
-    async showAddRatingModal(offerId, userId) {
+    async showAddRatingModal(offerId, userId, index) {
       this.selectedRating = 0;
-      this.showModal = true;
+      this.showRatingModal = true;
       this.currentOfferId = offerId;
-      globalrating = userId;
+      this.currentIndex = index;
     },
     // Method to select star rating
     selectStar(rating) {
       this.selectedRating = rating;
     },
-    // Method to submit rating
+    // // Method to submit rating
     async submitRating() {
       if (this.selectedRating > 0) {
-        await this.addRating(this.currentOfferId, globalLogid, this.selectedRating); 
-        this.showModal = false;
+        await this.addRating(this.currentOfferId, this.selectedRating, this.reviewText);
+        this.cancelRating();
       } else {
-        Swal.fire('Error', 'Bitte wähle ein Rating.', 'error');
+        toast.info("Please select a Rating");
       }
     },
     cancelRating() {
-      this.showModal = false;
+      this.showRatingModal = false;
+      this.reviewText = '';
     },
     // Method to add rating for a specific offer
-    async addRating(offerId, toUserId, userRating) {
+    async addRating(offerId, userRating, reviewText) {
       try {
-        const response = await axios.post(`${process.env.baseURL}user-rating/add-rating-to-host`, {
-          user_Id: toUserId,
+        const response = await axiosInstance.post(`${process.env.baseURL}review/add-review`, {
           offerId: offerId,
-          hostRating: userRating,
-          submissionDate: new Date().toISOString()
+          ratingValue: userRating,
+          reviewComment: reviewText,
+          reviewedUserId: null,
         });
         if (response.status === 200) {
-          Swal.fire('Rating hinzugefügt', 'Dein Rating wurde erfolgreich hinzugefügt.', 'success');
-        } else {
-          Swal.fire('Etwas ist schief gelaufen', 'Dein Rating konnte nicht abgegeben werden.', 'error');
+          toast.success("Dein Rating wurde erfolgreich hinzugefügt.");
         }
       } catch (error) {
-        Swal.fire('Bereits hinzugefügt', 'Du hast bereits ein Rating abgegeben!', '');
+        if (error.response.data.message == "The Review already exists.") {
+          toast.info("Du hast bereits ein Rating abgegeben.");
+        }
+        else {
+          toast.error("Fehler beim Absenden der Bewertungen!");
+        }
       }
     },
   },
@@ -465,10 +347,14 @@ export default {
     filteredOffers() {
       return this.offers.filter(offer => {
         const title = offer.title ? offer.title.toLowerCase() : '';
-        const description = offer.description ? offer.description.toLowerCase() : '';
         const skills = offer.skills ? offer.skills.toLowerCase() : '';
-        const region = offer.state ? offer.state.toLowerCase() : '';
-        return title.includes(this.searchTerm.toLowerCase()) || region.includes(this.searchTerm.toLowerCase()) || description.includes(this.searchTerm.toLowerCase()) || skills.includes(this.searchTerm.toLowerCase());
+        const region = offer.region ? offer.region.toLowerCase() : '';
+        const isValidOffer = offer.hostId != offer.id;
+        return isValidOffer && (
+          title.includes(this.searchTerm.toLowerCase()) ||
+          region.includes(this.searchTerm.toLowerCase()) ||
+          skills.includes(this.searchTerm.toLowerCase())
+        );
       });
     }
   }
@@ -482,6 +368,11 @@ export default {
   font-weight: bold;
 }
 
+.test {
+  font-size: 5.5rem;
+  color: #ca0000;
+  margin-bottom: 1rem;
+}
 
 .search-input {
   padding: 0.75rem 1rem;
@@ -500,7 +391,6 @@ export default {
   border-color: #1ee94a;
   box-shadow: 0 0 5px rgba(63, 248, 27, 0.5);
 }
-
 
 .card {
   max-width: 100%;
@@ -539,15 +429,6 @@ export default {
   margin-bottom: 0.5rem;
 }
 
-.btn {
-  display: inline-block;
-  padding: 0.5rem 1rem;
-  font-size: 1rem;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s, color 0.3s;
-}
-
 .btn-success {
   background-color: #28a745;
   color: white;
@@ -560,6 +441,10 @@ export default {
 .btn-warning {
   background-color: #ffc107;
   color: black;
+}
+
+.modal-content {
+  text-align: center;
 }
 
 .btn-warning:hover {
@@ -602,7 +487,6 @@ export default {
 
 .btn-secondary.mt-2 {
   margin-top: 0;
-
 }
 
 .custom-swal-container {
@@ -651,27 +535,24 @@ export default {
   text-decoration: underline;
 }
 
-.container {
-  padding: 20px;
-}
-
+// .container {
+//   padding: 20px;
+// }
 .table {
   width: 100%;
   border-collapse: collapse;
 }
 
-.table th,
-.table td {
-  border: 1px solid #ccc;
-  padding: 8px;
-}
-
-.table th {
-  background-color: #f2f2f2;
-}
-
-.table td {
-  text-align: left;
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  /* Semi-transparent black */
+  z-index: 100;
+  /* Behind the modal */
 }
 
 .table th:first-child,
@@ -690,10 +571,12 @@ export default {
   left: 50%;
   transform: translate(-50%, -50%);
   background: white;
-  padding: 20px;
+  padding: 0px;
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   z-index: 1000;
+  max-width: 500px;
+  width: 100%;
 }
 
 .modal-content {
@@ -703,7 +586,7 @@ export default {
 #rating-stars {
   display: flex;
   justify-content: center;
-  margin: 20px 0;
+  margin: 0px 0;
 }
 
 .star {
@@ -713,12 +596,13 @@ export default {
 }
 
 .star.selected {
-  color: gold;
+  color: #f6a716;
 }
 
 button {
   margin: 5px;
 }
+
 .rating-star {
   font-family: var(--fa-style-family, "Font Awesome 6 Free");
   font-weight: var(--fa-style, 900);
@@ -727,4 +611,9 @@ button {
 .rating-star:before {
   content: "\f005";
 }
+
+.OfferButtons {
+  width: 100%;
+}
+
 </style>

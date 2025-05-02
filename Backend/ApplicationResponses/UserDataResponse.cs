@@ -1,0 +1,27 @@
+﻿using UGH.Domain.Entities;
+
+namespace UGH.Domain.ApplicationResponses;
+
+public class UserDataResponse
+{
+    public Guid User_Id { get; set; }
+    public string FirstName { get; set; }
+    public string LastName { get; set; }
+    public DateTime DateOfBirth { get; set; }
+    public string Gender { get; set; }
+    public string Street { get; set; }
+    public string HouseNumber { get; set; }
+    public string PostCode { get; set; }
+    public string City { get; set; }
+    public string Country { get; set; }
+    public string State { get; set; }
+    public string Email_Address { get; set; }
+    public bool IsEmailVerified { get; set; }
+    public int? MembershipId { get; set; }
+    public string Facebook_Link { get; set; }
+    public string Link_RS { get; set; }
+    public string Link_VS { get; set; }
+    public int VerificationState { get; set; }
+    public Membership CurrentMembership { get; set; }
+    public double AverageRating { get; set; }
+}

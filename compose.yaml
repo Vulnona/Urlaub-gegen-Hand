@@ -22,6 +22,8 @@ services:
     volumes:
       - ./Frontend-Vuetify:/app/frontend
       - /app/frontend/node_modules
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
 
   backend:
     build:
@@ -38,10 +40,12 @@ services:
     depends_on:
       - db
     volumes:
-    - D:/UGH Docker/UGH/Backend/logs:/app/logs
-
+    - /home/docker/UGH-Main/Backend/logs:/app/logs
+    - /etc/timezone:/etc/timezone:ro
+    - /etc/localtime:/etc/localtime:ro
+    
   db:
-    image: mysql:5.7
+    image: mysql:8.0
     restart: unless-stopped
     command: '--default-authentication-plugin=mysql_native_password'
     environment:
@@ -76,7 +80,7 @@ services:
       - ConnectionStrings__DefaultConnection=Server=db;User ID=root;Password=password;Database=db;SSL Mode=None
     depends_on:
       - db
-
+    
 volumes:
   db-data2:
 

@@ -10,13 +10,24 @@ export default defineConfig(({ mode }) => {
     server: {
       host: '0.0.0.0',
       port: 3000,
-      watch: {
-        usePolling: env.VITE_USE_POLLING === 'true',
-      },
+      allowedHosts: ['localhost'],
+    },
+    optimizeDeps: {
+      include: ['vue', 'vue-router', 'sweetalert2', 'crypto-js', 'axios', 'vue-toastification',
+        'jwt-decode', 'lodash/debounce', 'bootstrap/dist/js/bootstrap.min.js', 'vue-multiselect',
+        'crypto-js/aes', 'vue3-datepicker','@stripe/stripe-js'],
     },
     plugins: [
       vue({
-        template: { transformAssetUrls },
+        template: {
+          transformAssetUrls: {
+            ...transformAssetUrls,
+            img: ['src'],
+            image: ['xlink:href', 'href'],
+            'v-img': ['src', 'lazy-src'],
+            'v-carousel-item': ['src', 'lazy-src'],
+          },
+        },
       }),
       vuetify({
         autoImport: true,
@@ -35,26 +46,44 @@ export default defineConfig(({ mode }) => {
         },
       }),
     ],
+    css: {
+      preprocessorOptions: {
+        scss: {
+          additionalData: `@use "sass:math";`,
+        },
+      },
+    },  
     define: {
       'process.env': {
-        SECRET_KEY: env.SECRET_KEY, 
-        baseURL: env.BASE_URL, 
-        baseURL_Frontend: env.BASE_URL_FRONTEND, 
-        SecretAccessKey: env.AWS_SECRET_ACCESS_KEY, 
-        AccessKeyId: env.AWS_ACCESS_KEY_ID,
-        Aws_region: env.AWS_REGION, 
-        Aws_Url:env.AWS_URL,
-        S3_BUCKET_NAME: env.S3_BUCKET_NAME, 
-        x_api_key: env.API_KEY, 
-        claims_Url:env.CLAIMS_URL,
+        SECRET_KEY: env.SECRET_KEY,
+        baseURL: env.BASE_URL,
+        baseURL_Frontend: env.BASE_URL_FRONTEND,
+        claims_Url: env.CLAIMS_URL,
+        StripeKey: env.STRIPE_KEY,
       },
     },
     resolve: {
       alias: {
         '@': fileURLToPath(new URL('./src', import.meta.url)),
+        'images': fileURLToPath(new URL('./src/assets/images', import.meta.url)),
       },
       extensions: ['.js', '.json', '.jsx', '.mjs', '.ts', '.tsx', '.vue'],
     },
-    base: './',
+    base: '/', // Changed from './' to '/'
+    build: {
+      assetsDir: 'assets',
+      rollupOptions: {
+        output: {
+          assetFileNames: (assetInfo) => {
+            const info = assetInfo.name.split('.');
+            const ext = info[info.length - 1];
+            if (/png|jpe?g|svg|gif|tiff|bmp|ico|webp/i.test(ext)) {
+              return `assets/images/[name].[hash][extname]`;
+            }
+            return `assets/[name].[hash][extname]`;
+          },
+        },
+      },
+    },
   };
 });

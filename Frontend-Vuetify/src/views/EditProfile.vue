@@ -1,339 +1,347 @@
 <template>
-    <div class="col-6 offset-3" style="    margin-top: 20px;
-    margin-bottom: 20px;">
-      <div class="container col-6">
+  <Navbar />
+  <div class="inner_banner_layout">
+    <div class="container">
+      <div class="row">
+        <div class="col-sm-12">
+          <div class="inner_banner">
+            <h2>Edit Profile</h2>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="container mt-4">
+    <div class="col-md-7 mx-auto">
+      <div class="card">
         <form @submit.prevent="saveProfile" class="profile-form">
-          <div class="form-group">
-            <label for="firstName">First Name</label>
-            <input type="text" id="firstName" v-model="profile.user.firstName" class="form-control">
+          <div class="row">            
+            <div class="col-sm-12">
+              <div class="form-group">
+                <label>Fertigkeiten </label>
+                <multiselect v-model="profile.skills" :options="availableSkills" placeholder="Select Fertigkeiten"
+                  class="skills-multiselect" :multiple="true">
+                </multiselect>
+                <small v-if="errors.skills" style="color: red;">{{ errors.skills }}</small>
+              </div>
+            </div>
+            <div class="col-sm-12">
+              <div class="form-group">
+                <label>Hobbies</label>
+                <div class="hobbies_inputBox input-group mb-3">
+                  <input type="text" v-model="newHobby" class="form-control" placeholder="Enter a hobby"
+                    @keyup.enter="addHobby">
+                  <div class="input-group-append">
+                    <button class="btn btn-outline-secondary" type="button" @click="addHobby">Add Hobby</button>
+                  </div>
+                </div>
+                <div v-if="profile.hobbies.length > 0" class="mt-2">
+                  <span v-for="(hobby, index) in profile.hobbies" :key="index" class="badge badge-primary mr-2 mb-2">
+                    {{ hobby }}
+                    <button type="button" class="close ml-1" @click="removeHobby(index)">&times;</button>
+                  </span>
+                </div>
+                <span v-if="errors.hobbies" class="text-danger">{{ errors.hobbies }}</span>
+              </div>
+            </div>
           </div>
-          <div class="form-group">
-            <label for="lastName">Last Name</label>
-            <input type="text" id="lastName" v-model="profile.user.lastName" class="form-control">
+
+          <div class="row">
+            <div class="col-sm-12">
+              <div class="profile_btn">
+                <!-- Submit Button -->
+                <button type="button" @click="back()" class="btn btn-back rounded">Back</button>
+                <button type="submit" class="btn btn-primary  rounded">Save Profile</button>
+              </div>
+            </div>
           </div>
-          <div class="form-group">
-            <label for="dateOfBirth">Date of Birth</label>
-            <input type="date" id="dateOfBirth" v-model="profile.user.dateOfBirth" class="form-control">
-          </div>
-          <div class="form-group">
-            <label for="gender">Gender</label>
-            <input type="text" id="gender" v-model="profile.user.gender" class="form-control" >
-          </div>
-          <div class="form-group">
-            <label for="street">Street</label>
-            <input type="text" id="street" v-model="profile.user.street" class="form-control">
-          </div>
-          <div class="form-group">
-            <label for="houseNumber">House Number</label>
-            <input type="text" id="houseNumber" v-model="profile.user.houseNumber" class="form-control">
-          </div>
-          <div class="form-group">
-            <label for="postCode">Post Code</label>
-            <input type="text" id="postCode" v-model="profile.user.postCode" class="form-control">
-          </div>
-          <div class="form-group">
-            <label for="city">City</label>
-            <input type="text" id="city" v-model="profile.user.city" class="form-control">
-          </div>
-          <div class="form-group">
-            <label for="state">State/Region</label>
-            <input type="text" id="state" v-model="profile.user.state" class="form-control">
-          </div>
-          <div class="form-group">
-            <label for="country">Country</label>
-            <input type="text" id="country" v-model="profile.user.country" class="form-control">
-          </div>
-          <div class="form-group">
-            <label for="facebookLink">Facebook Link</label>
-            <input type="text" id="facebookLink" v-model="profile.user.facebook_link" class="form-control">
-          </div>
-          <div class="form-group">
-            <label for="userPic">User Picture</label>
-            <input type="file" id="userPic" multiple @change="onFileChange" class="form-control">
-          </div>
-          <div class="form-check">
-            <input type="checkbox" id="smoker" v-model="profileOptions.smoker" class="form-check-input">
-            <label for="smoker" class="form-check-label">Smoker</label>
-          </div>
-          <div class="form-check">
-            <input type="checkbox" id="petOwner" v-model="profileOptions.petOwner" class="form-check-input">
-            <label for="petOwner" class="form-check-label">Pet Owner</label>
-          </div>
-          <div class="form-check">
-            <input type="checkbox" id="liabilityInsurance" v-model="profileOptions.haveLiabilityInsurance" class="form-check-input">
-            <label for="liabilityInsurance" class="form-check-label">Have Liability Insurance</label>
-          </div>
-          <div class="form-group">
-            <button type="button" class="btn btn-primary col-2" style="color: #fff; background-color: #0d6efd;" @click="toggleHobbiesInput">+ Something Else</button>
-          </div>
-          <div v-if="showHobbiesInput" class="form-group">
-            <label for="hobbies">Hobbies</label>
-            <input type="text" id="hobbies" v-model="profile.hobbies" class="form-control">
-          </div>
-          <button type="submit" class="btn btn-success col-3" style="color: #fff; background-color: #28a745; float: right;">Save Profile</button>
         </form>
       </div>
     </div>
-  </template>
-  <script>
-  import axios from 'axios';
-  import Swal from 'sweetalert2';
-  import router from '@/router';
-  import CryptoJS from 'crypto-js';
+  </div>
+</template>
 
-  
-  let globalToken = '';
-  export default {
-    data() {
-      return {
-        profile: {
-          id: 0,
-          user_Id: 0,
-          user: {
-            user_Id: 0,
-            firstName: '',
-            lastName: '',
-            dateOfBirth: '',
-            gender: '',
-            street: '',
-            houseNumber: '',
-            postCode: '',
-            city: '',
-            state:'',
-            country: '',
-            email_Address: '',
-            password: '',
-            saltKey: '',
-            isEmailVerified: false,
-            facebook_link: '',
-            verificationState: 0,
-            currentMembership: {
-              membershipID: 0,
-              expiration: ''
-            }
-          },
-          userPic: '',
-          hobbies: '',
-          options: 0, 
-        },
-        profileOptions: {
-          smoker: false,
-          petOwner: false,
-          haveLiabilityInsurance: false,
-        },
-        showHobbiesInput: false, 
-      };
+<script>
+import Navbar from '@/components/navbar/Navbar.vue';
+import Securitybot from '@/services/SecurityBot';
+import axiosInstance from '@/interceptor/interceptor';
+import Multiselect from 'vue-multiselect';
+import 'vue-multiselect/dist/vue-multiselect.css';
+import toast from '@/components/toaster/toast';
+export default {
+  components: {
+    Navbar,
+    Multiselect,
+  },
+  data() {
+    return {
+      profile: {
+        skills: [],
+        hobbies: [],
+      },
+      validations: {
+        skills: true,
+      },
+      skills: [],
+      newHobby: '',
+      availableSkills: [],
+      selectedCountry: null,
+      selectedState: null,
+      selectedCity: null,
+      errors: {},
+      formIsValid: true,
+    };
+  },
+  mounted() {
+    Securitybot();
+    this.fetchUserProfile();
+  },
+  methods: {
+    back() {
+      window.history.back();
     },
-    mounted() {
-      
-      const decryptedtoken=this.decryptToken(sessionStorage.getItem("token"));
-      globalToken=decryptedtoken;
-      const token = decryptedtoken;
-      if (token) {
-        this.fetchUserProfile(token);
-      } else {
-        Swal.fire('Error', 'User ID not found', 'error');
-        router.push('/login');
+    addHobby() {
+      if (this.newHobby.trim()) {
+        this.profile.hobbies.push(this.newHobby.trim());
+        this.newHobby = '';
       }
-      this.Securitybot();
     },
-    methods: {
-      toggleHobbiesInput() {
-        this.showHobbiesInput = !this.showHobbiesInput;
-      },
-      Securitybot() {
-        if (!sessionStorage.getItem("token")) {
-          Swal.fire({
-            title: 'You are not logged In!',
-            text: 'Login First to continue.',
-            icon: 'info',
-            confirmButtonText: 'OK'
-          });
-          router.push('/login');
-        }
-      },
-      // Method to decrypt log ID from AES encryption
-      decryptlogID(encryptedItem) {
-        try {
-          const bytes = CryptoJS.AES.decrypt(encryptedItem, process.env.SECRET_KEY);
-          const decryptedString = bytes.toString(CryptoJS.enc.Utf8);
-          return parseInt(decryptedString, 10).toString();
-        } catch (e) {
-          console.error('Error decrypting item:', e);
-          return null;
-        }
-      },
-      // Method to fetch user profile data from backend API
-      async fetchUserProfile(token) {
-        try {
-          const response = await axios.get(`${process.env.baseURL}profile/get-user-profile?token=${token}`);
-          if (response.data.profile) {
-            const profile = response.data.profile;
-            this.profile = {
-              id: profile.id,
-              user_Id: profile.user_Id,
-              user: {
-                user_Id: profile.user.user_Id,
-                firstName: profile.user.firstName,
-                lastName: profile.user.lastName,
-                dateOfBirth: profile.user.dateOfBirth,
-                gender: profile.user.gender,
-                street: profile.user.street,
-                houseNumber: profile.user.houseNumber,
-                postCode: profile.user.postCode,
-                city: profile.user.city,
-                state: profile.user.state,
-                country: profile.user.country,
-                email_Address: profile.user.email_Address,
-                password: profile.user.password,
-                saltKey: profile.user.saltKey,
-                isEmailVerified: profile.user.isEmailVerified,
-                facebook_link: profile.user.facebook_link,
-                verificationState: profile.user.verificationState,
-                currentMembership: profile.user.currentMembership
-              },
-              userPic: response.data.userPic,
-              hobbies: profile.hobbies,
-              options: profile.options,
-            };
-            const options = profile.options;
-            this.profileOptions = {
-              smoker: (options & 1) === 1,
-              petOwner: (options & 2) === 2,
-              haveLiabilityInsurance: (options & 4) === 4,
-            };
-          } else {
-            Swal.fire('Error', 'User profile data not found', 'error');
-          }
-        } catch (error) {
-          console.error('Error fetching user profile:', error);
-          Swal.fire('Error', 'Failed to fetch user profile');
-        }
-      },
-      decryptToken(encryptedToken) {
+
+    removeHobby(index) {
+      this.profile.hobbies.splice(index, 1);
+    },
+    async fetchSkills() {
       try {
-        const bytes = CryptoJS.AES.decrypt(encryptedToken, process.env.SECRET_KEY);
-        return bytes.toString(CryptoJS.enc.Utf8); 
-      } catch (e) {
-        console.error('Error decrypting token:', e);
-        return null;
+        const response = await axiosInstance.get(`${process.env.baseURL}skills/get-all-skills`);
+        this.availableSkills = response.data.map(skill => skill.skillDescrition);
+      } catch (error) {
       }
     },
-      // Method to save updated profile data
-      async saveProfile() {
-        try {      
-          const optionsValue = this.computeOptionsValue(this.profileOptions);
-          const profileData = {
-            ...this.profile,
-            options: optionsValue,
-          };    
-          const response = await axios.put(`${process.env.baseURL}profile/add-or-update-profile?token=${globalToken}`, profileData);
-          if (response.status === 200) {
-            Swal.fire('Success', 'Profile saved successfully', 'success');
-            router.push('/profile');
-          } else {
-            Swal.fire('Error', 'Failed to save profile', 'error');
-          }
-        } catch (error) {
-          console.error('Error saving user profile:', error);
-          Swal.fire('Error', 'Failed to save profile');
+    async fetchUserProfile() {
+      try {
+        const response = await axiosInstance.get(`${process.env.baseURL}profile/get-user-profile`);
+        if (response.data.profile) {
+          this.profile = response.data.profile;
+          this.profile.skills = Array.isArray(this.profile.skills) ? this.profile.skills : [];
+          this.profile.hobbies = Array.isArray(this.profile.hobbies) ? this.profile.hobbies :
+            (typeof this.profile.hobbies === 'string' ? this.profile.hobbies.split(', ') : []);
+          await this.fetchSkills();
+          this.profile.skills = this.profile.skills.map(userSkill =>
+            this.skills.find(skill => skill.skill_ID === userSkill.skill_ID) || userSkill
+          );
+        } else {
+          toast.info("User profile data not found");
         }
-      },
-      computeOptionsValue(options) {
-        let value = 0;
-        if (options.smoker) value |= 1;
-        if (options.petOwner) value |= 2;
-        if (options.haveLiabilityInsurance) value |= 4;
-        return value;
-      },
-      // Method to handle file upload and update userPic
-      async onFileChange(event) {
-        const file = event.target.files[0];
-        if (file) {
-          const reader = new FileReader();
-          reader.onload = (e) => {
-            this.profile.userPic = e.target.result.split(',')[1];
-          };
-          reader.readAsDataURL(file);
-        }
+      } catch (error) {
+        toast.info("Failed to fetch user profile!");
       }
+    },
+    saveProfile() {
+      if (this.validateForm()) {        
+        const skillsString = this.profile.skills.join(', ');
+        const hobbiesString = this.profile.hobbies.join(', ');
+        const updatedProfile = {
+          ...this.profile,
+          skills: skillsString,
+          hobbies: hobbiesString
+        };
+        delete updatedProfile.countryName;
+        delete updatedProfile.stateName;
+        delete updatedProfile.cityName;
+        this.updateProfileAPI(updatedProfile);
+      } else {
+        toast.error("Please correct the errors in the form before submitting.");
+      }
+    },
+    async updateProfileAPI(updatedProfile) {
+      try {
+        const response = await axiosInstance.put(`${process.env.baseURL}profile/update-profile`, updatedProfile);
+        if (response.status === 200) {
+          toast.success("Profile saved successfully!");
+          if (response.data && response.data.profile) {            
+            this.profile.skills = Array.isArray(this.profile.skills) ? this.profile.skills :
+              (typeof this.profile.skills === 'string' ? this.profile.skills.split(', ') : []);
+            this.profile = {
+              ...response.data.profile,
+              skills: skillsArray
+            };
+            this.profile.skills = this.profile.skills.map(userSkill =>
+              this.skills.find(skill => skill.skill_ID === userSkill.skill_ID) || userSkill
+            );
+          }
+          this.$router.push('/profile');
+        } else {
+          toast.error("Failed to save profile. Please try again.");
+        }
+      } catch (error) {
+        console.error("Error updating profile:", error);
+        toast.error("An error occurred while saving the profile. Please try again later.");
+      }
+    },
+    validateForm() {
+      this.errors = {};
+      this.formIsValid = true;
+      const requiredFields = [
+        'firstName', 'lastName', 'gender', 'dateOfBirth',
+        'street', 'houseNumber', 'postCode'
+      ];
+      requiredFields.forEach(field => {
+        if (!this.profile[field]) {
+          this.errors[field] = `${field.charAt(0).toUpperCase() + field.slice(1)} is required`;
+          this.formIsValid = false;
+        }
+      });
+      if (!this.profile.skills || this.profile.skills.length === 0) {
+        this.errors.skills = "At least one skill is required";
+        this.formIsValid = false;
+      } else {
+        delete this.errors.skills;
+      }
+      if (this.profile.facebookLink && !this.validateFacebookLink()) {
+        this.formIsValid = false;
+      }
+      if (this.profile.hobbies.length === 0) {
+        this.errors.hobbies = "Please add at least one hobby";
+        this.formIsValid = false;
+      } else {
+        delete this.errors.hobbies;
+      }
+      return this.formIsValid;
     }
-  };
+  },
+};
 </script>
+
 <style scoped>
-  .v-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 20px;
-  }
-  
-  .account-page {
-    background-color: #f8f9fa;
-    padding: 30px;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    max-width: 600px;
-    width: 100%;
-  }
-  
-  .card {
-    background-color: #fff;
-    border: none;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    width: 100%;
-  }
-  
-  .card-body {
-    padding: 20px;
-  }
-  
-  .card-title {
-    margin-bottom: 20px;
-    font-size: 24px;
-    font-weight: bold;
-    color: #333;
-    text-align: center;
-  }
-  
-  .profile-img {
-    width: 100%;
-    height: auto;
-    border-radius: 50%;
-    margin-bottom: 20px;
-  }
-  
-  .card-text-group {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-  
-  .card-text {
-    font-size: 16px;
-    color: #555;
-  }
-  
-  .card-text strong {
-    color: #333;
-  }
-  
-  .card-text a {
-    color: #007bff;
-    text-decoration: none;
-  }
-  
-  .card-text a:hover {
-    text-decoration: underline;
-  }
-  
-  .btn-primary {
-    margin-top: 20px;
-    display: block;
-    width: 100%;
-    text-align: center;
-  }
-  </style>
-  
+.v-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.account-page {
+  background-color: #f8f9fa;
+  padding: 30px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  max-width: 600px;
+  width: 100%;
+}
+
+.card {
+  background-color: #fff;
+  border: none;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  width: 100%;
+}
+
+.card-body {
+  padding: 20px;
+}
+
+.card-title {
+  margin-bottom: 20px;
+  font-size: 24px;
+  font-weight: bold;
+  color: #333;
+  text-align: center;
+}
+
+.card-text-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.card-text {
+  font-size: 16px;
+  color: #555;
+}
+
+.card-text strong {
+  color: #333;
+}
+
+.card-text a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+.card-text a:hover {
+  text-decoration: underline;
+}
+
+.btn-primary {
+  color: #fff !important;
+}
+
+/* .btn-primary {
+  margin-top: 20px;
+  display: block;
+  width: 100%;
+  text-align: center;
+} */
+
+.profile-form-inner {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1%;
+}
+
+.profile-form-inner .form-group {
+  width: 19.2%;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.text-danger {
+  color: red;
+}
+
+.badge {
+  font-size: 0.9em;
+  padding: 0.5em 0.7em;
+}
+
+.badge .close {
+  font-size: 1em;
+  line-height: 0.8;
+}
+
+.btn.btn-back {
+  background: #4e4e4e;
+  background-color: #585757;
+  color: #fff;
+}
+
+.btn.btn-back:hover {
+  background: #4e4e4e;
+  color: #fff;
+}
+
+
+
+.badge.badge-primary {
+  background: #f0f6fd !important;
+  font-size: 11px;
+  font-weight: 400;
+  color: #000;
+  border: 1px solid rgb(0 0 0 / 12%) !important;
+  padding: 5px 7px 5px 7px;
+  border-radius: 5px;
+}
+
+.hobbies_inputBox .input-group-append .btn {
+  font-size: 14px;
+  border: 1px solid #c4cbdd;
+  background: #d9d9d9;
+  border-left: 2px solid #c4cbdd;
+  color: #333;
+  font-weight: 500;
+}
+</style>

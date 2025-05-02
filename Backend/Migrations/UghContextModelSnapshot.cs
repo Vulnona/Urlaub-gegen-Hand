@@ -8,43 +8,24 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace UGHApi.Migrations
 {
-    [DbContext(typeof(UghContext))]
+    [DbContext(typeof(Ugh_Context))]
     partial class UghContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "7.0.10")
+                .HasAnnotation("ProductVersion", "7.0.20")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
-            modelBuilder.Entity("Backend.Models.EmailVerificator", b =>
-                {
-                    b.Property<int>("verificationId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("requestDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<int>("user_Id")
-                        .HasColumnType("int");
-
-                    b.Property<Guid>("verificationToken")
-                        .HasColumnType("char(36)");
-
-                    b.HasKey("verificationId");
-
-                    b.ToTable("emailverificators");
-                });
-
-            modelBuilder.Entity("UGHApi.Models.Accommodation", b =>
+            modelBuilder.Entity("UGH.Domain.Entities.Accommodation", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
                     b.Property<string>("NameAccommodationType")
+                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.HasKey("Id");
@@ -52,7 +33,7 @@ namespace UGHApi.Migrations
                     b.ToTable("accomodations");
                 });
 
-            modelBuilder.Entity("UGHApi.Models.City", b =>
+            modelBuilder.Entity("UGH.Domain.Entities.City", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -70,7 +51,7 @@ namespace UGHApi.Migrations
                     b.ToTable("cities");
                 });
 
-            modelBuilder.Entity("UGHApi.Models.Continent", b =>
+            modelBuilder.Entity("UGH.Domain.Entities.Continent", b =>
                 {
                     b.Property<int>("Continent_ID")
                         .ValueGeneratedOnAdd()
@@ -81,7 +62,7 @@ namespace UGHApi.Migrations
                     b.ToTable("continents");
                 });
 
-            modelBuilder.Entity("UGHApi.Models.Country", b =>
+            modelBuilder.Entity("UGH.Domain.Entities.Country", b =>
                 {
                     b.Property<int>("Country_ID")
                         .ValueGeneratedOnAdd()
@@ -98,7 +79,7 @@ namespace UGHApi.Migrations
                     b.ToTable("countries");
                 });
 
-            modelBuilder.Entity("UGHApi.Models.Coupon", b =>
+            modelBuilder.Entity("UGH.Domain.Entities.Coupon", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -108,178 +89,235 @@ namespace UGHApi.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("char(36)");
+
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("Description")
                         .HasColumnType("longtext");
 
-                    b.Property<decimal>("DiscountAmount")
-                        .HasColumnType("decimal(65,30)");
+                    b.Property<int>("Duration")
+                        .HasColumnType("int");
 
-                    b.Property<DateTime>("EndDate")
-                        .HasColumnType("datetime(6)");
+                    b.Property<int>("MembershipId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<DateTime>("StartDate")
-                        .HasColumnType("datetime(6)");
-
                     b.HasKey("Id");
+
+                    b.HasIndex("CreatedBy");
+
+                    b.HasIndex("MembershipId");
 
                     b.ToTable("coupons");
                 });
 
-            modelBuilder.Entity("UGHApi.Models.Membership", b =>
+            modelBuilder.Entity("UGH.Domain.Entities.EmailVerificator", b =>
+                {
+                    b.Property<int>("verificationId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("requestDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<Guid>("user_Id")
+                        .HasColumnType("char(36)");
+
+                    b.Property<Guid>("verificationToken")
+                        .HasColumnType("char(36)");
+
+                    b.HasKey("verificationId");
+
+                    b.ToTable("emailverificators");
+                });
+
+            modelBuilder.Entity("UGH.Domain.Entities.Membership", b =>
                 {
                     b.Property<int>("MembershipID")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("Expiration")
-                        .HasColumnType("datetime(6)");
+                    b.Property<string>("Description")
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("DurationDays")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(65,30)");
 
                     b.HasKey("MembershipID");
 
                     b.ToTable("memberships");
                 });
 
-            modelBuilder.Entity("UGHApi.Models.Offer", b =>
+            modelBuilder.Entity("UGH.Domain.Entities.Offer", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<string>("Accomodation")
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("Contact")
-                        .HasColumnType("longtext");
+                    b.Property<DateOnly>("CreatedAt")
+                        .HasColumnType("date");
 
                     b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Discriminator")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<DateOnly>("FromDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("GroupProperties")
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("GroupSize")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Mobility")
+                        .HasColumnType("int");
+
+                    b.Property<DateOnly>("ModifiedAt")
+                        .HasColumnType("date");
+
+                    b.Property<int>("OfferType")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("PictureId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Requirements")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Skills")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<DateOnly>("ToDate")
+                        .HasColumnType("date");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("char(36)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PictureId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("offers");
+
+                    b.HasDiscriminator<string>("Discriminator").HasValue("Offer");
+
+                    b.UseTphMappingStrategy();
+                });
+
+            modelBuilder.Entity("UGH.Domain.Entities.OfferApplication", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<Guid>("HostId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<int>("OfferId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("char(36)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HostId");
+
+                    b.HasIndex("OfferId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("offerapplication");
+                });
+
+            modelBuilder.Entity("UGH.Domain.Entities.PasswordResetToken", b =>
+                {
+                    b.Property<int>("TokenId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("Token")
+                        .HasColumnType("char(36)");
+
+                    b.Property<DateTime>("requestDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<Guid>("user_Id")
+                        .HasColumnType("char(36)");
+
+                    b.HasKey("TokenId");
+
+                    b.ToTable("passwordresettokens");
+                });
+
+            modelBuilder.Entity("UGH.Domain.Entities.Picture", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<string>("Hash")
                         .HasColumnType("longtext");
 
                     b.Property<byte[]>("ImageData")
+                        .IsRequired()
                         .HasColumnType("longblob");
 
-                    b.Property<string>("ImageMimeType")
-                        .HasColumnType("longtext");
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("char(36)");
 
-                    b.Property<string>("Location")
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("Title")
-                        .HasColumnType("longtext");
-
-                    b.Property<int>("User_Id")
-                        .HasColumnType("int");
-
-                    b.Property<string>("accomodationsuitable")
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("city")
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("country")
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("skills")
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("state")
-                        .HasColumnType("longtext");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("User_Id");
-
-                    b.ToTable("offers");
-                });
-
-            modelBuilder.Entity("UGHApi.Models.RatingHostLogin", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<int>("OfferId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("SubmissionDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<int>("UserRating")
-                        .HasColumnType("int");
-
-                    b.Property<int>("User_Id")
+                    b.Property<int>("Width")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("OfferId");
+                    b.HasIndex("UserId");
 
-                    b.HasIndex("User_Id");
-
-                    b.ToTable("ratinghostlogins");
+                    b.ToTable("pictures");
                 });
 
-            modelBuilder.Entity("UGHApi.Models.RatingUserLogin", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<int>("HostRating")
-                        .HasColumnType("int");
-
-                    b.Property<int>("OfferId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("SubmissionDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<int>("User_Id")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("OfferId");
-
-                    b.HasIndex("User_Id");
-
-                    b.ToTable("ratinguserlogins");
-                });
-
-            modelBuilder.Entity("UGHApi.Models.Ratings", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<int>("OfferId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Rating")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("SubmissionDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<int>("User_Id")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("OfferId");
-
-                    b.HasIndex("User_Id");
-
-                    b.ToTable("ratings");
-                });
-
-            modelBuilder.Entity("UGHApi.Models.Redemption", b =>
+            modelBuilder.Entity("UGH.Domain.Entities.Redemption", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -291,17 +329,18 @@ namespace UGHApi.Migrations
                     b.Property<DateTime>("RedeemedDate")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("char(36)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CouponId");
+                    b.HasIndex("CouponId")
+                        .IsUnique();
 
                     b.ToTable("redemptions");
                 });
 
-            modelBuilder.Entity("UGHApi.Models.Region", b =>
+            modelBuilder.Entity("UGH.Domain.Entities.Region", b =>
                 {
                     b.Property<int>("Region_ID")
                         .ValueGeneratedOnAdd()
@@ -315,115 +354,45 @@ namespace UGHApi.Migrations
                     b.ToTable("regions");
                 });
 
-            modelBuilder.Entity("UGHApi.Models.Review", b =>
+            modelBuilder.Entity("UGH.Domain.Entities.Review", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
                     b.Property<int>("OfferId")
                         .HasColumnType("int");
 
-                    b.Property<int>("Status")
+                    b.Property<int>("RatingValue")
                         .HasColumnType("int");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
+                    b.Property<string>("ReviewComment")
+                        .HasColumnType("longtext");
+
+                    b.Property<Guid>("ReviewedId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<Guid>("ReviewerId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("OfferId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("ReviewedId");
+
+                    b.HasIndex("ReviewerId");
 
                     b.ToTable("reviews");
                 });
 
-            modelBuilder.Entity("UGHApi.Models.ReviewLoginUser", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<string>("AddReviewForLoginUser")
-                        .HasColumnType("longtext");
-
-                    b.Property<DateTime?>("CreatedAt")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<int>("OfferId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("OfferId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("reviewloginusers");
-                });
-
-            modelBuilder.Entity("UGHApi.Models.ReviewOfferUser", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<string>("AddReviewForOfferUser")
-                        .HasColumnType("longtext");
-
-                    b.Property<DateTime?>("CreatedAt")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<int>("OfferId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("OfferId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("reviewofferusers");
-                });
-
-            modelBuilder.Entity("UGHApi.Models.ReviewPost", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("CreatedAt")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<string>("LoginUserReviewPost")
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("OfferUserReviewPost")
-                        .HasColumnType("longtext");
-
-                    b.Property<int>("ReviewLoginUserId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ReviewOfferUserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ReviewLoginUserId");
-
-                    b.HasIndex("ReviewOfferUserId");
-
-                    b.ToTable("reviewposts");
-                });
-
-            modelBuilder.Entity("UGHApi.Models.Skill", b =>
+            modelBuilder.Entity("UGH.Domain.Entities.Skill", b =>
                 {
                     b.Property<int>("Skill_ID")
                         .ValueGeneratedOnAdd()
@@ -440,7 +409,7 @@ namespace UGHApi.Migrations
                     b.ToTable("skills");
                 });
 
-            modelBuilder.Entity("UGHApi.Models.State", b =>
+            modelBuilder.Entity("UGH.Domain.Entities.State", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -457,13 +426,14 @@ namespace UGHApi.Migrations
                     b.ToTable("states");
                 });
 
-            modelBuilder.Entity("UGHApi.Models.SuitableAccommodation", b =>
+            modelBuilder.Entity("UGH.Domain.Entities.SuitableAccommodation", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
                     b.Property<string>("Name")
+                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.HasKey("Id");
@@ -471,74 +441,14 @@ namespace UGHApi.Migrations
                     b.ToTable("accommodationsuitables");
                 });
 
-            modelBuilder.Entity("UGHApi.Models.UserProfile", b =>
+            modelBuilder.Entity("UGH.Domain.Entities.User", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("User_Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("char(36)");
 
-                    b.Property<string>("Hobbies")
+                    b.Property<string>("About")
                         .HasColumnType("longtext");
-
-                    b.Property<int>("Options")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Token")
-                        .HasColumnType("longtext");
-
-                    b.Property<byte[]>("UserPic")
-                        .HasColumnType("longblob");
-
-                    b.Property<int>("User_Id")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("User_Id");
-
-                    b.ToTable("userprofiles");
-                });
-
-            modelBuilder.Entity("UGHApi.Models.UserRole", b =>
-                {
-                    b.Property<int>("RoleId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<string>("RoleName")
-                        .HasColumnType("longtext");
-
-                    b.HasKey("RoleId");
-
-                    b.ToTable("userroles");
-                });
-
-            modelBuilder.Entity("UGHApi.Models.UserRoleMapping", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<int>("RoleId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("RoleId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("userrolesmapping");
-                });
-
-            modelBuilder.Entity("UGHModels.User", b =>
-                {
-                    b.Property<int>("User_Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
 
                     b.Property<string>("City")
                         .IsRequired()
@@ -547,9 +457,6 @@ namespace UGHApi.Migrations
                     b.Property<string>("Country")
                         .IsRequired()
                         .HasColumnType("longtext");
-
-                    b.Property<int?>("CurrentMembershipMembershipID")
-                        .HasColumnType("int");
 
                     b.Property<DateOnly>("DateOfBirth")
                         .HasColumnType("date");
@@ -569,6 +476,9 @@ namespace UGHApi.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
+                    b.Property<string>("Hobbies")
+                        .HasColumnType("longtext");
+
                     b.Property<string>("HouseNumber")
                         .IsRequired()
                         .HasColumnType("longtext");
@@ -586,6 +496,9 @@ namespace UGHApi.Migrations
                     b.Property<string>("Link_VS")
                         .HasColumnType("longtext");
 
+                    b.Property<int?>("MembershipId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Password")
                         .IsRequired()
                         .HasColumnType("longtext");
@@ -594,7 +507,13 @@ namespace UGHApi.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
+                    b.Property<byte[]>("ProfilePicture")
+                        .HasColumnType("longblob");
+
                     b.Property<string>("SaltKey")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Skills")
                         .HasColumnType("longtext");
 
                     b.Property<string>("State")
@@ -610,169 +529,341 @@ namespace UGHApi.Migrations
 
                     b.HasKey("User_Id");
 
-                    b.HasIndex("CurrentMembershipMembershipID");
+                    b.HasIndex("MembershipId");
 
                     b.ToTable("users");
                 });
 
-            modelBuilder.Entity("UGHApi.Models.Offer", b =>
+            modelBuilder.Entity("UGH.Domain.Entities.UserMembership", b =>
                 {
-                    b.HasOne("UGHModels.User", "User")
-                        .WithMany()
-                        .HasForeignKey("User_Id")
+                    b.Property<int>("UserMembershipID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime>("Expiration")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int>("MembershipID")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<Guid>("User_Id")
+                        .HasColumnType("char(36)");
+
+                    b.HasKey("UserMembershipID");
+
+                    b.HasIndex("MembershipID");
+
+                    b.HasIndex("User_Id");
+
+                    b.ToTable("usermembership");
+                });
+
+            modelBuilder.Entity("UGH.Domain.Entities.UserProfile", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<string>("Hobbies")
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("Options")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Skills")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Token")
+                        .HasColumnType("longtext");
+
+                    b.Property<byte[]>("UserPic")
+                        .HasColumnType("longblob");
+
+                    b.Property<Guid>("User_Id")
+                        .HasColumnType("char(36)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("User_Id");
+
+                    b.ToTable("userprofiles");
+                });
+
+            modelBuilder.Entity("UGH.Domain.Entities.UserRole", b =>
+                {
+                    b.Property<int>("RoleId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<string>("RoleName")
+                        .HasColumnType("longtext");
+
+                    b.HasKey("RoleId");
+
+                    b.ToTable("userroles");
+                });
+
+            modelBuilder.Entity("UGH.Domain.Entities.UserRoleMapping", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<int>("RoleId")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("char(36)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RoleId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("userrolesmapping");
+                });
+
+            modelBuilder.Entity("UGHApi.Entities.ShopItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("Duration")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("shopitems");
+                });
+
+            modelBuilder.Entity("UGHApi.Entities.Transaction", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<int?>("CouponId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ShopItemId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("TransactionDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("TransactionId")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("char(36)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CouponId");
+
+                    b.HasIndex("ShopItemId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("transaction");
+                });
+
+            modelBuilder.Entity("UGH.Domain.Entities.OfferTypeLodging", b =>
+                {
+                    b.HasBaseType("UGH.Domain.Entities.Offer");
+
+                    b.Property<string>("AdditionalLodgingProperties")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Location")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("LodgingType")
+                        .HasColumnType("longtext");
+
+                    b.HasDiscriminator().HasValue("OfferTypeLodging");
+                });
+
+            modelBuilder.Entity("UGH.Domain.Entities.OfferTypeRequest", b =>
+                {
+                    b.HasBaseType("UGH.Domain.Entities.Offer");
+
+                    b.Property<string>("PossibleLocations")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("SpecialConditions")
+                        .HasColumnType("longtext");
+
+                    b.HasDiscriminator().HasValue("OfferTypeRequest");
+                });
+
+            modelBuilder.Entity("UGH.Domain.Entities.Coupon", b =>
+                {
+                    b.HasOne("UGH.Domain.Entities.User", "CreatedByUser")
+                        .WithMany("Coupons")
+                        .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("UGH.Domain.Entities.Membership", "Membership")
+                        .WithMany()
+                        .HasForeignKey("MembershipId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("Membership");
+                });
+
+            modelBuilder.Entity("UGH.Domain.Entities.Offer", b =>
+                {
+                    b.HasOne("UGH.Domain.Entities.Picture", "Picture")
+                        .WithMany()
+                        .HasForeignKey("PictureId");
+
+                    b.HasOne("UGH.Domain.Entities.User", "User")
+                        .WithMany("Offers")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Picture");
 
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("UGHApi.Models.RatingHostLogin", b =>
+            modelBuilder.Entity("UGH.Domain.Entities.OfferApplication", b =>
                 {
-                    b.HasOne("UGHApi.Models.Offer", "Offer")
+                    b.HasOne("UGH.Domain.Entities.User", "Host")
                         .WithMany()
+                        .HasForeignKey("HostId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("UGH.Domain.Entities.Offer", "Offer")
+                        .WithMany("OfferApplications")
                         .HasForeignKey("OfferId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("UGHModels.User", "User")
+                    b.HasOne("UGH.Domain.Entities.User", "User")
                         .WithMany()
-                        .HasForeignKey("User_Id")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Host");
 
                     b.Navigation("Offer");
 
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("UGHApi.Models.RatingUserLogin", b =>
+            modelBuilder.Entity("UGH.Domain.Entities.Picture", b =>
                 {
-                    b.HasOne("UGHApi.Models.Offer", "Offer")
+                    b.HasOne("UGH.Domain.Entities.User", "Owner")
                         .WithMany()
-                        .HasForeignKey("OfferId")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("UGHModels.User", "User")
-                        .WithMany()
-                        .HasForeignKey("User_Id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Offer");
-
-                    b.Navigation("User");
+                    b.Navigation("Owner");
                 });
 
-            modelBuilder.Entity("UGHApi.Models.Ratings", b =>
+            modelBuilder.Entity("UGH.Domain.Entities.Redemption", b =>
                 {
-                    b.HasOne("UGHApi.Models.Offer", "Offer")
-                        .WithMany()
-                        .HasForeignKey("OfferId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("UGHModels.User", "User")
-                        .WithMany()
-                        .HasForeignKey("User_Id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Offer");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("UGHApi.Models.Redemption", b =>
-                {
-                    b.HasOne("UGHApi.Models.Coupon", "Coupon")
-                        .WithMany()
-                        .HasForeignKey("CouponId")
+                    b.HasOne("UGH.Domain.Entities.Coupon", "Coupon")
+                        .WithOne("Redemption")
+                        .HasForeignKey("UGH.Domain.Entities.Redemption", "CouponId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Coupon");
                 });
 
-            modelBuilder.Entity("UGHApi.Models.Review", b =>
+            modelBuilder.Entity("UGH.Domain.Entities.Review", b =>
                 {
-                    b.HasOne("UGHApi.Models.Offer", "Offer")
-                        .WithMany()
+                    b.HasOne("UGH.Domain.Entities.Offer", "Offer")
+                        .WithMany("Reviews")
                         .HasForeignKey("OfferId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("UGHModels.User", "User")
+                    b.HasOne("UGH.Domain.Entities.User", "Reviewed")
                         .WithMany()
-                        .HasForeignKey("UserId")
+                        .HasForeignKey("ReviewedId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("UGH.Domain.Entities.User", "Reviewer")
+                        .WithMany()
+                        .HasForeignKey("ReviewerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Offer");
 
-                    b.Navigation("User");
+                    b.Navigation("Reviewed");
+
+                    b.Navigation("Reviewer");
                 });
 
-            modelBuilder.Entity("UGHApi.Models.ReviewLoginUser", b =>
+            modelBuilder.Entity("UGH.Domain.Entities.User", b =>
                 {
-                    b.HasOne("UGHApi.Models.Offer", "Offer")
+                    b.HasOne("UGH.Domain.Entities.Membership", "CurrentMembership")
                         .WithMany()
-                        .HasForeignKey("OfferId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("MembershipId");
 
-                    b.HasOne("UGHModels.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Offer");
-
-                    b.Navigation("User");
+                    b.Navigation("CurrentMembership");
                 });
 
-            modelBuilder.Entity("UGHApi.Models.ReviewOfferUser", b =>
+            modelBuilder.Entity("UGH.Domain.Entities.UserMembership", b =>
                 {
-                    b.HasOne("UGHApi.Models.Offer", "Offer")
+                    b.HasOne("UGH.Domain.Entities.Membership", "Membership")
                         .WithMany()
-                        .HasForeignKey("OfferId")
+                        .HasForeignKey("MembershipID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("UGHModels.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
+                    b.HasOne("UGH.Domain.Entities.User", "User")
+                        .WithMany("UserMemberships")
+                        .HasForeignKey("User_Id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Offer");
+                    b.Navigation("Membership");
 
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("UGHApi.Models.ReviewPost", b =>
+            modelBuilder.Entity("UGH.Domain.Entities.UserProfile", b =>
                 {
-                    b.HasOne("UGHApi.Models.ReviewLoginUser", "ReviewLoginUser")
-                        .WithMany()
-                        .HasForeignKey("ReviewLoginUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("UGHApi.Models.ReviewOfferUser", "ReviewOfferUser")
-                        .WithMany()
-                        .HasForeignKey("ReviewOfferUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("ReviewLoginUser");
-
-                    b.Navigation("ReviewOfferUser");
-                });
-
-            modelBuilder.Entity("UGHApi.Models.UserProfile", b =>
-                {
-                    b.HasOne("UGHModels.User", "User")
+                    b.HasOne("UGH.Domain.Entities.User", "User")
                         .WithMany()
                         .HasForeignKey("User_Id")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -781,15 +872,15 @@ namespace UGHApi.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("UGHApi.Models.UserRoleMapping", b =>
+            modelBuilder.Entity("UGH.Domain.Entities.UserRoleMapping", b =>
                 {
-                    b.HasOne("UGHApi.Models.UserRole", "Role")
+                    b.HasOne("UGH.Domain.Entities.UserRole", "Role")
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("UGHModels.User", "User")
+                    b.HasOne("UGH.Domain.Entities.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -800,13 +891,107 @@ namespace UGHApi.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("UGHModels.User", b =>
+            modelBuilder.Entity("UGHApi.Entities.ShopItem", b =>
                 {
-                    b.HasOne("UGHApi.Models.Membership", "CurrentMembership")
-                        .WithMany()
-                        .HasForeignKey("CurrentMembershipMembershipID");
+                    b.OwnsOne("UGHApi.Entities.Money", "Price", b1 =>
+                        {
+                            b1.Property<int>("ShopItemId")
+                                .HasColumnType("int");
 
-                    b.Navigation("CurrentMembership");
+                            b1.Property<decimal>("Amount")
+                                .HasPrecision(18, 2)
+                                .HasColumnType("decimal(18,2)")
+                                .HasColumnName("Price_Amount");
+
+                            b1.Property<string>("Currency")
+                                .IsRequired()
+                                .HasMaxLength(3)
+                                .HasColumnType("varchar(3)")
+                                .HasColumnName("Price_Currency");
+
+                            b1.HasKey("ShopItemId");
+
+                            b1.ToTable("shopitems");
+
+                            b1.WithOwner()
+                                .HasForeignKey("ShopItemId");
+                        });
+
+                    b.Navigation("Price");
+                });
+
+            modelBuilder.Entity("UGHApi.Entities.Transaction", b =>
+                {
+                    b.HasOne("UGH.Domain.Entities.Coupon", "Coupon")
+                        .WithMany()
+                        .HasForeignKey("CouponId");
+
+                    b.HasOne("UGHApi.Entities.ShopItem", "ShopItem")
+                        .WithMany()
+                        .HasForeignKey("ShopItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("UGH.Domain.Entities.User", "User")
+                        .WithMany("Transactions")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.OwnsOne("UGHApi.Entities.Money", "Amount", b1 =>
+                        {
+                            b1.Property<int>("TransactionId")
+                                .HasColumnType("int");
+
+                            b1.Property<decimal>("Amount")
+                                .HasPrecision(18, 2)
+                                .HasColumnType("decimal(18,2)")
+                                .HasColumnName("Amount_Value");
+
+                            b1.Property<string>("Currency")
+                                .IsRequired()
+                                .HasMaxLength(3)
+                                .HasColumnType("varchar(3)")
+                                .HasColumnName("Amount_Currency");
+
+                            b1.HasKey("TransactionId");
+
+                            b1.ToTable("transaction");
+
+                            b1.WithOwner()
+                                .HasForeignKey("TransactionId");
+                        });
+
+                    b.Navigation("Amount");
+
+                    b.Navigation("Coupon");
+
+                    b.Navigation("ShopItem");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("UGH.Domain.Entities.Coupon", b =>
+                {
+                    b.Navigation("Redemption");
+                });
+
+            modelBuilder.Entity("UGH.Domain.Entities.Offer", b =>
+                {
+                    b.Navigation("OfferApplications");
+
+                    b.Navigation("Reviews");
+                });
+
+            modelBuilder.Entity("UGH.Domain.Entities.User", b =>
+                {
+                    b.Navigation("Coupons");
+
+                    b.Navigation("Offers");
+
+                    b.Navigation("Transactions");
+
+                    b.Navigation("UserMemberships");
                 });
 #pragma warning restore 612, 618
         }

@@ -1,187 +1,158 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using System.ComponentModel.DataAnnotations;
+using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using System.ComponentModel.DataAnnotations;
-using UGHApi.Models;
-using UGHApi.Services;
-using UGHModels;
+using UGH.Application.Admin;
+using UGH.Domain.Core;
+using UGHApi.Applications.Admin;
 
-namespace UGHApi.Controllers
+namespace UGHApi.Controllers;
+
+[Route("api/admin")]
+[ApiController]
+[Authorize(Roles = "Admin")]
+public class AdminController : ControllerBase
 {
-    [Route("api/admin")]
-    [ApiController]
-    [Authorize(Roles = "Admin")]
-    public class AdminController : ControllerBase
+    private readonly IMediator _mediator;
+    private readonly ILogger<AdminController> _logger;
+
+    public AdminController(ILogger<AdminController> logger, IMediator mediator)
     {
-        private readonly UghContext _context;
-        private readonly UserService _userService;
-        private readonly EmailService _mailService;
-        private readonly ILogger<AdminController> _logger;
-        public AdminController(UghContext context, UserService userService, EmailService mailService, ILogger<AdminController> logger)
-        {
-            _context = context;
-            _userService = userService;
-            _mailService = mailService;
-            _logger = logger;
-        }
-
-        #region verifyuserstate
-        [HttpPut("verify-user/{userId}")]
-        public async Task<IActionResult> VerifyUser([Required] int userId)
-        {
-            try
-            {
-                var user = await _context.users.FindAsync(userId);
-
-                if (user == null)
-                {
-                    return NotFound("User not found.");
-                }
-
-                if (user.VerificationState == UGH_Enums.VerificationState.Verified)
-                {
-                    return BadRequest("User verification already completed.");
-                }
-
-                user.VerificationState = UGH_Enums.VerificationState.Verified;
-                await _context.SaveChangesAsync();
-
-                return Ok("User verification completed successfully.");
-            }
-            catch (Exception ex)
-            {
-               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
-        }
-
-
-        [HttpPost("update-verification-state/{userId}/{verificationState}")]
-        public async Task<IActionResult> UpdateVerifyState([Required]int userId,[Required] UGH_Enums.VerificationState verificationState)
-        {
-            try
-            {
-                var user = await _context.users.FindAsync(userId);
-                if (user == null)
-                {
-                    return NotFound("User not found.");
-                }
-
-                user.VerificationState = verificationState;
-                await _context.SaveChangesAsync();
-
-                if (verificationState == UGH_Enums.VerificationState.VerificationFailed ||
-                    verificationState == UGH_Enums.VerificationState.Verified)
-                {
-                    _userService.DeleteUserInfo(userId);
-
-                    if (verificationState == UGH_Enums.VerificationState.VerificationFailed)
-                    {
-                        await Task.Delay(TimeSpan.FromMinutes(5));
-                    }
-
-                    string status = verificationState == UGH_Enums.VerificationState.VerificationFailed ? "Verification Failed" : "Verified";
-                    await _mailService.SendTemplateEmailAsync(user.Email_Address, status, user.FirstName);
-                }
-                    return Ok("Successfully updated verification state of user.");
-                
-            }
-            catch (DbUpdateException ex)
-            {
-                _logger.LogInformation(ex.Message,$"{ex.StackTrace}");
-                return StatusCode(500, $"Database error occurred while updating verification state: {ex.Message}");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
-        }
-
-        [HttpGet("get-all-users")]
-        public async Task<ActionResult<IEnumerable<User>>> GetAllUsersByAdmin()
-        {
-            try
-            {
-                var users = await _context.users.Include(u => u.CurrentMembership)
-                                                .OrderBy(u => u.VerificationState)
-                                                .ToListAsync();
-
-                if (users == null || !users.Any())
-                {
-                    return NotFound("No users found.");
-                }
-
-                return Ok(users);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
-        }
-
-        [HttpGet("get-user-by-id/{id}")]
-        public async Task<ActionResult<User>> GetUserById([Required]int id)
-        {
-            try
-            {
-                var user = await _context.users.FindAsync(id);
-
-                if (user == null)
-                {
-                    return NotFound("User not found.");
-                }
-
-                return user;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
-        }
-
-        [HttpGet("get-user-profile/{userId}")]
-        public async Task<IActionResult> GetProfile([Required]int userId)
-        {
-            try
-            {
-                var checkProfile = await _context.userprofiles.Include(u => u.User).FirstOrDefaultAsync(p => p.User_Id == userId);
-                if (checkProfile == null)
-                {
-                    var newProfile = new UserProfile
-                    {
-                        User_Id = userId,
-                    };
-
-                    _context.userprofiles.Add(newProfile);
-                    _context.SaveChanges();
-                }
-                var profile = await _context.userprofiles.Include(u => u.User).FirstOrDefaultAsync(p => p.User_Id == userId);
-                if (profile != null)
-                {
-                    // Generate a unique token for the profile
-                    var token = Guid.NewGuid().ToString();
-                    profile.Token = token;
-                    _context.SaveChanges();
-
-                    return Ok(new { Profile = profile, Token = token });
-                }
-                var user = await _context.users.FindAsync(userId);
-                if (user != null)
-                {
-                    return Ok(user);
-                }
-                return NotFound("Profile not found.");
-            }
-            catch (Exception ex)
-            {
-               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
-        }
-        #endregion
+        _mediator = mediator;
+        _logger = logger;
     }
+
+    #region verifyuserstate
+    [HttpPut("verify-user/{userId}")]
+    public async Task<IActionResult> VerifyUser([Required] Guid userId)
+    {
+        var result = await _mediator.Send(new VerifyUserCommand(userId));
+
+        if (result.IsSuccess)
+        {
+            return Ok(result);
+        }
+
+        return BadRequest(result);
+    }
+
+    [HttpPost("update-verification-state/{userId}/{verificationState}")]
+    public async Task<IActionResult> UpdateVerifyState(
+        [Required] Guid userId,
+        [Required] UGH_Enums.VerificationState verificationState
+    )
+    {
+        var command = new UpdateVerifyStateCommand(userId, verificationState);
+        var result = await _mediator.Send(command);
+
+        if (result.IsSuccess)
+        {
+            return Ok(result);
+        }
+
+        return StatusCode(500, result);
+    }
+
+    [HttpGet("get-all-users")]
+    public async Task<ActionResult> GetAllUsersByAdmin(
+        string searchTerm,
+        string sortBy,
+        string sortDirection = "asc",
+        int pageNumber = 1,
+        int pageSize = 10
+    )
+    {
+        var result = await _mediator.Send(
+            new GetAllUsersByAdminQuery
+            {
+                PageNumber = pageNumber,
+                PageSize = pageSize,
+                SearchTerm = searchTerm,
+                SortBy = sortBy,
+                SortDirection = sortDirection,
+            }
+        );
+
+        return Ok(result.Value);
+    }
+
+    [HttpGet("get-user-by-id/{userId}")]
+    public async Task<IActionResult> GetUserById([Required] Guid userId)
+    {
+        try
+        {
+            var query = new GetUserByIdQuery(userId);
+            var result = await _mediator.Send(query);
+
+            if (result == null)
+            {
+                return NotFound("User not found.");
+            }
+
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+            return StatusCode(500, $"Internal server error: {ex.Message}");
+        }
+    }
+
+    [HttpGet("get-user-profile/{userId}")]
+    public async Task<IActionResult> GetProfile([Required] Guid userId)
+    {
+        try
+        {
+            var profile = await _mediator.Send(new GetProfileQuery(userId));
+
+            if (profile == null)
+            {
+                _logger.LogWarning($"Profile with UserId {userId} not found.");
+                return NotFound($"Profile with UserId {userId} not found.");
+            }
+
+            return Ok(profile);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+            return StatusCode(500, new { Message = "Internal server error", Details = ex.Message });
+        }
+    }
+
+    [HttpDelete("delete-admin-user/{userId}")]
+    public async Task<IActionResult> DeleteUserByAdmin([Required] Guid userId)
+    {
+        try
+        {
+            var result = await _mediator.Send(new DeleteAdminUserCommand(userId));
+
+            if (result.IsFailure)
+            {
+                _logger.LogWarning($"Profile with UserId {userId} not found.");
+                return NotFound($"Profile with UserId {userId} not found.");
+            }
+
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+            return StatusCode(500, new { Message = "Internal server error", Details = ex.Message });
+        }
+    }
+
+    //[HttpPost("assign-membership")]
+    //public async Task<IActionResult> AssignMembership(AssignMembershipRequest request)
+    //{
+    //    var command = new RedeemMembershipCommand(request.UserId, request.MembershipId);
+
+    //    var result = await _mediator.Send(command);
+
+    //    if (!result)
+    //        return BadRequest("Failed to assign membership");
+    //    return Ok("Membership assigned successfully.");
+    //}
+
+    #endregion
 }

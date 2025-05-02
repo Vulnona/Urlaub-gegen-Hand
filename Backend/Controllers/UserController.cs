@@ -1,120 +1,107 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
+using MediatR;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using UGH.Application.Users;
 using UGHApi.Models;
-using UGHModels;
+using UGHApi.Services.UserProvider;
 
-namespace UGHApi.Controllers
+namespace UGHApi.Controllers;
+
+[Route("api/user")]
+[ApiController]
+public class UserController : ControllerBase
 {
-    [Route("api/user")]
-    [ApiController]
-    public class UserController : ControllerBase
+    private readonly ILogger<UserController> _logger;
+    private readonly IUserProvider _userProvider;
+    private readonly IMediator _mediator;
+
+    public UserController(
+        IMediator mediator,
+        ILogger<UserController> logger,
+        IUserProvider userProvider
+    )
     {
-        private readonly UghContext _context;
-        private readonly ILogger<UserController> _logger;
-
-        public UserController(UghContext context, ILogger<UserController> logger)
-        {
-            _context = context;
-            _logger = logger;
-        }
-        #region users-info
-        [HttpGet("get-all-users")]
-        public async Task<ActionResult<IEnumerable<User>>> GetUsers()
-        {
-            try
-            {
-                var users = await _context.users.ToListAsync();
-                if (!users.Any()) NotFound();
-                return Ok(users);
-            }
-            catch (Exception ex)
-            {
-               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
-        }
-
-        [HttpGet("get-user-by-id/{id}")]
-        public async Task<ActionResult<User>> GetUser([Required]int id)
-        {
-            try
-            {
-                var user = await _context.users.FindAsync(id);
-                if (user == null)
-                {
-                    return NotFound();
-                }
-
-                return Ok(user);
-            }
-            catch (Exception ex)
-            {
-               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
-        }
-
-        [HttpPut("upload-id")]
-        public async Task<IActionResult> UploadID([FromBody] UploadIDViewModel model)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            try
-            {
-                var existUser = await _context.users.FindAsync(model.Id);
-                if (existUser == null)
-                {
-                    return NotFound();
-                }
-
-                existUser.Link_VS = model.Link_VS;
-                existUser.Link_RS = model.Link_RS;
-                await _context.SaveChangesAsync();
-                _logger.LogInformation("ID Uploaded Successfully");
-                return Ok("ID Uploaded Successfully");
-            }
-            catch (Exception ex)
-            {
-               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
-        }
-
-        [HttpDelete("delete-user/{id}")]
-        public async Task<IActionResult> DeleteUser([Required]int id)
-        {
-            try
-            {
-                var user = await _context.users.FindAsync(id);
-                if (user == null)
-                {
-                    return NotFound();
-                }
-
-                _context.users.Remove(user);
-                await _context.SaveChangesAsync();
-
-                return NoContent();
-            }
-            catch (Exception ex)
-            {
-               _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
-        }
-
-        private async Task<bool> UserExistsAsync([Required] int id)
-        {
-            if (_context == null || _context.users == null)
-            {
-                return false;
-            }
-            return await _context.users.AnyAsync(e => e.User_Id == id);
-        }
-        #endregion
+        _mediator = mediator;
+        _logger = logger;
+        _userProvider = userProvider;
     }
+
+    #region users-info
+
+    [Authorize]
+    [HttpGet("get-user-by-id/{id}")]
+    public async Task<IActionResult> GetUser([Required] Guid id)
+    {
+        try
+        {
+            var query = new GetUserByIdQuery(id);
+            var result = await _mediator.Send(query);
+
+            if (result.IsFailure)
+            {
+                return NotFound(result.Error);
+            }
+
+            return Ok(result.Value);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+            return StatusCode(500, $"Internal server error: {ex.Message}");
+        }
+    }
+
+    [HttpPut("upload-id")]
+    public async Task<IActionResult> UploadID([FromBody] UploadIdRequest model)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        try
+        {
+            var command = new UploadIdCommand(model.Id, model.Link_VS, model.Link_RS);
+            var result = await _mediator.Send(command);
+
+            if (result.IsFailure)
+            {
+                return NotFound(result.Error);
+            }
+
+            return Ok("ID Uploaded Successfully");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+            return StatusCode(500, $"Internal server error: {ex.Message}");
+        }
+    }
+
+    // This function is to be used by the admin. A self delete function has not been implemented yet.
+    [Authorize(Roles = "Admin")]
+    [HttpDelete("delete-user")]
+    public async Task<IActionResult> DeleteUser()
+    {
+        try
+        {
+            var userId = _userProvider.UserId;
+            var command = new DeleteUserCommand(userId);
+            var result = await _mediator.Send(command);
+
+            if (result.IsFailure)
+            {
+                return NotFound(result.Error);
+            }
+
+            return NoContent();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+            return StatusCode(500, $"Internal server error: {ex.Message}");
+        }
+    }
+    #endregion
 }
