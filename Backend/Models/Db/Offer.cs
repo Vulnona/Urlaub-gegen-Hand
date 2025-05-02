@@ -16,8 +16,8 @@ public class Offer {
     [ForeignKey("PictureId")]
     public virtual Picture Picture { get; set; }
 
-    public DateOnly CreatedAt { get; set; }
-    // add modification date (before migration)
+    public DateOnly CreatedAt { get; init; }
+    public DateOnly ModifiedAt { get; set; }
     public DateOnly FromDate { get; set; }
     public DateOnly ToDate { get; set; }
 
