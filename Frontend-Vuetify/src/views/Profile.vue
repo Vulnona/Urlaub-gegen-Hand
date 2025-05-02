@@ -16,7 +16,7 @@
       <div class="card custom-card overflow-hidden border p-0 leftBox-content">
         <div class="card-body border-bottom border-block-end-dashed">
           <div class="text-center">
-
+            
             <span class="avatar avatar-xxl avatar-rounded online mb-3">
               <i v-if="user.verificationState === 'Verified'" @click="editProfilePic"
                  class="ri-pencil-line edit_icon"></i>
@@ -27,7 +27,7 @@
             <span @click="openReviewsModal()" class="action-link fs-13 font-normal">View All Reviews</span>
           </div>
         </div>
-
+        
         <div v-if="userRole != 'Admin' && user.userRating != 0"
              class="rating_block d-flex mb-0 flex-wrap gap-3 p-3 justify-content-center border-bottom border-block-end-dashed">
           <div class="">

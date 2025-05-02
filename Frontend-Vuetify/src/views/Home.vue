@@ -104,43 +104,7 @@ body .custom-card .card-text strong {
             </div>
             <div v-else class="row">
               <div v-for="(offer, index) in offers" :key="offer.id" class="col-md-3 mb-4">
-                <div class="all_items card-offer">
-                  <div class="item_img">
-                    <img loading="lazy" :src="'data:' + offer.imageMimeType + ';base64,' + offer.imageData"
-                      class="card-img-top" alt="Offer Image">
-                    <div class="rating"
-                      v-if="isActiveMember && offer.hostId != logId && offer.appliedStatus == 'Approved'"
-                      @click="showAddRatingModal(offer.id, offer.hostId, index)"><i class="ri-star-line"></i></div>
-                  </div>
-                  <div class="item_text">
-                    <div @click="redirectToOfferDetail(offer.id)">
-                      <h3 class="card-title">{{ offer.title }}</h3>
-                      <div class="item_description">
-                        <p class="card-text"><strong>Fähigkeiten:</strong> {{ offer.skills }}</p>
-                        <p class="card-text"><strong>Unterbringung:</strong> {{ offer.accomodation }}</p>
-                        <p class="card-text"><strong>Geeignet für:</strong> {{ offer.accomodationsuitable }}</p>
-                        <p class="card-text"><strong>Region/Ort:</strong> {{ offer.region }} {{ offer.location }}</p>
-                      </div>
-                    </div>
-                    <div class="rating_flexBox card-text">
-                      <strong>Overall Rating:</strong>
-                      <div class="rating_star">
-                        <span>
-                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" aria-hidden="true"
-                            role="presentation" focusable="false"
-                            style="display: block; height: 13px; width: 13px; fill: #f6a716;">
-                            <path fill-rule="evenodd"
-                              d="m15.1 1.58-4.13 8.88-9.86 1.27a1 1 0 0 0-.54 1.74l7.3 6.57-1.97 9.85a1 1 0 0 0 1.48 1.06l8.62-5 8.63 5a1 1 0 0 0 1.48-1.06l-1.97-9.85 7.3-6.57a1 1 0 0 0-.55-1.73l-9.86-1.28-4.12-8.88a1 1 0 0 0-1.82 0z">
-                            </path>
-                          </svg>
-                        </span>
-                        <span class="vertical_middle">{{ offer.averageRating }} </span>
-                      </div>
-                    </div>
-                    <Apply :offer=offer :isActiveMember=isActiveMember :logId=logId />
-                    
-                  </div>
-                </div>
+                <OfferCard :offer=offer :logId=logId :isActiveMember=isActiveMember />
               </div>
             </div>
             <!-- Pagination Section -->
@@ -198,9 +162,11 @@ body .custom-card .card-text strong {
   </div>
 </template>
 
-<script>
+<script setup lang="ts">
+import OfferCard from '@/components/offer/OfferCard.vue';
+</script>
+<script lang="ts">
 import Navbar from '@/components/navbar/Navbar.vue';
-import Apply from '@/components/Apply.vue';
 import axiosInstance from '@/interceptor/interceptor';
 import PublicNav from '@/components/navbar/PublicNav.vue';
 import {isActiveMembership,GetUserRole} from '@/services/GetUserPrivileges';
@@ -224,7 +190,6 @@ export default {
   components: {
     Navbar,
       PublicNav,
-      Apply
   },
   data() {
     return {
@@ -332,15 +297,6 @@ export default {
     debouncedSearch() {
       this.currentPage = 1;
       this.debouncedSearchOffers();
-    },
-    // Method to redirect to offer detail page
-    redirectToOfferDetail(offerId) {
-      this.$router.push({
-        name: 'OfferDetail',
-        params: {
-          id: offerId
-        }
-      });
     },
     async showAddRatingModal(offerId, userId, index) {
       this.selectedRating = 0;

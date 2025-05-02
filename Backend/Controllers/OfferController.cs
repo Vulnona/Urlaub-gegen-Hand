@@ -107,29 +107,30 @@ public class OfferController : ControllerBase
             var userId = _userProvider.UserId;            
             var user = await _context.users.Include(u => u.CurrentMembership).FirstOrDefaultAsync(u => u.User_Id == userId);
             
-            if (user == null)            
+            if (user == null)
                 return BadRequest("UserNotFound");            
 
-            var offer = new Offer {
+            var offer = new OfferTypeLodging {
                 Title = offerViewModel.Title,
                 Description = offerViewModel.Description,
+                CreatedAt = DateOnly.FromDateTime(DateTime.UtcNow),
+                Skills = offerViewModel.Skills,
+                UserId = userId,
+                Requirements = offerViewModel.AccommodationSuitable,                
+                AdditionalLodgingProperties = offerViewModel.Accommodation,
                 Location = offerViewModel.Location,
-                CreatedAt = DateTime.UtcNow,
-                Contact = offerViewModel.Contact,
-                Accomodation = offerViewModel.Accommodation,
-                accomodationsuitable = offerViewModel.AccommodationSuitable,
-                skills = offerViewModel.Skills,
-                HostId = userId,
+                Status = OfferStatus.Active,
+                GroupProperties = "",
+                FromDate = DateOnly.FromDateTime(DateTime.Parse(offerViewModel.FromDate)),
+                ToDate = DateOnly.FromDateTime(DateTime.Parse(offerViewModel.ToDate))
             };
 
             if (offerViewModel.Image.Length > 0) {
                 using var memoryStream = new MemoryStream();
-                await offerViewModel.Image.CopyToAsync(memoryStream);
-                offer.ImageData = memoryStream.ToArray();
-                offer.ImageMimeType = offerViewModel.Image.ContentType;
+                await offerViewModel.Image.CopyToAsync(memoryStream);                
+                offer.Picture = await _offerRepository.AddPicture(memoryStream.ToArray(), user);
             }
-
-            _context.offers.Add(offer);
+            await _context.offers.AddAsync(offer);
             await _context.SaveChangesAsync();
             _logger.LogInformation("New Offer Added Successfully!");                        
 
@@ -157,7 +158,7 @@ public class OfferController : ControllerBase
             var offer = await _offerRepository.GetOfferByIdAsync(offerId);
             if (offer == null)
                 return BadRequest("OfferNotFound");
-            if (offer.HostId == userId)
+            if (offer.UserId == userId)
                 return BadRequest("Host Cannot apply for own offer");
 
             var existingApplication = await _offerRepository.GetOfferApplicationAsync(offer.Id, userId);
@@ -167,7 +168,7 @@ public class OfferController : ControllerBase
             var offerApplication = new OfferApplication {
                 OfferId = offer.Id,
                 UserId = userId,
-                HostId = offer.HostId,
+                HostId = offer.UserId,
                 Status = OfferApplicationStatus.Pending,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow

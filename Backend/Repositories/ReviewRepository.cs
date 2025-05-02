@@ -53,7 +53,7 @@ public class ReviewRepository
         try {
             IQueryable<Review> query = _context
                 .reviews.Include(r => r.Offer)
-                .Where(r => r.OfferId == offerId && r.Offer.HostId == r.ReviewedId);
+                .Where(r => r.OfferId == offerId && r.Offer.UserId == r.ReviewedId);
 
             int totalCount = await query.CountAsync();
 
@@ -92,7 +92,7 @@ public class ReviewRepository
         if (offer == null)
             return "Offer not found";
         
-        bool isReviewerHost = reviewer.User_Id == offer.HostId;
+        bool isReviewerHost = reviewer.User_Id == offer.UserId;
         Guid reviewedId;
         Guid guestId;
         
@@ -105,7 +105,7 @@ public class ReviewRepository
         }
         else
         {
-            reviewedId = offer.HostId;
+            reviewedId = offer.UserId;
             guestId = UserId;
         }
         existingReview =  await _context.reviews.FirstOrDefaultAsync(r => r.OfferId == OfferId && r.ReviewerId == UserId && r.ReviewedId == reviewedId);

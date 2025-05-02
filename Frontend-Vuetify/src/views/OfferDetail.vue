@@ -11,12 +11,18 @@
         <div class="col-xs-12 col-sm-6">
           <div class="offer-content">
             <h1 class="offer-title">{{ offer.title }}</h1>
-            <div class="offer-details">
-              <p><strong>Fähigkeiten:</strong> {{ offer.skills }}</p>
-              <p><strong>Annehmlichkeiten:</strong> {{ offer.accomodation }}</p>
-              <p><strong>Geeignet für:</strong> {{ offer.accomodationsuitable }}</p>
-              <p><strong>Ort/Region:</strong> {{ offer.location }}</p>
-            </div>
+              <div class="item_description">
+                <tr><td>
+                    <div style="display: flex; align-items: center;"> <strong>Gastgeber:&nbsp;</strong>
+                      <UserLink :hostPic=offer.hostPicture :hostId=offer.hostId :hostName=offer.hostName />
+                  </div> </td>
+                </tr>
+                <tr><strong>Gesuchte Fähigkeiten:</strong> {{ offer.skills }}</tr>
+                <tr><strong>Annehmlichkeiten:</strong> {{ offer.accomodation }}</tr>
+                <tr><strong>Geeignet für:</strong> {{ offer.accomodationsuitable }}</tr>
+                <tr><strong>Ort/Region:</strong> {{ offer.location }}</tr>
+                <tr><strong>Angebotszeitraum:</strong> {{offer.fromDate}} - {{offer.toDate}}</tr>
+              </div>
             <Apply :offer=offer :isActiveMember=isActiveMember :logId=logId />
             <div class="offer_btn">
               <button @click="backtooffers()" class="action-link"><i class="ri-arrow-go-back-line"
@@ -32,73 +38,9 @@
           </div>
         </div>
       </div>
-      <!--Review-->
-      <div class="review_layout">
-        <div class="row">
-          <div class="col-sm-12">
-            <div class="secondary_title">
-              <h2>Reviews</h2>
-            </div>
-          </div>
-          <div class="col-sm-12">
-            <div class="review-score">
-              <div class="rating-value">
-                <div class="rating-score">
-                  <i class="ri-star-fill" aria-hidden="true"></i>{{ offer.averageRating }}<span>/5</span>
-                </div>
-                <div v-if="offer.averageRating >= 4" class="ratting-text">Wonderful </div>
-                <div v-if="offer.averageRating >= 3 && offer.averageRating < 4" class="ratting-text">Good</div>
-                <div v-if="offer.averageRating >= 1 && offer.averageRating < 3" class="ratting-text">Poor </div>
-                <div v-if="offer.averageRating == 0" class="ratting-text">No Ratings</div>
-                <div class="rating-vote">{{ reviews.length }} reviews</div>
-              </div>
-            </div>
-          </div>
-        </div>
 
-        <div class="comments-area">
-          <div class="comment-list-wrap">
-            <ol class="comment-list">
-              <li v-for="(offerReviews, index) in displayedReviews" :key="index" class="comment">
-                <div class="comment-body">
-                  <div class="comment-author vcard" v-if="offerReviews.reviewer.profilePicture != null">
-                    <img @click="redirectToProfile(offerReviews.reviewer.user_Id)" alt=""
-                      :src="'data:' + offer.imageMimeType + ';base64,' + offerReviews.reviewer.profilePicture"
-                      class="avatar avatar-80 photo clickable-item" height="80" width="80" decoding="async">
-                  </div>
-                  <div class="comment-author vcard" v-if="offerReviews.reviewer.profilePicture == null">
-                    <img alt="" :src="defaultProfileImgSrc" class="avatar avatar-80 photo" height="80" width="80"
-                      decoding="async">
-                  </div>
-                  <div class="comment-content">
-                    <div class="comment-head">
-                      <div class="comment-user">
-                        <div @click="redirectToProfile(offerReviews.reviewer.user_Id)" class="user clickable-item">{{
-                          offerReviews.reviewer.firstName }} {{ offerReviews.reviewer.lastName }}
-                        </div>
-                        <div class="comment-date"> <time :datetime="offerReviews.createdAt">{{
-                          formatDate(offerReviews.createdAt) }}</time>
-                        </div>
-                        <div class="comment-rating-stars stars">
-                          <span class="star star-1"> <i class="ri-star-fill"></i> {{ offerReviews.ratingValue }}</span>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="comment-text">
-                      <p class="mb-0">{{ offerReviews.reviewComment }}</p>
-                    </div>
-                  </div>
-                </div>
-              </li>
-            </ol>
-            <div class="text-center" v-if="reviews.length > 1">
-              <button type="button" @click="toggleShowMore" class="btn outline_Greybtn">
-                {{ showAllReviews ? "Hide Reviews" : "Show More Reviews" }}
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+
+
     </div>
   </section>
   <div class="loading" v-else>
@@ -121,6 +63,7 @@ import router from '@/router';
 import {isActiveMembership} from '@/services/GetUserPrivileges';
 import Apply from '@/components/Apply.vue';
 import getLoggedUserId from '@/services/LoggedInUserId';
+import UserLink from '@/components/offer/UserLink.vue';
 
 const {
   params

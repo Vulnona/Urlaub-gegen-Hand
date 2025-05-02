@@ -139,6 +139,13 @@ public class UserRepository : IUserRepository
         }
     }
 
+    public async Task<User> GetUserWithMembershipAsync(Guid userId)
+    {
+        return await _context
+            .users.Include(u => u.CurrentMembership)
+            .FirstOrDefaultAsync(u => u.User_Id == userId);
+    }
+
     public async Task UpdateUserAsync(User user)
     {
         _context.users.Update(user);

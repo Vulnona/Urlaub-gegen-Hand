@@ -13,6 +13,8 @@ namespace UGH.Domain.ViewModels
         public string Contact { get; set; }
         public string? Accommodation { get; set; }
         public string? AccommodationSuitable { get; set; }
+        public string FromDate { get; set; }
+        public string ToDate { get; set; }
 
         [Required]
         public string Skills { get; set; }

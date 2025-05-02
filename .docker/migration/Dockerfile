@@ -5,7 +5,7 @@ FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build-env
 ENV PATH $PATH:/root/.dotnet/tools
 
 # Install dotnet-ef tool globally
-RUN dotnet tool install -g dotnet-ef --version 7.0.10
+RUN dotnet tool install -g dotnet-ef --version 7.0.20
 
 WORKDIR /app
 

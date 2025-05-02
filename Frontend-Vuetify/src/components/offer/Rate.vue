@@ -42,7 +42,7 @@
 import {ref,onUpdated, getCurrentInstance, nextTick} from "vue";
 import toast from '@/components/toaster/toast';
 import axiosInstance from '@/interceptor/interceptor';
-
+import TableEntryUser from '@/components/UserOverlay.vue';
 const props = defineProps({active: Boolean, offer: Object, user: Object})
 const emit = defineEmits(['update:active', "update:refresh"]);
 let selectedRating = ref(0)

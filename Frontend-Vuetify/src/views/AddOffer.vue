@@ -11,16 +11,34 @@
               <div class="general_infoContent">
                 <div class="card-title"> <h5>Allgemeine Informationen</h5> </div>
                 <div class="card-body">
-                  <Input n="Titel für Angebot" v-model="offer.title" p="" req="true" />
-                  <Input n="Beschreibung" v-model="offer.description" p="" :t="true" :req="true" />
+                  <Input n="Titel für Angebot" v-model="offer.title" p="" :req=true />
+                  <Input n="Beschreibung" v-model="offer.description" p="" :t="true" :req=true />
                 </div>
               </div>
             </div>
             <div class="card general_info_box">
               <div class="general_infoContent">
-                <div class="card-title"> <h5>Address Information</h5> </div>
-                <div class="card-body address-search-selection">
-                  <Input n="Ort" v-model="offer.location" p="Geben Sie den Ort des Angebots ein" :req="true" />
+                <div class="card-title"> <h5>Zeit und Ort</h5> </div>
+                <div class="card-body">
+                  <Input n="Ort" v-model="offer.location" p="Geben Sie den Ort des Angebots ein" :req=true />
+                  <div class="form-group">
+
+
+                    
+                    <div class="row">
+                      <div class="col">
+                        <label for="FromDate">Möglich ab<b style="color: red;">*</b></label>
+                 <Datepicker date v-model="FromDate" :enable-time-picker="false"
+                             :auto-apply="true" placeholder="dd.mm.yyyy" :typeable="true" input-class-name="datepicker-input" startingView='month'  inputFormat="dd.MM.yyyy"/>
+                      </div>
+                      <div class="col">
+                        <label for="UntilDate">Möglich bis<b style="color: red;">*</b></label>
+                        <Datepicker date v-model="UntilDate" :enable-time-picker="false"
+                                    :auto-apply="true" placeholder="dd.mm.yyyy" :typeable="true" input-class-name="datepicker-input" startingView='month'  inputFormat="dd.MM.yyyy"/>
+                      </div>
+                      </div>
+
+                   </div>
                 </div>
               </div>
             </div>
@@ -69,7 +87,7 @@
                     </div>
                   </div>
                   <div class="form-group">
-                    <req n="Bild hochladen" />
+                    <div>Bild hochladen<b style="color: red;">*</b> </div>
                     <input ref="imageInput" type="file" accept="image/x-png,image/jpeg" @change="onFileChange"
                            class="form-control" />
                   </div>
@@ -88,10 +106,11 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, defineExpose, onMounted, onUpdated } from "vue";
-  import Banner from '@/components/Banner.vue';
-  import Input from '@/components/form/Input.vue';
-  import Navbar from '@/components/navbar/Navbar.vue';
+import { ref, defineExpose, onMounted, onUpdated } from "vue";
+import Banner from '@/components/Banner.vue';
+import Input from '@/components/form/Input.vue';
+import Navbar from '@/components/navbar/Navbar.vue';
+import Datepicker from 'vue3-datepicker';
 </script>
 
 <script lang="ts">
@@ -110,17 +129,19 @@ export default {
     return {
       toast: null,
       offer: {
-        title: '',
-        description: '',
-        location: '',
-        accommodation: [],
-        accommodationSuitable: [],
-        skills: [],
-          image: null,
+          title: '',
+          description: '',
+          location: '',
+          accommodation: [],
+          accommodationSuitable: [],
+          skills: [],
+          image: null,          
       },
-      skills: [],
-      accommodations: [],
-      suitableAccommodations: [],
+        skills: [],
+        accommodations: [],
+        suitableAccommodations: [],
+        UntilDate: null,
+        FromDate: null,
     };
   },
 
@@ -168,17 +189,19 @@ export default {
         toast.info("Please fill all the required fields marked with *");
         return;
       }
-      const offerData = new FormData();
-      offerData.append('title', this.offer.title);
-      offerData.append('description', this.offer.description);
-      offerData.append('location', this.offer.location);
-      offerData.append('contact', this.offer.contact);
-      offerData.append('accommodation', this.offer.accommodation.join(', '));
-      offerData.append('accommodationSuitable', this.offer.accommodationSuitable.join(', '));
-      offerData.append('skills', this.offer.skills.map(skill => skill.skillDescrition).join(', '));
-      offerData.append('country', "");
-      offerData.append('state', "");
-      offerData.append('city', "");
+        const offerData = new FormData();
+        offerData.append('title', this.offer.title);
+        offerData.append('description', this.offer.description);
+        offerData.append('location', this.offer.location);
+        offerData.append('contact', this.offer.contact);
+        offerData.append('accommodation', this.offer.accommodation.join(', '));
+        offerData.append('accommodationSuitable', this.offer.accommodationSuitable.join(', '));
+        offerData.append('ToDate', this.UntilDate.toISOString().split('+')[0]);
+        offerData.append('FromDate', this.FromDate.toISOString().split('+')[0]);
+        offerData.append('skills', this.offer.skills.map(skill => skill.skillDescrition).join(', '));
+        offerData.append('country', "");
+        offerData.append('state', "");
+        offerData.append('city', "");        
       if (this.offer.image) {
         offerData.append('image', this.offer.image);
       }

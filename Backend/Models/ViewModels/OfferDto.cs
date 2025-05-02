@@ -18,8 +18,10 @@ public class OfferDTO
     public string Region { get; set; }
     public string Location { get; set; }
     public string Description {get; set; }
-
-    public OfferDTO(Offer o, User u, OfferApplication oa){
+    public string FromDate { get; set; }
+    public string ToDate { get; set; }
+    public byte[] HostPicture { get; set; }
+    public OfferDTO(OfferTypeLodging o, User u, OfferApplication oa){
         string appliedStatus = oa == null ? "CanApply" : oa.Status switch {
             OfferApplicationStatus.Pending => "Applied",
             OfferApplicationStatus.Approved => "Approved",
@@ -27,17 +29,20 @@ public class OfferDTO
             _ => "Unknown",
         };
         Id = o.Id;
-        ImageData = o.ImageData;
+        ImageData = o.Picture.ImageData;
         Title = o.Title;
-        Accomodation = o.Accomodation;
-        Accomodationsuitable = o.accomodationsuitable;
-        Skills = o.skills;
-        HostId = o.HostId;
+        Accomodation = o.AdditionalLodgingProperties;
+        Accomodationsuitable = o.Requirements;
+        Skills = o.Skills;
+        HostId = o.UserId;
         HostName = $"{u.FirstName} {u.LastName}";
-        AverageRating = o.AverageRating;
+        AverageRating = 0;
         Location = o.Location ?? "";
-        Region = o.state ?? "";
+        Region = "";
         AppliedStatus = appliedStatus;
         Description = o.Description;
+        FromDate = o.FromDate.ToString("dd.MM.yyyy");
+        ToDate = o.ToDate.ToString("dd.MM.yyyy");
+        HostPicture = u.ProfilePicture;
     }
 }

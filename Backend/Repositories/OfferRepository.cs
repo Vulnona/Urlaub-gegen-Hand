@@ -5,6 +5,8 @@ using UGH.Domain.ViewModels;
 using UGHApi.Shared;
 using UGHApi.ViewModels;
 using UGHApi.ViewModels.UserComponent;
+using ImageMagick;
+using System.Security.Cryptography;
 
 namespace UGH.Infrastructure.Repositories;
 
@@ -14,26 +16,6 @@ public class OfferRepository
     public OfferRepository(Ugh_Context context)
     {
         _context = context;
-    }
-
-    public async Task<List<Offer>> GetAllOffersAsync(string searchTerm, Guid userId)
-    {
-        IQueryable<Offer> query = _context
-            .offers.Include(o => o.User)
-            .Include(o => o.Reviews)
-            .Include(o => o.OfferApplications.Where(oa => oa.UserId == userId));
-
-        if (!string.IsNullOrEmpty(searchTerm))
-        {
-            query = query.Where(o =>
-                o.Title.Contains(searchTerm)
-                || o.skills.Contains(searchTerm)
-                || o.Location.Contains(searchTerm)
-                || o.state.Contains(searchTerm)
-            );
-        }
-
-        return await query.ToListAsync();
     }
 
     public async Task<Offer> GetOfferByIdAsync(int offerId)
@@ -48,20 +30,18 @@ public class OfferRepository
         int pageSize =10,
         bool forUser = false
     ) {    
-        IQueryable<Offer> query = _context
-            .offers.Include(o => o.User)
-            .Include(o => o.Reviews)
+        IQueryable<OfferTypeLodging> query = _context
+            .offertypelodgings.Include(o => o.User).Include(o => o.Picture)
             .Include(o => o.OfferApplications)
         .OrderBy(o => o.CreatedAt);
 
          if (forUser)
-             query = query.Where(o => o.HostId == userId);
+             query = query.Where(o => o.UserId == userId);
         if (!string.IsNullOrEmpty(searchTerm)) {
             query = query.Where(o =>
                 o.Title.Contains(searchTerm)
-                || o.skills.Contains(searchTerm)
-                || o.Location.Contains(searchTerm)
-                || o.state.Contains(searchTerm)
+                || o.Skills.Contains(searchTerm)
+                || o.Location.Contains(searchTerm)                
             );
         }
 
@@ -121,7 +101,7 @@ public class OfferRepository
     public async Task<PaginatedList<OfferApplicationDto>> GetOfferApplicationsByUserAsync(Guid requestingUserId, int pageNumber, int pageSize, bool isHost) {
         try {
             IQueryable<OfferApplication> query = _context
-                .offerapplication.Include(oa => oa.Offer)
+                .offerapplication.Include(oa => oa.Offer).ThenInclude(Offer => Offer.Picture)
                 .Include(oa => oa.User).Include(oa => oa.Host);
             if (isHost)
                 query = query.Where(app => app.HostId == requestingUserId);
@@ -145,8 +125,7 @@ public class OfferRepository
                      Offer = new OfferDto {
                          Id = app.Offer.Id,
                          Title = app.Offer.Title,
-                         ImageData = app.Offer.ImageData,
-                         ImageMimeType = app.Offer.ImageMimeType,
+                         ImageData = app.Offer.Picture.ImageData
                      },
                      User = new UserC {
                          User_Id = isHost ? app.User.User_Id : app.Host.User_Id,
@@ -168,9 +147,8 @@ public class OfferRepository
     public async Task<OfferDTO> GetOfferDetailsByIdAsync(int offerId, Guid userId)
     {
         var offer = await _context
-            .offers.Include(o => o.User)
-            .Include(o => o.Reviews)
-            .Include(o => o.OfferApplications)
+            .offertypelodgings.Include(o => o.User)
+            .Include(o => o.OfferApplications).Include(o => o.Picture)
             .FirstOrDefaultAsync(o => o.Id == offerId);
 
         if (offer == null)
@@ -186,15 +164,14 @@ public class OfferRepository
         int pageSize
     )
     {
-        IQueryable<Offer> query = _context.offers.AsQueryable();
+        IQueryable<OfferTypeLodging> query = _context.offertypelodgings.AsQueryable();
 
         if (!string.IsNullOrEmpty(searchTerm))
         {
             query = query.Where(o =>
                 o.Title.Contains(searchTerm)
-                || o.skills.Contains(searchTerm)
+                || o.Skills.Contains(searchTerm)
                 || o.Location.Contains(searchTerm)
-                || o.state.Contains(searchTerm)
             );
         }
 
@@ -212,5 +189,32 @@ public class OfferRepository
             pageNumber,
             pageSize
         );
+    }
+
+    // todo: generalize for different formats and other pictures (like profile pic)
+    public async Task<Picture>AddPicture(byte[] data, User user){
+            using (MagickImage image = new MagickImage(data)) {
+                image.Thumbnail(new MagickGeometry(100));
+                var format = MagickFormat.Jpg;
+                var stream = new MemoryStream();
+                image.Write(stream, format);
+                stream.Position = 0;
+                byte[] hashBytes = MD5.Create().ComputeHash(stream);
+                String hash = BitConverter.ToString(hashBytes).Replace("-", "");
+                Picture alreadyExisting = await _context.pictures.FirstOrDefaultAsync(p => p.Owner == user && p.Hash == hash);
+                // a method for cleaning up unused pictures is still missing
+                if (alreadyExisting != null)
+                    return alreadyExisting;
+                Picture p = new Picture{
+                    ImageData = stream.ToArray(),
+                    Width = 100,
+                    Hash = hash,
+                    Owner = user
+                };
+                await _context.pictures.AddAsync(p);
+                await _context.SaveChangesAsync();
+                return p;
+            }
+
     }
 }

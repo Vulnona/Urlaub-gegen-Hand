@@ -25,6 +25,9 @@ public class Ugh_Context : DbContext
     public DbSet<Coupon> coupons { get; set; }
     public DbSet<Redemption> redemptions { get; set; }
     public DbSet<Offer> offers { get; set; }
+    public DbSet<Picture> pictures { get; set; }
+    public DbSet<OfferTypeRequest> offertyperequests { get; set; }
+    public DbSet<OfferTypeLodging> offertypelodgings { get; set; }
     public DbSet<OfferApplication> offerapplication { get; set; }
     public DbSet<Accommodation> accomodations { get; set; }
     public DbSet<SuitableAccommodation> accommodationsuitables { get; set; }
@@ -45,7 +48,7 @@ public class Ugh_Context : DbContext
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
-
+        
         builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
     }
 }
