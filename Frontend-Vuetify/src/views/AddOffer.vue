@@ -28,12 +28,12 @@
                     <div class="row">
                       <div class="col">
                         <label for="FromDate">Möglich ab<b style="color: red;">*</b></label>
-                 <Datepicker date v-model="FromDate" :enable-time-picker="false"
+                 <Datepicker date v-model="FromDate" :locale="de" :enable-time-picker="false"
                              :auto-apply="true" placeholder="dd.mm.yyyy" :typeable="true" input-class-name="datepicker-input" startingView='month'  inputFormat="dd.MM.yyyy"/>
                       </div>
                       <div class="col">
                         <label for="UntilDate">Möglich bis<b style="color: red;">*</b></label>
-                        <Datepicker date v-model="UntilDate" :enable-time-picker="false"
+                        <Datepicker date v-model="UntilDate" :locale="de" :enable-time-picker="false"
                                     :auto-apply="true" placeholder="dd.mm.yyyy" :typeable="true" input-class-name="datepicker-input" startingView='month'  inputFormat="dd.MM.yyyy"/>
                       </div>
                       </div>
@@ -110,7 +110,9 @@ import { ref, defineExpose, onMounted, onUpdated } from "vue";
 import Banner from '@/components/Banner.vue';
 import Input from '@/components/form/Input.vue';
 import Navbar from '@/components/navbar/Navbar.vue';
+import { de } from 'date-fns/locale';
 import Datepicker from 'vue3-datepicker';
+
 </script>
 
 <script lang="ts">
@@ -141,7 +143,7 @@ export default {
         accommodations: [],
         suitableAccommodations: [],
         UntilDate: null,
-        FromDate: null,
+        FromDate: new Date(),
     };
   },
 
