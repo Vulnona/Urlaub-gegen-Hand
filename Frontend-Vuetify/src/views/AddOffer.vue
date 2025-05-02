@@ -54,7 +54,7 @@
                                  label="skillDescrition" track-by="skill_ID" multiple></multiselect>
                   </div>
                   <div class="amenities-wrapper">
-                    <div class="form-group"> <label> Angebotene Annehmlichkeiten </label> <div class="contact_infoBox">
+                    <div class="form-group"> <label> Unterbringung </label> <div class="contact_infoBox">
                         <ul>
                           <li v-for="accommodation in accommodations" :key="accommodation.id">
                             <div class="flexBox gap-x-2 image-withCheckbox">
