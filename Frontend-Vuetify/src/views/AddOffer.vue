@@ -142,7 +142,7 @@ let accommodations = [];
 let suitableAccommodations = [];
 
 const createOffer = async() => {
-        loading = true;
+        loading.value = true;
       if (offer.image && offer.image.size > 3.5 * 1024 * 1024) {
         toast.warning("Image size cannot be greater than 3.5 MB.");
         return;
@@ -182,7 +182,7 @@ const createOffer = async() => {
       } catch (error) {
         toast.info("Unable To Create Offer!");
       }
-       loading = false;
+       loading.value = false;
 }
 const onFileChange = (event) => {
       offer.image = event.target.files[0];
