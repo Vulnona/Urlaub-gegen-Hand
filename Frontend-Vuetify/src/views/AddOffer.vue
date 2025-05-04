@@ -151,7 +151,8 @@ const createOffer = async() => {
         toast.info("Please fill all the required fields marked with *");
         return;
       }
-        const offerData = new FormData();
+    const offerData = new FormData();
+    offer.description = offer.description.replaceAll("\n","\\\n");
         offerData.append('title', offer.title);
         offerData.append('description', offer.description);
         offerData.append('location', offer.location);
