@@ -152,7 +152,7 @@ const createOffer = async() => {
         return;
       }
     const offerData = new FormData();
-    offer.description = offer.description.replaceAll("\n","\\\n");
+    offer.description = offer.description.replaceAll("\n","\ \ \n");
         offerData.append('title', offer.title);
         offerData.append('description', offer.description);
         offerData.append('location', offer.location);
