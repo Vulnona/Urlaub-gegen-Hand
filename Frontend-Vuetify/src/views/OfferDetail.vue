@@ -34,7 +34,7 @@
       <div class="row">
         <div class="col-sm-12">
           <div class="offer_decription mt-4">
-            <p class="offer-description mb-0">{{ offer.description }}</p>
+            <VueMarkdown :source="offer.description" class="offer-description mb-0" />
           </div>
         </div>
       </div>
@@ -64,6 +64,7 @@ import {isActiveMembership} from '@/services/GetUserPrivileges';
 import Apply from '@/components/Apply.vue';
 import getLoggedUserId from '@/services/LoggedInUserId';
 import UserLink from '@/components/offer/UserLink.vue';
+import VueMarkdown from "vue-markdown-render";
 
 const {
   params
