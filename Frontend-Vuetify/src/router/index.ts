@@ -86,11 +86,6 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/components/account/AccountRegister.vue'),
   },
   {
-    path: '/test',
-    name: 'MarkdownWriter',
-    component: () => import('@/components/offer/MarkdownWriter.vue'),
-  },
-  {
     path: '/offer-request',
     name: 'OfferRequest',
     component: () => import('@/views/OfferRequests.vue'),
