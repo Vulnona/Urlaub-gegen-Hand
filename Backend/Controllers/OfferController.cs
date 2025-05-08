@@ -60,7 +60,7 @@ public class OfferController : ControllerBase
             return StatusCode(500, $"Internal server error.");
         }
     }
-
+    
     [HttpGet("get-offer-by-user")]
     public async Task<IActionResult> GetOfferAsync(string searchTerm, int pageNumber = 1, int pageSize = 10) {
         try {
@@ -79,11 +79,14 @@ public class OfferController : ControllerBase
         }
     }
 
+    // if UserId == null a censored Offer will be displayed
+    [AllowAnonymous]
     [HttpGet("get-offer-by-id/{OfferId:int}")]
     public async Task<IActionResult> GetOffer([Required] int OfferId)
     {
         try {
             var userId = _userProvider.UserId;
+            _logger.LogError($"UserId: {userId}");
             var offer = await _offerRepository.GetOfferDetailsByIdAsync(OfferId, userId);            
             if (offer == null)
                 return NotFound();

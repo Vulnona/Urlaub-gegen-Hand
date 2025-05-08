@@ -1,5 +1,6 @@
-<template>
+<template> 
 <Navbar />
+<PublicNav />
   <section class="offer-detail-container offer_detail_layout section_space" v-if="!loading">
     <div class="container">
       <div class="row">
@@ -11,14 +12,17 @@
         <div class="col-xs-12 col-sm-6">
           <div class="offer-content">
             <h1 class="offer-title">{{ offer.title }}</h1>
-              <div class="item_description">
-                <tr><td>
+            <div class="item_description">
+              <div v-if="offer.hostId != null">
+                <tr>
+                  <td>
                     <div style="display: flex; align-items: center;"> <strong>Gastgeber:&nbsp;</strong>
                       <UserLink :hostPic=offer.hostPicture :hostId=offer.hostId :hostName=offer.hostName />
                   </div> </td>
                 </tr>
+                </div>
                 <tr><strong>Gesuchte Fähigkeiten:</strong> {{ offer.skills }}</tr>
-                <tr><strong>Annehmlichkeiten:</strong> {{ offer.accomodation }}</tr>
+                <tr><strong>Unterbringung:</strong> {{ offer.accomodation }}</tr>
                 <tr><strong>Geeignet für:</strong> {{ offer.accomodationsuitable }}</tr>
                 <tr><strong>Ort/Region:</strong> {{ offer.location }}</tr>
                 <tr><strong>Angebotszeitraum:</strong> {{offer.fromDate}} - {{offer.toDate}}</tr>
@@ -58,6 +62,7 @@ import {
   useRoute
 } from 'vue-router';
 import Navbar from '@/components/navbar/Navbar.vue';
+import PublicNav from '@/components/navbar/PublicNav.vue';
 import axiosInstance from '@/interceptor/interceptor';
 import router from '@/router';
 import {isActiveMembership} from '@/services/GetUserPrivileges';
@@ -71,8 +76,6 @@ const {
 } = useRoute();
 const offer = ref(null);
 const loading = ref(true);
-const showAllReviews = ref(false);
-var reviews = ref([]);
 const defaultProfileImgSrc = '/defaultprofile.jpg';
 const redirectToProfile = (userId) => {
   sessionStorage.setItem("UserId", userId);
@@ -81,7 +84,6 @@ const redirectToProfile = (userId) => {
 
 const fetchOfferDetail = async () => {
   try {
-    fetchReview();
     const response = await axiosInstance.get(`${process.env.baseURL}offer/get-offer-by-id/${params.id}`);
       offer.value = response.data;
   } catch (error) {
@@ -97,20 +99,6 @@ const formatDate = (dateString) => {
     day: '2-digit',
   };
   return new Date(dateString).toLocaleDateString(undefined, options);
-};
-const fetchReview = async () => {
-  try {
-    const response = await axiosInstance.get(`${process.env.baseURL}review/get-offer-reviews?offerId=${params.id}`);
-    reviews.value = response.data.items;
-  } catch (error) {
-    console.error('Error fetching reviews:', error);
-  }
-};
-const displayedReviews = computed(() => {
-  return showAllReviews.value ? reviews.value : reviews.value.slice(0, 1);
-});
-const toggleShowMore = () => {
-  showAllReviews.value = !showAllReviews.value;
 };
 const backtooffers = () => {
   window.history.back();

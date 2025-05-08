@@ -153,9 +153,13 @@ public class OfferRepository
 
         if (offer == null)
             return null;
-
-        var firstApplication = offer.OfferApplications.FirstOrDefault(oa => oa.UserId == userId);                
-        return new OfferDTO(offer ,offer.User, firstApplication);
+        
+        if (userId != default(Guid)) {
+            var applicationOfRequestingUser = offer.OfferApplications.FirstOrDefault(oa => oa.UserId == userId);
+            return new OfferDTO(offer ,offer.User, applicationOfRequestingUser);
+        } else
+            return new OfferDTO(offer , null, null);
+            
     }
 
     public async Task<PaginatedList<ReviewOfferDTO>> GetAllOffersForReviewsAsync(

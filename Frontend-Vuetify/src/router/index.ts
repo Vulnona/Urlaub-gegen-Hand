@@ -86,6 +86,11 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/components/account/AccountRegister.vue'),
   },
   {
+    path: '/test',
+    name: 'MarkdownWriter',
+    component: () => import('@/components/offer/MarkdownWriter.vue'),
+  },
+  {
     path: '/offer-request',
     name: 'OfferRequest',
     component: () => import('@/views/OfferRequests.vue'),
@@ -171,7 +176,7 @@ router.beforeEach((to, from, next) => {
   const requiredRoles = to.meta.roles as string[];
   const requiredMembership = to.meta.membershipStatus as string[];
   const requiredVerification = to.meta.verification as string[];
-  if (requiredRoles) {
+  if (requiredRoles && privileges != null) {
     const userRole = privileges.userRole;
     const membership = privileges.membershipStatus;
     const verification = privileges.verification;
