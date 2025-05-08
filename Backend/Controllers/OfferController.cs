@@ -79,7 +79,7 @@ public class OfferController : ControllerBase
         }
     }
 
-    // if UserId == null a censored Offer will be displayed
+    // if UserId is default a censored Offer will be displayed
     [AllowAnonymous]
     [HttpGet("get-offer-by-id/{OfferId:int}")]
     public async Task<IActionResult> GetOffer([Required] int OfferId)
@@ -99,6 +99,22 @@ public class OfferController : ControllerBase
         }
     }
 
+    // url for the preview picture
+    [AllowAnonymous]
+    [HttpGet("get-preview-picture/{OfferId:int}")]
+    public async Task<IActionResult> GetPreviewPicture([Required] int OfferId){
+        try {
+        var offer = await _context.offers.Include(o => o.Picture).FirstOrDefaultAsync(o => o.Id == OfferId);
+        if (offer != null)
+            return File(offer.Picture.ImageData, "image/jpeg");
+        else
+            return BadRequest("OfferNotFound");
+        } catch (Exception ex) {
+            _logger.LogError($"Exception occurred fetching preview picture: {ex.Message} | StackTrace: {ex.StackTrace}");
+            return StatusCode(500, $"Internal server error.");
+        } 
+    }    
+    
     [HttpPost("add-new-offer")]
     public async Task<IActionResult> AddOffer([FromForm] OfferViewModel offerViewModel)
     {

@@ -1,4 +1,6 @@
-<template> 
+<template>
+  <link rel="image_src" :href=pictureLink />
+
 <Navbar />
 <PublicNav />
   <section class="offer-detail-container offer_detail_layout section_space" v-if="!loading">
@@ -74,6 +76,8 @@ import VueMarkdown from "vue-markdown-render";
 const {
   params
 } = useRoute();
+
+const pictureLink = `${process.env.baseURL}offer/get-preview-picture/${params.id}`;
 const offer = ref(null);
 const loading = ref(true);
 const defaultProfileImgSrc = '/defaultprofile.jpg';
