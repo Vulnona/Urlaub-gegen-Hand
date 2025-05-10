@@ -1,8 +1,25 @@
 import vue from '@vitejs/plugin-vue';
 import vuetify, { transformAssetUrls } from 'vite-plugin-vuetify';
 import ViteFonts from 'unplugin-fonts/vite';
-import { defineConfig, loadEnv } from 'vite';
+import { defineConfig, loadEnv, Plugin } from 'vite';
 import { fileURLToPath, URL } from 'node:url';
+
+const modifyOfferMetaPlugin = () => {
+  return {
+    name: 'html-transform',
+      transformIndexHtml(html, ctx) {
+          if(/\/offer\/\d+/.test(ctx.originalUrl)){
+              let offerNum = ctx.originalUrl.substring(7);
+              console.log(offerNum);
+              return html.replace(
+                  /<meta property="og:image" (.*?)>/,
+                  `<meta property="og:image content=https://alreco.de:8443/api/offer/get-preview-picture/${offerNum}">`
+              )
+          }
+          return html;
+    },
+  }
+}
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
@@ -45,6 +62,7 @@ export default defineConfig(({ mode }) => {
           ],
         },
       }),
+        modifyOfferMetaPlugin(),
     ],
     css: {
       preprocessorOptions: {
