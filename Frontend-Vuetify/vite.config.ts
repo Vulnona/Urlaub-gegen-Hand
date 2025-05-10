@@ -13,7 +13,7 @@ const modifyOfferMetaPlugin = () => {
               console.log(offerNum);
               return html.replace(
                   /<meta property="og:image" (.*?)>/,
-                  `<meta property="og:image content=https://alreco.de:8443/api/offer/get-preview-picture/${offerNum}">`
+                  `<meta property="og:image" content="https://alreco.de:8443/api/offer/get-preview-picture/${offerNum}">`
               )
           }
           return html;
@@ -27,7 +27,10 @@ export default defineConfig(({ mode }) => {
     server: {
       host: '0.0.0.0',
       port: 3000,
-      allowedHosts: ['localhost'],
+      allowedHosts: ['alreco.de'],
+      hmr: {
+        clientPort: 443,
+      },
     },
     optimizeDeps: {
       include: ['vue', 'vue-router', 'sweetalert2', 'crypto-js', 'axios', 'vue-toastification',
