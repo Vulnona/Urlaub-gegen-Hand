@@ -198,7 +198,7 @@ public class OfferRepository
     // todo: generalize for different formats and other pictures (like profile pic)
     public async Task<Picture>AddPicture(byte[] data, User user){
             using (MagickImage image = new MagickImage(data)) {
-                image.Thumbnail(new MagickGeometry(100));
+                image.Thumbnail(new MagickGeometry(400));
                 var format = MagickFormat.Jpg;
                 var stream = new MemoryStream();
                 image.Write(stream, format);
