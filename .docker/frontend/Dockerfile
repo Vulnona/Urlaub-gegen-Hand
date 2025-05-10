@@ -1,4 +1,4 @@
-FROM node:20-alpine as base
+FROM node:24-alpine as base
 
 # Set the timezone
 RUN apk add --no-cache tzdata \
@@ -28,4 +28,5 @@ RUN npm install
 RUN chmod +x ./node_modules/.bin/vite
 
 # Run the development server
-CMD ["npm", "run", "dev"]
+#CMD ["npm", "run", "dev"]
+ENTRYPOINT ["sleep", "infinity"]
