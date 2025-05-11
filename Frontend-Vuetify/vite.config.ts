@@ -7,19 +7,21 @@ import axios from 'axios';
 
 // fetch the metadata on startup, transformIndexHtml is not compatible to asynchronous fetches
 let metadata = new Map();
-const url = `http://172.19.0.4:8080/api/offer/get-meta-data`;
+const url = `http://172.18.0.3:8080/api/offer/get-meta-data`;
 const headers = {'Content-Type': 'application/json'};
-axios.get(url, { headers })
-    .then(res => {
-        res.data.forEach( (o) => {
-            metadata.set(o.id.toString(), o);
+const fetchMetadata = () =>{
+    axios.get(url, { headers })
+        .then(res => {
+            res.data.forEach( (o) => {
+                metadata.set(o.id.toString(), o);
+            })
         })
-
-    })
     .catch(error => {
         console.error('Error:', error.message);
     });
-
+}
+fetchMetadata();
+setInterval(fetchMetadata,60000);
 const modifyOfferMetaPlugin = () => {
   return {
     name: 'html-transform',
