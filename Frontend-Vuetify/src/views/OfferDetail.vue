@@ -1,6 +1,4 @@
-<template>
-  <link rel="image_src" :href=pictureLink />
-
+<template>  
 <Navbar />
 <PublicNav />
   <section class="offer-detail-container offer_detail_layout section_space" v-if="!loading">
@@ -14,21 +12,23 @@
         <div class="col-xs-12 col-sm-6">
           <div class="offer-content">
             <h1 class="offer-title">{{ offer.title }}</h1>
-            <div class="item_description">
-              <div v-if="offer.hostId != null">
+            <table class="item_description">
+              <tbody v-if="offer.hostId != null">
                 <tr>
                   <td>
-                    <div style="display: flex; align-items: center;"> <strong>Gastgeber:&nbsp;</strong>
+                    <div style="display: flex; align-items: center;"> <font class="b">Gastgeber:&nbsp;</font>
                       <UserLink :hostPic=offer.hostPicture :hostId=offer.hostId :hostName=offer.hostName />
                   </div> </td>
                 </tr>
-                </div>
-                <tr><strong>Gesuchte Fähigkeiten:</strong> {{ offer.skills }}</tr>
-                <tr><strong>Unterbringung:</strong> {{ offer.accomodation }}</tr>
-                <tr><strong>Geeignet für:</strong> {{ offer.accomodationsuitable }}</tr>
-                <tr><strong>Ort/Region:</strong> {{ offer.location }}</tr>
-                <tr><strong>Angebotszeitraum:</strong> {{offer.fromDate}} - {{offer.toDate}}</tr>
-              </div>
+              </tbody>
+              <tbody>
+                <tr><font class="b">Gesuchte Fähigkeiten:</font> {{ offer.skills }}</tr>
+                <tr><font class="b">Unterbringung:</font> {{ offer.accomodation }}</tr>
+                <tr><font class="b">Geeignet für:</font> {{ offer.accomodationsuitable }}</tr>
+                <tr><font class="b">Ort/Region:</font> {{ offer.location }}</tr>
+                <tr><font class="b">Angebotszeitraum:</font> {{offer.fromDate}} - {{offer.toDate}}</tr>
+               </tbody>
+              </table>
             <Apply :offer=offer :isActiveMember=isActiveMember :logId=logId />
             <div class="offer_btn">
               <button @click="backtooffers()" class="action-link"><i class="ri-arrow-go-back-line"
@@ -183,5 +183,10 @@ export default {
 
 .reviews {
   margin-top: 20px;
+}
+
+.b {
+    font-weight:bold;
+    color:black;
 }
 </style>
