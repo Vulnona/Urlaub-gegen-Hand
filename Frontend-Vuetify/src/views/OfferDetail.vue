@@ -44,9 +44,16 @@
           </div>
         </div>
       </div>
-
-
-
+      <div v-if="logId == offer.hostId">
+        <div v-if="offer.status == '0'">
+          <button class="btn btn-danger" @click="closeOffer()">
+            Angebot schließen.
+          </button>
+        </div>
+        <div v-else>
+          Das Angebot ist geschlossen.
+        </div>        
+      </div>
     </div>
   </section>
   <div class="loading" v-else>
@@ -106,6 +113,13 @@ const formatDate = (dateString) => {
 };
 const backtooffers = () => {
   window.history.back();
+};
+const closeOffer = async () => {
+    try {
+        const response = await axiosInstance.put(`${process.env.baseURL}offer/close-offer/${params.id}`);
+    } catch {
+        console.error('Error closing offer');
+    }
 };
 onMounted(fetchOfferDetail);
 </script>

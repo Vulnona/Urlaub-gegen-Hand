@@ -21,6 +21,7 @@ public class OfferDTO
     public string FromDate { get; set; }
     public string ToDate { get; set; }
     public byte[] HostPicture { get; set; }
+    public OfferStatus Status { get; set;}
     public OfferDTO(OfferTypeLodging o, User? u, OfferApplication? oa){
         string appliedStatus = oa == null ? "CanApply" : oa.Status switch {
             OfferApplicationStatus.Pending => "Applied",
@@ -46,5 +47,6 @@ public class OfferDTO
             HostId = o.UserId;
             HostPicture = u.ProfilePicture;
         }
+        Status = o.Status;
     }
 }

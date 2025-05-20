@@ -1,5 +1,5 @@
 <template>
-  <div v-if="offer != null && isActiveMember && offer.hostId != logId">
+  <div v-if="offer != null && isActiveMember && offer.hostId != logId && offer.status == '0'">
     <button v-if="offer.appliedStatus === 'CanApply'" @click="sendRequest(offer.id)"
             class="btn btn-success OfferButtons">Apply</button>
     <button v-else-if="offer.appliedStatus === 'Applied'" class="btn btn-info OfferButtons"

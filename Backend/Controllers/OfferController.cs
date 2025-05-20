@@ -191,6 +191,31 @@ public class OfferController : ControllerBase
         }
     }
 
+    [HttpPut("close-offer/{OfferId:int}")]
+    public async Task<IActionResult> CloseOffer([Required] int offerId)
+    {
+        try {
+            Guid userId = _userProvider.UserId;
+            User user = await _context.users.FindAsync(userId);
+            var offer = await _offerRepository.GetOfferByIdAsync(offerId);
+            if (offer.UserId == userId) {
+                if (offer.Status == OfferStatus.Active){
+                    offer.Status = OfferStatus.Closed;
+                    await _context.SaveChangesAsync();
+                    return Ok();
+                } else {
+                    return StatusCode(400, "Offer not active");
+                }
+            } else
+                return StatusCode(404, "Forbidden.");
+        } catch (Exception ex)
+        {
+            _logger.LogError($"Exception occurred closing offer: {ex.Message} | StackTrace: {ex.StackTrace}");
+            return StatusCode(500, $"Internal server error.");
+        }
+        
+    }
+    
     // reimplement delete_offer
 
 
@@ -204,6 +229,8 @@ public class OfferController : ControllerBase
                 return BadRequest("NoCurrentMembership");
             
             var offer = await _offerRepository.GetOfferByIdAsync(offerId);
+            if (offer.Status == OfferStatus.Closed)
+                return BadRequest("Offer is closed.");
             if (offer == null)
                 return BadRequest("OfferNotFound");
             if (offer.UserId == userId)
@@ -212,7 +239,7 @@ public class OfferController : ControllerBase
             var existingApplication = await _offerRepository.GetOfferApplicationAsync(offer.Id, userId);
             if (existingApplication != null)
                 return BadRequest("Application already exists");
-
+            
             var offerApplication = new OfferApplication {
                 OfferId = offer.Id,
                 UserId = userId,
