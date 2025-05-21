@@ -32,11 +32,13 @@ public class OfferRepository
     ) {    
         IQueryable<OfferTypeLodging> query = _context
             .offertypelodgings.Include(o => o.User).Include(o => o.Picture)
-            .Include(o => o.OfferApplications)
+            .Include(o => o.OfferApplications)            
         .OrderBy(o => o.CreatedAt);
 
          if (forUser)
-             query = query.Where(o => o.UserId == userId);
+             query = query.Where(o => o.UserId == userId && o.Status != OfferStatus.Hidden);
+         else
+             query = query.Where(o => o.Status == OfferStatus.Active);
         if (!string.IsNullOrEmpty(searchTerm)) {
             query = query.Where(o =>
                 o.Title.Contains(searchTerm)
