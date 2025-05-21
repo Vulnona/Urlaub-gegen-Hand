@@ -37,7 +37,7 @@ public class OfferController : ControllerBase
     public async Task<IActionResult> GetOffersAsync(string searchTerm, int pageNumber = 1, int pageSize = 10) {
         try {
             var userId = _userProvider.UserId;
-            PaginatedList<OfferDTO> paginatedOffers =await _offerRepository.GetOffersAsync(userId, searchTerm, pageNumber, pageSize ,true);
+            PaginatedList<OfferDTO> paginatedOffers =await _offerRepository.GetOffersAsync(userId, searchTerm, pageNumber, pageSize ,false);
             if (paginatedOffers == null)
             {
                 return NotFound();
