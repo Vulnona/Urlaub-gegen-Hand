@@ -5,53 +5,13 @@ import { defineConfig, loadEnv, Plugin } from 'vite';
 import { fileURLToPath, URL } from 'node:url';
 import axios from 'axios';
 
-// fetch the metadata on startup, transformIndexHtml is not compatible to asynchronous fetches
-let metadata = new Map();
-const url = `http://172.18.0.3:8080/api/offer/get-meta-data`;
-const headers = {'Content-Type': 'application/json'};
-const fetchMetadata = () =>{
-    axios.get(url, { headers })
-        .then(res => {
-            res.data.forEach( (o) => {
-                metadata.set(o.id.toString(), o);
-            })
-        })
-    .catch(error => {
-        console.error('Error:', error.message);
-    });
-}
-fetchMetadata();
-setInterval(fetchMetadata,60000);
-const modifyOfferMetaPlugin = () => {
-  return {
-    name: 'html-transform',
-      transformIndexHtml(html, ctx) {
-          if(/\/offer\/\d+/.test(ctx.originalUrl)){
-              let offerNum = ctx.originalUrl.substring(7);
-              if (metadata.has(offerNum)) {
-                  const meta = metadata.get(offerNum);
-                  html = html.replace(/<meta property="og:title" (.*?)>/, `<meta property="og:title" content="${meta.title}">`);
-                  html = html.replace(/<meta property="og:description" (.*?)>/, `<meta property="og:description" content="${meta.description}">`);
-              }
-              return html.replace(
-                  /<meta property="og:image" (.*?)>/,
-                  `<meta property="og:image" content="https://alreco.de:8443/api/offer/get-preview-picture/${offerNum}">`
-              );
-          }
-    },
-  }
-}
-
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
   return {
     server: {
         host: '0.0.0.0',
         port: 3000,
-        allowedHosts: ['alreco.de'],
-        hmr: {
-          clientPort: 443,
-      },
+        allowedHosts: ['localhost']
     },
     optimizeDeps: {
       include: ['vue', 'vue-router', 'sweetalert2', 'crypto-js', 'axios', 'vue-toastification',
@@ -86,7 +46,6 @@ export default defineConfig(({ mode }) => {
           ],
         },
       }),
-        modifyOfferMetaPlugin(),
     ],
     css: {
       preprocessorOptions: {

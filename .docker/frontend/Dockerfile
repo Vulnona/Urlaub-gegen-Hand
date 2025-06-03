@@ -27,6 +27,8 @@ RUN npm install
 # Ensure vite binary is executable
 RUN chmod +x ./node_modules/.bin/vite
 
-# Run the development server
-#CMD ["npm", "run", "dev"]
-ENTRYPOINT ["sleep", "infinity"]
+RUN npx vite build
+    
+# Run the server
+CMD "/usr/local/bin/node" "productionserver.js"
+#ENTRYPOINT ["sleep", "infinity"]
