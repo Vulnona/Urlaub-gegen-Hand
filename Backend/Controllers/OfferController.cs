@@ -120,30 +120,7 @@ public class OfferController : ControllerBase
         public String Title {get; set;}
         public String Description {get; set;}
     };
-    
-    [AllowAnonymous]
-    [HttpGet("get-meta-data")]
-    public async Task<IActionResult> GetMetaData() {
-        try {
-            var offers = await _context.offers.Where(o => o.Status == OfferStatus.Active).ToListAsync();
-            List<OfferMeta> offerMetaList = new List<OfferMeta>();
-            foreach(Offer offer in offers){
-                String str = offer.Description;
-                if (str.Length > 300)
-                    str = str.Substring(0,300);
-                OfferMeta o = new OfferMeta{
-                    Id = offer.Id,
-                    Title = offer.Title,
-                    Description = str
-                };
-                offerMetaList.Add(o);
-            }
-            return Ok(offerMetaList);
-        } catch (Exception ex){
-            _logger.LogError($"Exception occurred fetching offer meta data: {ex.Message} | StackTrace: {ex.StackTrace}");
-            return StatusCode(500, $"Internal server error.");
-        }
-    }
+
     [HttpPost("add-new-offer")]
     public async Task<IActionResult> AddOffer([FromForm] OfferViewModel offerViewModel)
     {
