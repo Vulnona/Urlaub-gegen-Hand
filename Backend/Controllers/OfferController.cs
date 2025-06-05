@@ -121,8 +121,8 @@ public class OfferController : ControllerBase
         public String Description {get; set;}
     };
 
-    [HttpPost("add-new-offer")]
-    public async Task<IActionResult> AddOffer([FromForm] OfferViewModel offerViewModel)
+    [HttpPut("put-offer")]
+    public async Task<IActionResult> PutOffer([FromForm] OfferViewModel offerViewModel)
     {
         try
         {
@@ -135,27 +135,45 @@ public class OfferController : ControllerBase
             if (user == null)
                 return BadRequest("UserNotFound");            
 
-            var offer = new OfferTypeLodging {
-                Title = offerViewModel.Title,
-                Description = offerViewModel.Description,
+            int offerId = offerViewModel.OfferId;
+            OfferTypeLodging offer;
+            if (offerId != -1) {
+                offer = await _context.offertypelodgings.Include(o => o.OfferApplications).FirstOrDefaultAsync(o => o.Id == offerId);
+                if (offer == null)
+                    return BadRequest("OfferNotFound");
+                if (offer.UserId != userId)
+                    return StatusCode(403, "Forbidden.");
+                var firstApplication = offer.OfferApplications.FirstOrDefault();
+                if (firstApplication != null)
+                    return StatusCode(412, "Can't modify an offer if applications exists.");
+                // test if applications exist missing
+            } else {                                    
+            offer = new OfferTypeLodging {
                 CreatedAt = DateOnly.FromDateTime(DateTime.UtcNow),
-                Skills = offerViewModel.Skills,
-                UserId = userId,
-                Requirements = offerViewModel.AccommodationSuitable,                
-                AdditionalLodgingProperties = offerViewModel.Accommodation,
-                Location = offerViewModel.Location,
-                Status = OfferStatus.Active,
-                GroupProperties = "",
-                FromDate = DateOnly.FromDateTime(DateTime.Parse(offerViewModel.FromDate)),
-                ToDate = DateOnly.FromDateTime(DateTime.Parse(offerViewModel.ToDate))
+                UserId = userId
             };
-
-            if (offerViewModel.Image.Length > 0) {
+            }
+            offer.Title = offerViewModel.Title;
+            offer.Description = offerViewModel.Description;
+            offer.Skills = offerViewModel.Skills;
+            offer.Requirements = offerViewModel.AccommodationSuitable;
+            offer.AdditionalLodgingProperties = offerViewModel.Accommodation;
+            offer.Location = offerViewModel.Location;
+            offer.Status = OfferStatus.Active;
+            offer.GroupProperties = "";
+            offer.FromDate = DateOnly.FromDateTime(DateTime.Parse(offerViewModel.FromDate));
+            offer.ToDate = DateOnly.FromDateTime(DateTime.Parse(offerViewModel.ToDate));
+            if (offerViewModel.Image != null && offerViewModel.Image.Length > 0) {
                 using var memoryStream = new MemoryStream();
                 await offerViewModel.Image.CopyToAsync(memoryStream);                
                 offer.Picture = await _offerRepository.AddPicture(memoryStream.ToArray(), user);
+            } else if(offerId == -1){
+                return BadRequest("Image required");
             }
-            await _context.offers.AddAsync(offer);
+            // a new offer is only created if there is no old one to modify
+            if(offerId == -1)
+                await _context.offers.AddAsync(offer);
+            
             await _context.SaveChangesAsync();
             _logger.LogInformation("New Offer Added Successfully!");                        
 
@@ -184,7 +202,7 @@ public class OfferController : ControllerBase
                     return StatusCode(400, "Offer not active");
                 }
             } else
-                return StatusCode(404, "Forbidden.");
+                return StatusCode(403, "Forbidden.");
         } catch (Exception ex)
         {
             _logger.LogError($"Exception occurred closing offer: {ex.Message} | StackTrace: {ex.StackTrace}");

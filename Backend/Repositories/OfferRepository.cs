@@ -124,17 +124,13 @@ public class OfferRepository
                      Status = app.Status,
                      CreatedAt = app.CreatedAt.ToString("dd.MM.yyyy"),
                      HasReview = await hasReview(app.Offer.Id, isHost, app.User.User_Id, app.Host.User_Id),
-                     Offer = new OfferDto {
-                         Id = app.Offer.Id,
-                         Title = app.Offer.Title,
-                         ImageData = app.Offer.Picture.ImageData
-                     },
+                     OfferTitle = app.Offer.Title,
                      User = new UserC {
                          User_Id = isHost ? app.User.User_Id : app.Host.User_Id,
                          ProfilePicture = isHost ? app.User.ProfilePicture : app.Host.ProfilePicture,
                          FirstName = isHost ? app.User.FirstName : app.Host.FirstName,
                          LastName = isHost ? app.User.LastName : app.Host.LastName,
-                     }                    
+                     }
                 };
                 applicationDtos.Add(o);
             }
@@ -155,12 +151,12 @@ public class OfferRepository
 
         if (offer == null)
             return null;
-        
+        bool applicationsExist = (offer.OfferApplications.FirstOrDefault() != null);
         if (userId != default(Guid)) {
             var applicationOfRequestingUser = offer.OfferApplications.FirstOrDefault(oa => oa.UserId == userId);
-            return new OfferDTO(offer ,offer.User, applicationOfRequestingUser);
+            return new OfferDTO(offer ,offer.User, applicationOfRequestingUser, applicationsExist);
         } else
-            return new OfferDTO(offer , null, null);
+            return new OfferDTO(offer , null, null, applicationsExist);
             
     }
 

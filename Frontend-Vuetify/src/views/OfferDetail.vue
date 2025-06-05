@@ -16,17 +16,17 @@
               <tbody v-if="offer.hostId != null">
                 <tr>
                   <td>
-                    <div style="display: flex; align-items: center;"> <font class="b">Gastgeber:&nbsp;</font>
+                    <div style="display: flex; align-items: center;"> <a class="b">Gastgeber:&nbsp;</a>
                       <UserLink :hostPic=offer.hostPicture :hostId=offer.hostId :hostName=offer.hostName />
                   </div> </td>
                 </tr>
               </tbody>
               <tbody>
-                <tr><font class="b">Gesuchte Fähigkeiten:</font> {{ offer.skills }}</tr>
-                <tr><font class="b">Unterbringung:</font> {{ offer.accomodation }}</tr>
-                <tr><font class="b">Geeignet für:</font> {{ offer.accomodationsuitable }}</tr>
-                <tr><font class="b">Ort/Region:</font> {{ offer.location }}</tr>
-                <tr><font class="b">Angebotszeitraum:</font> {{offer.fromDate}} - {{offer.toDate}}</tr>
+                <tr><a class="b">Gesuchte Fähigkeiten:</a> {{ offer.skills }}</tr>
+                <tr><a class="b">Unterbringung:</a> {{ offer.accomodation }}</tr>
+                <tr><a class="b">Geeignet für:</a> {{ offer.accomodationsuitable }}</tr>
+                <tr><a class="b">Ort/Region:</a> {{ offer.location }}</tr>
+                <tr><a class="b">Angebotszeitraum:</a> {{offer.fromDate}} - {{offer.toDate}}</tr>
                </tbody>
               </table>
             <Apply :offer=offer :isActiveMember=isActiveMember :logId=logId />
@@ -49,9 +49,19 @@
           <button class="btn btn-danger" @click="closeOffer()">
             Angebot schließen.
           </button>
+          <a v-if="!offer.applicationsExist">
+           <button class="btn btn-primary" @click="modifyOffer()">
+            Angebot modifizieren.
+           </button>
+          </a>
+          <a v-else>
+            <button class="btn btn-blocked">
+              Angebot schreibgeschützt.
+             </button>
+          </a>
         </div>
         <div v-else>
-          Das Angebot ist geschlossen.
+          <button class="btn btn-blocked">Angebot geschlossen.</button>
         </div>        
       </div>
     </div>
@@ -67,9 +77,6 @@ import {
   onMounted,
   computed
 } from 'vue';
-import {
-  useRoute
-} from 'vue-router';
 import Navbar from '@/components/navbar/Navbar.vue';
 import PublicNav from '@/components/navbar/PublicNav.vue';
 import axiosInstance from '@/interceptor/interceptor';
@@ -79,10 +86,8 @@ import Apply from '@/components/Apply.vue';
 import getLoggedUserId from '@/services/LoggedInUserId';
 import UserLink from '@/components/offer/UserLink.vue';
 import VueMarkdown from "vue-markdown-render";
-
-const {
-  params
-} = useRoute();
+import {useRoute} from 'vue-router';
+const {params} = useRoute();
 
 const pictureLink = `${process.env.baseURL}offer/get-preview-picture/${params.id}`;
 const offer = ref(null);
@@ -121,6 +126,12 @@ const closeOffer = async () => {
         console.error('Error closing offer');
     }
 };
+const modifyOffer = () => {
+      router.push({
+        name: 'ModifyOffer', params: {id: params.id}
+      });
+};
+
 onMounted(fetchOfferDetail);
 </script>
 
@@ -202,5 +213,10 @@ export default {
 .b {
     font-weight:bold;
     color:black;
+}
+.btn-blocked {
+   color: #fff;
+   background-color: grey;
+   border-color: darkgrey;
 }
 </style>

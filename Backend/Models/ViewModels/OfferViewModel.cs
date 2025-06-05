@@ -22,7 +22,8 @@ namespace UGH.Domain.ViewModels
         public string? State { get; set; }
         public string? City { get; set; }
 
-        [Required]
+        public int OfferId { get; set; }
+        // modifications don't need a new image. If an image exists is checked in PutOffer
         public IFormFile Image { get; set; }
     }
 }
