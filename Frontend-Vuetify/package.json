@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "dev": "vite --host",
+    "dev": "vite -l info",
     "build": "vue-tsc --noEmit && vite build",
     "preview": "vite preview",
     "lint": "eslint . --fix --ignore-path .gitignore"
@@ -11,9 +11,12 @@
   "dependencies": {
     "@mdi/font": "7.0.96",
     "@stripe/stripe-js": "^5.5.0",
+    "@vue/compiler-sfc": "^3.5.13",
+    "@vue/server-renderer": "^3.5.13",
     "axios": "^1.6.8",
     "axios-interceptor": "^3.0.15",
     "bootstrap": "^5.3.3",
+    "check": "^1.0.0",
     "core-js": "^3.29.0",
     "cors": "^2.8.5",
     "crypto-js": "^4.2.0",
@@ -21,14 +24,16 @@
     "dotenv": "^16.4.5",
     "jwt-decode": "^4.0.0",
     "lodash": "^4.17.21",
+    "markdown-it": "^14.1.0",
     "remixicon": "^4.2.0",
     "roboto-fontface": "*",
     "router": "^2.0.0",
     "sass": "^1.84.0",
-    "sweetalert2": "^11.15.10",
-    "vue": "^3.2.0",
+    "sweetalert2": "^11.6.13",
+    "vue": "^3.5.13",
+    "vue-markdown-render": "^2.2.1",
     "vue-multiselect": "^3.0.0",
-    "vue-router": "^4.0.0",
+    "vue-router": "^4.5.1",
     "vue-toastification": "^2.0.0-rc.5",
     "vue3-datepicker": "^0.4.0",
     "vue3-perfect-scrollbar": "^2.0.0",
@@ -38,10 +43,11 @@
     "@babel/types": "^7.21.4",
     "@eslint/config-array": "^0.19.2",
     "@eslint/object-schema": "^2.1.6",
+    "@types/markdown-it": "^14.1.2",
     "@types/node": "^18.15.0",
     "@typescript-eslint/eslint-plugin": "^8.23.0",
     "@typescript-eslint/parser": "^8.23.0",
-    "@vitejs/plugin-vue": "^4.0.0",
+    "@vitejs/plugin-vue": "^5.2.4",
     "@vue/eslint-config-typescript": "^14.3.0",
     "eslint": "^9.19.0",
     "eslint-plugin-vue": "^9.32.0",
@@ -49,14 +55,15 @@
     "rimraf": "^6.0.1",
     "typescript": "^5.0.0",
     "unplugin-fonts": "^1.0.3",
-    "vite": "^4.2.0",
-    "vite-plugin-vuetify": "^1.0.0",
+    "vite": "^6.3.4",
+    "vite-plugin-open-graph": "^2.0.6",
+    "vite-plugin-vuetify": "^2.1.1",
     "vue-tsc": "^2.2.0"
   },
   "overrides": {
     "rimraf": "^6.0.1",
     "glob": "^11.0.1",
     "inflight": "^1.0.7"
-  }
+  },
+  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }
- 

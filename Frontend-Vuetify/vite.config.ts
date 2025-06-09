@@ -1,16 +1,17 @@
 import vue from '@vitejs/plugin-vue';
 import vuetify, { transformAssetUrls } from 'vite-plugin-vuetify';
 import ViteFonts from 'unplugin-fonts/vite';
-import { defineConfig, loadEnv } from 'vite';
+import { defineConfig, loadEnv, Plugin } from 'vite';
 import { fileURLToPath, URL } from 'node:url';
+import axios from 'axios';
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
   return {
     server: {
-      host: '0.0.0.0',
-      port: 3000,
-      allowedHosts: ['localhost'],
+        host: '0.0.0.0',
+        port: 3000,
+        allowedHosts: ['localhost']
     },
     optimizeDeps: {
       include: ['vue', 'vue-router', 'sweetalert2', 'crypto-js', 'axios', 'vue-toastification',

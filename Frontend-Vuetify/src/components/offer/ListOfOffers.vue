@@ -33,20 +33,20 @@
                         </span>
                         {{item.user.firstName}} {{item.user.lastName}} </a> </td>
                     <td>
-                      <a class="view_user" style="cursor: pointer;" @click="redirectToOfferDetail(item.offer.id)">{{
-                        item.offer.title }}</a>
+                      <a class="view_user" style="cursor: pointer;" @click="redirectToOfferDetail(item.offerId)">{{
+                        item.offerTitle }}</a>
                     </td>
                     <td><a class="view_user" style="cursor: pointer;">{{item.createdAt}} </a></td>
                     <td>
                       <div class="btn_flexBox now_wrap buttons_text">
-                        <button v-if="item.status === 0 && isHost" @click="respondToOffer(item.offer.id, item.user.user_Id, true)"
+                        <button v-if="item.status === 0 && isHost" @click="respondToOffer(item.offerId, item.user.user_Id, true)"
                                 class="icon_btn bg_ltgreen">Akzeptieren </button>
-                        <button v-if="item.status === 0 && isHost" @click="respondToOffer(item.offer.id, item.user.user_Id, false)"
+                        <button v-if="item.status === 0 && isHost" @click="respondToOffer(item.offerId, item.user.user_Id, false)"
                                 class="icon_btn bg_ltred && isHost">Ablehnen </button>
                         <button v-if="item.status === 0 && !isHost" class="icon_btn bg_ltgreen" disabled >Ausstehend </button>
                         <button v-if="item.status === 2" class="icon_btn bg_ltred" disabled title="Rejected">Abgelehnt</button>
                         <button v-if="item.status === 1 && item.hasReview === false"
-                                @click="showAddRatingModal(item.offer.id, item.HostId, index)" class="icon_btn bg_ltblue">Bewerten
+                                @click="showAddRatingModal(item.offerId, item.HostId, index)" class="icon_btn bg_ltblue">Bewerten
                         </button>
                         <button v-if="item.status === 1 && item.hasReview" class="icon_btn bg_ltblue">Bereits bewertet. </button>
                       </div>

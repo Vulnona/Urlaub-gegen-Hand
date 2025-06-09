@@ -40,6 +40,12 @@ const routes: RouteRecordRaw[] = [
     meta: { roles: ['User'], membershipStatus: ['Active'], verification: ['ok'] },
   },
   {
+    path: '/modify-offer/:id',
+    name: 'ModifyOffer',
+    component: () => import('@/views/ModifyOffer.vue'),
+    meta: { roles: ['User'], membershipStatus: ['Active'], verification: ['ok'] },
+  },
+  {
     path: '/show-more',
     name: 'ShowMore',
     component: () => import('@/views/ShowMore.vue'),
@@ -171,7 +177,7 @@ router.beforeEach((to, from, next) => {
   const requiredRoles = to.meta.roles as string[];
   const requiredMembership = to.meta.membershipStatus as string[];
   const requiredVerification = to.meta.verification as string[];
-  if (requiredRoles) {
+  if (requiredRoles && privileges != null) {
     const userRole = privileges.userRole;
     const membership = privileges.membershipStatus;
     const verification = privileges.verification;

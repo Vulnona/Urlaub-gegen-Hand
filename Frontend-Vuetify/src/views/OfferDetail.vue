@@ -1,5 +1,6 @@
-<template>
+<template>  
 <Navbar />
+<PublicNav />
   <section class="offer-detail-container offer_detail_layout section_space" v-if="!loading">
     <div class="container">
       <div class="row">
@@ -11,18 +12,23 @@
         <div class="col-xs-12 col-sm-6">
           <div class="offer-content">
             <h1 class="offer-title">{{ offer.title }}</h1>
-              <div class="item_description">
-                <tr><td>
-                    <div style="display: flex; align-items: center;"> <strong>Gastgeber:&nbsp;</strong>
+            <table class="item_description">
+              <tbody v-if="offer.hostId != null">
+                <tr>
+                  <td>
+                    <div style="display: flex; align-items: center;"> <a class="b">Gastgeber:&nbsp;</a>
                       <UserLink :hostPic=offer.hostPicture :hostId=offer.hostId :hostName=offer.hostName />
                   </div> </td>
                 </tr>
-                <tr><strong>Gesuchte Fähigkeiten:</strong> {{ offer.skills }}</tr>
-                <tr><strong>Annehmlichkeiten:</strong> {{ offer.accomodation }}</tr>
-                <tr><strong>Geeignet für:</strong> {{ offer.accomodationsuitable }}</tr>
-                <tr><strong>Ort/Region:</strong> {{ offer.location }}</tr>
-                <tr><strong>Angebotszeitraum:</strong> {{offer.fromDate}} - {{offer.toDate}}</tr>
-              </div>
+              </tbody>
+              <tbody>
+                <tr><a class="b">Gesuchte Fähigkeiten:</a> {{ offer.skills }}</tr>
+                <tr><a class="b">Unterbringung:</a> {{ offer.accomodation }}</tr>
+                <tr><a class="b">Geeignet für:</a> {{ offer.accomodationsuitable }}</tr>
+                <tr><a class="b">Ort/Region:</a> {{ offer.location }}</tr>
+                <tr><a class="b">Angebotszeitraum:</a> {{offer.fromDate}} - {{offer.toDate}}</tr>
+               </tbody>
+              </table>
             <Apply :offer=offer :isActiveMember=isActiveMember :logId=logId />
             <div class="offer_btn">
               <button @click="backtooffers()" class="action-link"><i class="ri-arrow-go-back-line"
@@ -34,13 +40,30 @@
       <div class="row">
         <div class="col-sm-12">
           <div class="offer_decription mt-4">
-            <p class="offer-description mb-0">{{ offer.description }}</p>
+            <VueMarkdown :source="offer.description" class="offer-description mb-0" />
           </div>
         </div>
       </div>
-
-
-
+      <div v-if="logId == offer.hostId">
+        <div v-if="offer.status == '0'">
+          <button class="btn btn-danger" @click="closeOffer()">
+            Angebot schließen.
+          </button>
+          <a v-if="!offer.applicationsExist">
+           <button class="btn btn-primary" @click="modifyOffer()">
+            Angebot modifizieren.
+           </button>
+          </a>
+          <a v-else>
+            <button class="btn btn-blocked">
+              Angebot schreibgeschützt.
+             </button>
+          </a>
+        </div>
+        <div v-else>
+          <button class="btn btn-blocked">Angebot geschlossen.</button>
+        </div>        
+      </div>
     </div>
   </section>
   <div class="loading" v-else>
@@ -54,24 +77,21 @@ import {
   onMounted,
   computed
 } from 'vue';
-import {
-  useRoute
-} from 'vue-router';
 import Navbar from '@/components/navbar/Navbar.vue';
+import PublicNav from '@/components/navbar/PublicNav.vue';
 import axiosInstance from '@/interceptor/interceptor';
 import router from '@/router';
 import {isActiveMembership} from '@/services/GetUserPrivileges';
 import Apply from '@/components/Apply.vue';
 import getLoggedUserId from '@/services/LoggedInUserId';
 import UserLink from '@/components/offer/UserLink.vue';
+import VueMarkdown from "vue-markdown-render";
+import {useRoute} from 'vue-router';
+const {params} = useRoute();
 
-const {
-  params
-} = useRoute();
+const pictureLink = `${process.env.baseURL}offer/get-preview-picture/${params.id}`;
 const offer = ref(null);
 const loading = ref(true);
-const showAllReviews = ref(false);
-var reviews = ref([]);
 const defaultProfileImgSrc = '/defaultprofile.jpg';
 const redirectToProfile = (userId) => {
   sessionStorage.setItem("UserId", userId);
@@ -80,7 +100,6 @@ const redirectToProfile = (userId) => {
 
 const fetchOfferDetail = async () => {
   try {
-    fetchReview();
     const response = await axiosInstance.get(`${process.env.baseURL}offer/get-offer-by-id/${params.id}`);
       offer.value = response.data;
   } catch (error) {
@@ -97,23 +116,22 @@ const formatDate = (dateString) => {
   };
   return new Date(dateString).toLocaleDateString(undefined, options);
 };
-const fetchReview = async () => {
-  try {
-    const response = await axiosInstance.get(`${process.env.baseURL}review/get-offer-reviews?offerId=${params.id}`);
-    reviews.value = response.data.items;
-  } catch (error) {
-    console.error('Error fetching reviews:', error);
-  }
-};
-const displayedReviews = computed(() => {
-  return showAllReviews.value ? reviews.value : reviews.value.slice(0, 1);
-});
-const toggleShowMore = () => {
-  showAllReviews.value = !showAllReviews.value;
-};
 const backtooffers = () => {
   window.history.back();
 };
+const closeOffer = async () => {
+    try {
+        const response = await axiosInstance.put(`${process.env.baseURL}offer/close-offer/${params.id}`);
+    } catch {
+        console.error('Error closing offer');
+    }
+};
+const modifyOffer = () => {
+      router.push({
+        name: 'ModifyOffer', params: {id: params.id}
+      });
+};
+
 onMounted(fetchOfferDetail);
 </script>
 
@@ -190,5 +208,15 @@ export default {
 
 .reviews {
   margin-top: 20px;
+}
+
+.b {
+    font-weight:bold;
+    color:black;
+}
+.btn-blocked {
+   color: #fff;
+   background-color: grey;
+   border-color: darkgrey;
 }
 </style>

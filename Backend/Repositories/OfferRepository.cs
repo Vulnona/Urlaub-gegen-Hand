@@ -32,11 +32,13 @@ public class OfferRepository
     ) {    
         IQueryable<OfferTypeLodging> query = _context
             .offertypelodgings.Include(o => o.User).Include(o => o.Picture)
-            .Include(o => o.OfferApplications)
+            .Include(o => o.OfferApplications)            
         .OrderBy(o => o.CreatedAt);
 
          if (forUser)
-             query = query.Where(o => o.UserId == userId);
+             query = query.Where(o => o.UserId == userId && o.Status != OfferStatus.Hidden);
+         else
+             query = query.Where(o => o.Status == OfferStatus.Active);
         if (!string.IsNullOrEmpty(searchTerm)) {
             query = query.Where(o =>
                 o.Title.Contains(searchTerm)
@@ -122,17 +124,13 @@ public class OfferRepository
                      Status = app.Status,
                      CreatedAt = app.CreatedAt.ToString("dd.MM.yyyy"),
                      HasReview = await hasReview(app.Offer.Id, isHost, app.User.User_Id, app.Host.User_Id),
-                     Offer = new OfferDto {
-                         Id = app.Offer.Id,
-                         Title = app.Offer.Title,
-                         ImageData = app.Offer.Picture.ImageData
-                     },
+                     OfferTitle = app.Offer.Title,
                      User = new UserC {
                          User_Id = isHost ? app.User.User_Id : app.Host.User_Id,
                          ProfilePicture = isHost ? app.User.ProfilePicture : app.Host.ProfilePicture,
                          FirstName = isHost ? app.User.FirstName : app.Host.FirstName,
                          LastName = isHost ? app.User.LastName : app.Host.LastName,
-                     }                    
+                     }
                 };
                 applicationDtos.Add(o);
             }
@@ -153,9 +151,13 @@ public class OfferRepository
 
         if (offer == null)
             return null;
-
-        var firstApplication = offer.OfferApplications.FirstOrDefault(oa => oa.UserId == userId);                
-        return new OfferDTO(offer ,offer.User, firstApplication);
+        bool applicationsExist = (offer.OfferApplications.FirstOrDefault() != null);
+        if (userId != default(Guid)) {
+            var applicationOfRequestingUser = offer.OfferApplications.FirstOrDefault(oa => oa.UserId == userId);
+            return new OfferDTO(offer ,offer.User, applicationOfRequestingUser, applicationsExist);
+        } else
+            return new OfferDTO(offer , null, null, applicationsExist);
+            
     }
 
     public async Task<PaginatedList<ReviewOfferDTO>> GetAllOffersForReviewsAsync(
@@ -194,7 +196,7 @@ public class OfferRepository
     // todo: generalize for different formats and other pictures (like profile pic)
     public async Task<Picture>AddPicture(byte[] data, User user){
             using (MagickImage image = new MagickImage(data)) {
-                image.Thumbnail(new MagickGeometry(100));
+                image.Thumbnail(new MagickGeometry(400));
                 var format = MagickFormat.Jpg;
                 var stream = new MemoryStream();
                 image.Write(stream, format);
