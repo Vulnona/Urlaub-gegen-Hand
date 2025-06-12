@@ -12,10 +12,11 @@ public class UGH_Enums
 
     public enum CouponDuration
     {
-        ThreeMonths,
-        SixMonths,
-        OneYear,
-        TwoYears,
+        Keiner = 0,
+        EinJahr = 365,
+        ZweiJahre = 730,
+        DreiJahre = 1095,     
+        Lebenslang    
     }
 
     public enum TransactionStatus
@@ -25,3 +26,31 @@ public class UGH_Enums
         Failed = 2,
     }
 }
+
+// namespace UGH.Domain.Core;
+
+// public class UGH_Enums
+// {
+//     public enum VerificationState
+//     {
+//         IsNew,
+//         VerificationPending,
+//         VerificationFailed,
+//         Verified,
+//     }
+
+//     public enum CouponDuration
+//     {
+//         ThreeMonths,
+//         SixMonths,
+//         OneYear,
+//         TwoYears,
+//     }
+
+//     public enum TransactionStatus
+//     {
+//         Pending = 0,
+//         Complete = 1,
+//         Failed = 2,
+//     }
+// }

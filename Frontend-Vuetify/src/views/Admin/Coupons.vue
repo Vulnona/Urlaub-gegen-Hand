@@ -32,6 +32,7 @@
                     <th>Created By</th>
                     <th>Created Date</th>
                     <th>Duration</th>
+                    <th class="text-center">Redeemed by</th>
                     <th class="text-center">Status</th>
                     <!-- <th class="text-center">Actions</th> -->
                   </tr>
@@ -51,7 +52,9 @@
                       <td>{{ coupon.name }}</td>
                       <td>{{ coupon.createdBy }}</td>
                       <td>{{ formatDate(coupon.createdDate) }}</td>
-                      <td v-if="coupon.duration">{{ coupon.duration }} days</td>
+                     <td v-if="coupon.duration">
+                     {{ Math.round(coupon.duration / 365) }} Jahr<span v-if="Math.round(coupon.duration / 365) !== 1">e</span></td>
+                      <td class="text-center">{{ coupon.redeemedBy }}<span v-if="coupon.redeemedBy == ''">N/A</span></td>
                       <td class="text-center">
                         <span v-if="coupon.isRedeemed" class="newState badge badge-primary">Redeemed</span>
                         <span v-if="!coupon.isRedeemed" class="newState badge badge-success">Available</span>

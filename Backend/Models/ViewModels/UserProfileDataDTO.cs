@@ -21,4 +21,5 @@ public class UserProfileDataDTO
     public double? UserRating { get; set; }
     public List<string>? Hobbies { get; set; }
     public List<string>? Skills { get; set; }
+    public DateTime? MembershipEndDate { get; set; }
 }

@@ -16,7 +16,7 @@
       <div class="card custom-card overflow-hidden border p-0 leftBox-content">
         <div class="card-body border-bottom border-block-end-dashed">
           <div class="text-center">
-            
+
             <span class="avatar avatar-xxl avatar-rounded online mb-3">
               <i v-if="user.verificationState === 'Verified'" @click="editProfilePic"
                  class="ri-pencil-line edit_icon"></i>
@@ -24,10 +24,11 @@
                    alt="User Profile Picture">
             </span>
             <h5 class="fw-semibold mb-1">{{ user.firstName }} {{ user.lastName }}</h5>
-            <span @click="openReviewsModal()" class="action-link fs-13 font-normal">View All Reviews</span>
+            <span @click="openReviewsModal()" class="action-link fs-13 font-normal">View All Reviews</span><br/>
+            <span class="fs-13 font-normal" v-if="isActiveMember">Membership Expiry: {{ formatMembershipDate(user.membershipEndDate) }}</span>
           </div>
         </div>
-        
+
         <div v-if="userRole != 'Admin' && user.userRating != 0"
              class="rating_block d-flex mb-0 flex-wrap gap-3 p-3 justify-content-center border-bottom border-block-end-dashed">
           <div class="">
@@ -336,6 +337,15 @@
       },
     },
     methods: {
+      formatMembershipDate(dateString) {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const month = months[date.getMonth()];
+        const day = date.getDate();
+        const year = date.getFullYear();
+        return `${month} ${day}, ${year}`;
+      },
       async redeemCoupon() {
         try {
           // Step 1: Open SweetAlert for user input
