@@ -43,3 +43,5 @@ dotnet ef database update
 7. Avoid Renaming Fields Without Care
 Renaming a property deletes and recreates the column by default.
 Use [Column("OldName")] or a manual RenameColumn operation in the migration if you want (and you should want that...) to preserve data
+
+8. Code that affects the structure of the DB MUST be located in the Backend/Models/Db folder
