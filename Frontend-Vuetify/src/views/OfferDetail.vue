@@ -122,6 +122,7 @@ const backtooffers = () => {
 const closeOffer = async () => {
     try {
         const response = await axiosInstance.put(`${process.env.baseURL}offer/close-offer/${params.id}`);
+        router.go()
     } catch {
         console.error('Error closing offer');
     }
