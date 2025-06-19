@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -9,9 +10,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace UGHApi.Migrations
 {
     [DbContext(typeof(Ugh_Context))]
-    partial class UghContextModelSnapshot : ModelSnapshot
+    [Migration("20250617092937_add_paypal_integration_changes")]
+    partial class addpaypalintegrationchanges
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -30,7 +33,7 @@ namespace UGHApi.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("accomodations", (string)null);
+                    b.ToTable("accomodations");
                 });
 
             modelBuilder.Entity("UGH.Domain.Entities.City", b =>
@@ -48,7 +51,7 @@ namespace UGHApi.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("cities", (string)null);
+                    b.ToTable("cities");
                 });
 
             modelBuilder.Entity("UGH.Domain.Entities.Continent", b =>
@@ -59,7 +62,7 @@ namespace UGHApi.Migrations
 
                     b.HasKey("Continent_ID");
 
-                    b.ToTable("continents", (string)null);
+                    b.ToTable("continents");
                 });
 
             modelBuilder.Entity("UGH.Domain.Entities.Country", b =>
@@ -76,7 +79,7 @@ namespace UGHApi.Migrations
 
                     b.HasKey("Country_ID");
 
-                    b.ToTable("countries", (string)null);
+                    b.ToTable("countries");
                 });
 
             modelBuilder.Entity("UGH.Domain.Entities.Coupon", b =>
@@ -114,7 +117,7 @@ namespace UGHApi.Migrations
 
                     b.HasIndex("MembershipId");
 
-                    b.ToTable("coupons", (string)null);
+                    b.ToTable("coupons");
                 });
 
             modelBuilder.Entity("UGH.Domain.Entities.EmailVerificator", b =>
@@ -134,7 +137,7 @@ namespace UGHApi.Migrations
 
                     b.HasKey("verificationId");
 
-                    b.ToTable("emailverificators", (string)null);
+                    b.ToTable("emailverificators");
                 });
 
             modelBuilder.Entity("UGH.Domain.Entities.Membership", b =>
@@ -162,7 +165,7 @@ namespace UGHApi.Migrations
 
                     b.HasKey("MembershipID");
 
-                    b.ToTable("memberships", (string)null);
+                    b.ToTable("memberships");
                 });
 
             modelBuilder.Entity("UGH.Domain.Entities.Offer", b =>
@@ -229,7 +232,7 @@ namespace UGHApi.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("offers", (string)null);
+                    b.ToTable("offers");
 
                     b.HasDiscriminator<string>("Discriminator").HasValue("Offer");
 
@@ -268,7 +271,7 @@ namespace UGHApi.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("offerapplication", (string)null);
+                    b.ToTable("offerapplication");
                 });
 
             modelBuilder.Entity("UGH.Domain.Entities.PasswordResetToken", b =>
@@ -288,7 +291,7 @@ namespace UGHApi.Migrations
 
                     b.HasKey("TokenId");
 
-                    b.ToTable("passwordresettokens", (string)null);
+                    b.ToTable("passwordresettokens");
                 });
 
             modelBuilder.Entity("UGH.Domain.Entities.Picture", b =>
@@ -314,7 +317,7 @@ namespace UGHApi.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("pictures", (string)null);
+                    b.ToTable("pictures");
                 });
 
             modelBuilder.Entity("UGH.Domain.Entities.Redemption", b =>
@@ -340,7 +343,7 @@ namespace UGHApi.Migrations
                     b.HasIndex("CouponId")
                         .IsUnique();
 
-                    b.ToTable("redemptions", (string)null);
+                    b.ToTable("redemptions");
                 });
 
             modelBuilder.Entity("UGH.Domain.Entities.Region", b =>
@@ -354,7 +357,7 @@ namespace UGHApi.Migrations
 
                     b.HasKey("Region_ID");
 
-                    b.ToTable("regions", (string)null);
+                    b.ToTable("regions");
                 });
 
             modelBuilder.Entity("UGH.Domain.Entities.Review", b =>
@@ -392,7 +395,7 @@ namespace UGHApi.Migrations
 
                     b.HasIndex("ReviewerId");
 
-                    b.ToTable("reviews", (string)null);
+                    b.ToTable("reviews");
                 });
 
             modelBuilder.Entity("UGH.Domain.Entities.Skill", b =>
@@ -409,7 +412,7 @@ namespace UGHApi.Migrations
 
                     b.HasKey("Skill_ID");
 
-                    b.ToTable("skills", (string)null);
+                    b.ToTable("skills");
                 });
 
             modelBuilder.Entity("UGH.Domain.Entities.State", b =>
@@ -426,7 +429,7 @@ namespace UGHApi.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("states", (string)null);
+                    b.ToTable("states");
                 });
 
             modelBuilder.Entity("UGH.Domain.Entities.SuitableAccommodation", b =>
@@ -441,7 +444,7 @@ namespace UGHApi.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("accommodationsuitables", (string)null);
+                    b.ToTable("accommodationsuitables");
                 });
 
             modelBuilder.Entity("UGH.Domain.Entities.User", b =>
@@ -534,7 +537,7 @@ namespace UGHApi.Migrations
 
                     b.HasIndex("MembershipId");
 
-                    b.ToTable("users", (string)null);
+                    b.ToTable("users");
                 });
 
             modelBuilder.Entity("UGH.Domain.Entities.UserMembership", b =>
@@ -567,7 +570,7 @@ namespace UGHApi.Migrations
 
                     b.HasIndex("User_Id");
 
-                    b.ToTable("usermembership", (string)null);
+                    b.ToTable("usermembership");
                 });
 
             modelBuilder.Entity("UGH.Domain.Entities.UserProfile", b =>
@@ -598,7 +601,7 @@ namespace UGHApi.Migrations
 
                     b.HasIndex("User_Id");
 
-                    b.ToTable("userprofiles", (string)null);
+                    b.ToTable("userprofiles");
                 });
 
             modelBuilder.Entity("UGH.Domain.Entities.UserRole", b =>
@@ -612,7 +615,7 @@ namespace UGHApi.Migrations
 
                     b.HasKey("RoleId");
 
-                    b.ToTable("userroles", (string)null);
+                    b.ToTable("userroles");
                 });
 
             modelBuilder.Entity("UGH.Domain.Entities.UserRoleMapping", b =>
@@ -634,7 +637,7 @@ namespace UGHApi.Migrations
                     b.HasIndex("UserId")
                         .IsUnique();
 
-                    b.ToTable("userrolesmapping", (string)null);
+                    b.ToTable("userrolesmapping");
                 });
 
             modelBuilder.Entity("UGHApi.Entities.ShopItem", b =>
@@ -656,7 +659,7 @@ namespace UGHApi.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("shopitems", (string)null);
+                    b.ToTable("shopitems");
                 });
 
             modelBuilder.Entity("UGHApi.Entities.Transaction", b =>
@@ -696,7 +699,7 @@ namespace UGHApi.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("transaction", (string)null);
+                    b.ToTable("transaction");
                 });
 
             modelBuilder.Entity("UGH.Domain.Entities.OfferTypeLodging", b =>
@@ -900,7 +903,7 @@ namespace UGHApi.Migrations
 
             modelBuilder.Entity("UGHApi.Entities.ShopItem", b =>
                 {
-                    b.OwnsOne("UGHApi.Entities.ShopItem.Price#UGHApi.Entities.Money", "Price", b1 =>
+                    b.OwnsOne("UGHApi.Entities.Money", "Price", b1 =>
                         {
                             b1.Property<int>("ShopItemId")
                                 .HasColumnType("int");
@@ -918,7 +921,7 @@ namespace UGHApi.Migrations
 
                             b1.HasKey("ShopItemId");
 
-                            b1.ToTable("shopitems", (string)null);
+                            b1.ToTable("shopitems");
 
                             b1.WithOwner()
                                 .HasForeignKey("ShopItemId");
@@ -945,7 +948,7 @@ namespace UGHApi.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.OwnsOne("UGHApi.Entities.Transaction.Amount#UGHApi.Entities.Money", "Amount", b1 =>
+                    b.OwnsOne("UGHApi.Entities.Money", "Amount", b1 =>
                         {
                             b1.Property<int>("TransactionId")
                                 .HasColumnType("int");
@@ -963,7 +966,7 @@ namespace UGHApi.Migrations
 
                             b1.HasKey("TransactionId");
 
-                            b1.ToTable("transaction", (string)null);
+                            b1.ToTable("transaction");
 
                             b1.WithOwner()
                                 .HasForeignKey("TransactionId");
