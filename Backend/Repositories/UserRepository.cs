@@ -68,7 +68,6 @@ public class UserRepository : IUserRepository
     {
         return await _context
             .users.Include(u => u.UserMemberships)
-            .Include(u => u.UserRoleMapping)
             .Include(u => u.Offers)
             .ThenInclude(o => o.Reviews)
             .FirstOrDefaultAsync(u => u.User_Id == userId);
@@ -78,11 +77,10 @@ public class UserRepository : IUserRepository
     {
         IQueryable<User> query = _context
             .users
-            .Include(u => u.UserRoleMapping)
             .Include(u => u.UserMemberships)
             .Include(u => u.Offers)
                 .ThenInclude(o => o.Reviews)
-            .Where(u => u.UserRoleMapping.RoleId != 1)
+            .Where(u => u.UserRole != UserRoles.Admin)
             .AsQueryable();
 
         if (!string.IsNullOrEmpty(parameters.SearchTerm))

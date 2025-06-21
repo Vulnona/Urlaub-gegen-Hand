@@ -93,16 +93,10 @@ public class RegisterUserCommandHandler
                 Link_VS = request.Link_VS,
                 State = request.State,
                 VerificationState = UGH_Enums.VerificationState.IsNew,
+                UserRole = UserRoles.Admin
             };
 
             var savedUser = await _userRepository.AddUserAsync(newUser);
-
-            var defaultUserRole = await _userService.GetDefaultUserRoleAsync();
-
-            if (defaultUserRole != null)
-            {
-                await _userService.AssignUserRoleAsync(savedUser.User_Id, defaultUserRole.RoleId);
-            }
 
             var verificationToken = _tokenService.GenerateNewEmailVerificator(savedUser.User_Id);
             await _emailService.SendVerificationEmailAsync(

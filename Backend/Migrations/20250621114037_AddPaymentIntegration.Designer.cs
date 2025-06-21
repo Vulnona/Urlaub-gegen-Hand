@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace UGHApi.Migrations
 {
     [DbContext(typeof(Ugh_Context))]
-    [Migration("20250617092937_add_paypal_integration_changes")]
-    partial class addpaypalintegrationchanges
+    [Migration("20250621114037_AddPaymentIntegration")]
+    partial class AddPaymentIntegration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -530,6 +530,9 @@ namespace UGHApi.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
+                    b.Property<int>("UserRole")
+                        .HasColumnType("int");
+
                     b.Property<int>("VerificationState")
                         .HasColumnType("int");
 
@@ -602,42 +605,6 @@ namespace UGHApi.Migrations
                     b.HasIndex("User_Id");
 
                     b.ToTable("userprofiles");
-                });
-
-            modelBuilder.Entity("UGH.Domain.Entities.UserRole", b =>
-                {
-                    b.Property<int>("RoleId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<string>("RoleName")
-                        .HasColumnType("longtext");
-
-                    b.HasKey("RoleId");
-
-                    b.ToTable("userroles");
-                });
-
-            modelBuilder.Entity("UGH.Domain.Entities.UserRoleMapping", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<int>("RoleId")
-                        .HasColumnType("int");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("char(36)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("RoleId");
-
-                    b.HasIndex("UserId")
-                        .IsUnique();
-
-                    b.ToTable("userrolesmapping");
                 });
 
             modelBuilder.Entity("UGHApi.Entities.ShopItem", b =>
@@ -882,25 +849,6 @@ namespace UGHApi.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("UGH.Domain.Entities.UserRoleMapping", b =>
-                {
-                    b.HasOne("UGH.Domain.Entities.UserRole", "Role")
-                        .WithMany()
-                        .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("UGH.Domain.Entities.User", "User")
-                        .WithOne("UserRoleMapping")
-                        .HasForeignKey("UGH.Domain.Entities.UserRoleMapping", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Role");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("UGHApi.Entities.ShopItem", b =>
                 {
                     b.OwnsOne("UGHApi.Entities.Money", "Price", b1 =>
@@ -1002,8 +950,6 @@ namespace UGHApi.Migrations
                     b.Navigation("Transactions");
 
                     b.Navigation("UserMemberships");
-
-                    b.Navigation("UserRoleMapping");
                 });
 #pragma warning restore 612, 618
         }

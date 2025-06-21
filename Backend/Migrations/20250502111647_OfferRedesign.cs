@@ -69,16 +69,6 @@ namespace UGHApi.Migrations
                 table: "offers",
                 newName: "IX_offers_UserId");
 
-            migrationBuilder.AlterColumn<Guid>(
-                name: "UserId",
-                table: "offers",
-                type: "char(36)",
-                nullable: false,
-                collation: "ascii_general_ci",
-                oldClrType: typeof(Guid),
-                oldType: "char(36)",
-                oldCollation: "utf8mb4_general_ci");
-
             migrationBuilder.AlterColumn<DateOnly>(
                 name: "CreatedAt",
                 table: "offers",

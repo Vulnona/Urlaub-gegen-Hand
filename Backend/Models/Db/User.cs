@@ -63,7 +63,7 @@ public class User
 
     [ForeignKey("MembershipId")]
     public Membership CurrentMembership { get; set; }
-    public UserRoleMapping UserRoleMapping { get; set; }
+    public UserRoles UserRole { get; set; }
     public ICollection<Offer> Offers { get; set; } = new List<Offer>();
     public ICollection<Coupon> Coupons { get; set; } = new List<Coupon>();
     public ICollection<Transaction> Transactions { get; set; } = new List<Transaction>();
@@ -127,4 +127,8 @@ public class User
         Link_VS = link_VS;
         State = state;
     }
+}
+public enum UserRoles {
+    User,
+    Admin
 }
