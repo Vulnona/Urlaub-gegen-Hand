@@ -46,7 +46,7 @@
       </div>
       <div v-if="logId == offer.hostId">
         <div v-if="offer.status == '0'">
-          <button class="btn btn-danger" @click="closeOffer()">
+          <button class="btn btn-danger" @click="closeOffer(offer)">
             Angebot schließen.
           </button>
           <a v-if="!offer.applicationsExist">
@@ -119,9 +119,10 @@ const formatDate = (dateString) => {
 const backtooffers = () => {
   window.history.back();
 };
-const closeOffer = async () => {
+const closeOffer = async (offer) => {
     try {
         const response = await axiosInstance.put(`${process.env.baseURL}offer/close-offer/${params.id}`);
+        offer.status = 1;
     } catch {
         console.error('Error closing offer');
     }
