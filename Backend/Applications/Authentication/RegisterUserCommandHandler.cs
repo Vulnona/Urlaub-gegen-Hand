@@ -93,7 +93,7 @@ public class RegisterUserCommandHandler
                 Link_VS = request.Link_VS,
                 State = request.State,
                 VerificationState = UGH_Enums.VerificationState.IsNew,
-                UserRole = UserRoles.Admin
+                UserRole = UserRoles.User
             };
 
             var savedUser = await _userRepository.AddUserAsync(newUser);
