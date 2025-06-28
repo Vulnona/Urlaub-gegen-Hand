@@ -84,7 +84,6 @@ import Swal from "sweetalert2";
 import Navbar from "@/components/navbar/Navbar.vue";
 import axiosInstance from "@/interceptor/interceptor";
 import Securitybot from "@/services/SecurityBot";
-import toast from '@/components/toaster/toast';
 
 let stripe = null;
 let elements = null;
@@ -107,6 +106,7 @@ export default {
     this.fetchShopItems();
     stripe = await loadStripe(`${process.env.StripeKey}`);
   },
+
   methods: {
     async fetchShopItems() {
       try {
@@ -135,31 +135,63 @@ export default {
       try {
         const response = await axiosInstance.post(`create-payment-intent`, {
           ShopitemId,
+          automatic_payment_methods: { enabled: true },
+          payment_method_types: ['card', 'paypal']
         });
 
         if (response.status === 200 && response.data.clientSecret) {
+          console.log('Payment intent created with client secret');
           await this.initializeStripeElements(response.data.clientSecret);
           this.showStripeModal = true;
         } else {
           Swal.fire("Error", "Something went wrong. Please try again.", "error");
         }
       } catch (error) {
+        console.error("Payment intent creation error:", error);
         Swal.fire("Error", "Failed to process the purchase.", "error");
       }
     },
     async initializeStripeElements(clientSecret) {
-      elements = stripe.elements({
-        clientSecret,
-        appearance: {
-          theme: 'stripe',
-        },
-      });
+      try {
+        // Clean up existing elements
+        if (elements) {
+          const existingElement = elements.getElement('payment');
+          if (existingElement) {
+            existingElement.destroy();
+          }
+        }
 
-      const paymentElement = elements.create('payment');
-      paymentElement.mount('#payment-element');
+        console.log('Setting up Stripe elements with PayPal support');
+        elements = stripe.elements({
+          clientSecret,
+          appearance: {
+            theme: 'stripe',
+            variables: {
+              colorPrimary: '#0066cc',
+              borderRadius: '4px'
+            }
+          }
+        });
 
-      const form = document.querySelector('#submit');
-      form.addEventListener('click', this.handleSubmit);
+        const paymentElement = elements.create('payment', {
+          layout: {
+            type: 'tabs',
+            defaultCollapsed: false
+          },
+          fields: {
+            billingDetails: 'auto'
+          },
+          paymentMethodOrder: ['card', 'paypal']
+        });
+
+        paymentElement.mount('#payment-element');
+
+        const form = document.querySelector('#submit');
+        form.addEventListener('click', this.handleSubmit);
+      } catch (error) {
+        console.error('Error initializing Stripe elements:', error);
+        Swal.fire("Error", "Failed to initialize payment form. Please try again.", "error");
+      }
     },
     async handleSubmit(e) {
       e.preventDefault();
@@ -169,10 +201,17 @@ export default {
         elements,
         confirmParams: {
           return_url: `${window.location.origin}/purchase-history?success=true`,
-        },
+          payment_method_data: {
+            billing_details: {
+              name: '',
+              email: ''
+            }
+          }
+        }
       });
 
       if (error) {
+        console.error('Payment confirmation error:', error);
         const messageDiv = document.querySelector('#payment-message');
         messageDiv.textContent = error.message;
         messageDiv.classList.remove('hidden');

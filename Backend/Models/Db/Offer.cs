@@ -43,6 +43,7 @@ public class Offer {
     public Guid UserId { get; init; }
     [ForeignKey("UserId")]
     public User User { get; set; }
+
     public ICollection<OfferApplication> OfferApplications { get; set; }
     public ICollection<Review> Reviews { get; set; } = new List<Review>();
 }
@@ -52,6 +53,7 @@ public class OfferTypeLodging : Offer {
     public string? AdditionalLodgingProperties { get; set; }
     public string? Location { get; set; }
 }
+
 public class OfferTypeRequest : Offer {
     // differs from Location, has to be treated as a list. Multiple Locations are realistic.
     public string? PossibleLocations { get; set; }

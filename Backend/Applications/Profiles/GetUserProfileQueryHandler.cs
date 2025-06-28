@@ -36,6 +36,11 @@ public class GetUserProfileQueryHandler : IRequestHandler<GetUserProfileQuery, U
                 return null;
             }
 
+            var membershipEndDate = user.UserMemberships
+                .Where(m => m.IsMembershipActive)
+                .OrderBy(m => m.CreatedAt)
+                .FirstOrDefault()?.Expiration;
+
             var userProfileDataDTO = new UserProfileDataDTO
             {
                 FirstName = user.FirstName,
@@ -52,6 +57,10 @@ public class GetUserProfileQueryHandler : IRequestHandler<GetUserProfileQuery, U
                 FacebookLink = user.Facebook_link,
                 Link_RS = user.Link_RS,
                 Link_VS = user.Link_VS,
+    //            UserRating = user.Offers.Any(o => o.AverageRating > 0)
+    //? user.Offers.Where(o => o.AverageRating > 0).Average(o => o.AverageRating)
+    //: 0.0,
+                MembershipEndDate = membershipEndDate,
                 Hobbies = user?.Hobbies?.Split(',').ToList(),
                 Skills = user?.Skills?.Split(',').ToList(),
                 VerificationState = user.VerificationState.ToString()
@@ -69,3 +78,4 @@ public class GetUserProfileQueryHandler : IRequestHandler<GetUserProfileQuery, U
         }
     }
 }
+

@@ -1,6 +1,7 @@
 ﻿using Mapster;
 using Microsoft.EntityFrameworkCore;
 using UGH.Domain.Entities;
+using UGHApi.Extensions;
 using UGHApi.Interfaces;
 using UGHApi.Shared;
 using UGHApi.ViewModels;
@@ -49,6 +50,7 @@ public class CouponRepository : ICouponRepository
         var couponsWithRedemptions = await _context
             .coupons.Include(c => c.CreatedByUser)
             .Include(c => c.Redemption)
+            .OrderByDescending(c => c.CreatedDate)
             .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync();
@@ -58,7 +60,12 @@ public class CouponRepository : ICouponRepository
             {
                 var couponDto = coupon.Adapt<CouponDto>();
                 couponDto.IsRedeemed = coupon.Redemption != null;
-                return couponDto;
+                couponDto.Duration = coupon.Duration.ToDays();
+                if (couponDto.IsRedeemed)
+                {
+                couponDto.RedeemedBy = coupon.Redemption?.UserEmail ?? null;
+                }
+                return couponDto;   
             })
             .ToList();
 
@@ -114,7 +121,7 @@ public class CouponRepository : ICouponRepository
         await _context.SaveChangesAsync();
     }
 
-    public async Task RedeemCoupon(Coupon coupon, Guid userId)
+    public async Task RedeemCoupon(Coupon coupon, User user)
     {
         try
         {
@@ -123,7 +130,8 @@ public class CouponRepository : ICouponRepository
             var redemption = new Redemption
             {
                 CouponId = coupon.Id,
-                UserId = userId,
+                UserId = user.User_Id,
+                UserEmail = user.Email_Address,
                 RedeemedDate = currentDate,
             };
 
@@ -161,3 +169,5 @@ public class CouponRepository : ICouponRepository
     }
 }
     #endregion
+
+

@@ -100,7 +100,6 @@ namespace UGHApi
             ConfigureMailSettings(builder);
             ConfigureSwagger(builder);
             RegisterServices(builder.Services);
-            //SeedDefaultRoles(builder.Services);
             //CreateAutoAdminUser(builder.Services.BuildServiceProvider().GetService<UserService>());
         }
 
@@ -245,24 +244,6 @@ namespace UGHApi
         private static void ConfigureEndpoints(WebApplication app)
         {
             app.MapControllers();
-        }
-
-        private static void SeedDefaultRoles(IServiceCollection services)
-        {
-            using var scope = services.BuildServiceProvider().CreateScope();
-            var dbContext = scope.ServiceProvider.GetRequiredService<Ugh_Context>();
-
-            if (!dbContext.userroles.Any())
-            {
-                dbContext.userroles.AddRange(
-                    new List<UGH.Domain.Entities.UserRole>
-                    {
-                        new UGH.Domain.Entities.UserRole { RoleName = "Admin" },
-                        new UGH.Domain.Entities.UserRole { RoleName = "User" },
-                    }
-                );
-                dbContext.SaveChanges();
-            }
         }
     }
 }

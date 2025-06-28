@@ -64,83 +64,84 @@ public class PaymentSucceededWebhookCommandHandler
             var stripeEvent = EventUtility.ConstructEvent(
                 request.JsonPayload,
                 request.StripeSignature,
-                _stripeWebhookSecret
+                _stripeWebhookSecret,
+                throwOnApiVersionMismatch: false
             );
 
-            if (stripeEvent.Type == "payment_intent.succeeded")
+            if (stripeEvent.Type != "payment_intent.succeeded")
             {
-                var paymentIntent = stripeEvent.Data.Object as Stripe.PaymentIntent;
-
-                var document = JsonDocument.Parse(request.JsonPayload);
-                var paymentIntentId = ExtractPaymentIntentId(request.JsonPayload);
-
-                var transaction = await _transactionRepository.GetTransactionByTransactionId(
-                    paymentIntentId
-                );
-
-                if (transaction == null)
-                {
-                    _logger.LogInformation(
-                        $"Transaction not found with Payment intent Id: {paymentIntentId}"
-                    );
-                    return Result.Failure(Errors.General.NotFound("Transaction", transaction));
-                }
-
-                var membership = await _membershipRepository.GetMembershipByDurationDaysAsync(
-                    transaction.ShopItem.Duration.ToDays()
-                );
-                if (membership == null)
-                {
-                    _logger.LogInformation(
-                        $"Membership with duration of {transaction.ShopItem.Duration.ToDays()} days not found."
-                    );
-                    return Result.Failure(
-                        Errors.General.InvalidOperation(
-                            "Shop Item does not belong to any membership"
-                        )
-                    );
-                }
-
-                var newCoupon = new UGH.Domain.Entities.Coupon
-                {
-                    Code = Ulid.NewUlid().ToString(),
-                    Name = transaction.ShopItem.Name,
-                    Description = string.Empty,
-                    CreatedBy = transaction.UserId,
-                    MembershipId = membership.MembershipID,
-                    Duration = transaction.ShopItem.Duration,
-                };
-
-                var coupon = await _couponRepository.AddCoupon(newCoupon);
-
-                transaction.AssignCouponId(coupon.Id);
-                transaction.UpdateTransactionStatus(TransactionStatus.Complete);
-                await _couponRepository.SaveChangesAsync();
-
-                //Send Mail Here
-                Task.Run(async () =>
-                {
-                    try
-                    {
-                        var htmlTemplate = _htmlTemplateService.GetCouponPurchasedDetails(
-                            coupon.Code,
-                            $"{transaction.User.FirstName} {transaction.User.LastName}".Trim()
-                        );
-
-                        await _emailService.SendEmailAsync(
-                            coupon.CreatedByUser.Email_Address,
-                            htmlTemplate.Subject,
-                            htmlTemplate.BodyHtml
-                        );
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogError(
-                            $"Error sending email to {coupon.CreatedByUser.Email_Address}: {ex.Message}"
-                        );
-                    }
-                });
+                return Result.Failure(Errors.General.InvalidOperation("Unsupported webhook event type."));
             }
+
+            var paymentIntent = stripeEvent.Data.Object as Stripe.PaymentIntent;
+            var paymentMethodId = paymentIntent.PaymentMethodId;
+
+            var service = new PaymentMethodService();
+            var paymentMethod = await service.GetAsync(paymentMethodId);
+            var paymentMethodType = paymentMethod.Type;
+
+            var paymentIntentId = ExtractPaymentIntentId(request.JsonPayload);
+
+            var transaction = await _transactionRepository.GetTransactionByTransactionId(paymentIntentId);
+
+            if (transaction == null)
+            {
+                _logger.LogInformation($"Transaction not found with Payment intent Id: {paymentIntentId}");
+                return Result.Failure(Errors.General.NotFound("Transaction", paymentIntentId));
+            }
+
+            var membership = await _membershipRepository.GetMembershipByDurationDaysAsync(
+                transaction.ShopItem.Duration.ToDays()
+            );
+
+            if (membership == null)
+            {
+                _logger.LogInformation(
+                    $"Membership with duration of {transaction.ShopItem.Duration.ToDays()} days not found."
+                );
+                return Result.Failure(Errors.General.InvalidOperation("Shop Item does not belong to any membership"));
+            }
+
+            var newCoupon = new UGH.Domain.Entities.Coupon
+            {
+                Code = Ulid.NewUlid().ToString(),
+                Name = transaction.ShopItem.Name,
+                Description = string.Empty,
+                CreatedBy = transaction.UserId,
+                MembershipId = membership.MembershipID,
+                Duration = membership.DurationDays.ToCouponDuration(),
+            };
+
+            var coupon = await _couponRepository.AddCoupon(newCoupon);
+
+            transaction.AssignCouponId(coupon.Id);
+            transaction.UpdateTransactionStatus(TransactionStatus.Complete);
+            transaction.SetPaymentMethod(paymentMethodType);
+            await _couponRepository.SaveChangesAsync();
+
+            // Send Mail Here
+            Task.Run(async () =>
+            {
+                try
+                {
+                    var htmlTemplate = _htmlTemplateService.GetCouponPurchasedDetails(
+                        coupon.Code,
+                        $"{transaction.User.FirstName} {transaction.User.LastName}".Trim()
+                    );
+
+                    await _emailService.SendEmailAsync(
+                        coupon.CreatedByUser.Email_Address,
+                        htmlTemplate.Subject,
+                        htmlTemplate.BodyHtml
+                    );
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(
+                        $"Error sending email to {coupon.CreatedByUser.Email_Address}: {ex.Message}"
+                    );
+                }
+            });
 
             return Result.Success("Data updated successfully");
         }
@@ -150,6 +151,7 @@ public class PaymentSucceededWebhookCommandHandler
             return Result.Failure(Errors.General.InvalidOperation(ex.Message));
         }
     }
+
 
     private string ExtractPaymentIntentId(string jsonPayload)
     {

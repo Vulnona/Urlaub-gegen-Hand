@@ -51,7 +51,7 @@ public class CreatePaymentIntentCommandHandler
             {
                 Amount = CalculateAmount(shopItem.Price.Amount),
                 Currency = shopItem.Price.Currency,
-                PaymentMethodTypes = new List<string> { "card" },
+                PaymentMethodTypes = new List<string> { "card", "paypal" },
             };
 
             var service = new Stripe.PaymentIntentService();
@@ -83,3 +83,4 @@ public class CreatePaymentIntentCommandHandler
         return (long)(amount * 100);
     }
 }
+

@@ -12,10 +12,11 @@ public class UGH_Enums
 
     public enum CouponDuration
     {
-        ThreeMonths,
-        SixMonths,
-        OneYear,
-        TwoYears,
+        Keiner = 0,
+        EinJahr = 365,
+        ZweiJahre = 730,
+        DreiJahre = 1095,     
+        Lebenslang    
     }
 
     public enum TransactionStatus

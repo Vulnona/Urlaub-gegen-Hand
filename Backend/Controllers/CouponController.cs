@@ -39,12 +39,12 @@ namespace UGHApi.Controllers
         #region Coupon-generation-by-admin
         [HttpPost("coupon/add-coupon")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> AddCoupon()
+        public async Task<IActionResult> AddCoupon([FromBody] int membershipId)
         {
             try
             {
                 var userId = _userProvider.UserId;
-                var result = await _mediator.Send(new AddCouponCommand(userId));
+                var result = await _mediator.Send(new AddCouponCommand(userId, membershipId));
 
                 return Ok(result);
             }
@@ -156,10 +156,10 @@ namespace UGHApi.Controllers
             }
         }
 
-        public class RedeemCouponRequest{ public string CouponCode { get; set; }}
         [HttpPost("coupon/redeem")]
         [Authorize]
-        public async Task<IActionResult> RedeemCoupon([FromBody] RedeemCouponRequest request) {
+        public async Task<IActionResult> RedeemCoupon([FromBody] RedeemCouponRequest request)
+        {
             _logger.LogInformation($"Coupon wird eingelöst userid:{_userProvider.UserId}, code:{request.CouponCode}");
             try
             {
@@ -208,11 +208,17 @@ namespace UGHApi.Controllers
             }
         }
 
+        [AllowAnonymous]
         [HttpPost("webhook")]
         public async Task<IActionResult> StripeWebhook()
         {
             var json = await new StreamReader(HttpContext.Request.Body).ReadToEndAsync();
             var stripeSignature = Request.Headers["Stripe-Signature"];
+
+            if (string.IsNullOrEmpty(stripeSignature))
+            {
+                return NotFound("Stripe-Signature not found");
+            }
 
             var command = new PaymentSucceededWebhookCommand
             {

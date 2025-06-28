@@ -46,7 +46,7 @@ public class TokenService
                 Encoding.UTF8.GetBytes(_configuration["Jwt:Key"])
             );
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
-            var roles = await _userService.GetUserRolesByUserEmail(userName);
+            string role = await _userService.GetUserRoleByUserEmail(userName);
 
             // Handle membership status, default to "Inactive" if membership is null
             var membershipStatus = memberships.Count != 0 ? "Active" : "Inactive";
@@ -72,10 +72,8 @@ public class TokenService
             };
 
             // Add roles to claims
-            foreach (var role in roles)
-            {
-                claims.Add(new Claim(ClaimTypes.Role, role));
-            }
+            // currently only the mutually exclusive Roles User and Admin are supported.
+            claims.Add(new Claim(ClaimTypes.Role, role));
 
             // Create the token
             var token = new JwtSecurityToken(

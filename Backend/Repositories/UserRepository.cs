@@ -6,6 +6,7 @@ using UGHApi.Repositories;
 using UGHApi.Services.AWS;
 using UGHApi.Shared;
 using UGHApi.ViewModels;
+using UGHApi.ViewModels.UserComponent;
 
 namespace UGH.Infrastructure.Repositories;
 
@@ -51,6 +52,10 @@ public class UserRepository : IUserRepository
 
         var userDto = user.Adapt<UserDTO>();
 
+        userDto.MembershipEndDate = user.UserMemberships
+        .OrderBy(m => m.CreatedAt)
+        .FirstOrDefault()?.Expiration;
+
         return userDto;
     }
 
@@ -62,7 +67,8 @@ public class UserRepository : IUserRepository
     public async Task<User> GetUserWithRatingByIdAsync(Guid userId)
     {
         return await _context
-            .users.Include(u => u.Offers)
+            .users.Include(u => u.UserMemberships)
+            .Include(u => u.Offers)
             .ThenInclude(o => o.Reviews)
             .FirstOrDefaultAsync(u => u.User_Id == userId);
     }
@@ -70,9 +76,11 @@ public class UserRepository : IUserRepository
     public async Task<PaginatedList<UserDTO>> GetAllUsersAsync(UserQueryParameters parameters)
     {
         IQueryable<User> query = _context
-            .users.Include(u => u.Offers)
-            .ThenInclude(o => o.Reviews)
-            .Where(u => u.User_Id != Guid.Parse("08dcd23c-d4eb-45db-88e4-73837709fada"))
+            .users
+            .Include(u => u.UserMemberships)
+            .Include(u => u.Offers)
+                .ThenInclude(o => o.Reviews)
+            .Where(u => u.UserRole != UserRoles.Admin)
             .AsQueryable();
 
         if (!string.IsNullOrEmpty(parameters.SearchTerm))
@@ -93,24 +101,34 @@ public class UserRepository : IUserRepository
         }
 
         int totalCount = await query.CountAsync();
+
         var users = await query
             .Skip((parameters.PageNumber - 1) * parameters.PageSize)
             .Take(parameters.PageSize)
-            .ToListAsync();
+        .ToListAsync();
 
         if (users == null || !users.Any())
         {
             return null;
         }
-
         TypeAdapterConfig<User, UserDTO>
             .NewConfig()
             .Map(dest => dest.Hobbies, src => SplitAndTrim(src.Hobbies))
             .Map(dest => dest.Skills, src => SplitAndTrim(src.Skills))
             .Map(dest => dest.Link_RS, src => _urlBuilderService.BuildAWSFileUrl(src.Link_RS))
-            .Map(dest => dest.Link_VS, src => _urlBuilderService.BuildAWSFileUrl(src.Link_VS));
+            .Map(dest => dest.Link_VS, src => _urlBuilderService.BuildAWSFileUrl(src.Link_VS))
+            ; 
 
-        var userDtoList = users.Adapt<List<UserDTO>>();
+        var userDtoList = users.Select(user =>
+        {
+            var dto = user.Adapt<UserDTO>();
+            dto.MembershipEndDate = user.UserMemberships
+                .Where(m => m.IsMembershipActive)
+                .OrderBy(m => m.CreatedAt)
+                .FirstOrDefault()?.Expiration;
+            return dto;
+        }).ToList();
+
 
         return PaginatedList<UserDTO>.Create(
             userDtoList,
@@ -137,13 +155,6 @@ public class UserRepository : IUserRepository
         {
             throw new InvalidOperationException("An error occurred while adding the user.", ex);
         }
-    }
-
-    public async Task<User> GetUserWithMembershipAsync(Guid userId)
-    {
-        return await _context
-            .users.Include(u => u.CurrentMembership)
-            .FirstOrDefaultAsync(u => u.User_Id == userId);
     }
 
     public async Task UpdateUserAsync(User user)

@@ -14,6 +14,6 @@ public interface ICouponRepository
     Task<bool> IsCouponRedeemed(int couponId);
     Task<PaginatedList<CouponDto>> GetAllCoupons(int pageNumber, int pageSize);
     Task DeleteCoupon(int couponId);
-    Task RedeemCoupon(Coupon coupon, Guid userId);
+    Task RedeemCoupon(Coupon coupon, User user);
     Task SaveChangesAsync();
 }

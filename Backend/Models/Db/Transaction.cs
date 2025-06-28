@@ -19,6 +19,8 @@ public class Transaction
 
     public string TransactionId { get; set; }
 
+    public string PaymentMethod { get; set; } = null;
+
     public TransactionStatus Status { get; set; }
 
     public int? CouponId { get; set; }
@@ -32,5 +34,10 @@ public class Transaction
     public void AssignCouponId(int couponId)
     {
         CouponId = couponId;
+    }
+
+    public void SetPaymentMethod(string paymentMenthod)
+    {
+        PaymentMethod = paymentMenthod;
     }
 }

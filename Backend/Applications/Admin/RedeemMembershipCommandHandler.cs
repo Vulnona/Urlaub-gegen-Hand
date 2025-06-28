@@ -69,7 +69,7 @@ public class RedeemMembershipCommandHandler : IRequestHandler<RedeemMembershipCo
                 );
             }
 
-            await _couponRepository.RedeemCoupon(coupon, request.UserId);
+            await _couponRepository.RedeemCoupon(coupon, user);
 
             user.SetMembershipId(coupon.MembershipId);
             await _userRepository.UpdateUserAsync(user);
@@ -105,3 +105,4 @@ public class RedeemMembershipCommandHandler : IRequestHandler<RedeemMembershipCo
         }
     }
 }
+

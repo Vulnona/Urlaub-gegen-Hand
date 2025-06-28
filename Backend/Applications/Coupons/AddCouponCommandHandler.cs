@@ -1,6 +1,8 @@
 ﻿using MediatR;
 using UGH.Domain.Core;
 using UGH.Domain.Entities;
+using UGH.Domain.Interfaces;
+using UGHApi.Extensions;
 using UGHApi.Interfaces;
 
 namespace UGHApi.Applications.Coupons;
@@ -8,14 +10,17 @@ namespace UGHApi.Applications.Coupons;
 public class AddCouponCommandHandler : IRequestHandler<AddCouponCommand, Result>
 {
     private readonly ICouponRepository _couponRepository;
+    private readonly IMembershipRepository _membershipRepository;
     private readonly ILogger<AddCouponCommandHandler> _logger;
 
     public AddCouponCommandHandler(
         ICouponRepository couponRepository,
+        IMembershipRepository membershipRepository,
         ILogger<AddCouponCommandHandler> logger
     )
     {
         _couponRepository = couponRepository;
+        _membershipRepository = membershipRepository;
         _logger = logger;
     }
 
@@ -23,14 +28,23 @@ public class AddCouponCommandHandler : IRequestHandler<AddCouponCommand, Result>
     {
         try
         {
+            var membership = await _membershipRepository.GetMembershipByIdAsync(request.MembershipId);
+
+            if (membership == null)
+            {
+                return Result.Failure<string>(
+                    Errors.General.InvalidOperation("Membership not found.")
+                );
+            }
+
             var newCoupon = new Coupon
             {
                 Code = Ulid.NewUlid().ToString(),
                 Name = "Admin Issued Coupon",
                 Description = string.Empty,
                 CreatedBy = request.UserId,
-                MembershipId = 1, //Statically stored for now.
-                Duration = UGH_Enums.CouponDuration.ThreeMonths,
+                MembershipId = membership.MembershipID,
+                Duration = membership.DurationDays.ToCouponDuration(),
             };
 
             await _couponRepository.AddCoupon(newCoupon);

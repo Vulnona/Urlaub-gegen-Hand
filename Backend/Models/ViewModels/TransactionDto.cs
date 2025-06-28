@@ -12,4 +12,5 @@ public class TransactionDto
     public TransactionStatus Status { get; set; }
     public string CouponStatus { get; set; }
     public string CouponCode { get; set; }
+    public string PaymentMethod { get; set; }
 }

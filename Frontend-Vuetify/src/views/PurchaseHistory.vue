@@ -26,6 +26,7 @@
                   <th class="text-center" style="width: 18%;">Date</th>
                   <th class="text-center" style="width: 18%;">Item Name</th>
                   <th class="text-center">Amount</th>
+                  <th class="text-center">Payment Method</th>
                   <th class="text-center" style="width: 30%;">Coupon Code</th>
                   <th class="text-center" style="width: 15%;">Purchase Status</th>
                   <th class="text-center" style="width: 15%;">Coupon Status</th>
@@ -37,6 +38,23 @@
                   <td class="text-center">{{ formatDate(coupon.transactionDate) }}</td>
                   <td class="text-center">{{ coupon.shopItemName }}</td>
                   <td class="text-center">{{ coupon.amount.amount }} {{ coupon.amount.currency }}</td>
+                 <td class="text-center">
+                  <template v-if="coupon.paymentMethod === 'card'">
+                    <!-- Card SVG Icon -->
+                    <svg xmlns="http://www.w3.org/2000/svg" style="max-width: 20%;" viewBox="0 0 24 24" fill="currentColor"><path d="M22.0049 9.99979V19.9998C22.0049 20.5521 21.5572 20.9998 21.0049 20.9998H3.00488C2.4526 20.9998 2.00488 20.5521 2.00488 19.9998V9.99979H22.0049ZM22.0049 7.99979H2.00488V3.99979C2.00488 3.4475 2.4526 2.99979 3.00488 2.99979H21.0049C21.5572 2.99979 22.0049 3.4475 22.0049 3.99979V7.99979ZM15.0049 15.9998V17.9998H19.0049V15.9998H15.0049Z"></path></svg>
+                    <span class="ml-1">Card</span>
+                  </template>
+
+                  <template v-else-if="coupon.paymentMethod === 'paypal'">
+                    <!-- PayPal SVG Icon -->
+                  <svg xmlns="http://www.w3.org/2000/svg" style="max-width: 20%;" viewBox="0 0 24 24" fill="currentColor"><path d="M20.0673 8.47768C20.5591 9.35823 20.6237 10.4924 20.3676 11.8053C19.627 15.6107 17.0916 16.9253 13.8536 16.9253H13.3536C12.9583 16.9253 12.6216 17.214 12.5596 17.6047L12.519 17.8253L11.8896 21.818L11.857 21.988C11.795 22.3787 11.4583 22.6667 11.063 22.6667H7.72031C7.42365 22.6667 7.19698 22.402 7.24298 22.1093L7.41807 21H8.9367L9.88603 14.9793H11.2716C15.9496 14.9793 19.0209 12.7768 20.0673 8.47768ZM17.1066 3.38784C17.8693 4.25635 18.0908 5.19891 17.8597 6.67324C17.8405 6.79594 17.82 6.91391 17.7973 7.03253C17.0621 10.8057 14.7087 12.4793 10.8417 12.4793H8.95703C8.32647 12.4793 7.78368 12.8928 7.60372 13.4811L7.58913 13.4788L6.65969 19.3733H3.12169C3.08991 19.3733 3.06598 19.3454 3.07097 19.3136L5.66905 2.80233C5.74174 2.34036 6.13984 2 6.6075 2H12.583C14.7658 2 16.2998 2.46869 17.1066 3.38784Z"></path></svg>
+                    <span class="ml-1">PayPal</span>
+                  </template>
+
+                  <template v-else>
+                    <span class="text-gray-400">N/A</span>
+                  </template>
+                </td>
                   <td  class="copyCoupon text-center" >
                     <span v-if="coupon.couponCode"><b>{{ coupon.couponCode }}</b></span>
                     <span v-if="!coupon.couponCode">No Coupon</span>

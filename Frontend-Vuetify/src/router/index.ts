@@ -177,7 +177,10 @@ router.beforeEach((to, from, next) => {
   const requiredRoles = to.meta.roles as string[];
   const requiredMembership = to.meta.membershipStatus as string[];
   const requiredVerification = to.meta.verification as string[];
-  if (requiredRoles && privileges != null) {
+  if (requiredRoles) {
+    if(privileges === null){
+       next({ name: 'Login' });
+    }
     const userRole = privileges.userRole;
     const membership = privileges.membershipStatus;
     const verification = privileges.verification;

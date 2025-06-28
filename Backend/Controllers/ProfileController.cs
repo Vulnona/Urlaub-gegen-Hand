@@ -167,7 +167,7 @@ public class ProfileController : ControllerBase
              return StatusCode(500, new { Message = "Authentication Error"});
          }
          try {
-            User user = await _context.users.FindAsync(userId);
+            User user = await _context.users.Include(u => u.UserMemberships).FirstOrDefaultAsync(u => u.User_Id == userId);
             if (user == null) {
                 throw new Exception("User not found.");
             }
@@ -189,6 +189,10 @@ public class ProfileController : ControllerBase
                 State = user.State,
                 FacebookLink = user.Facebook_link,
                 AverageRating = averageRating,
+                MembershipEndDate = user.UserMemberships
+                .Where(m => m.IsMembershipActive)
+                .OrderBy(m => m.CreatedAt)
+                .FirstOrDefault()?.Expiration
             };
             if (user.Hobbies != null)
                 profile.Hobbies = user.Hobbies.Split(',').Select(h => h.Trim()).ToList() ?? new List<string>();
@@ -204,3 +208,4 @@ public class ProfileController : ControllerBase
     }
     #endregion
 }
+

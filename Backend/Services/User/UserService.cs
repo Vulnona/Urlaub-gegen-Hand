@@ -85,11 +85,6 @@ public class UserService
         }
     }
 
-    public async Task<UserRole> GetDefaultUserRoleAsync()
-    {
-        return await _context.userroles.FirstOrDefaultAsync(r => r.RoleName == "User");
-    }
-
     public async Task<User> GetUserByEmailAsync(string email)
     {
         return await _context.users.FirstOrDefaultAsync(r => r.Email_Address == email);
@@ -133,36 +128,6 @@ public class UserService
     public async Task<Membership> GetDefaultMembershipAsync()
     {
         return await _context.memberships.FirstOrDefaultAsync(r => r.MembershipID == 2);
-    }
-
-    public async Task<bool> AssignUserRoleAsync(Guid userId, int roleId)
-    {
-        try
-        {
-            var existingMapping = await _context.userrolesmapping.AnyAsync(mapping =>
-                mapping.UserId == userId && mapping.RoleId == roleId
-            );
-
-            if (existingMapping)
-            {
-                return false;
-            }
-
-            var userRole = new UserRoleMapping { UserId = userId, RoleId = roleId };
-
-            await _context.userrolesmapping.AddAsync(userRole);
-            await _context.SaveChangesAsync();
-
-            return true;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(
-                $"Exception occurred while assigning user role. UserId: {userId}, RoleId: {roleId} | Exception: {ex.Message} | StackTrace: {ex.StackTrace}"
-            );
-
-            return false;
-        }
     }
 
     public async Task<Result> VerifyEmailAddressAsync(string token)
@@ -238,20 +203,9 @@ public class UserService
                 request.State
             );
             newUser.VerificationState = UGH.Domain.Core.UGH_Enums.VerificationState.Verified;
+            newUser.UserRole = UserRoles.Admin;
             _context.users.Add(newUser);
-            _context.SaveChanges();
-
-            var defaultUserRole = _context.userroles.FirstOrDefault(r => r.RoleName == "Admin");
-            if (defaultUserRole != null)
-            {
-                var userRoleMapping = new UserRoleMapping
-                {
-                    UserId = newUser.User_Id,
-                    RoleId = defaultUserRole.RoleId,
-                };
-                _context.userrolesmapping.Add(userRoleMapping);
-                _context.SaveChanges();
-            }
+            _context.SaveChanges();           
             return true;
         }
         catch (Exception ex)
@@ -261,26 +215,15 @@ public class UserService
         }
     }
 
-    public async Task<IEnumerable<string>> GetUserRolesByUserEmail(string userEmail)
+    public async Task<string> GetUserRoleByUserEmail(string userEmail)
     {
         try
         {
-            var userRoles = await _context
-                .users.Where(ur => ur.Email_Address == userEmail)
-                .SelectMany(ur =>
-                    _context
-                        .userrolesmapping.Where(urm => urm.UserId == ur.User_Id)
-                        .Join(
-                            _context.userroles,
-                            urm => urm.RoleId,
-                            role => role.RoleId,
-                            (urm, role) => role.RoleName
-                        )
-                )
-                .ToListAsync();
-            if (userRoles.Count == 0)
-                return null;
-            return userRoles;
+            var user = await _context.users.Where(ur => ur.Email_Address == userEmail).FirstOrDefaultAsync();
+            String userRole = "User";
+            if (user.UserRole == UserRoles.Admin)
+                userRole = "Admin";
+            return userRole;
         }
         catch (Exception ex)
         {

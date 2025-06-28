@@ -19,4 +19,5 @@ public class VisibleProfile
     #nullable disable
     // if this flag is true more privileged information can be shared
     public bool contact { get; set; }
+    public DateTime? MembershipEndDate { get; set; }
 }

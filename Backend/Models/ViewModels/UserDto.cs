@@ -28,4 +28,5 @@ public class UserDTO
     public string? About { get; set; }
     public UGH_Enums.VerificationState VerificationState { get; set; }
     public double AverageRating { get; set; }
+    public DateTime? MembershipEndDate { get; set; }
 }
