@@ -142,17 +142,5 @@ public class AdminController : ControllerBase
         }
     }
 
-    //[HttpPost("assign-membership")]
-    //public async Task<IActionResult> AssignMembership(AssignMembershipRequest request)
-    //{
-    //    var command = new RedeemMembershipCommand(request.UserId, request.MembershipId);
-
-    //    var result = await _mediator.Send(command);
-
-    //    if (!result)
-    //        return BadRequest("Failed to assign membership");
-    //    return Ok("Membership assigned successfully.");
-    //}
-
     #endregion
 }
