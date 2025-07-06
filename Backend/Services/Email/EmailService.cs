@@ -91,14 +91,6 @@ public class EmailService
                     subject="Die Verifikation deines Accounts wurde abgelehnt.";
                     templatePath = _templateSettings.FailedTemplate;
                     break;
-                    //                case string str when str.Equals("ExpirationWarning"):
-                    //subject="Deine Mitgliedschaft läuft in " + DaysRemaining + " Tagen ab.";
-                    //templatePath = _templateSettings.ExpirationWarningTemplate;
-                    //break;
-                    //                case string str when str.Equals("Expired"):
-                    //subject="Deine Mitgliedschaft ist abgelaufen.";
-                    //templatePath = _templateSettings.ExpiredTemplate;
-                    //break;
                 default:
                     throw new Exception($"Invalid Call parameter for function SendTemplateEmailAsync: '{Template}'.");
             }

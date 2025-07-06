@@ -1,5 +1,6 @@
 using System.Reflection;
 using System.Text;
+using System.Threading.RateLimiting;
 using Mapster;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -14,8 +15,8 @@ using UGH.Domain.Interfaces;
 using UGH.infrastructure.Repositories;
 using UGH.Infrastructure.Services;
 using UGHApi.Interfaces;
+using UGHApi.Models;
 using UGHApi.Repositories;
-using UGHApi.Services;
 using UGHApi.Services.AWS;
 using UGHApi.Services.HtmlTemplate;
 using UGHApi.Services.Stripe;
@@ -101,6 +102,24 @@ namespace UGHApi
             ConfigureSwagger(builder);
             RegisterServices(builder.Services);
             //CreateAutoAdminUser(builder.Services.BuildServiceProvider().GetService<UserService>());
+
+            builder.Services.Configure<StripeWebhookPolicyOptions>(config.GetSection("StripeWebhookPolicy"));
+
+            builder.Services.AddRateLimiter(options =>
+            {
+                var policyConfig = config.GetSection("StripeWebhookPolicy").Get<StripeWebhookPolicyOptions>();
+
+                options.AddPolicy("StripeWebhookPolicy", context =>
+                    RateLimitPartition.GetFixedWindowLimiter(
+                        partitionKey: context.Connection.RemoteIpAddress?.ToString(),
+                        factory: key => new FixedWindowRateLimiterOptions
+                        {
+                            PermitLimit = policyConfig.PermitLimit,
+                            Window = TimeSpan.FromMinutes(policyConfig.WindowMinutes),
+                            QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                            QueueLimit = policyConfig.QueueLimit
+                        }));
+            });
         }
 
         private static void ConfigureAuthentication(WebApplicationBuilder builder)
@@ -235,6 +254,7 @@ namespace UGHApi
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
+            app.UseRateLimiter();
             app.UseHttpsRedirection();
             app.UseAuthentication();
             app.UseCors("MyPolicy");

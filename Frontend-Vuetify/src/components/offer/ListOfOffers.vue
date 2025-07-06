@@ -106,8 +106,7 @@ const fetchOffers = async(newPage:Number) => {
         });
         offers = response.data.items;
         totalPages = Math.ceil(response.data.totalCount / pageSize);
-    } catch (error) {
-        //console.log(error);
+    } catch (error) {       
     } finally {
         loading.value = false;
     }   
@@ -124,7 +123,6 @@ const respondToOffer = async (reviewId:Number, userId:Number, approve:Boolean) =
         }
         fetchOffers(currentPage);
     } catch (error) {
-        // console.error('Error responding to offer:', error);
     }
 }
 const showAddRatingModal = (offerId:Number, userId:String, index:Number) => {

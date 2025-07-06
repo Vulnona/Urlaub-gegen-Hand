@@ -147,12 +147,6 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/views/Admin/Coupons.vue'),
     meta: { roles: ['Admin'] },
   },
-  // {
-  //   path: '/payment-confirmation',
-  //   name: 'PaymentConfirmation',
-  //   component: () => import('@/views/PaymentConfirmation.vue'),
-  //   meta: { roles: ['User'] },
-  // },
   {
     path: '/purchase-history',
     name: 'PurchaseHistory',

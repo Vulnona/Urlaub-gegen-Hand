@@ -20,7 +20,6 @@ public class Offer {
     public DateOnly ModifiedAt { get; set; }
     public DateOnly FromDate { get; set; }
     public DateOnly ToDate { get; set; }
-    //public DateOnly StatusUpdated { get; set; } // to allow changing offer status using a timed service
 
     // number of adults. Usually one or 2. (for non-requests: maximum, for requests: intended group size)
     public int GroupSize { get; set; }

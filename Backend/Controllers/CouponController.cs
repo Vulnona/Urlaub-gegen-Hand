@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.IdentityModel.Tokens;
 using UGH.Domain.Entities;
 using UGHApi.Applications.Admin;
@@ -208,6 +209,7 @@ namespace UGHApi.Controllers
             }
         }
 
+        [EnableRateLimiting("StripeWebhookPolicy")]
         [AllowAnonymous]
         [HttpPost("webhook")]
         public async Task<IActionResult> StripeWebhook()
