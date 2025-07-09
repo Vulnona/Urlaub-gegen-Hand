@@ -92,11 +92,8 @@ const userRole = ref('');
 // Handle logout and session clearing
 const doLogout = () => {
   sessionStorage.clear();
-  if (router.currentRoute.value.path === '/home') {
-    router.go(0);
-  } else {
-    router.push("/");
-  }
+  // Always redirect to login page after logout
+  router.push({ name: 'Login' });
 };
 // Navigate to profile
 const openProfile = () => {

@@ -132,8 +132,8 @@ const uploadImages = async () => {
       try {
         await updateUserLinks(userId, frontFileName, backFileName);
         toast.success("Upload erfolgreich!");
-          sessionStorage.clear();
-          router.push('/');
+        sessionStorage.clear();
+        router.push({ name: 'Login' }); // Use named route instead of path
       } catch (error) {
         if (error.response.status === 413) {
             toast.error("Bilddateien zu groß.");

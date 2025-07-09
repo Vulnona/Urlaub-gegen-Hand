@@ -5,7 +5,11 @@ const PORT = 3000;
 const fs = require('node:fs');
 const axios = require('axios');
 
-const url = `http://172.18.0.2:8080/api/offer/get-offer-by-id/`;
+//environment variable or default to localhost for API URL
+const API_BASE_URL = process.env.API_BASE_URL || 'http://localhost:8080';
+const FRONTEND_BASE_URL = process.env.FRONTEND_BASE_URL || 'http://localhost:3000';
+
+const url = `${API_BASE_URL}/api/offer/get-offer-by-id/`;
 const headers = {'Content-Type': 'application/json'};
 
 let distPath = path.join(__dirname, 'dist');
@@ -24,7 +28,8 @@ app.get('/:loc', function (req,res) {
 });
 app.get('/offer/:id', (req, res, next) => {
     let id = req.params.id;
-    let i2 = index.replace(/<meta property="og:image" (.*?)>/, `<meta property="og:image" content="https://alreco.de:8443/api/offer/get-preview-picture/${req.params.id}">`);
+    //dynamic URL instead of the hardcoded one
+    let i2 = index.replace(/<meta property="og:image" (.*?)>/, `<meta property="og:image" content="${API_BASE_URL}/api/offer/get-preview-picture/${req.params.id}">`);
     axios.get(`${url}${id}`, { headers })
         .then(ret => {
             i2 = i2.replace(/<meta property="og:title" (.*?)>/, `<meta property="og:title" content="${ret.data.title}">`);

@@ -448,7 +448,7 @@ export default {
       if (result.isConfirmed) {
       } else {
         //   console.log('User did not consent to cookies. Redirecting...');
-        router.push('/');
+        router.push({ name: 'Login' });
       }
     });
   }

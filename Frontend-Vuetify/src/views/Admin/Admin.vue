@@ -490,14 +490,15 @@ export default {
         // Method to handle Axios errors
         handleAxiosError(error) {
             if (error.response) {
-                if (error.response.status === 401) {
-                    toast.info("Your session has expired. Please log in again.")
-                        .then(() => {
-                            sessionStorage.clear();
-                            router.push('/');
-                        });
-                } else {
-                    // toast.info("An error occurred!");
+                // 401 errors are now handled by the axios interceptor
+                // Remove redundant 401 handling to avoid conflicts
+                if (error.response.status !== 401) {
+                    toast.error("Ein Fehler ist aufgetreten!");
+                }
+            } else {
+                toast.error("Netzwerkfehler!");
+            }
+        },
                 }
             } else if (error.request) {
                 toast.info("A network error occurred. Please check your connection and try again.")

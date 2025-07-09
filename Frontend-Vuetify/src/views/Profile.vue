@@ -373,7 +373,7 @@
             // Step 3: Handle the API response
             if (response.data.isSuccess == true) {
               sessionStorage.clear();
-              router.push('/');
+              router.push({ name: 'Login' });
               Swal.fire({
                 icon: 'success',
                 title: 'Coupon Redeemed',
@@ -502,7 +502,7 @@
             axiosInstance.delete(`${process.env.baseURL}user/delete-user`).then(() => {
               toast.success("User data deleted successfully!");
               sessionStorage.clear();
-              router.push("/");
+              router.push({ name: 'Login' });
             }).catch((error) => {
               // console.log(error);
             });
