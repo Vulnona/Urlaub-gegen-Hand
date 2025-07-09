@@ -499,18 +499,8 @@ export default {
                 toast.error("Netzwerkfehler!");
             }
         },
-                }
-            } else if (error.request) {
-                toast.info("A network error occurred. Please check your connection and try again.")
-                    .then(() => {
-                        router.push('/');
-                    });
-            } else {
-                //  toast.success("An error occurred");
-            }
-        }
-    }
-};
+    },
+}
 </script>
 
 <style scoped>
