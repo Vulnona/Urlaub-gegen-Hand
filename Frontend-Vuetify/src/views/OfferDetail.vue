@@ -6,7 +6,7 @@
       <div class="row">
         <div class="col-xs-12 col-sm-6">
           <div class="offer-image" v-if="offer.imageData">
-            <img :src="'data:' + offer.imageMimeType + ';base64,' + offer.imageData" alt="Offer Image" />
+            <img :src="'data:' + 'image/jpeg' + ';base64,' + offer.imageData" alt="Offer Image" />
           </div>
         </div>
         <div class="col-xs-12 col-sm-6">

@@ -3,12 +3,15 @@
 <div id="rating-modal" class="rating-modal" v-if="active && offer != null && user != null" >
       <div class="modal-content rating-modal-content">
         <div class="review_rating_layout">
-          <div class="review_header">
-            <div class="photo">
+          <div class="review_header">            
+            <div class="photo" v-if="!loadingImage">
               <img loading="lazy"
-                   :src="'data:' + offer.imageMimetype + ';base64,' + offer.imageData"
+                   :src="'data:' + 'image/jpeg'  + ';base64,' + image"
                    alt="Offer Image" />
             </div>
+              <div class="loading" v-else>
+                Loading...
+              </div>
             <div class="rightSideBox">
               <h5>{{ offer.title }}</h5>
               <p class="hostName">{{user.firstName }} {{user.lastName }}</p>
@@ -22,7 +25,7 @@
             </div>
           </div>
           <div class="review_box">
-            <p>Write a review</p>
+            <p>Schreibe eine Bewertung</p>
             <textarea class="textarea form-control" style="height: 120px;" v-model="reviewText">
               Bitte gebt die gegenseitige Bewertung erst ab, nachdem diese terminlich abgeschlossen ist.
             </textarea>
@@ -39,22 +42,36 @@
 </template>
 
 <script setup lang="ts">
-import {ref,onUpdated, getCurrentInstance, nextTick} from "vue";
+import {ref,onUpdated, getCurrentInstance, nextTick, watch} from "vue";
 import toast from '@/components/toaster/toast';
 import axiosInstance from '@/interceptor/interceptor';
 import TableEntryUser from '@/components/UserOverlay.vue';
 const props = defineProps({active: Boolean, offer: Object, user: Object})
 const emit = defineEmits(['update:active', "update:refresh"]);
+let image = ref(null);
 let selectedRating = ref(0)
 let reviewText = ""
+const loadingImage = ref(true);
+watch (() => props.active, async () => {
+    if (props.active == false)
+        return;
+    loadingImage.value = true;
+    try {
+        const response = await axiosInstance.get(`${process.env.baseURL}offer/get-offer-by-id/${props.offer.offerId}`);
+        image.value = response.data.imageData;
+        loadingImage.value=false;
+  } catch (error) {
+      console.error("failed to load image");
+  } 
+});
 const cancelRating = () => {reviewText = ''; selectedRating=ref(0); emit('update:active', false);}
 const submitRating = async () => {
     const text = "";
     if (selectedRating.value > 0) {
         await nextTick();
-          try {
+        try {
               const response = await axiosInstance.post(`${process.env.baseURL}review/add-review`, {
-                  offerId: props.offer.id,
+                  offerId: props.offer.offerId,
                   ratingValue: selectedRating.value,
                   reviewComment: reviewText,
                   reviewedUserId: props.user.user_Id,
@@ -129,5 +146,11 @@ const submitRating = async () => {
 
 .star.selected {
   color: gold;
+}
+.loading {
+  font-size: 1.5rem;
+  color: #888;
+  text-align: center;
+  padding: 40px;
 }
 </style>

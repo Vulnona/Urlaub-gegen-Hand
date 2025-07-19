@@ -126,7 +126,7 @@ const respondToOffer = async (reviewId:Number, userId:Number, approve:Boolean) =
     }
 }
 const showAddRatingModal = (offerId:Number, userId:String, index:Number) => {
-    ratedOffer.value = offers[index].offer;
+    ratedOffer.value = offers[index];
     ratedUser.value = offers[index].user;
     showModal.value = true;
 }
