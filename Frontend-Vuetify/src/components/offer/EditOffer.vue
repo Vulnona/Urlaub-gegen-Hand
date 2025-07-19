@@ -141,15 +141,14 @@ let suitableAccommodations = [];
 let modify = false;
 
 const createOffer = async() => {
-    console.log(offer.FromDate);
         loading.value = true;
-      if (offer.image && offer.image.size > 3.5 * 1024 * 1024) {
-          toast.warning("Image size cannot be greater than 3.5 MB.");
+      if (offer.image && offer.image.size > 17 * 1024 * 1024) {
+          toast.warning("Das Bild darf nicht größer als 17 MB sein.");
           loading.value = false;
           return;
       }
-      if (!offer.title || !offer.skills.length || !offer.image && !modify || !offer.description || !offer.location) {
-          toast.info("Please fill all the required fields marked with *");
+      if (!offer.title || !offer.skills.length || !offer.image && !modify || !offer.description || !offer.location || !offer.UntilDate || !offer.FromDate) {
+          toast.info("Bitte alle mit * markierten Felder ausfüllen.");
           loading.value = false;
           return;
       }
