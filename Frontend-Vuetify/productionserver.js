@@ -6,13 +6,13 @@ const fs = require('node:fs');
 const axios = require('axios');
 
 //environment variable or default to localhost for API URL
-const API_BASE_URL = process.env.API_BASE_URL || 'http://localhost:8080';
-const FRONTEND_BASE_URL = process.env.FRONTEND_BASE_URL || 'http://localhost:3000';
+const API_BASE_URL = 'https://alreco.de:8443';
 
 const url = `${API_BASE_URL}/api/offer/get-offer-by-id/`;
 const headers = {'Content-Type': 'application/json'};
 
-let distPath = path.join(__dirname, 'dist');
+let distPath = path.join('/app/dist');
+console.log(distPath);
 let index;
 fs.readFile(distPath + '/index.html', 'utf8', (err, data) => {
   if (err) {
