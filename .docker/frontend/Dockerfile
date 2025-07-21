@@ -30,6 +30,6 @@ RUN chmod +x ./node_modules/.bin/vite
 RUN npx vite build --outDir /app/dist --emptyOutDir
     
 # Run the server
-CMD "/usr/local/bin/node" "productionserver.js"
-#CMD npm run dev
+#CMD "/usr/local/bin/node" "productionserver.js"
+CMD npm run dev
 #ENTRYPOINT ["sleep", "infinity"]
