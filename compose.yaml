@@ -39,11 +39,7 @@ services:
       - db__user_password
     depends_on:
       - db
-    volumes:
-    - /home/docker/UGH-Main/Backend/logs:/app/logs
-    - /etc/timezone:/etc/timezone:ro
-    - /etc/localtime:/etc/localtime:ro
-    
+
   db:
     image: mysql:8.0
     restart: unless-stopped
