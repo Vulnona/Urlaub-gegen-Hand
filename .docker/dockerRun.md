@@ -21,7 +21,7 @@ If in case, the error persists while creating containers use "CTRL+C" to stop th
 
 After the docker is up, 
 Check clicking on the URLs formed in Docker Desktop, directly click on the URL and the application would start working:
-1. Frontend:  http://localhost:3000
+1. Frontend:  http://localhost:3001
 2. Backend: http://localhost:8080/swagger/index.html
 
 
@@ -53,5 +53,5 @@ Falls der Fehler weiterhin besteht, verwenden Sie "CTRL+C“, um den Docker anzu
 Nachdem der Docker hochgefahren ist, 
 Klicken Sie auf die in Docker Desktop erstellten URLs, klicken Sie direkt auf die URL und die Anwendung beginnt zu funktionieren:
 
-1. Frontend:  http://localhost:3000
+1. Frontend:  http://localhost:3001
 2. Backend: http://localhost:8080/swagger/index.html

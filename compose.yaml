@@ -8,6 +8,8 @@ services:
       - '81:81'
     volumes:
       - ./.docker/webserver/config/vhost.dev.conf:/etc/nginx/templates/default.conf.template
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
 
   frontend:
     build:
@@ -18,7 +20,7 @@ services:
     environment:
       - APP_ENV=dev
     ports:
-      - '3000:3000'
+      - '3001:3001'
     volumes:
       - ./Frontend-Vuetify:/app/frontend
       - /app/frontend/node_modules
@@ -35,6 +37,10 @@ services:
     environment:
       - ASPNETCORE_URLS=http://+:8080 #PORT
       - ASPNETCORE_ENVIRONMENT=Development
+      - TZ=Europe/Berlin
+    volumes:
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
     secrets:
       - db__user_password
     depends_on:
@@ -51,11 +57,14 @@ services:
       MYSQL_ROOT_PASSWORD_FILE: /run/secrets/db__root_password
       MYSQL_HOST: 'db'
       MYSQL_ROOT_HOST: '%'
+      TZ: 'Europe/Berlin'
     volumes:
       - db-data2:/var/lib/mysql
       - ./my.cnf:/etc/my.cnf
       - ./data.sql:/docker-entrypoint-initdb.d/data.sql
       - ./init-db.sh:/docker-entrypoint-initdb.d/init-db.sh
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
       
     ports:
       - '3306:3306'
@@ -74,6 +83,10 @@ services:
       dockerfile: .docker/migration/Dockerfile
     environment:
       - ConnectionStrings__DefaultConnection=Server=db;User ID=root;Password=password;Database=db;SSL Mode=None
+      - TZ=Europe/Berlin
+    volumes:
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
     depends_on:
       - db
     

@@ -28,6 +28,7 @@ namespace UGHApi
     public class Program
     {
         private readonly IConfiguration _configuration;
+        public static TimeZoneInfo AppTimeZone { get; private set; }
 
         public Program(IConfiguration configuration)
         {
@@ -80,15 +81,17 @@ namespace UGHApi
         private static void ConfigureServices(WebApplicationBuilder builder)
         {
             // Configure timezone to German time (works on both Windows and Linux)
+            TimeZoneInfo germanTimeZone;
             try
             {
-                var germanTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Europe/Berlin");
+                germanTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Europe/Berlin");
             }
             catch (TimeZoneNotFoundException)
             {
                 // Fallback for Windows
-                var germanTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Central European Standard Time");
+                germanTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Central European Standard Time");
             }
+            AppTimeZone = germanTimeZone;
             
             var config = builder.Configuration;
             MapsterConfig.RegisterMappings();

@@ -29,6 +29,14 @@ namespace UGHApi.Controllers
         [HttpPost("emergency-reset")]
         public IActionResult EmergencyResetAdmin([FromBody] EmergencyResetRequest request)
         {
+            // Simple in-memory rate limiting per IP (for demonstration purposes)
+            string ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+            if (!RateLimiter.AllowRequest(ipAddress))
+            {
+                _logger.LogWarning($"Rate limit exceeded for IP: {ipAddress}");
+                return StatusCode(429, "Too many requests. Please try again later.");
+            }
+
             try
             {
                 // Security: Only allow in development or with proper token
@@ -40,7 +48,8 @@ namespace UGHApi.Controllers
                     return Unauthorized("Invalid reset token");
                 }
 
-                var adminUser = _context.users.FirstOrDefault(u => u.Email_Address == "admin@gmail.com");
+                var adminEmail = Environment.GetEnvironmentVariable("ADMIN_EMAIL") ?? "admin@gmail.com";
+                var adminUser = _context.users.FirstOrDefault(u => u.Email_Address == adminEmail);
                 if (adminUser == null)
                 {
                     return NotFound("Admin user not found");
@@ -90,10 +99,42 @@ namespace UGHApi.Controllers
             }
         }
     }
-
     public class EmergencyResetRequest
     {
         public string ResetToken { get; set; } = string.Empty;
         public string NewPassword { get; set; } = string.Empty;
     }
+
+    // Simple in-memory rate limiter (for demonstration; use distributed cache for production)
+    public static class RateLimiter
+    {
+        private static readonly Dictionary<string, List<DateTime>> Requests = new();
+        private static readonly object LockObj = new();
+
+        private const int MaxRequests = 5;
+        private static readonly TimeSpan Window = TimeSpan.FromMinutes(5);
+
+        public static bool AllowRequest(string ip)
+        {
+            lock (LockObj)
+            {
+                if (!Requests.ContainsKey(ip))
+                {
+                    Requests[ip] = new List<DateTime>();
+                }
+
+                // Remove requests outside the window
+                Requests[ip].RemoveAll(dt => dt < DateTime.UtcNow - Window);
+
+                if (Requests[ip].Count >= MaxRequests)
+                {
+                    return false;
+                }
+
+                Requests[ip].Add(DateTime.UtcNow);
+                return true;
+            }
+        }
+    }
+}
 }
