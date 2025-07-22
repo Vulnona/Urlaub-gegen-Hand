@@ -79,6 +79,17 @@ namespace UGHApi
 
         private static void ConfigureServices(WebApplicationBuilder builder)
         {
+            // Configure timezone to German time (works on both Windows and Linux)
+            try
+            {
+                var germanTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Europe/Berlin");
+            }
+            catch (TimeZoneNotFoundException)
+            {
+                // Fallback for Windows
+                var germanTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Central European Standard Time");
+            }
+            
             var config = builder.Configuration;
             MapsterConfig.RegisterMappings();
             var connectionString = config.GetConnectionString("DefaultConnection");
@@ -161,7 +172,7 @@ namespace UGHApi
                     policy =>
                     {
                         policy
-                            .WithOrigins("http://localhost:3000", "https://alreco.de")
+                            .WithOrigins("http://localhost:3001", "https://alreco.de")
                             .AllowAnyMethod()
                             .AllowAnyHeader()
                             .AllowCredentials();
@@ -255,7 +266,13 @@ namespace UGHApi
                 app.UseSwaggerUI();
             }
             app.UseRateLimiter();
-            app.UseHttpsRedirection();
+            
+            // Only use HTTPS redirection in production!
+            if (!app.Environment.IsDevelopment())
+            {
+                app.UseHttpsRedirection();
+            }
+            
             app.UseAuthentication();
             app.UseCors("MyPolicy");
             app.UseAuthorization();
