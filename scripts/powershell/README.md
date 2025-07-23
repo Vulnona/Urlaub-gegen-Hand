@@ -5,16 +5,7 @@ Dieser Ordner enthält alle PowerShell-Skripte für das UGH-Projekt.
 **Cross-Platform:** Alle Skripte laufen auf Windows, Linux und macOS mit PowerShell Core.
 
 ## Installation PowerShell (Linux/macOS)
-```bash
-# Ubuntu/Debian
-sudo apt-get install -y powershell
-
-# CentOS/RHEL  
-sudo yum install -y powershell
-
-# macOS
-brew install powershell
-```
+[Link](https://learn.microsoft.com/en-us/powershell/scripting/install/installing-powershell-on-linux?view=powershell-7.5)
 
 ## Aufruf der Skripte
 
@@ -25,8 +16,9 @@ brew install powershell
 
 **Linux/macOS:**
 ```bash
-pwsh ./script-name.ps1 [Parameter]
+pwsh -File ./script-name.ps1 [Parameter]
 ```
+Wichtig: Unter Linux brauchen Interaktionen mit Dockercontainern root-Rechte. D.h. einige Scripte erfordern ein sudo.
 
 ## Verfügbare Skripte
 
