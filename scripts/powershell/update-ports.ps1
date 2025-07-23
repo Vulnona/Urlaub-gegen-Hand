@@ -12,8 +12,8 @@ function Test-Platform {
     }
 }
 
-# Show help if requested or no parameters provided
-if ($Help -or ($args.Count -eq 0 -and -not $DryRun -and -not $Verbose)) {
+# Show help if requested
+if ($Help) {
     Write-Host "PORT UPDATE SCRIPT - Help" -ForegroundColor Green
     Write-Host "=========================" -ForegroundColor Green
     Write-Host ""
@@ -52,8 +52,10 @@ if ($Help -or ($args.Count -eq 0 -and -not $DryRun -and -not $Verbose)) {
 Write-Host "PORT UPDATE SCRIPT" -ForegroundColor Green
 Write-Host "==================" -ForegroundColor Green
 
+# Navigate to project root (two levels up from scripts/powershell)
 $ScriptPath = Split-Path -Parent $MyInvocation.MyCommand.Path
-Set-Location $ScriptPath
+$ProjectRoot = Split-Path -Parent (Split-Path -Parent $ScriptPath)
+Set-Location $ProjectRoot
 
 $PortsConfigPath = "ports.config"
 if (-not (Test-Path $PortsConfigPath)) {
@@ -228,6 +230,60 @@ function Update-Documentation {
     }
 }
 
+function Update-NginxConfig {
+    Write-Host "Aktualisiere Nginx-Konfiguration..." -ForegroundColor Yellow
+    
+    # Development vhost.dev.conf
+    $DevConfigPath = ".docker\webserver\config\vhost.dev.conf"
+    if (Test-Path $DevConfigPath) {
+        $Content = Get-Content $DevConfigPath -Raw
+        $OriginalContent = $Content
+        
+        # Frontend Proxy Pass - Update Port
+        $Content = $Content -replace "frontend:3001", "frontend:$($PortConfig['FRONTEND_PORT'])"
+        $Content = $Content -replace "frontend:3002", "frontend:$($PortConfig['FRONTEND_PORT'])"
+        
+        # Backend Proxy Pass - Update Port  
+        $Content = $Content -replace "backend:8080", "backend:$($PortConfig['BACKEND_PORT'])"
+        
+        if ($Content -ne $OriginalContent) {
+            if (-not $DryRun) {
+                $Content | Set-Content $DevConfigPath -NoNewline
+                Write-Host "   vhost.dev.conf aktualisiert" -ForegroundColor Green
+            } else {
+                Write-Host "   Wuerde vhost.dev.conf aktualisieren" -ForegroundColor Cyan
+            }
+        } else {
+            Write-Host "   vhost.dev.conf bereits aktuell" -ForegroundColor Cyan
+        }
+    } else {
+        Write-Host "Warnung: $DevConfigPath nicht gefunden - ueberspringe" -ForegroundColor Yellow
+    }
+    
+    # Production vhost.conf
+    $ProdConfigPath = ".docker\webserver\config\vhost.conf"
+    if (Test-Path $ProdConfigPath) {
+        $Content = Get-Content $ProdConfigPath -Raw
+        $OriginalContent = $Content
+        
+        # Backend Proxy Pass - Update Port
+        $Content = $Content -replace "localhost:8080", "localhost:$($PortConfig['BACKEND_PORT'])"
+        
+        if ($Content -ne $OriginalContent) {
+            if (-not $DryRun) {
+                $Content | Set-Content $ProdConfigPath -NoNewline
+                Write-Host "   vhost.conf aktualisiert" -ForegroundColor Green
+            } else {
+                Write-Host "   Wuerde vhost.conf aktualisieren" -ForegroundColor Cyan
+            }
+        } else {
+            Write-Host "   vhost.conf bereits aktuell" -ForegroundColor Cyan
+        }
+    } else {
+        Write-Host "Warnung: $ProdConfigPath nicht gefunden - ueberspringe" -ForegroundColor Yellow
+    }
+}
+
 if ($DryRun) {
     Write-Host "DRY RUN MODE - Keine Aenderungen werden vorgenommen" -ForegroundColor Yellow
     Write-Host ""
@@ -237,6 +293,7 @@ Update-DockerCompose
 Update-ViteConfig
 Update-ProductionServer
 Update-BackendProgram
+Update-NginxConfig
 Update-Documentation
 
 Write-Host ""
