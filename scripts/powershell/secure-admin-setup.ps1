@@ -93,9 +93,15 @@ Write-Host "Secure Admin Password Reset" -ForegroundColor Yellow
 Write-Host "================================" -ForegroundColor Yellow
 Write-Host ""
 
-# Set environment variable for the container
+# Write token to file inside container (cross-platform compatible)
 Write-Host "Setting reset token in container..." -ForegroundColor Green
-$SetEnvResult = docker exec ugh-backend-1 sh -c "export ADMIN_RESET_TOKEN='$ResetToken'; echo 'Token set'"
+$TokenResult = docker exec ugh-backend sh -c "echo '$ResetToken' > /tmp/admin_reset_token"
+
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "❌ Failed to set token in container. Is the container running?" -ForegroundColor Red
+    Write-Host "Try: docker-compose up -d" -ForegroundColor Yellow
+    exit 1
+}
 
 # Prepare the request
 $RequestBody = @{
@@ -121,9 +127,9 @@ catch {
     Write-Host "Make sure the containers are running and try again." -ForegroundColor Yellow
 }
 
-# Clean up - remove the token from environment
+# Clean up - remove the token from container
 Write-Host ""
 Write-Host "Cleaning up reset token..." -ForegroundColor Yellow
-docker exec ugh-backend-1 sh -c "unset ADMIN_RESET_TOKEN" 2>$null
+docker exec ugh-backend sh -c "rm -f /tmp/admin_reset_token" 2>$null
 
 Write-Host "Setup complete!" -ForegroundColor Green

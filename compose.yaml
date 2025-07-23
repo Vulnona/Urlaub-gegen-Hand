@@ -2,6 +2,7 @@ version: '3.7'
 
 services:
   webserver:
+    container_name: ugh-webserver
     image: "nginx:alpine"
     restart: unless-stopped
     ports:
@@ -12,6 +13,7 @@ services:
       - /etc/localtime:/etc/localtime:ro
 
   frontend:
+    container_name: ugh-frontend
     build:
       context: ./Frontend-Vuetify
       dockerfile: ../.docker/frontend/Dockerfile
@@ -28,6 +30,7 @@ services:
       - /etc/localtime:/etc/localtime:ro
 
   backend:
+    container_name: ugh-backend
     build:
       context: .
       dockerfile: .docker/backend/Dockerfile
@@ -50,6 +53,7 @@ services:
         condition: service_completed_successfully
 
   db:
+    container_name: ugh-db
     image: mysql:8.0
     restart: unless-stopped
     command: '--default-authentication-plugin=mysql_native_password'
@@ -81,6 +85,7 @@ services:
       - db__root_password
 
   migration:
+    container_name: ugh-migration
     build:
       context: .
       dockerfile: .docker/migration/Dockerfile

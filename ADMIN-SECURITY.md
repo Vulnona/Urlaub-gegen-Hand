@@ -43,7 +43,7 @@ secrets:
 .\scripts\powershell\generate-admin-hash.ps1
 
 # 2. SQL in Docker Container ausführen
-docker exec -i ugh-db-1 mysql -u root -p ugh_db
+docker exec -i ugh-db mysql -u root -p ugh_db
 # Dann das UPDATE SQL-Statement eingeben
 ```
 

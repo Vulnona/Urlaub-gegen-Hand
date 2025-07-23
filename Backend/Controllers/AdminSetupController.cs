@@ -40,7 +40,20 @@ namespace UGHApi.Controllers
             try
             {
                 // Security: Only allow in development or with proper token
-                var resetToken = Environment.GetEnvironmentVariable("ADMIN_RESET_TOKEN");
+                string resetToken = null;
+                const string tokenFilePath = "/tmp/admin_reset_token";
+                
+                try
+                {
+                    if (System.IO.File.Exists(tokenFilePath))
+                    {
+                        resetToken = System.IO.File.ReadAllText(tokenFilePath).Trim();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning($"Could not read reset token file: {ex.Message}");
+                }
                 
                 if (string.IsNullOrEmpty(resetToken) || resetToken != request.ResetToken)
                 {
