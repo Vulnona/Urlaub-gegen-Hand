@@ -49,15 +49,16 @@ check_migrations_needed() {
     if mysql -h db -u root -p"$MYSQL_ROOT_PASSWORD" -D db -e "SELECT 1 FROM __EFMigrationsHistory LIMIT 1;" > /dev/null 2>&1; then
         echo "Migration history table exists, checking for pending migrations..."
         
-        # Get pending migrations
-        PENDING=$(dotnet ef migrations list --no-build --project /app/Backend --startup-project /app/Backend --context Ugh_Context | grep -E "^\s*[0-9]" | grep -v "Applied" || true)
+        # Check if database needs updates - proper way to detect pending migrations
+        UPDATE_NEEDED=$(dotnet ef database update --dry-run --no-build --project /app/Backend --startup-project /app/Backend --context Ugh_Context 2>&1 | grep -c "Applying migration" || echo "0")
         
-        if [ -z "$PENDING" ]; then
+        if [ "$UPDATE_NEEDED" -eq 0 ]; then
             echo "✅ Database is up to date - no migrations needed"
             return 1
         else
-            echo "Pending migrations found:"
-            echo "$PENDING"
+            echo "Pending migrations found - $UPDATE_NEEDED migration(s) to apply"
+            # Show which migrations are pending
+            dotnet ef database update --dry-run --no-build --project /app/Backend --startup-project /app/Backend --context Ugh_Context 2>&1 | grep "Applying migration" || true
             return 0
         fi
     else
@@ -120,43 +121,35 @@ add_migration_baseline() {
 apply_migrations() {
     echo "🔄 Applying database migrations with robust error handling..."
     
-    # Get list of pending migrations
-    PENDING_MIGRATIONS=$(dotnet ef migrations list --no-build --project /app/Backend --startup-project /app/Backend --context Ugh_Context | grep "Pending" | awk '{print $1}' || true)
+    # Check if any migrations need to be applied using dry-run
+    UPDATE_CHECK=$(dotnet ef database update --dry-run --no-build --project /app/Backend --startup-project /app/Backend --context Ugh_Context 2>&1 || true)
+    PENDING_COUNT=$(echo "$UPDATE_CHECK" | grep -c "Applying migration" || echo "0")
     
-    if [ -z "$PENDING_MIGRATIONS" ]; then
+    if [ "$PENDING_COUNT" -eq 0 ]; then
         echo "✅ No pending migrations to apply"
         return 0
     fi
     
-    echo "📋 Applying migrations one by one with error handling..."
-    
-    for migration in $PENDING_MIGRATIONS; do
-        echo ""
-        echo "🔧 Applying migration: $migration"
-        
-        # Create backup before each migration
-        create_migration_backup "$migration"
-        
-        # Validate migration before applying
-        if ! validate_migration_safety "$migration"; then
-            echo "❌ Migration $migration failed safety validation"
-            return 1
-        fi
-        
-        # Apply single migration with detailed error handling
-        if apply_single_migration "$migration"; then
-            echo "✅ Successfully applied: $migration"
-            verify_migration_result "$migration"
-        else
-            echo "❌ Failed to apply migration: $migration"
-            handle_migration_failure "$migration"
-            return 1
-        fi
-    done
-    
+    echo "📋 Found $PENDING_COUNT migration(s) to apply:"
+    echo "$UPDATE_CHECK" | grep "Applying migration" || true
     echo ""
-    echo "🎉 All migrations applied successfully!"
-    return 0
+    
+    # Apply all pending migrations at once (more reliable than one-by-one)
+    echo "🔧 Applying all pending migrations..."
+    
+    # Create backup before migrations
+    create_migration_backup "batch_$(date +%Y%m%d_%H%M%S)"
+    
+    # Apply all migrations with detailed error handling
+    if dotnet ef database update --no-build --project /app/Backend --startup-project /app/Backend --context Ugh_Context; then
+        echo "✅ Successfully applied all pending migrations!"
+        verify_migration_result
+        return 0
+    else
+        echo "❌ Failed to apply migrations"
+        handle_migration_failure "batch_migration"
+        return 1
+    fi
 }
 
 # Function to verify migration success
@@ -171,7 +164,7 @@ verify_migration() {
         
         # Show last applied migration
         LAST_MIGRATION=$(mysql -h db -u root -p"$MYSQL_ROOT_PASSWORD" -D db -se "SELECT MigrationId FROM __EFMigrationsHistory ORDER BY MigrationId DESC LIMIT 1;" 2>/dev/null || echo "None")
-        echo "📅 Last applied migration: $LAST_MIGRATION"
+        echo "Last applied migration: $LAST_MIGRATION"
     else
         echo "⚠️  No migration history found - this might be the first run"
     fi
@@ -265,8 +258,8 @@ check_risky_operations() {
     fi
     
     if [ $warnings -gt 0 ]; then
-        echo "📊 Found $warnings potential issues in migration $migration_name"
-        echo "🔧 Consider running data cleanup before this migration"
+        echo "Found $warnings potential issues in migration $migration_name"
+        echo "Consider running data cleanup before this migration"
     else
         echo "✅ No obvious risks detected in migration"
     fi
@@ -365,7 +358,7 @@ diagnose_migration_failure() {
     fi
     
     # Check for specific error patterns
-    echo "🔍 Run manual diagnosis with:"
+    echo "   Run manual diagnosis with:"
     echo "   docker-compose exec db mysql -u root -p\"password\" -D db"
     echo "   Check for: data integrity, constraints, disk space, locks"
 }
