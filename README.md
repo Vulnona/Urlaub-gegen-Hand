@@ -4,45 +4,41 @@
 
 ### Erste Einrichtung
 ```powershell
-# 1. Container starten (automatische Migration)
+# 1. Container starten (vollautomatische Migration & 2FA-Setup)
 docker-compose up -d
 
-# 2. Bei Migrationsproblemen (Windows):
-.\scripts\powershell\migrate-db.ps1 validate  # Probleme prüfen
-.\scripts\powershell\migrate-db.ps1 cleanup   # Probleme beheben
-.\scripts\powershell\migrate-db.ps1 run       # Migration ausführen
-
-# 2. Bei Migrationsproblemen (Linux/macOS):
-pwsh ./scripts/powershell/migrate-db.ps1 validate  # Probleme prüfen
-pwsh ./scripts/powershell/migrate-db.ps1 cleanup   # Probleme beheben
-pwsh ./scripts/powershell/migrate-db.ps1 run       # Migration ausführen
+# 2. Backend-Entwicklungsumgebung einrichten (einmalig)
+.\scripts\setup-backend-dev.ps1
 ```
+
+> **✅ Vollautomatisiert**: Migrations und 2FA werden automatisch eingerichtet - keine manuellen Schritte erforderlich!
 
 ### Tägliche Entwicklung
 ```powershell
-# System starten
+# System starten (alles automatisch)
 docker-compose up -d
-
-# Bei neuen Migrationen (Windows):
-.\scripts\powershell\migrate-db.ps1 run
-
-# Bei neuen Migrationen (Linux/macOS):
-pwsh ./scripts/powershell/migrate-db.ps1 run
 ```
+
+> **🤖 Zero-Maintenance**: Neue Migrationen werden automatisch erkannt und angewendet!
 
 ## Dokumentation
 
-### 📚 Kern-Dokumentation
-* [Migrations-System Schnellreferenz](MIGRATION-QUICK-REFERENCE.md) - **Wichtig für Entwickler!**
-* [Vollständige Migrations-Dokumentation](MIGRATION-SYSTEM.md)
-* [Admin-Sicherheit & Passwort-Management](ADMIN-SECURITY.md)
+### 📚 Hauptdokumentation
+* **[📖 Dokumentations-Index](Docs/INDEX.md)** - Zentrale Übersicht aller Dokumentationen
+* **[🛠️ Development Guide](Docs/DEVELOPMENT.md)** - Vollständiger Entwicklerleitfaden
+* **[⚙️ Scripts & Automation](Docs/SCRIPTS.md)** - Alle PowerShell-Tools und Automatisierung
 
-### 🛠️ Entwicklung & Tools
-* [Entwicklerdokumentation](Docs/development/README.md)
-* [PowerShell-Skripte](scripts/powershell/README.md) - Automatisierungstools
+### � Security & Admin
+* **[🔒 Admin Security](ADMIN-SECURITY.md)** - Admin-Setup und Sicherheit
+* **[🔄 Migration System](Docs/MIGRATION-SYSTEM.md)** - Erweiterte Migration-Verwaltung
 
-### ⚙️ Scripts & Tools
-* [PowerShell Scripts Übersicht](scripts/powershell/README.md)
+### 🚀 Quick Links
+* **[📋 Migration Tools](scripts/migration/)** - Enhanced Migration System mit Auto-Dokumentation
+* **[🌐 Infrastructure Tools](scripts/infrastructure/)** - Port & Service Management  
+* **[🗄️ Database Tools](scripts/database/)** - Backup, Restore & Access Tools
+
+### 📖 Legacy Documentation
+* **[Business Specs](Docs/)** - Fachliche Spezifikationen und Konzepte
 
 ## 🌐 Services
 
@@ -54,14 +50,14 @@ Nach dem Start sind folgende Services verfügbar:
 
 ## ⚙️ Port-Konfiguration
 
-Ports können zentral in `ports.config` geändert werden:
+Ports können zentral in `scripts/infrastructure/ports.config` geändert werden:
 
 **Windows:**
 ```powershell
-.\scripts\powershell\update-ports.ps1
+.\scripts\infrastructure\port-management.ps1
 ```
 
 **Linux/macOS:**
 ```bash
-pwsh ./scripts/powershell/update-ports.ps1
+pwsh ./scripts/infrastructure/port-management.ps1
 ```

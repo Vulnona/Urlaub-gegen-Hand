@@ -37,11 +37,16 @@
                       <i :class="sortOrder === 'asc' ? 'ri-arrow-up-line' : 'ri-arrow-down-line'"></i>
                     </button>
     
+                            <!-- Admin Password Reset Button -->
+                            <button class="btn btn-warning" @click="showAdminPasswordResetModal()" title="Reset Admin Password">
+                      <i class="ri-lock-password-line"></i> Reset Admin Password
+                    </button>
+
                             <!-- Generate Button -->
                             <button v-if="!couponCode" class="btn btn-primary" @click="generateCode()">
                       Generate Coupon Code
                     </button>
-    
+
                             <!-- Display the Coupon Code if Available -->
                             <p v-if="couponCode">
                                 <input type="text" :value="couponCode" class="coupon-input" disabled />&nbsp;
@@ -497,6 +502,63 @@ export default {
                 }
             } else {
                 toast.error("Netzwerkfehler!");
+            }
+        },
+        
+        // Method to show admin password reset modal
+        async showAdminPasswordResetModal() {
+            const { value: email } = await Swal.fire({
+                title: "Admin Password Reset",
+                text: "Enter your admin email address to receive a password reset link",
+                input: "email",
+                inputPlaceholder: "Enter your admin email",
+                showCancelButton: true,
+                confirmButtonText: "Send Reset Link",
+                cancelButtonText: "Cancel",
+                inputValidator: (value) => {
+                    if (!value) {
+                        return 'Email address is required!';
+                    }
+                    if (!/\S+@\S+\.\S+/.test(value)) {
+                        return 'Please enter a valid email address!';
+                    }
+                }
+            });
+
+            if (email) {
+                await this.sendAdminPasswordReset(email);
+            }
+        },
+
+        // Method to send admin password reset request
+        async sendAdminPasswordReset(email) {
+            try {
+                const response = await axiosInstance.post(`${process.env.baseURL}authenticate/reset-password`, {
+                    email: email
+                });
+                
+                toast.success("Password reset link sent successfully! Check your email.");
+                
+                Swal.fire({
+                    title: "Reset Link Sent",
+                    text: "A password reset link has been sent to your email address. Please check your inbox and follow the instructions to reset your password.",
+                    icon: "success",
+                    confirmButtonText: "OK"
+                });
+                
+            } catch (error) {
+                if (error.response && error.response.data) {
+                    toast.error(error.response.data.value || "Failed to send password reset email");
+                } else {
+                    toast.error("Failed to send password reset email. Please try again.");
+                }
+                
+                Swal.fire({
+                    title: "Error",
+                    text: "Failed to send password reset email. Please check the email address and try again.",
+                    icon: "error",
+                    confirmButtonText: "OK"
+                });
             }
         },
     },

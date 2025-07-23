@@ -21,6 +21,7 @@ using UGHApi.Services.AWS;
 using UGHApi.Services.HtmlTemplate;
 using UGHApi.Services.Stripe;
 using UGHApi.Services.UserProvider;
+using UGHApi.Services;
 using UGHApi.Shared;
 
 namespace UGHApi
@@ -243,6 +244,7 @@ namespace UGHApi
             services.AddSingleton<EmailService>();
             services.AddTransient<UserService>();
             services.AddScoped<PasswordService>();
+            services.AddScoped<ITwoFactorAuthService, TwoFactorAuthService>();
             services.AddScoped<S3Service>();
             services.AddScoped<HtmlTemplateService>();
             services.AddScoped<IUrlBuilderService, UrlBuilderService>();

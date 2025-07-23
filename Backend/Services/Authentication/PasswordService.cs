@@ -23,6 +23,23 @@ namespace UGH.Infrastructure.Services
                 return Convert.ToBase64String(hash);
             }
         }
+
+        // Verify the password against stored hash and salt
+        public bool VerifyPassword(string password, string storedHash, string salt)
+        {
+            if (string.IsNullOrEmpty(password) || string.IsNullOrEmpty(storedHash) || string.IsNullOrEmpty(salt))
+                return false;
+
+            try
+            {
+                string hashedInput = HashPassword(password, salt);
+                return hashedInput == storedHash;
+            }
+            catch
+            {
+                return false;
+            }
+        }
         #endregion
     }
 }

@@ -53,7 +53,21 @@ docker exec -i ugh-db mysql -u root -p ugh_db
 2. **Verwenden von Umgebungsvariablen oder Secrets**
 3. **Implementieren von Passwort-Rotation**
 4. **Loggen aller Admin-Zugriffe**
-5. **2FA in Produktion**
+5. **✅ 2FA in Produktion** - [Vollständig implementiert](Docs/TWO-FACTOR-AUTH.md)
+
+## ✅ Implementierte Sicherheitsfeatures
+
+### Zwei-Faktor-Authentifizierung (2FA)
+- **Status**: ✅ Vollständig implementiert
+- **Features**: TOTP-basiert, QR-Codes, Backup-Codes
+- **Dokumentation**: [TWO-FACTOR-AUTH.md](Docs/TWO-FACTOR-AUTH.md)
+- **Verfügbar für**: Alle Benutzer und Admins (optional)
+
+### Admin-Password-Reset
+- **Status**: ✅ Implementiert
+- **Feature**: Reset-Button im Admin-Panel
+- **Sicherheit**: E-Mail-basierte Token-Verifizierung
+- **UI**: Integriert in Admin.vue Header-Aktionen
 
 ## Next Steps für Produktion
 

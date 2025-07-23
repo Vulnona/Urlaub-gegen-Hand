@@ -48,6 +48,11 @@ public class User
     public string Password { get; set; }
     public string? SaltKey { get; set; }
 
+    // 2FA Properties
+    public bool IsTwoFactorEnabled { get; set; } = false;
+    public string? TwoFactorSecret { get; set; }
+    public string? BackupCodes { get; set; } // JSON array of backup codes
+
     public bool IsEmailVerified { get; set; }
     public int? MembershipId { get; set; }
     public string? Facebook_link { get; set; }
