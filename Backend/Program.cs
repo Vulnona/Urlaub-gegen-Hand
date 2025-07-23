@@ -183,7 +183,7 @@ namespace UGHApi
                     policy =>
                     {
                         policy
-                            .WithOrigins("http://localhost:3001", "https://alreco.de")
+                            .WithOrigins("http://localhost:3002", "https://alreco.de")
                             .AllowAnyMethod()
                             .AllowAnyHeader()
                             .AllowCredentials();
@@ -292,6 +292,18 @@ namespace UGHApi
         private static void ConfigureEndpoints(WebApplication app)
         {
             app.MapControllers();
+            
+            // Health Check Endpoint
+            app.MapGet("/api/health", () => Results.Ok(new
+            {
+                status = "healthy",
+                timestamp = DateTime.UtcNow,
+                germanTime = GetGermanTime(),
+                version = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "unknown",
+                environment = app.Environment.EnvironmentName
+            }))
+            .WithName("HealthCheck")
+            .WithOpenApi();
         }
         
         /// <summary>

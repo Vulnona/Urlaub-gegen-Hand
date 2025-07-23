@@ -31,7 +31,7 @@ docker-compose up -d
 ## 🌐 Services
 
 Nach dem Start sind folgende Services verfügbar:
-- **Frontend**: http://localhost:3001
+- **Frontend**: http://localhost:3002
 - **Backend API**: http://localhost:8080  
 - **Nginx Proxy**: http://localhost:81
 - **MySQL**: localhost:3306

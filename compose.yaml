@@ -5,7 +5,7 @@ services:
     image: "nginx:alpine"
     restart: unless-stopped
     ports:
-      - '81:81'
+      - '81:80'
     volumes:
       - ./.docker/webserver/config/vhost.dev.conf:/etc/nginx/templates/default.conf.template
       - /etc/timezone:/etc/timezone:ro
@@ -20,7 +20,7 @@ services:
     environment:
       - APP_ENV=dev
     ports:
-      - '3001:3001'
+      - '3002:3002'
     volumes:
       - ./Frontend-Vuetify:/app/frontend
       - /app/frontend/node_modules
