@@ -12,11 +12,12 @@ using Serilog;
 using Serilog.Events;
 using UGH.Application.Authentication;
 using UGH.Domain.Interfaces;
-using UGH.infrastructure.Repositories;
+using UGHApi.Repositories;
 using UGH.Infrastructure.Services;
+using UGH.Domain.Services; // NEW: Geocoding services
+using UGHApi.DATA; // NEW: Database context
 using UGHApi.Interfaces;
 using UGHApi.Models;
-using UGHApi.Repositories;
 using UGHApi.Services.AWS;
 using UGHApi.Services.HtmlTemplate;
 using UGHApi.Services.Stripe;
@@ -177,17 +178,14 @@ namespace UGHApi
         {
             builder.Services.AddCors(options =>
             {
-                options.AddPolicy(
-                    "MyPolicy",
-                    policy =>
-                    {
-                        policy
-                            .WithOrigins("http://localhost:3002", "https://alreco.de")
-                            .AllowAnyMethod()
-                            .AllowAnyHeader()
-                            .AllowCredentials();
-                    }
-                );
+                options.AddDefaultPolicy(policy =>
+                {
+                    policy
+                        .SetIsOriginAllowed(origin => true) // Allow any origin
+                        .AllowAnyMethod()
+                        .AllowAnyHeader()
+                        .AllowCredentials();
+                });
             });
         }
 
@@ -252,7 +250,7 @@ namespace UGHApi
             services.AddMemoryCache();
             services.AddScoped<TokenService>();
             services.AddTransient<ICouponRepository, CouponRepository>();
-            services.AddScoped<UGH.Infrastructure.Repositories.ReviewRepository>();
+            services.AddScoped<UGHApi.Repositories.ReviewRepository>();
             services.AddTransient<IStripeService, StripeService>();
             services.AddScoped<IUserProvider, UserProvider>();
             services.AddScoped<ITransactionRepository, TransactionRepository>();
@@ -262,7 +260,13 @@ namespace UGHApi
             services.AddScoped<IUserMembershipRepository, UserMembershipRepository>();
             services.AddScoped<IMembershipRepository, MembershipRepository>();
 
-            services.AddScoped<UGH.Infrastructure.Repositories.OfferRepository>();
+            services.AddScoped<UGHApi.Repositories.OfferRepository>();
+            
+            // NEW: Geographic services for OpenStreetMap integration
+            services.AddHttpClient<NominatimGeocodingService>();
+            services.AddScoped<IGeocodingService, NominatimGeocodingService>();
+            services.AddScoped<IAddressService, AddressService>();
+            
             services.AddHttpContextAccessor();
         }
 
@@ -284,8 +288,8 @@ namespace UGHApi
                 app.UseHttpsRedirection();
             }
             
+            app.UseCors(); // Use default policy
             app.UseAuthentication();
-            app.UseCors("MyPolicy");
             app.UseAuthorization();
         }
 

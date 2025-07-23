@@ -63,7 +63,7 @@ Durch Klicken auf "Registrieren" bestätigen Sie, dass Sie diese Bedingungen akz
                       <span v-if="!gender && showError" class="error-message">Geschlecht ist
                         erforderlich</span>
                     </div>
-                    <div class="custom-form" :class="{ 'has-error': !isValidDateOfBirth && showError }">
+                    <div class="custom-form" :class="{ 'has-error': !dateOfBirth && showError }">
                       <label for="dateOfBirth">Geburtsdatum</label>
                       <Datepicker date v-model="dateOfBirth" :enable-time-picker="false"
                         :auto-apply="true" placeholder="dd.mm.yyyy" :typeable="true" input-class-name="datepicker-input" startingView='year'  inputFormat="dd.MM.yyyy"/>
@@ -71,43 +71,17 @@ Durch Klicken auf "Registrieren" bestätigen Sie, dass Sie diese Bedingungen akz
                         Alter muss zwischen 14 und 120 Jahren liegen
                       </span>
                     </div>
-                    <div class="custom-form" :class="{ 'has-error': !countryName && showError }">
-                      <label for="country">Land</label>
-                      <input type="text" placeholder="Land" id="country" v-model="countryName">
-                      <span v-if="!countryName && showError" class="error-message">Land ist
-                        erforderlich</span>
-                    </div>
-                    <div class="custom-form" :class="{ 'has-error': !stateName && showError }">
-                      <label for="state">Region/Bundesland</label>
-                      <input type="text" placeholder="Region/Bundesland" id="region" v-model="stateName">
-                      <span v-if="!stateName && showError" class="error-message">Bundesland ist erforderlich</span>
-                    </div>                    
-                    
-                    <div class="custom-form" :class="{ 'has-error': !cityName && showError }">
-                      <label for="cityName">Stadt</label>
-                      <input type="text" placeholder="Stadt" id="city" v-model="cityName">
-                      <span v-if="!cityName && showError" class="error-message">Stadt ist
-                        erforderlich</span>
-                    </div>
-                    
-                    <div class="custom-form" :class="{ 'has-error': !street && showError }">
-                      <label for="street">Straße</label>
-                      <input type="text" placeholder="Geben Sie Ihre Straße ein" id="street" v-model="street">
-                      <span v-if="!street && showError" class="error-message">Straße ist
-                        erforderlich</span>
-                    </div>
-                    <div class="custom-form" :class="{ 'has-error': !houseNumber && showError }">
-                      <label for="houseNumber">Hausnummer</label>
-                      <input type="text" placeholder="Geben Sie Ihre Hausnummer ein" id="houseNumber"
-                        v-model="houseNumber">
-                      <span v-if="!houseNumber && showError" class="error-message">Hausnummer ist
-                        erforderlich</span>
-                    </div>
-                    <div class="custom-form" :class="{ 'has-error': !postCode && showError }">
-                      <label for="postCode">Postleitzahl</label>
-                      <input type="text" placeholder="Geben Sie Ihre Postleitzahl ein" id="postCode" v-model="postCode">
-                      <span v-if="!postCode && showError" class="error-message">Postleitzahl ist
-                        erforderlich</span>
+
+                    <!-- Address Selection via Map -->
+                    <div class="custom-form address-map-section" :class="{ 'has-error': !selectedAddress && showError }">
+                      <label>Adresse</label>
+                      <AddressMapPicker 
+                        @address-selected="onAddressSelected"
+                        :required="true"
+                      />
+                      <span v-if="!selectedAddress && showError" class="error-message">
+                        Bitte wählen Sie eine Adresse aus
+                      </span>
                     </div>
                     <div class="custom-form" :class="{ 'has-error': !isValidFacebookLink && showError }">
                       <label for="facebook_link">Facebook-Profillink</label>
@@ -169,13 +143,14 @@ import AES from 'crypto-js/aes';
 import Datepicker from 'vue3-datepicker';
 import axiosInstance from '@/interceptor/interceptor';
 import toast from '../toaster/toast';
-
+import AddressMapPicker from '@/components/common/AddressMapPicker.vue';
 import PublicNav from '@/components/navbar/PublicNav.vue';
             
 export default {
   components: {
     Datepicker,
-    PublicNav
+    PublicNav,
+    AddressMapPicker
   },
   data() {
     return {
@@ -187,26 +162,12 @@ export default {
       lastName: '',
       gender: '',
       dateOfBirth: null,
-      country: '',
-      city: '',
-      street: '',
-      houseNumber: '',
-      postCode: '',
+      selectedAddress: null,
       facebook_link: '',
       confirmPassword: '',
       errorMessage: '',
-      state: '',
       link_RS: '',
       link_VS: '',
-      countries: [],
-      states: [],
-      cities: [],
-      countryId: '',
-      stateId: '',
-      cityId: '',
-      countryName: '',
-      stateName: '',
-      cityName: '',
       showError: false,
       isPasswordValid: true,
       isFacebookLinkValid: true,
@@ -238,6 +199,12 @@ export default {
     }
   },
   methods: {
+    onAddressSelected(address) {
+      this.selectedAddress = address;
+      if (address) {
+        this.showError = false;
+      }
+    },
     
     togglePasswordVisibility() {
       this.showPassword = !this.showPassword;
@@ -248,80 +215,6 @@ export default {
     validatePassword() {
       const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,20}$/;
       this.isPasswordValid = passwordRegex.test(this.password);
-    },
-    //getall countries
-    loadCountries() {
-      axiosInstance.get(`${process.env.baseURL}region/get-all-countries`)
-        .then(response => {
-          this.countries = response.data;
-        })
-        .catch(error => {
-          // console.error('Error loading countries:', error);
-        });
-    },
-    //get states on the basis of country selection
-    loadStates() {
-
-      if (this.countryId) {
-        this.countryName = this.countries.find(c => c.country_ID === this.countryId).countryName;
-        axiosInstance.get(`${process.env.baseURL}region/get-state-by-countryId/${this.countryId}`)
-          .then(response => {
-            this.states = response.data;
-            this.stateId = '';
-            this.stateName = '';
-            this.cityId = '';
-            this.cityName = '';
-            this.cities = [];
-          })
-          .catch(error => {
-            //  console.error('Error loading states:', error);
-          });
-      } else {
-        this.countryName = '';
-        this.states = [];
-        this.stateId = '';
-        this.stateName = '';
-        this.cityId = '';
-        this.cityName = '';
-        this.cities = [];
-      }
-    },
-    //get cities on the basis of state selection
-    loadCities() {
-      if (this.stateId) {
-        this.stateName = this.states.find(s => s.id === this.stateId).name;
-        axiosInstance.get(`${process.env.baseURL}region/get-city-by-stateId/${this.stateId}`)
-          .then(response => {
-            this.cities = response.data;
-            this.cityId = '';
-            this.cityName = '';
-          })
-          .catch(error => {
-            //   console.error('Error loading cities:', error);
-          });
-      } else {
-        this.stateName = '';
-        this.cities = [];
-        this.cityId = '';
-        this.cityName = '';
-      }
-    },
-    updateStateSelection() {
-      this.stateName =
-        this.states.find((s) => s.id === this.stateId)?.name || "";
-      if (this.stateId) this.showError = false;
-      this.loadCities();
-    },
-    updateCitySelection() {
-      this.cityName = this.cities.find((c) => c.id === this.cityId)?.name || "";
-      if (this.cityId) this.showError = false;
-    },
-    updateCityName() {
-      if (this.cityId) {
-        this.cityName = this.cities.find(c => c.id === this.cityId).name;
-      } else {
-        this.cityName = '';
-      }
     },
     // Method to handle the registration process
     register() {
@@ -351,6 +244,12 @@ export default {
         return;
       }
 
+      // Check if address is selected
+      if (!this.selectedAddress) {
+        this.errorMessage = "Bitte wählen Sie eine Adresse aus.";
+        return;
+      }
+
       // Show loader
       Swal.fire({
         title: 'Registrieren...',
@@ -362,7 +261,7 @@ export default {
         }
       });
 
-      // Creating registration data object
+      // Creating registration data object with new address structure
       const registrationData = {
         email_Address: this.email_Address,
         password: this.password,
@@ -370,12 +269,17 @@ export default {
         lastName: this.lastName,
         gender: this.gender,
         dateOfBirth: this.dateOfBirth,
-        country: this.countryName,
-        state: this.stateName,
-        city: this.cityName,
-        street: this.street,
-        houseNumber: this.houseNumber,
-        postCode: this.postCode,
+        address: {
+          latitude: this.selectedAddress.latitude,
+          longitude: this.selectedAddress.longitude,
+          displayName: this.selectedAddress.displayName,
+          houseNumber: this.selectedAddress.houseNumber,
+          road: this.selectedAddress.road,
+          city: this.selectedAddress.city,
+          postcode: this.selectedAddress.postcode,
+          country: this.selectedAddress.country,
+          addressType: 'Home'
+        },
         facebook_link: this.facebook_link,
         link_RS: this.link_RS,
         link_VS: this.link_VS,
@@ -411,7 +315,6 @@ export default {
     }
   },
   mounted() {
-    this.loadCountries(); // Load the list of countries when the component is mounted
     Swal.fire({
       title: 'Zustimmung erforderlich',
       html: `

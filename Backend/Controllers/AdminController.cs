@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using UGH.Application.Admin;
 using UGH.Domain.Core;
 using UGHApi.Applications.Admin;
+using UGHApi.DATA;
 
 namespace UGHApi.Controllers;
 

@@ -7,6 +7,7 @@ using UGHApi.Services.AWS;
 using UGHApi.Shared;
 using UGHApi.ViewModels;
 using UGHApi.ViewModels.UserComponent;
+using UGHApi.DATA;
 
 namespace UGH.Infrastructure.Repositories;
 

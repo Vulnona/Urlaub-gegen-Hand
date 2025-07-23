@@ -1,8 +1,9 @@
 ﻿using UGH.Domain.Interfaces;
 using UGH.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using UGHApi.DATA;
 
-namespace UGH.infrastructure.Repositories;
+namespace UGHApi.Repositories;
 
 public class UserProfileRepository : IUserProfileRepository
 {

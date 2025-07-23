@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using UGH.Application.Users;
 using UGHApi.Models;
 using UGHApi.Services.UserProvider;
+using UGHApi.DATA;
 
 namespace UGHApi.Controllers;
 

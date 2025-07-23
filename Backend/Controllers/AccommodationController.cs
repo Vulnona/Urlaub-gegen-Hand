@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using UGH.Domain.Entities;
+using UGHApi.DATA;
 
 namespace UGHApi.Controllers
 {

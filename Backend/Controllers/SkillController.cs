@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
+using UGHApi.DATA;
 
 namespace UGHApi.Controllers
 {

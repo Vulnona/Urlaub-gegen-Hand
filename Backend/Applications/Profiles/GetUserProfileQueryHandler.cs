@@ -48,12 +48,7 @@ public class GetUserProfileQueryHandler : IRequestHandler<GetUserProfileQuery, U
                 ProfilePicture = user.ProfilePicture,
                 DateOfBirth = user.DateOfBirth,
                 Gender = user.Gender,
-                Street = user.Street,
-                HouseNumber = user.HouseNumber,
-                PostCode = user.PostCode,
-                City = user.City,
-                State = user.State,
-                Country = user.Country,
+                Address = user.Address, // NEW: Use the Address navigation property
                 FacebookLink = user.Facebook_link,
                 Link_RS = user.Link_RS,
                 Link_VS = user.Link_VS,

@@ -3,6 +3,7 @@ using UGH.Contracts.Authentication;
 using UGH.Domain.Core;
 using UGH.Domain.Entities;
 using UGH.Domain.Interfaces;
+using UGHApi.DATA;
 
 namespace UGH.Infrastructure.Services;
 
@@ -13,12 +14,14 @@ public class UserService
     private readonly ILogger<UserService> _logger;
     private readonly IUserMembershipRepository _userMembershipRepository;
     private readonly IMembershipRepository _membershipRepository;
+    private readonly IAddressService _addressService;
 
     public UserService(
         Ugh_Context context,
         PasswordService passwordService,
         IUserMembershipRepository userMembershipRepository,
         IMembershipRepository membershipRepository,
+        IAddressService addressService,
         ILogger<UserService> logger
     )
     {
@@ -26,6 +29,7 @@ public class UserService
         _passwordService = passwordService;
         _userMembershipRepository = userMembershipRepository;
         _membershipRepository = membershipRepository;
+        _addressService = addressService;
         _logger = logger;
     }
 
@@ -161,7 +165,7 @@ public class UserService
         }
     }
 
-    public bool CreateAdmin(RegisterRequest request)
+    public async Task<bool> CreateAdmin(RegisterRequest request)
     {
         try
         {
@@ -181,6 +185,19 @@ public class UserService
                 parsedDateOfBirth.Day
             );
 
+            // Create address from geographic data
+            var address = await _addressService.CreateAddressAsync(
+                request.Latitude,
+                request.Longitude,
+                request.DisplayName,
+                request.HouseNumber,
+                request.Road,
+                request.City,
+                request.Postcode,
+                request.Country,
+                request.CountryCode
+            );
+
             var salt = _passwordService.GenerateSalt();
             var hashPassword = _passwordService.HashPassword(request.Password, salt);
             var newUser = new User(
@@ -188,24 +205,19 @@ public class UserService
                 request.LastName,
                 dateOfBirth,
                 request.Gender,
-                request.Street,
-                request.HouseNumber,
-                request.PostCode,
-                request.City,
-                request.Country,
+                address.Id, // Use the created address ID
                 request.Email_Address,
                 false,
                 hashPassword,
                 salt,
                 request?.Facebook_link,
                 request.Link_RS,
-                request.Link_VS,
-                request.State
+                request.Link_VS
             );
             newUser.VerificationState = UGH.Domain.Core.UGH_Enums.VerificationState.Verified;
             newUser.UserRole = UserRoles.Admin;
             _context.users.Add(newUser);
-            _context.SaveChanges();           
+            await _context.SaveChangesAsync();           
             return true;
         }
         catch (Exception ex)

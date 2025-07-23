@@ -1,3 +1,5 @@
+using UGH.Domain.Entities;
+
 namespace UGH.Domain.ViewModels;
 // the data other users are supposed to see when they click on another user
 public class VisibleProfile
@@ -8,9 +10,11 @@ public class VisibleProfile
     public byte[] ProfilePicture { get; set; }
     public int Age { get; set; }
     public string Gender { get; set; }
-    public string City { get; set; }
-    public string State { get; set; }
-    public string Country { get; set; }
+    
+    // Geographic location data (NEW) - simplified for public visibility
+    public string? City { get; set; } // From Address.City
+    public string? Country { get; set; } // From Address.Country
+    
     #nullable enable
     public string? FacebookLink { get; set; }
     public double? AverageRating { get; set; }

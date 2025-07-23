@@ -7,6 +7,7 @@ using UGH.Domain.Interfaces;
 using Newtonsoft.Json;
 using MediatR;
 using RestSharp;
+using UGHApi.DATA;
 
 namespace UGHApi.Controllers;
 

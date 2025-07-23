@@ -37,7 +37,7 @@ public class OfferDTO
         Accomodationsuitable = o.Requirements;
         Skills = o.Skills;        
         AverageRating = 0;
-        Location = o.Location ?? "";
+        Location = o.Address?.DisplayName ?? ""; // NEW: Use Address.DisplayName instead of Location
         Region = "";
         AppliedStatus = appliedStatus;
         Description = o.Description;

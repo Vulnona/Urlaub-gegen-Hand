@@ -4,8 +4,9 @@ using UGH.Domain.Entities;
 using UGH.Domain.Interfaces;
 using UGHApi.Shared;
 using UGHApi.ViewModels;
+using UGHApi.DATA;
 
-namespace UGH.Infrastructure.Repositories;
+namespace UGHApi.Repositories;
 
 public class ReviewRepository
 {
@@ -119,7 +120,7 @@ public class ReviewRepository
         
         if (existingReview != null)
             return "Review already exists";
-        var review = new Domain.Entities.Review
+        var review = new Review
         {
             OfferId = OfferId,
             RatingValue = RatingValue,

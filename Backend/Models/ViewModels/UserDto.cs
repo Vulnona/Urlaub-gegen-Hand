@@ -1,4 +1,5 @@
 ﻿using UGH.Domain.Core;
+using UGH.Domain.Entities;
 
 namespace UGHApi.ViewModels;
 
@@ -10,12 +11,10 @@ public class UserDTO
     public string LastName { get; set; }
     public DateOnly DateOfBirth { get; set; }
     public string Gender { get; set; }
-    public string Street { get; set; }
-    public string HouseNumber { get; set; }
-    public string PostCode { get; set; }
-    public string City { get; set; }
-    public string Country { get; set; }
-    public string State { get; set; }
+    
+    // Geographic location data (NEW)
+    public Address? Address { get; set; }
+    
     public string Email_Address { get; set; }
     public bool IsEmailVerified { get; set; }
     public int? MembershipId { get; set; }

@@ -4,13 +4,13 @@ import router from '@/router';
 
 // Create an Axios instance
 const axiosInstance = axios.create({
-  baseURL: process.env.baseURL,
+  baseURL: import.meta.env.VITE_BASE_URL || 'http://localhost:8081/api/',
 });
 
 // Function to decrypt token using CryptoJS.
 const decryptToken = (encryptedToken: string): string | null => {
   try {
-    const bytes = CryptoJS.AES.decrypt(encryptedToken, process.env.SECRET_KEY || '');
+    const bytes = CryptoJS.AES.decrypt(encryptedToken, import.meta.env.VITE_SECRET_KEY || 'thisismytestsecretkey');
     return bytes.toString(CryptoJS.enc.Utf8);
   } catch (e) {
     return null;

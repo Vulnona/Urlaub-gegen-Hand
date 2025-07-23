@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using UGHApi.Services.UserProvider;
 using UGH.Infrastructure.Services;
-using UGH.Infrastructure.Repositories;
+using UGHApi.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using UGH.Domain.Interfaces;
 

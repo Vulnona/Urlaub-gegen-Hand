@@ -4,6 +4,7 @@ using UGHApi.Entities;
 using UGHApi.Interfaces;
 using UGHApi.Shared;
 using UGHApi.ViewModels;
+using UGHApi.DATA;
 
 public class TransactionRepository : ITransactionRepository
 {

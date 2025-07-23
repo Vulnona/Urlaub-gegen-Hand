@@ -88,25 +88,52 @@
               <li class="list-group-item p-3">
                 <span class="fw-medium fs-15 d-block mb-3">General Info:</span>
                 <div class="text-muted">
-                  <p class="mb-3">
-                    <span class="icon icon2">
-                      <i class="ri-map-pin-line align-middle fs-15"></i>
-                    </span>
-                    <span class="fw-medium text-default">House Number: </span> {{ user.houseNumber }}
-                  </p>
-                  <p class="mb-3">
-                    <span class="icon icon3">
-                      <i class="ri-building-line align-middle fs-15"></i>
-                    </span>
-                    <span class="fw-medium text-default">Address: </span>{{ user.houseNumber }}, {{ user.street }},
-                    {{ user.country }}
-                  </p>
-                  <p class="mb-0">
-                    <span class="icon icon4">
-                      <i class="ri-phone-line align-middle fs-15"></i>
-                    </span>
-                    <span class="fw-medium text-default">Postal code: </span> {{ user.postCode }}
-                  </p>
+                  <div v-if="user.address" class="address-section">
+                    <p class="mb-3">
+                      <span class="icon icon2">
+                        <i class="ri-map-pin-line align-middle fs-15"></i>
+                      </span>
+                      <span class="fw-medium text-default">Adresse: </span> {{ user.address.displayName }}
+                    </p>
+                    <p class="mb-3">
+                      <span class="icon icon3">
+                        <i class="ri-building-line align-middle fs-15"></i>
+                      </span>
+                      <span class="fw-medium text-default">Details: </span>
+                      <span v-if="user.address.houseNumber">{{ user.address.houseNumber }}</span>
+                      <span v-if="user.address.road">, {{ user.address.road }}</span>
+                      <span v-if="user.address.city">, {{ user.address.city }}</span>
+                      <span v-if="user.address.postcode">, {{ user.address.postcode }}</span>
+                    </p>
+                    <p class="mb-3">
+                      <span class="icon icon4">
+                        <i class="ri-global-line align-middle fs-15"></i>
+                      </span>
+                      <span class="fw-medium text-default">Land: </span> {{ user.address.country }}
+                    </p>
+                    <p class="mb-0">
+                      <span class="icon">
+                        <i class="ri-navigation-line align-middle fs-15"></i>
+                      </span>
+                      <span class="fw-medium text-default">Koordinaten: </span> 
+                      {{ user.address.latitude?.toFixed(6) }}, {{ user.address.longitude?.toFixed(6) }}
+                      <button 
+                        class="btn btn-sm btn-outline-primary ms-2" 
+                        @click="showAddressOnMap"
+                        title="Auf Karte anzeigen"
+                      >
+                        <i class="ri-map-2-line"></i>
+                      </button>
+                    </p>
+                  </div>
+                  <div v-else class="no-address">
+                    <p class="mb-0 text-muted">
+                      <span class="icon">
+                        <i class="ri-map-pin-line align-middle fs-15"></i>
+                      </span>
+                      Keine Adresse hinterlegt
+                    </p>
+                  </div>
                 </div>
               </li>
               <li class="list-group-item p-3 skills_content">
@@ -523,12 +550,23 @@
       editProfile() {
         router.push('/edit-profile');
       },
-        editUserData() {
-            router.push('/edit-user-data');
-        },
-         changePassword() {
-            router.push('/change-password');
+      editUserData() {
+        router.push('/edit-user-data');
+      },
+      changePassword() {
+        router.push('/change-password');
+      },
+      showAddressOnMap() {
+        if (this.user.address && this.user.address.latitude && this.user.address.longitude) {
+          // Open address in new window with OpenStreetMap
+          const lat = this.user.address.latitude;
+          const lng = this.user.address.longitude;
+          const url = `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}&zoom=15&layers=M`;
+          window.open(url, '_blank');
+        } else {
+          toast.info('Keine Koordinaten für diese Adresse verfügbar');
         }
+      }
     },
 
     computed: {

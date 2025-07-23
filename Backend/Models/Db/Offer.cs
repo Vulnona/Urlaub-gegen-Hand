@@ -38,6 +38,11 @@ public class Offer {
     [Required]
     public OfferStatus Status { get; set; }
 
+    // Geographic location (NEW) - replacing old Location fields
+    public int? AddressId { get; set; }
+    [ForeignKey("AddressId")]
+    public Address? Address { get; set; }
+
     [Required]
     public Guid UserId { get; init; }
     [ForeignKey("UserId")]
@@ -50,12 +55,14 @@ public class Offer {
 public class OfferTypeLodging : Offer {    
     public string? LodgingType { get; set; }
     public string? AdditionalLodgingProperties { get; set; }
-    public string? Location { get; set; }
+    // OLD: string? Location - now using Address system
 }
 
 public class OfferTypeRequest : Offer {
-    // differs from Location, has to be treated as a list. Multiple Locations are realistic.
-    public string? PossibleLocations { get; set; }
+    // NOTE: Multiple locations for requests will use a separate many-to-many table in future
+    // For now, using single address like other offers
+    // public string? PossibleLocations { get; set; } // DEPRECATED
+    
     // health or other important individual factors. Not searchable.
     public string? SpecialConditions { get; set; }
 }

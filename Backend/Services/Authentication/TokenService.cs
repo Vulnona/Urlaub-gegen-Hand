@@ -6,6 +6,7 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.IdentityModel.Tokens;
 using UGH.Domain.Entities;
 using UGH.Domain.Core;
+using UGHApi.DATA;
 
 namespace UGH.Infrastructure.Services;
 

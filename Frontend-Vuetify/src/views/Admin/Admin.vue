@@ -38,13 +38,8 @@
                     </button>
     
                             <!-- Admin Password Reset Button -->
-<<<<<<< HEAD
                             <button class="btn btn-warning" @click="showAdminPasswordResetModal()" title="Admin-Passwort zurücksetzen">
                       <i class="ri-lock-password-line"></i> Admin-Passwort zurücksetzen
-=======
-                            <button class="btn btn-warning" @click="showAdminPasswordResetModal()" title="Reset Admin Password">
-                      <i class="ri-lock-password-line"></i> Reset Admin Password
->>>>>>> b80002b7822c218d8ac94bf44fb58c5eb0929d68
                     </button>
 
                             <!-- Generate Button -->
@@ -142,12 +137,17 @@
                             <p><strong>Vollständiger Name:</strong> {{ userdata.firstName }} {{ userdata.lastName }}</p>
                             <p><strong>Geburtsdatum:</strong> {{ userdata.dateOfBirth }}</p>
                             <p><strong>Geschlecht:</strong> {{ userdata.gender }}</p>
-                            <p><strong>Land:</strong> {{ userdata.country }}</p>
-                            <p><strong>Bundesland:</strong> {{ userdata.state }}</p>
-                            <p><strong>Stadt:</strong> {{ userdata.city }}</p>
-                            <p><strong>Postleitzahl:</strong> {{ userdata.postCode }}</p>
-                            <p><strong>Hausnummer:</strong> {{ userdata.houseNumber }}</p>
-                            <p><strong>Straßenadresse:</strong> {{ userdata.street }}</p>
+                            <!-- Geographic Address Information -->
+                            <div v-if="userdata.address">
+                                <p><strong>Adresse:</strong> {{ userdata.address.displayName }}</p>
+                                <p><strong>Stadt:</strong> {{ userdata.address.city }}</p>
+                                <p><strong>Postleitzahl:</strong> {{ userdata.address.postcode }}</p>
+                                <p><strong>Land:</strong> {{ userdata.address.country }}</p>
+                                <p><strong>Koordinaten:</strong> {{ userdata.address.latitude }}, {{ userdata.address.longitude }}</p>
+                            </div>
+                            <div v-else>
+                                <p><strong>Adresse:</strong> Nicht verfügbar</p>
+                            </div>
                         </div>
                     </div>
                     <div class="image-container">
@@ -513,7 +513,6 @@ export default {
         // Method to show admin password reset modal
         async showAdminPasswordResetModal() {
             const { value: email } = await Swal.fire({
-<<<<<<< HEAD
                 title: "Admin-Passwort zurücksetzen",
                 text: "Geben Sie Ihre Admin-E-Mail-Adresse ein, um einen Passwort-Reset-Link zu erhalten",
                 input: "email",
@@ -524,18 +523,6 @@ export default {
                 inputValidator: (value) => {
                     if (!value) {
                         return 'E-Mail-Adresse ist erforderlich!';
-=======
-                title: "Admin Password Reset",
-                text: "Enter your admin email address to receive a password reset link",
-                input: "email",
-                inputPlaceholder: "Enter your admin email",
-                showCancelButton: true,
-                confirmButtonText: "Send Reset Link",
-                cancelButtonText: "Cancel",
-                inputValidator: (value) => {
-                    if (!value) {
-                        return 'Email address is required!';
->>>>>>> b80002b7822c218d8ac94bf44fb58c5eb0929d68
                     }
                     if (!/\S+@\S+\.\S+/.test(value)) {
                         return 'Please enter a valid email address!';
@@ -555,26 +542,17 @@ export default {
                     email: email
                 });
                 
-<<<<<<< HEAD
                 toast.success("Passwort-Reset-Link erfolgreich gesendet! Überprüfen Sie Ihre E-Mail.");
                 
                 Swal.fire({
                     title: "Reset-Link gesendet",
                     text: "Ein Passwort-Reset-Link wurde an Ihre E-Mail-Adresse gesendet. Bitte überprüfen Sie Ihren Posteingang und folgen Sie den Anweisungen zum Zurücksetzen Ihres Passworts.",
-=======
-                toast.success("Password reset link sent successfully! Check your email.");
-                
-                Swal.fire({
-                    title: "Reset Link Sent",
-                    text: "A password reset link has been sent to your email address. Please check your inbox and follow the instructions to reset your password.",
->>>>>>> b80002b7822c218d8ac94bf44fb58c5eb0929d68
                     icon: "success",
                     confirmButtonText: "OK"
                 });
                 
             } catch (error) {
                 if (error.response && error.response.data) {
-<<<<<<< HEAD
                     toast.error(error.response.data.value || "Fehler beim Senden der Passwort-Reset-E-Mail");
                 } else {
                     toast.error("Fehler beim Senden der Passwort-Reset-E-Mail. Bitte versuchen Sie es erneut.");
@@ -583,16 +561,6 @@ export default {
                 Swal.fire({
                     title: "Fehler",
                     text: "Fehler beim Senden der Passwort-Reset-E-Mail. Bitte überprüfen Sie die E-Mail-Adresse und versuchen Sie es erneut.",
-=======
-                    toast.error(error.response.data.value || "Failed to send password reset email");
-                } else {
-                    toast.error("Failed to send password reset email. Please try again.");
-                }
-                
-                Swal.fire({
-                    title: "Error",
-                    text: "Failed to send password reset email. Please check the email address and try again.",
->>>>>>> b80002b7822c218d8ac94bf44fb58c5eb0929d68
                     icon: "error",
                     confirmButtonText: "OK"
                 });

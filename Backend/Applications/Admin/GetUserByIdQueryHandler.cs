@@ -38,12 +38,7 @@ public class GetUserByIdQueryHandler : IRequestHandler<GetUserByIdQuery, UserDat
             LastName = user.LastName,
             DateOfBirth = user.DateOfBirth.ToDateTime(TimeOnly.MinValue),
             Gender = user.Gender,
-            Street = user.Street,
-            HouseNumber = user.HouseNumber,
-            PostCode = user.PostCode,
-            City = user.City,
-            Country = user.Country,
-            State = user.State,
+            Address = user.Address, // NEW: Use the Address navigation property
             Email_Address = user.Email_Address,
             IsEmailVerified = user.IsEmailVerified,
             MembershipId = user.MembershipId,

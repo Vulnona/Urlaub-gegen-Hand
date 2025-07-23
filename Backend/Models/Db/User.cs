@@ -23,23 +23,12 @@ public class User
     [Required]
     public string Gender { get; set; }
 
+    // NEW: Geographic address system replacing old Street, HouseNumber, PostCode, City, Country, State
     [Required]
-    public string Street { get; set; }
-
-    [Required]
-    public string HouseNumber { get; set; }
-
-    [Required]
-    public string PostCode { get; set; }
-
-    [Required]
-    public string City { get; set; }
-
-    [Required]
-    public string Country { get; set; }
-
-    [Required]
-    public string State { get; set; }
+    public int AddressId { get; set; }
+    
+    [ForeignKey("AddressId")]
+    public Address Address { get; set; } = null!;
 
     [Required, EmailAddress]
     public string Email_Address { get; set; }
@@ -98,30 +87,21 @@ public class User
         string lastName,
         DateOnly dateOfBirth,
         string gender,
-        string street,
-        string houseNumber,
-        string postCode,
-        string city,
-        string country,
+        int addressId,
         string emailAddress,
         bool isEmailVerified,
         string password,
         string saltKey,
         string facebook_link,
         string link_RS,
-        string link_VS,
-        string state
+        string link_VS
     )
     {
         FirstName = firstName;
         LastName = lastName;
         DateOfBirth = dateOfBirth;
         Gender = gender;
-        Street = street;
-        HouseNumber = houseNumber;
-        PostCode = postCode;
-        City = city;
-        Country = country;
+        AddressId = addressId;
         Email_Address = emailAddress;
         IsEmailVerified = isEmailVerified;
         Password = password;
@@ -130,7 +110,6 @@ public class User
         Facebook_link = facebook_link;
         Link_RS = link_RS;
         Link_VS = link_VS;
-        State = state;
     }
 }
 public enum UserRoles {

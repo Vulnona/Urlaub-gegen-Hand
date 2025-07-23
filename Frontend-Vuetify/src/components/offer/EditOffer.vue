@@ -24,9 +24,17 @@
               <div class="general_infoContent">
                 <div class="card-title"> <h5>Zeit und Ort</h5> </div>
                 <div class="card-body">
-                  <Input n="Ort" v-model="offer.location" p="Geben Sie den Ort des Angebots ein" :req=true />
+                  <!-- Address Selection via Map -->
                   <div class="form-group">
-                    
+                    <label>Adresse <b style="color: red;">*</b></label>
+                    <AddressMapPicker 
+                      @address-selected="onAddressSelected"
+                      :initial-address="offer.address"
+                      :required="true"
+                    />
+                  </div>
+                  
+                  <div class="form-group">
                     <div class="row">
                       <div class="col">
                         <label for="offer.FromDate">Möglich ab<b style="color: red;">*</b></label>
@@ -120,6 +128,7 @@ import 'vue-multiselect/dist/vue-multiselect.css';
 import Securitybot from '@/services/SecurityBot';
 import axiosInstance from '@/interceptor/interceptor';
 import toast from '@/components/toaster/toast';
+import AddressMapPicker from '@/components/common/AddressMapPicker.vue';
 const props = defineProps({banner: String, offer:{type: Object, default: {id: -1}, required: false} })
 
 let loading = ref(true);
@@ -127,6 +136,7 @@ let offer = reactive ({
     title: '',
     description: '',
     location: '',
+    address: null,
     accommodation: [],
     accommodationSuitable: [],
     skills: [],
@@ -140,6 +150,10 @@ let accommodations = [];
 let suitableAccommodations = [];
 let modify = false;
 
+const onAddressSelected = (address) => {
+    offer.address = address;
+};
+
 const createOffer = async() => {
         loading.value = true;
       if (offer.image && offer.image.size > 17 * 1024 * 1024) {
@@ -147,26 +161,36 @@ const createOffer = async() => {
           loading.value = false;
           return;
       }
-      if (!offer.title || !offer.skills.length || !offer.image && !modify || !offer.description || !offer.location || !offer.UntilDate || !offer.FromDate) {
+      if (!offer.title || !offer.skills.length || !offer.image && !modify || !offer.description || !offer.address || !offer.UntilDate || !offer.FromDate) {
           toast.info("Bitte alle mit * markierten Felder ausfüllen.");
           loading.value = false;
           return;
       }
     const offerData = new FormData();
     offer.description = offer.description.replaceAll("\n","\ \ \n");
-        offerData.append('title', offer.title);
+    offerData.append('title', offer.title);
         offerData.append('description', offer.description);
-        offerData.append('location', offer.location);
-        offerData.append('contact', offer.contact);
+        offerData.append('location', offer.address ? offer.address.displayName : '');
+        // Add address data
+        if (offer.address) {
+            offerData.append('addressLatitude', offer.address.latitude.toString());
+            offerData.append('addressLongitude', offer.address.longitude.toString());
+            offerData.append('addressDisplayName', offer.address.displayName);
+            offerData.append('addressHouseNumber', offer.address.houseNumber || '');
+            offerData.append('addressRoad', offer.address.road || '');
+            offerData.append('addressCity', offer.address.city || '');
+            offerData.append('addressPostcode', offer.address.postcode || '');
+            offerData.append('addressCountry', offer.address.country || '');
+        }
         offerData.append('accommodation', offer.accommodation.join(', '));
         offerData.append('accommodationSuitable', offer.accommodationSuitable.join(', '));
         offerData.append('ToDate', offer.UntilDate.toISOString().split('+')[0]);
         offerData.append('FromDate', offer.FromDate.toISOString().split('+')[0]);
         offerData.append('skills', offer.skills.map(skill => skill.skillDescrition).join(', '));
-        offerData.append('country', "");
-        offerData.append('state', "");
-        offerData.append('city', "");
-        offerData.append('OfferId', offer.id);
+        offerData.append('country', '');
+        offerData.append('state', '');
+        offerData.append('city', '');
+        offerData.append('OfferId', offer.id.toString());
       if (offer.image) {
         offerData.append('image', offer.image);
       }

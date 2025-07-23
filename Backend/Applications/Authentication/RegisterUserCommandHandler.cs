@@ -73,17 +73,28 @@ public class RegisterUserCommandHandler
             var salt = _passwordService.GenerateSalt();
             var hashPassword = _passwordService.HashPassword(request.Password, salt);
 
+            // NEW: Create address entity from geographic location data
+            var address = new Address
+            {
+                Latitude = request.Latitude,
+                Longitude = request.Longitude,
+                DisplayName = request.DisplayName,
+                HouseNumber = request.HouseNumber,
+                Road = request.Road,
+                City = request.City,
+                Postcode = request.Postcode,
+                Country = request.Country,
+                CountryCode = request.CountryCode,
+                Type = AddressType.Residential
+            };
+
             var newUser = new User
             {
                 FirstName = request.FirstName,
                 LastName = request.LastName,
                 DateOfBirth = DateOnly.FromDateTime(parsedDateOfBirth),
                 Gender = request.Gender,
-                Street = request.Street,
-                HouseNumber = request.HouseNumber,
-                PostCode = request.PostCode,
-                City = request.City,
-                Country = request.Country,
+                Address = address, // NEW: Use Address navigation property
                 Email_Address = request.Email_Address,
                 IsEmailVerified = false,
                 Password = hashPassword,
@@ -91,7 +102,6 @@ public class RegisterUserCommandHandler
                 Facebook_link = request.Facebook_link,
                 Link_RS = request.Link_RS,
                 Link_VS = request.Link_VS,
-                State = request.State,
                 VerificationState = UGH_Enums.VerificationState.IsNew,
                 UserRole = UserRoles.User
             };

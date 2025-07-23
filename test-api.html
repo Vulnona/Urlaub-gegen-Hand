@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API Test</title>
+</head>
+<body>
+    <h1>API Test</h1>
+    <button onclick="testGeocoding()">Test Geocoding Search</button>
+    <button onclick="testReverseGeocoding()">Test Reverse Geocoding</button>
+    <div id="result"></div>
+
+    <script>
+        async function testGeocoding() {
+            try {
+                const response = await fetch('http://localhost:8081/api/geocoding/search?query=Berlin');
+                const data = await response.json();
+                document.getElementById('result').innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                console.log('Geocoding result:', data);
+            } catch (error) {
+                console.error('Geocoding error:', error);
+                document.getElementById('result').innerHTML = 'Error: ' + error.message;
+            }
+        }
+
+        async function testReverseGeocoding() {
+            try {
+                const response = await fetch('http://localhost:8081/api/geocoding/reverse?lat=52.510885&lon=13.3989367');
+                const data = await response.json();
+                document.getElementById('result').innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                console.log('Reverse geocoding result:', data);
+            } catch (error) {
+                console.error('Reverse geocoding error:', error);
+                document.getElementById('result').innerHTML = 'Error: ' + error.message;
+            }
+        }
+    </script>
+</body>
+</html>

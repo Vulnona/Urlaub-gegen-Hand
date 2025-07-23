@@ -12,6 +12,7 @@ using UGH.Domain.Interfaces;
 
 using UGH.Domain.Entities;
 using UGH.Domain.Core;
+using UGHApi.DATA;
 
 namespace UGHApi.Controllers;
 
@@ -109,12 +110,28 @@ public class ProfileController : ControllerBase
                 user.LastName = profile.LastName;
                 user.DateOfBirth = profile.DateOfBirth;
                 user.Gender = profile.Gender;
-                user.Street = profile.Street;
-                user.HouseNumber = profile.HouseNumber;
-                user.PostCode = profile.PostCode;
-                user.City = profile.City;
-                user.State = profile.State;
-                user.Country = profile.Country;
+                
+                // Create or update Address entity from UserData geographic data
+                var address = new Address
+                {
+                    Latitude = profile.Latitude,
+                    Longitude = profile.Longitude,
+                    DisplayName = profile.DisplayName,
+                    HouseNumber = profile.HouseNumber,
+                    Road = profile.Road,
+                    City = profile.City,
+                    Postcode = profile.Postcode,
+                    Country = profile.Country,
+                    CountryCode = profile.CountryCode,
+                    Type = AddressType.Residential
+                };
+                
+                // Add the address to context and assign to user
+                _context.addresses.Add(address);
+                await _context.SaveChangesAsync();
+                user.AddressId = address.Id;
+                user.Address = address;
+                
                 user.VerificationState = UGH_Enums.VerificationState.IsNew;
                 await _userRepository.UpdateUserAsync(user);
             }
@@ -184,9 +201,8 @@ public class ProfileController : ControllerBase
                 ProfilePicture = user.ProfilePicture,
                 Age =  (int.Parse(DateTime.Today.ToString("yyyyMMdd")) - int.Parse(user.DateOfBirth.ToString("yyyyMMdd")))/10000,
                 Gender = user.Gender,
-                City = user.City,
-                Country = user.Country,
-                State = user.State,
+                City = user.Address?.City,
+                Country = user.Address?.Country,
                 FacebookLink = user.Facebook_link,
                 AverageRating = averageRating,
                 MembershipEndDate = user.UserMemberships

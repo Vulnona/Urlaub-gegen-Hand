@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using UGH.Domain.Entities;
 using UGH.Domain.Interfaces;
+using UGHApi.DATA;
 
 namespace UGHApi.Repositories;
 

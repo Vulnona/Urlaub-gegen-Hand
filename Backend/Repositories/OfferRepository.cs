@@ -7,8 +7,9 @@ using UGHApi.ViewModels;
 using UGHApi.ViewModels.UserComponent;
 using ImageMagick;
 using System.Security.Cryptography;
+using UGHApi.DATA;
 
-namespace UGH.Infrastructure.Repositories;
+namespace UGHApi.Repositories;
 
 public class OfferRepository
 {
@@ -43,7 +44,7 @@ public class OfferRepository
             query = query.Where(o =>
                 o.Title.Contains(searchTerm)
                 || o.Skills.Contains(searchTerm)
-                || o.Location.Contains(searchTerm)                
+                || (o.Address != null && o.Address.DisplayName.Contains(searchTerm))
             );
         }
 
@@ -173,7 +174,7 @@ public class OfferRepository
             query = query.Where(o =>
                 o.Title.Contains(searchTerm)
                 || o.Skills.Contains(searchTerm)
-                || o.Location.Contains(searchTerm)
+                || (o.Address != null && o.Address.DisplayName.Contains(searchTerm))
             );
         }
 

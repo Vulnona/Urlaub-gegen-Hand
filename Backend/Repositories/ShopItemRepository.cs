@@ -2,6 +2,7 @@
 using UGHApi.Entities;
 using UGHApi.Interfaces;
 using UGHApi.Shared;
+using UGHApi.DATA;
 
 namespace UGHApi.Repositories;
 

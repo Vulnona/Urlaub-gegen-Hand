@@ -11,7 +11,25 @@ export default defineConfig(({ mode }) => {
     server: {
         host: '0.0.0.0',
         port: 3002,
-        allowedHosts: ['localhost']
+        allowedHosts: ['localhost'],
+        proxy: {
+          '/api': {
+            target: 'http://backend:8080',
+            changeOrigin: true,
+            secure: false,
+            configure: (proxy, options) => {
+              proxy.on('error', (err, req, res) => {
+                console.log('proxy error', err);
+              });
+              proxy.on('proxyReq', (proxyReq, req, res) => {
+                console.log('Sending Request to the Target:', req.method, req.url);
+              });
+              proxy.on('proxyRes', (proxyRes, req, res) => {
+                console.log('Received Response from the Target:', proxyRes.statusCode, req.url);
+              });
+            },
+          }
+        }
     },
     optimizeDeps: {
       include: ['vue', 'vue-router', 'sweetalert2', 'crypto-js', 'axios', 'vue-toastification',

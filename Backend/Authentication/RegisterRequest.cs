@@ -26,23 +26,24 @@ public class RegisterRequest
     [Required]
     public string Gender { get; set; }
 
+    // Geographic location data (NEW) - replacing old address fields
     [Required]
-    public string Street { get; set; }
-
+    public double Latitude { get; set; }
+    
     [Required]
-    public string HouseNumber { get; set; }
-
+    public double Longitude { get; set; }
+    
     [Required]
-    public string PostCode { get; set; }
-
-    [Required]
-    public string City { get; set; }
-
-    [Required]
-    public string Country { get; set; }
-
-    [Required]
-    public string State { get; set; }
+    public string DisplayName { get; set; } // Full formatted address from map selection
+    
+    // Optional detailed address components (from Nominatim)
+    public string? HouseNumber { get; set; }
+    public string? Road { get; set; }
+    public string? City { get; set; }
+    public string? Postcode { get; set; }
+    public string? Country { get; set; }
+    public string? CountryCode { get; set; }
+    
     public string? Facebook_link { get; set; }
     public string Link_RS { get; set; }
     public string Link_VS { get; set; }

@@ -7,8 +7,9 @@ using UGHApi.Services.UserProvider;
 using UGH.Domain.Interfaces;
 using UGHApi.Shared;
 using UGH.Domain.Entities;
-using UGH.Infrastructure.Repositories;
+using UGHApi.Repositories;
 using Microsoft.EntityFrameworkCore;
+using UGHApi.DATA;
 
 namespace UGHApi.Controllers;
 
@@ -158,7 +159,18 @@ public class OfferController : ControllerBase
             offer.Skills = offerViewModel.Skills;
             offer.Requirements = offerViewModel.AccommodationSuitable;
             offer.AdditionalLodgingProperties = offerViewModel.Accommodation;
-            offer.Location = offerViewModel.Location;
+            
+            // NEW: Create Address entity from geographic location data
+            offer.Address = new Address
+            {
+                Latitude = offerViewModel.Latitude,
+                Longitude = offerViewModel.Longitude,
+                DisplayName = offerViewModel.DisplayName,
+                City = offerViewModel.City,
+                Country = offerViewModel.Country,
+                Type = AddressType.Tourism // Offers are typically tourism-related
+            };
+            
             offer.Status = OfferStatus.Active;
             offer.GroupProperties = "";
             offer.FromDate = DateOnly.FromDateTime(DateTime.Parse(offerViewModel.FromDate));

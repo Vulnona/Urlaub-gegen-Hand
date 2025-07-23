@@ -5,6 +5,7 @@ using UGHApi.Extensions;
 using UGHApi.Interfaces;
 using UGHApi.Shared;
 using UGHApi.ViewModels;
+using UGHApi.DATA;
 
 namespace UGHApi.Repositories;
 

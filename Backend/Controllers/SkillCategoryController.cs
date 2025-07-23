@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using UGH.Domain.Entities;
+using UGHApi.DATA;
 
 namespace UGHApi.Controllers
 {
