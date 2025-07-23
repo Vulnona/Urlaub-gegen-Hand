@@ -18,7 +18,7 @@ Write-Host ""
 
 # Set environment variable for the container
 Write-Host "Setting reset token in container..." -ForegroundColor Green
-docker exec -e ADMIN_RESET_TOKEN="$ResetToken" ugh-backend-1 echo "Token set"
+$SetEnvResult = docker exec ugh-backend-1 sh -c "export ADMIN_RESET_TOKEN='$ResetToken'; echo 'Token set'"
 
 # Prepare the request
 $RequestBody = @{
@@ -46,6 +46,6 @@ catch {
 # Clean up - remove the token from environment
 Write-Host ""
 Write-Host "Cleaning up reset token..." -ForegroundColor Yellow
-docker exec ugh-backend-1 env -u ADMIN_RESET_TOKEN 2>$null
+docker exec ugh-backend-1 sh -c "unset ADMIN_RESET_TOKEN" 2>$null
 
 Write-Host "Setup complete!" -ForegroundColor Green

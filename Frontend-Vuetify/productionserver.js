@@ -12,7 +12,6 @@ const url = `${API_BASE_URL}/api/offer/get-offer-by-id/`;
 const headers = {'Content-Type': 'application/json'};
 
 let distPath = path.join('/app/dist');
-console.log(distPath);
 let index;
 fs.readFile(distPath + '/index.html', 'utf8', (err, data) => {
   if (err) {

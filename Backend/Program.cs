@@ -28,7 +28,7 @@ namespace UGHApi
     public class Program
     {
         private readonly IConfiguration _configuration;
-        public static TimeZoneInfo AppTimeZone { get; private set; }
+        public static TimeZoneInfo AppTimeZone { get; private set; } = TimeZoneInfo.Utc;
 
         public Program(IConfiguration configuration)
         {
@@ -49,14 +49,34 @@ namespace UGHApi
 
         private static void ConfigureLogging(WebApplicationBuilder builder)
         {
+            // Set up timezone first for consistent logging
+            try
+            {
+                AppTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Europe/Berlin");
+            }
+            catch (TimeZoneNotFoundException)
+            {
+                try
+                {
+                    AppTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Central European Standard Time");
+                }
+                catch (TimeZoneNotFoundException)
+                {
+                    AppTimeZone = TimeZoneInfo.Utc;
+                    Console.WriteLine("Warning: Could not set German timezone for logging, using UTC");
+                }
+            }
+
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Information()
                 .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
                 .MinimumLevel.Override("Microsoft.EntityFrameworkCore", LogEventLevel.Warning)
                 .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
                 .Enrich.FromLogContext()
-                .WriteTo.Console()
-                .WriteTo.File("/app/logs/logfile.log", rollingInterval: RollingInterval.Day)
+                .WriteTo.Console(outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}")
+                .WriteTo.File("/app/logs/logfile.log", 
+                    rollingInterval: RollingInterval.Day,
+                    outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}")
                 .CreateLogger();
 
             builder.Logging.ClearProviders();
@@ -80,19 +100,7 @@ namespace UGHApi
 
         private static void ConfigureServices(WebApplicationBuilder builder)
         {
-            // Configure timezone to German time (works on both Windows and Linux)
-            TimeZoneInfo germanTimeZone;
-            try
-            {
-                germanTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Europe/Berlin");
-            }
-            catch (TimeZoneNotFoundException)
-            {
-                // Fallback for Windows
-                germanTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Central European Standard Time");
-            }
-            AppTimeZone = germanTimeZone;
-            
+            // Timezone is already configured in ConfigureLogging
             var config = builder.Configuration;
             MapsterConfig.RegisterMappings();
             var connectionString = config.GetConnectionString("DefaultConnection");
@@ -284,6 +292,14 @@ namespace UGHApi
         private static void ConfigureEndpoints(WebApplication app)
         {
             app.MapControllers();
+        }
+        
+        /// <summary>
+        /// Get current German time (MEZ/MESZ)
+        /// </summary>
+        public static DateTime GetGermanTime()
+        {
+            return TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, AppTimeZone);
         }
     }
 }
