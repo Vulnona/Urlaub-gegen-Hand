@@ -147,7 +147,7 @@ const fetchOfferDetail = async () => {
     loading.value = false;
   }
 };
-const formatDate = (dateString) => {
+const formatDate = (dateString: string) => {
   const options: Intl.DateTimeFormatOptions = {
     year: 'numeric',
     month: 'long',
@@ -155,14 +155,9 @@ const formatDate = (dateString) => {
   };
   return new Date(dateString).toLocaleDateString(undefined, options);
 };
-const toggleShowMore = () => {
-  showAllReviews.value = !showAllReviews.value;
-};
-const backtooffers = () => {
-  window.history.back();
-};
-const redirectToProfile = (userId) => {
-  sessionStorage.setItem("UserId", userId);
+
+const redirectToProfile = (userId: string | number) => {
+  sessionStorage.setItem("UserId", userId.toString());
   router.push("/account");
 }
 onMounted(fetchOfferDetail);
