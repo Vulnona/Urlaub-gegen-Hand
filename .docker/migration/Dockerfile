@@ -1,6 +1,9 @@
 # AS Build-env
 FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build-env
 
+# Install MySQL client for database connectivity checks
+RUN apt-get update && apt-get install -y default-mysql-client && rm -rf /var/lib/apt/lists/*
+
 # Set PATH to include global tools
 ENV PATH $PATH:/root/.dotnet/tools
 
@@ -25,6 +28,9 @@ RUN dotnet build --no-restore
 # Run dotnet tool restore to ensure dotnet-ef command is available
 RUN dotnet tool restore
 
+# Copy migration script
+COPY .docker/migration/migrate.sh /usr/local/bin/migrate.sh
+RUN chmod +x /usr/local/bin/migrate.sh
+
 # Entry point to execute database migrations
-#ENTRYPOINT ["dotnet", "ef", "database", "update"]
-ENTRYPOINT ["sleep", "infinity"]
+ENTRYPOINT ["/usr/local/bin/migrate.sh"]

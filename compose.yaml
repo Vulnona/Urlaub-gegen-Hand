@@ -44,7 +44,10 @@ services:
     secrets:
       - db__user_password
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+      migration:
+        condition: service_completed_successfully
 
   db:
     image: mysql:8.0
@@ -84,14 +87,21 @@ services:
     environment:
       - ConnectionStrings__DefaultConnection=Server=db;User ID=root;Password=password;Database=db;SSL Mode=None
       - TZ=Europe/Berlin
+      - CREATE_BACKUP=true
     volumes:
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
+      - migration-backups:/tmp
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+    secrets:
+      - db__root_password
+    restart: "no"
     
 volumes:
   db-data2:
+  migration-backups:
 
 secrets:
   db__root_password:
