@@ -18,9 +18,43 @@ function Test-DockerRunning {
         $null = docker version 2>$null
         return $LASTEXITCODE -eq 0
     } catch {
-        Write-ColorOutput "Docker is not running. Please start Docker Desktop." "Red"
         return $false
     }
+}
+
+function Test-Platform {
+    if ($IsLinux -or $IsMacOS) {
+        return "Unix"
+    } else {
+        return "Windows"
+    }
+}
+
+function Test-DockerAndPlatform {
+    $platform = Test-Platform
+    
+    if (-not (Test-DockerRunning)) {
+        Write-ColorOutput "❌ Docker ist nicht verfuegbar!" "Red"
+        Write-ColorOutput "" "White"
+        
+        if ($platform -eq "Windows") {
+            Write-ColorOutput "Windows: Bitte Docker Desktop starten:" "Yellow"
+            Write-ColorOutput "  - Docker Desktop öffnen" "White"
+            Write-ColorOutput "  - Warten bis Docker läuft (Whale-Icon im System Tray)" "White"
+            Write-ColorOutput "  - Dann das Skript erneut ausführen" "White"
+        } else {
+            Write-ColorOutput "Linux/macOS: Bitte Docker-Service starten:" "Yellow"
+            Write-ColorOutput "  sudo systemctl start docker    # Linux" "White"
+            Write-ColorOutput "  brew services start docker     # macOS mit Homebrew" "White"
+            Write-ColorOutput "  oder Docker Desktop starten" "White"
+        }
+        
+        Write-ColorOutput "" "White"
+        Write-ColorOutput "Testen Sie Docker mit: docker version" "Cyan"
+        return $false
+    }
+    
+    return $true
 }
 
 function Start-DatabaseIfNeeded {
@@ -145,7 +179,7 @@ function Invoke-DataCleanup {
     " 2>$null
     
     Write-ColorOutput "Cleanup completed!" "Green"
-    Write-ColorOutput "Run validation again: .\migrate-db-clean.ps1 validate" "Cyan"
+    Write-ColorOutput "Run validation again: .\migrate-db.ps1 validate" "Cyan"
 }
 
 function Invoke-Migration {
@@ -165,7 +199,7 @@ function Invoke-Migration {
 }
 
 # Main execution
-if (-not (Test-DockerRunning)) {
+if (-not (Test-DockerAndPlatform)) {
     exit 1
 }
 
@@ -182,6 +216,6 @@ switch ($Action.ToLower()) {
     "cleanup" { Invoke-DataCleanup }
     default { 
         Write-ColorOutput "Available actions: run, validate, cleanup" "Yellow"
-        Write-ColorOutput "Usage: .\migrate-db-clean.ps1 <action>" "White"
+        Write-ColorOutput "Usage: .\migrate-db.ps1 <action>" "White"
     }
 }

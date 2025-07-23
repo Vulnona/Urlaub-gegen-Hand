@@ -7,16 +7,16 @@ Ein robustes, automatisiertes Database Migration System mit umfassender Datenint
 ### ⚡ Einfache Befehle
 ```powershell
 # Sichere Migration mit Validierung
-.\migrate-db.ps1 run
+.\scripts\powershell\migrate-db.ps1 run
 
 # Datenprobleme prüfen  
-.\migrate-db.ps1 validate
+.\scripts\powershell\migrate-db.ps1 validate
 
 # Datenprobleme automatisch beheben
-.\migrate-db.ps1 cleanup
+.\scripts\powershell\migrate-db.ps1 cleanup
 
 # Migration-Status anzeigen
-.\migrate-db.ps1 status
+.\scripts\powershell\migrate-db.ps1 status
 ```
 
 ### Erstmaliges Setup

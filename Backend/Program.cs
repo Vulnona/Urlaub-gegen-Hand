@@ -112,12 +112,10 @@ namespace UGHApi
             TypeAdapterConfig.GlobalSettings.Scan(Assembly.GetExecutingAssembly());
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
-            //builder.Services.AddHostedService<MembershipStatusUpdaterService>();
             builder.Services.AddMediatR(
                 typeof(VerifyEmailCommandHandler).Assembly
             );
             builder.Services.Configure<AwsOptions>(builder.Configuration.GetSection("AwsOptions"));
-            //builder.Services.AddHostedService<PythonScriptRunner>();
             ConfigureAuthentication(builder);
             ConfigureCors(builder);
             ConfigureMailSettings(builder);

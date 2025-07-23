@@ -1,5 +1,8 @@
 # 🔐 Admin Password Security Guide
 
+> **Wichtig**: Admin-Passwort-Resets funktionieren nur über die API, da die MySQL-Datenbank 
+> in Docker läuft und nicht direkt vom Host erreichbar ist. Verwenden Sie die bereitgestellten 
+> PowerShell-Skripte für sichere Passwort-Verwaltung.
 
 ## Für Produktionsumgebungen
 
@@ -23,27 +26,25 @@ secrets:
 ### 3. **Sichere Passwort-Zurücksetzung**
 ```powershell
 # Nur im Notfall verwenden:
-.\secure-admin-setup.ps1 -NewPassword "NewSecurePassword123!"
+.\scripts\powershell\secure-admin-setup.ps1 -NewPassword "NewSecurePassword123!"
 ```
 
 ## Für Entwicklungsumgebungen
 
-### Option 1: Manuelles Setup (empfohlen)
-```sql
--- 1. Generieren Sie Hash mit dem PowerShell-Tool
-.\generate-admin-hash.ps1
-
--- 2. Führen Sie das SQL-Update aus
-UPDATE users SET 
-  Password = 'GENERATED_HASH', 
-  SaltKey = 'GENERATED_SALT' 
-WHERE Email_Address = 'admin@gmail.com';
+### Option 1: Automatischer Reset via API (empfohlen)
+```powershell
+# Verwendet die Backend-API für sicheren Passwort-Reset
+.\scripts\powershell\secure-admin-setup.ps1 -NewPassword "DevPassword123"
 ```
 
-### Option 2: Sicherer Reset-Endpoint
+### Option 2: Manueller Hash für Docker MySQL
 ```powershell
-# Mit temporärem Token
-.\secure-admin-setup.ps1 -NewPassword "DevPassword123"
+# 1. Hash generieren
+.\scripts\powershell\generate-admin-hash.ps1
+
+# 2. SQL in Docker Container ausführen
+docker exec -i ugh-db-1 mysql -u root -p ugh_db
+# Dann das UPDATE SQL-Statement eingeben
 ```
 
 ## ⚠️ Sicherheitsregeln
@@ -73,7 +74,7 @@ Wenn Sie den Admin-Zugang verlieren:
 
 2. **Emergency Reset:**
    ```powershell
-   .\secure-admin-setup.ps1 -NewPassword "EmergencyPassword123!"
+   .\scripts\powershell\secure-admin-setup.ps1 -NewPassword "EmergencyPassword123!"
    ```
 
 3. **Verify Login:**

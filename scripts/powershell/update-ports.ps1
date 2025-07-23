@@ -1,7 +1,53 @@
 param(
     [switch]$DryRun = $false,
-    [switch]$Verbose = $false
+    [switch]$Verbose = $false,
+    [switch]$Help = $false
 )
+
+function Test-Platform {
+    if ($IsLinux -or $IsMacOS) {
+        return "Unix"
+    } else {
+        return "Windows"
+    }
+}
+
+# Show help if requested or no parameters provided
+if ($Help -or ($args.Count -eq 0 -and -not $DryRun -and -not $Verbose)) {
+    Write-Host "PORT UPDATE SCRIPT - Help" -ForegroundColor Green
+    Write-Host "=========================" -ForegroundColor Green
+    Write-Host ""
+    Write-Host "BESCHREIBUNG:" -ForegroundColor Yellow
+    Write-Host "  Automatisiert die Aktualisierung von Port-Konfigurationen in allen Projektdateien"
+    Write-Host "  basierend auf der zentralen ports.config Datei."
+    Write-Host ""
+    Write-Host "USAGE:" -ForegroundColor Yellow
+    if ((Test-Platform) -eq "Windows") {
+        Write-Host "  .\update-ports.ps1 [-DryRun] [-Verbose] [-Help]"
+    } else {
+        Write-Host "  pwsh ./update-ports.ps1 [-DryRun] [-Verbose] [-Help]"
+    }
+    Write-Host ""
+    Write-Host "PARAMETER:" -ForegroundColor Yellow
+    Write-Host "  -DryRun   : Zeigt nur an, welche Aenderungen gemacht wuerden (ohne Ausfuehrung)"
+    Write-Host "  -Verbose  : Aktiviert ausfuehrliche Ausgabe"
+    Write-Host "  -Help     : Zeigt diese Hilfe an"
+    Write-Host ""
+    Write-Host "BEISPIELE:" -ForegroundColor Yellow
+    if ((Test-Platform) -eq "Windows") {
+        Write-Host "  .\update-ports.ps1                # Normale Ausfuehrung"
+        Write-Host "  .\update-ports.ps1 -DryRun        # Vorschau ohne Aenderungen"
+        Write-Host "  .\update-ports.ps1 -Verbose       # Mit ausfuehrlicher Ausgabe"
+        Write-Host "  .\update-ports.ps1 -DryRun -Verbose  # Beides kombiniert"
+    } else {
+        Write-Host "  pwsh ./update-ports.ps1                # Normale Ausfuehrung"
+        Write-Host "  pwsh ./update-ports.ps1 -DryRun        # Vorschau ohne Aenderungen"
+        Write-Host "  pwsh ./update-ports.ps1 -Verbose       # Mit ausfuehrlicher Ausgabe"
+        Write-Host "  pwsh ./update-ports.ps1 -DryRun -Verbose  # Beides kombiniert"
+    }
+    Write-Host ""
+    exit 0
+}
 
 Write-Host "PORT UPDATE SCRIPT" -ForegroundColor Green
 Write-Host "==================" -ForegroundColor Green
