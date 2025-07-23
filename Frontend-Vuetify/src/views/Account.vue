@@ -300,7 +300,7 @@ export default {
         this.user = response.data;
         this.profileImgSrc = `data:image/jpeg;base64,${response.data.profilePicture}`;
       } catch (error) {
-        toast.info("Failed to fetch user data!");
+        toast.info("Fehler beim Laden der Benutzerdaten!");
       }
     },
 

@@ -183,10 +183,10 @@ export default {
         if (response.data.profile) {
           this.profile = response.data.profile;
         } else {
-          toast.info("User profile data not found");
+          toast.info("Benutzerdatenprofil nicht gefunden");
         }
       } catch (error) {
-        toast.info("Failed to fetch user profile!");
+        toast.info("Fehler beim Abrufen des Benutzerprofils!");
       }
     },
     saveProfile() {
@@ -197,7 +197,7 @@ export default {
         };
         this.updateProfileAPI(updatedProfile);
       } else {
-        toast.error("Please correct the errors in the form before submitting.");
+        toast.error("Bitte korrigieren Sie die Fehler im Formular, bevor Sie es absenden.");
       }
     },
 async updateProfileAPI(updatedProfile) {
@@ -208,7 +208,7 @@ async updateProfileAPI(updatedProfile) {
         showCancelButton: true,
         confirmButtonColor: "#3085d6",
         cancelButtonColor: "#d33",
-        confirmButtonText: "Ja, möchte ich.!",
+        confirmButtonText: "Ja, möchte ich!",
         }).then( async(result) => {
             if (result.isConfirmed) {
       try {
@@ -223,11 +223,11 @@ async updateProfileAPI(updatedProfile) {
               }
               this.$router.push('/profile');
           } else {
-              toast.error("Failed to save profile. Please try again.");
+              toast.error("Fehler beim Speichern des Profils. Bitte versuchen Sie es erneut.");
           }
       } catch (error) {
           console.error("Error updating profile:", error);
-          toast.error("An error occurred while saving the profile. Please try again later.");
+          toast.error("Ein Fehler ist beim Speichern des Profils aufgetreten. Bitte versuchen Sie es später erneut.");
       }
             }
         })
@@ -247,15 +247,15 @@ async updateProfileAPI(updatedProfile) {
       });
       const locationNames = this.getLocationNames();
       if (!locationNames.country) {
-        this.errors.country = "Country is required";
+        this.errors.country = "Land ist erforderlich";
         this.formIsValid = false;
       }
       if (!locationNames.state) {
-        this.errors.state = "State is required";
+        this.errors.state = "Bundesland ist erforderlich";
         this.formIsValid = false;
       }
       if (!locationNames.city) {
-        this.errors.city = "City is required";
+        this.errors.city = "Stadt ist erforderlich";
         this.formIsValid = false;
       }
       if (!this.validateDateOfBirth()) {
@@ -275,7 +275,7 @@ async updateProfileAPI(updatedProfile) {
         age--;
       }
       if (age < 14 || age > 120) {
-        this.errors.dateOfBirth = "Date of birth must indicate age between 14 and 120.";
+        this.errors.dateOfBirth = "Das Alter muss zwischen 14 und 120 liegen.";
         return false;
       }
       return true;
@@ -285,7 +285,7 @@ async updateProfileAPI(updatedProfile) {
 
         const facebookRegex = /^https:\/\/www\.facebook\.com(\/.*)?$/;
         if (!facebookRegex.test(this.profile.facebookLink)) {
-          this.errors.facebookLink = "Please enter a valid Facebook link (e.g., https://www.facebook.com/anything)";
+          this.errors.facebookLink = "Bitte geben Sie einen gültigen Facebook-Link ein (z. B. https://www.facebook.com/name)";
           return false;
         }
       }

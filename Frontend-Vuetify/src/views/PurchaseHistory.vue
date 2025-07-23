@@ -23,13 +23,13 @@
             <table class="table theme_table">
               <thead>
                 <tr>
-                  <th class="text-center" style="width: 18%;">Date</th>
-                  <th class="text-center" style="width: 18%;">Item Name</th>
-                  <th class="text-center">Amount</th>
-                  <th class="text-center">Payment Method</th>
-                  <th class="text-center" style="width: 30%;">Coupon Code</th>
-                  <th class="text-center" style="width: 15%;">Purchase Status</th>
-                  <th class="text-center" style="width: 15%;">Coupon Status</th>
+                  <th class="text-center" style="width: 18%;">Datum</th>
+                  <th class="text-center" style="width: 18%;">Artikelname</th>
+                  <th class="text-center">Betrag</th>
+                  <th class="text-center">Zahlungsmethode</th>
+                  <th class="text-center" style="width: 30%;">Coupon-Code</th>
+                  <th class="text-center" style="width: 15%;">Bestellstatus</th>
+                  <th class="text-center" style="width: 15%;">Coupon-Status</th>
                   <!-- <th class="text-center">Action</th> -->
                 </tr>
               </thead>
@@ -212,7 +212,7 @@ export default {
           // toast.info("An error occurred!");
         }
       } else if (error.request) {
-        toast.info("A network error occurred. Please check your connection and try again.")
+        toast.info("Ein Netzwerkfehler ist aufgetreten. Bitte überprüfen Sie Ihre Verbindung und versuchen Sie es erneut.")
           .then(() => {
             router.push('/');
           });

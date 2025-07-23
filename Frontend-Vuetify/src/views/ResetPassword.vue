@@ -19,12 +19,12 @@
                       <!-- Disable button when loading -->
                       <button type="submit" class="btn" :disabled="loading">
                         <!-- Show loader or text based on loading status -->
-                        <span v-if="loading">Sending...</span>
+                        <span v-if="loading">Wird gesendet...</span>
                         <span v-else>Passwort-Link anfordern</span>
                       </button>
                     </div>
                     <div class="back-login">
-                      <a href="/login"><i class="ri-arrow-left-double-fill"></i> Back to Login</a>
+                      <a href="/login"><i class="ri-arrow-left-double-fill"></i> Zurück zur Anmeldung</a>
                     </div>
                   </div>
                   <div v-if="message" :class="{ 'error-message': isError, 'success-message': !isError }">

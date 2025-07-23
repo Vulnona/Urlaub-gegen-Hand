@@ -5,7 +5,7 @@
       <div class="row">
         <div class="col-sm-12">
           <div class="inner_banner">
-            <h2>Edit Profile</h2>
+            <h2>Profil bearbeiten</h2>
           </div>
         </div>
       </div>
@@ -32,7 +32,7 @@
                   <input type="text" v-model="newHobby" class="form-control" placeholder="Enter a hobby"
                     @keyup.enter="addHobby">
                   <div class="input-group-append">
-                    <button class="btn btn-outline-secondary" type="button" @click="addHobby">Add Hobby</button>
+                    <button class="btn btn-outline-secondary" type="button" @click="addHobby">Hobby hinzufügen</button>
                   </div>
                 </div>
                 <div v-if="profile.hobbies.length > 0" class="mt-2">
@@ -51,7 +51,7 @@
               <div class="profile_btn">
                 <!-- Submit Button -->
                 <button type="button" @click="back()" class="btn btn-back rounded">Back</button>
-                <button type="submit" class="btn btn-primary  rounded">Save Profile</button>
+                <button type="submit" class="btn btn-primary  rounded">Profil speichern</button>
               </div>
             </div>
           </div>
@@ -130,10 +130,10 @@ export default {
             this.skills.find(skill => skill.skill_ID === userSkill.skill_ID) || userSkill
           );
         } else {
-          toast.info("User profile data not found");
+          toast.info("Benutzerprofildaten nicht gefunden");
         }
       } catch (error) {
-        toast.info("Failed to fetch user profile!");
+        toast.info("Fehler beim Laden des Benutzerprofils!");
       }
     },
     saveProfile() {
@@ -150,14 +150,14 @@ export default {
         delete updatedProfile.cityName;
         this.updateProfileAPI(updatedProfile);
       } else {
-        toast.error("Please correct the errors in the form before submitting.");
+        toast.error("Bitte korrigieren Sie die Fehler im Formular vor dem Absenden.");
       }
     },
     async updateProfileAPI(updatedProfile) {
       try {
         const response = await axiosInstance.put(`${process.env.baseURL}profile/update-profile`, updatedProfile);
         if (response.status === 200) {
-          toast.success("Profile saved successfully!");
+          toast.success("Profil erfolgreich gespeichert!");
           if (response.data && response.data.profile) {            
             this.profile.skills = Array.isArray(this.profile.skills) ? this.profile.skills :
               (typeof this.profile.skills === 'string' ? this.profile.skills.split(', ') : []);
@@ -171,11 +171,11 @@ export default {
           }
           this.$router.push('/profile');
         } else {
-          toast.error("Failed to save profile. Please try again.");
+          toast.error("Fehler beim Speichern des Profils. Bitte versuchen Sie es erneut.");
         }
       } catch (error) {
         console.error("Error updating profile:", error);
-        toast.error("An error occurred while saving the profile. Please try again later.");
+        toast.error("Ein Fehler ist beim Speichern des Profils aufgetreten. Bitte versuchen Sie es später erneut.");
       }
     },
     validateForm() {
@@ -192,7 +192,7 @@ export default {
         }
       });
       if (!this.profile.skills || this.profile.skills.length === 0) {
-        this.errors.skills = "At least one skill is required";
+        this.errors.skills = "Mindestens ein Skill ist erforderlich";
         this.formIsValid = false;
       } else {
         delete this.errors.skills;
@@ -201,7 +201,7 @@ export default {
         this.formIsValid = false;
       }
       if (this.profile.hobbies.length === 0) {
-        this.errors.hobbies = "Please add at least one hobby";
+        this.errors.hobbies = "Bitte fügen Sie mindestens ein Hobby hinzu";
         this.formIsValid = false;
       } else {
         delete this.errors.hobbies;

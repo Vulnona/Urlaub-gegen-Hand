@@ -201,7 +201,7 @@ export default {
           // toast.info("An error occurred!");
         }
       } else if (error.request) {
-        toast.info("A network error occurred. Please check your connection and try again.")
+        toast.info("Ein Netzwerkfehler ist aufgetreten. Bitte überprüfen Sie Ihre Verbindung und versuchen Sie es erneut.")
           .then(() => {
             router.push('/');
           });

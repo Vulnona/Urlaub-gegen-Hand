@@ -157,7 +157,7 @@ namespace UGHApi.Controllers
                 var verificationToken = _tokenService.GenerateNewEmailVerificator(user.User_Id);
                 var emailSent = await _emailService.SendVerificationEmailAsync(resendUrl.Email, verificationToken);
                 if (!emailSent)
-                    return StatusCode(500, "Failed to send verification email.");
+                    return StatusCode(500, "Fehler beim Senden der Verifizierungs-E-Mail.");
 
                 return Ok("Verification email sent successfully.");
             }
@@ -186,14 +186,14 @@ namespace UGHApi.Controllers
                 var token = _tokenService.GenerateNewPasswordResetToken(user.User_Id);
                 var emailSent = await _emailService.SendResetPasswordEmailAsync(resendUrl.Email, token);
                 if (!emailSent)
-                    return StatusCode(500, "Failed to send email.");
+                    return StatusCode(500, "Fehler beim Senden der E-Mail.");
 
-                return Ok("Password reset token send successfully.");
+                return Ok("Passwort-Reset-Token erfolgreich gesendet.");
             }
             catch (Exception ex)
             {
                 _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
-                return StatusCode(500, $"Internal server error: {ex.Message}");
+                return StatusCode(500, $"Interner Serverfehler: {ex.Message}");
             }
         }
 
@@ -218,7 +218,7 @@ namespace UGHApi.Controllers
                 await _userRepository.UpdateUserAsync(user);
                 return Ok("Passwort erfolgreich geändert");
             } catch {
-                return StatusCode(500, new { Message = "Error"});
+                return StatusCode(500, new { Message = "Fehler"});
             }            
         }
 
@@ -240,7 +240,7 @@ namespace UGHApi.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"An error occurred while uploading files. Error: {ex}");
+                return StatusCode(500, $"Ein Fehler ist beim Hochladen der Dateien aufgetreten. Fehler: {ex}");
             }
         }
 
@@ -295,13 +295,13 @@ namespace UGHApi.Controllers
 
                 var user = await _userRepository.GetUserByEmailAsync(request.Email);
                 if (user == null)
-                    return NotFound("User not found");
+                    return NotFound("Benutzer nicht gefunden");
 
                 if (user.IsTwoFactorEnabled)
                     return BadRequest("2FA is already enabled for this user");
 
                 if (!_twoFactorAuthService.ValidateCode(request.Secret, request.Code))
-                    return BadRequest("Invalid verification code");
+                    return BadRequest("Ungültiger Verifizierungscode");
 
                 // Save 2FA settings to user
                 user.IsTwoFactorEnabled = true;

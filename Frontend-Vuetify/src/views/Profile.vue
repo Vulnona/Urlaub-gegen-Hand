@@ -350,16 +350,16 @@
         try {
           // Step 1: Open SweetAlert for user input
           const { value: redeemCode } = await Swal.fire({
-            title: 'Redeem Coupon',
+            title: 'Coupon einlösen',
             input: 'text',
-            inputLabel: 'Enter your redeem code',
-            inputPlaceholder: 'Redeem code...',
+            inputLabel: 'Gib deinen Coupon-Code ein',
+            inputPlaceholder: 'Coupon-Code...',
             showCancelButton: true,
-            confirmButtonText: 'Submit',
-            cancelButtonText: 'Cancel',
+            confirmButtonText: 'Einreichen',
+            cancelButtonText: 'Abbrechen',
             inputValidator: (value) => {
               if (!value) {
-                return 'You need to enter a redeem code!';
+                return 'Sie müssen einen Coupon-Code eingeben!';
               }
             }
           });
@@ -376,15 +376,15 @@
               router.push({ name: 'Login' });
               Swal.fire({
                 icon: 'success',
-                title: 'Coupon Redeemed',
-                text: 'Plesase Login Again!',
+                title: 'Coupon erfolgreich eingelöst',
+                text: 'Bitte loggen Sie sich erneut ein!',
               });
 
             } else {
               Swal.fire({
                 icon: '',
                 title: 'Unable To Redeem',
-                text: response.data.error.message || 'Failed to redeem coupon. Please try again.'
+                text: response.data.error.message || 'Fehler beim Einlösen des Coupons. Bitte versuchen Sie es erneut.'
               });
             }
           }
@@ -392,7 +392,7 @@
           Swal.fire({
             icon: '',
             title: 'Oops!',
-            text: 'Something went wrong. Please try again.'
+            text: 'Etwas ist schief gelaufen. Bitte versuchen Sie es erneut.'
           });
           console.error(error);
         }
@@ -441,7 +441,7 @@
       // Submit the profile picture as Base64 JSON to the API
       async submitProfilePic() {
         if (!this.selectedFile) {
-          toast.info("Please Select a profile picture!");
+          toast.info("Bitte wählen Sie ein Profilbild aus!");
           return;
         }
 
@@ -460,15 +460,15 @@
             });
 
             if (response.status === 200) {
-              toast.success("Profile picture updated successfully!");
+              toast.success("Profilbild erfolgreich aktualisiert!");
               this.showPicModal = false;
               this.fetchUserData();
             } else {
-              toast.info("Failed to update proile picture!");
+              toast.info("Fehler beim Aktualisieren des Profilbilds!");
             }
           } catch (error) {
             console.error(error);
-            toast.info("An Error Occoured At Our End!");
+            toast.info("Ein Fehler ist aufgetreten, bitte melden Sie sich beim Support");
           }
         };
 
@@ -490,17 +490,17 @@
       // Method to delete a user and associated images from S3
       deleteUser() {
         Swal.fire({
-          title: "Are you sure?",
-          text: "You want to delete your Data!",
+          title: "Sind Sie sicher?",
+          text: "Sie möchten Ihre Daten löschen!",
           icon: "warning",
           showCancelButton: true,
           confirmButtonColor: "#3085d6",
           cancelButtonColor: "#d33",
-          confirmButtonText: "Yes, delete it!",
+          confirmButtonText: "Ja, löschen!",
         }).then((result) => {
           if (result.isConfirmed) {
             axiosInstance.delete(`${process.env.baseURL}user/delete-user`).then(() => {
-              toast.success("User data deleted successfully!");
+              toast.success("Benutzerdaten erfolgreich gelöscht!");
               sessionStorage.clear();
               router.push({ name: 'Login' });
             }).catch((error) => {

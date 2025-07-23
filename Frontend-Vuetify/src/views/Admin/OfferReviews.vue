@@ -56,24 +56,24 @@
                 </li>
               </div>
               <div v-else>
-                <p class="text-center text-bold">No Review Yet!</p>
+                <p class="text-center text-bold">Keine Bewertungen bisher</p>
               </div>
             </ol>
             <div class="pagination" v-if="reviews.length >= 1">
               <button class="action-link" @click="changePage(currentPage - 1)" :hidden="currentPage === 1">
-                <i class="ri-arrow-left-s-line"></i> Previous
+                <i class="ri-arrow-left-s-line"></i> Vorherige
               </button>
 
-              <span>Page {{ currentPage }} of {{ totalPages }}</span>
+              <span>Seite {{ currentPage }} von {{ totalPages }}</span>
 
               <button class="action-link" @click="changePage(currentPage + 1)" :hidden="currentPage === totalPages">
-                Next <i class="ri-arrow-right-s-line"></i>
+                Nächste <i class="ri-arrow-right-s-line"></i>
               </button>
             </div>
 
             <!-- <div class="text-center" v-if="reviews.length > 1">
                 <button type="button" @click="toggleShowMore" class="btn outline_Greybtn">
-                    {{ showAllReviews ? "Hide Reviews" : "Show More Reviews" }}
+                    {{ showAllReviews ? "Verstecke Bewertungen" : "Zeig mehr Bewertungen" }}
                   </button>
               </div> -->
           </div>

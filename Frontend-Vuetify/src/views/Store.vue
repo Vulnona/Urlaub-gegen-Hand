@@ -119,11 +119,11 @@ export default {
     },
     async confirmBuy(item) {
       const result = await Swal.fire({
-        title: `Confirm Purchase`,
-        text: `Are you sure you want to buy ${item.name} for ${item.price.amount} ${item.price.currency}?`,
+        title: `Kauf bestätigen`,
+        text: `Sind Sie sicher, dass Sie ${item.name} für ${item.price.amount} ${item.price.currency} kaufen möchten?`,
         showCancelButton: true,
-        confirmButtonText: "Yes, Buy it!",
-        cancelButtonText: "Cancel",
+        confirmButtonText: "Ja, kaufen!",
+        cancelButtonText: "Abbrechen",
       });
 
       if (result.isConfirmed) {
@@ -144,11 +144,11 @@ export default {
           await this.initializeStripeElements(response.data.clientSecret);
           this.showStripeModal = true;
         } else {
-          Swal.fire("Error", "Something went wrong. Please try again.", "error");
+          Swal.fire("Fehler", "Etwas ist schief gelaufen. Bitte versuchen Sie es erneut.", "error");
         }
       } catch (error) {
         console.error("Payment intent creation error:", error);
-        Swal.fire("Error", "Failed to process the purchase.", "error");
+        Swal.fire("Fehler", "Fehler beim Verarbeiten des Kaufs", "error");
       }
     },
     async initializeStripeElements(clientSecret) {
@@ -190,7 +190,7 @@ export default {
         form.addEventListener('click', this.handleSubmit);
       } catch (error) {
         console.error('Error initializing Stripe elements:', error);
-        Swal.fire("Error", "Failed to initialize payment form. Please try again.", "error");
+        Swal.fire("Fehler", "Fehler beim Initialisieren des Zahlungsformulars. Bitte versuchen Sie es erneut.", "error");
       }
     },
     async handleSubmit(e) {

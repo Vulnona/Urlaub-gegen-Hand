@@ -58,14 +58,14 @@ namespace UGHApi.Controllers
                 if (string.IsNullOrEmpty(resetToken) || resetToken != request.ResetToken)
                 {
                     _logger.LogWarning("Unauthorized admin reset attempt");
-                    return Unauthorized("Invalid reset token");
+                    return Unauthorized("Ungültiger Reset-Token");
                 }
 
                 var adminEmail = Environment.GetEnvironmentVariable("ADMIN_EMAIL") ?? "admin@gmail.com";
                 var adminUser = _context.users.FirstOrDefault(u => u.Email_Address == adminEmail);
                 if (adminUser == null)
                 {
-                    return NotFound("Admin user not found");
+                    return NotFound("Admin-Benutzer nicht gefunden");
                 }
 
                 // Generate secure password
@@ -80,12 +80,12 @@ namespace UGHApi.Controllers
                 
                 _logger.LogWarning("Admin password has been reset via emergency endpoint");
                 
-                return Ok(new { message = "Admin password reset successfully" });
+                return Ok(new { message = "Admin-Passwort erfolgreich zurückgesetzt" });
             }
             catch (Exception ex)
             {
                 _logger.LogError($"Error during emergency reset: {ex.Message}");
-                return StatusCode(500, "Internal server error");
+                return StatusCode(500, "Interner Serverfehler");
             }
         }
 
@@ -108,7 +108,7 @@ namespace UGHApi.Controllers
             catch (Exception ex)
             {
                 _logger.LogError($"Error checking setup status: {ex.Message}");
-                return StatusCode(500, "Internal server error");
+                return StatusCode(500, "Interner Serverfehler");
             }
         }
     }

@@ -28,7 +28,7 @@
                             <select v-model="sortKey" class="sort-dropdown">
                       <option value="" disabled selected>Sort By</option>
                       <option value="FirstName">Name</option>
-                      <option value="Email_Address">Email</option>
+                      <option value="Email_Address">E-Mail</option>
                       <option value="VerificationState">Status</option>
                     </select>
     
@@ -38,8 +38,8 @@
                     </button>
     
                             <!-- Admin Password Reset Button -->
-                            <button class="btn btn-warning" @click="showAdminPasswordResetModal()" title="Reset Admin Password">
-                      <i class="ri-lock-password-line"></i> Reset Admin Password
+                            <button class="btn btn-warning" @click="showAdminPasswordResetModal()" title="Admin-Passwort zurücksetzen">
+                      <i class="ri-lock-password-line"></i> Admin-Passwort zurücksetzen
                     </button>
 
                             <!-- Generate Button -->
@@ -51,7 +51,7 @@
                             <p v-if="couponCode">
                                 <input type="text" :value="couponCode" class="coupon-input" disabled />&nbsp;
                                 <!-- Clear Button -->
-                                <button class="" title="Clear" @click="clearCode()">
+                                <button class="" title="Löschen" @click="clearCode()">
                         <i class="ri-close-circle-line"></i>
                       </button>
                             </p>
@@ -85,35 +85,35 @@
                                         <i class="ri-eye-line"></i> View VS
                                       </a>
                                         </td>
-                                        <td v-else>No VS Data Available</td>
+                                        <td v-else>Keine VS-Daten verfügbar</td>
                                         <td v-if="user.link_RS" class="vs_link">
                                             <a class="" @click="showImageModal(user.link_RS, user)">
                                         <i class="ri-eye-line"></i> View RS
                                       </a>
                                         </td>
-                                        <td v-else>No RS Data Available</td>
+                                        <td v-else>Keine RS-Daten verfügbar</td>
                                         <td class="text-center">
                                             <span class="newState badge badge-primary" v-if="user.verificationState === 0">New</span>
                                             <span class="penState badge badge-warning" v-else-if="user.verificationState === 1">Pending</span>
-                                            <span class="failState badge badge-danger" v-else-if="user.verificationState === 2">Failed</span>
-                                            <span class="verState badge badge-success" v-else-if="user.verificationState === 3">Verified</span>
+                                            <span class="failState badge badge-danger" v-else-if="user.verificationState === 2">Fehlgeschlagen</span>
+                                            <span class="verState badge badge-success" v-else-if="user.verificationState === 3">Verifiziert</span>
                                         </td>
                                         <td class="text-center">
                                             <div class="action-icon-btns buttons_text">
-                                                <button title="Reactivate" class="icon_btn bg_ltblue" @click="reactivate_User(user.user_Id, 1)" v-if="user.verificationState === 2 && user.verificationState !== 0">
-                                          Reactivate
+                                                <button title="Reaktivieren" class="icon_btn bg_ltblue" @click="reactivate_User(user.user_Id, 1)" v-if="user.verificationState === 2 && user.verificationState !== 0">
+                                          Reaktivieren
                                         </button>
-                                                <button title="Delete" class="icon_btn bg_ltred" @click="deleteUser(user.user_Id)" v-if="user.verificationState === 2 && user.verificationState !== 0">
-                                          Delete
+                                                <button title="Löschen" class="icon_btn bg_ltred" @click="deleteUser(user.user_Id)" v-if="user.verificationState === 2 && user.verificationState !== 0">
+                                          Löschen
                                         </button>
-                                                <button title="Approve" class="icon_btn bg_ltgreen" @click="approveUser(user.user_Id, 3)" v-if="user.verificationState === 1 || user.verificationState === 0">
-                                          Approve
+                                                <button title="Genehmigen" class="icon_btn bg_ltgreen" @click="approveUser(user.user_Id, 3)" v-if="user.verificationState === 1 || user.verificationState === 0">
+                                          Genehmigen
                                         </button>
-                                                <button title="Reject" class="icon_btn bg_ltred" @click="rejectUser(user.user_Id, 2)" v-if="user.verificationState === 1 || user.verificationState === 0">
-                                          Reject
+                                                <button title="Ablehnen" class="icon_btn bg_ltred" @click="rejectUser(user.user_Id, 2)" v-if="user.verificationState === 1 || user.verificationState === 0">
+                                          Ablehnen
                                         </button>
                                                 <button title="Coupon" class="icon_btn bg_ltgreen" @click="handleSendCode(user)" v-if="user.verificationState === 3 && user.membershipId == null">
-                                          Send Code
+                                          Code senden
                                         </button>
                                             </div>
                                         </td>
@@ -154,11 +154,11 @@
         <!-- Pagination Section -->
         <div class="pagination">
             <button class="action-link" @click="changePage(currentPage - 1)" :hidden="currentPage === 1">
-                        <i class="ri-arrow-left-s-line"></i>Previous
+                        <i class="ri-arrow-left-s-line"></i>Vorherige
                       </button>
-            <span>Page {{ currentPage }} of {{ totalPages }}</span>
+            <span>Seite {{ currentPage }} von {{ totalPages }}</span>
             <button class="action-link" @click="changePage(currentPage + 1)" :hidden="currentPage === totalPages">
-                        Next<i class="ri-arrow-right-s-line"></i>
+                        Nächste<i class="ri-arrow-right-s-line"></i>
                       </button>
         </div>
         <!-- Email Modal -->
@@ -166,30 +166,30 @@
             <div class="modal-overlay" @click="closeModal"></div>
             <div class="modal-content">
                 <span class="close" @click="closeModal">&times;</span>
-                <h4>Send Email</h4>
+                <h4>E-Mail senden</h4>
                 <form @submit.prevent="sendEmail">
                     <div class="form-group">
-                        <label for="from" class="text-left">From:</label>
+                        <label for="from" class="text-left">Von:</label>
                         <input id="from" type="text" value="info@alreco.de" disabled>
                     </div>
                     <div class="form-group">
-                        <label for="to" class="text-left">To:</label>
+                        <label for="to" class="text-left">An:</label>
                         <input id="to" type="text" :value="selectedUser.email_Address" disabled>
                     </div>
                     <div class="form-group">
-                        <label for="subject" class="text-left">Subject:</label>
+                        <label for="subject" class="text-left">Betreff:</label>
                         <input id="subject" v-model="emailSubject" type="text" required>
                     </div>
                     <div class="form-group">
-                        <label for="body" class="text-left">Body:</label>
+                        <label for="body" class="text-left">Nachricht:</label>
                         <textarea id="body" rows="5" v-model="emailBody" required></textarea>
                     </div>
                     <div class="modal-buttons">
                         <button class="btn themeBtn common-btn" type="submit" :disabled="isSending">
-                              Send
+                              Senden
                             </button>
                         <button class="btn-cancel common-btn" type="button" @click="closeModal" :disabled="isSending">
-                              Close
+                              Schließen
                             </button>
                     </div>
                     <div v-if="isSending" class="loader"></div>
@@ -327,8 +327,8 @@ export default {
                 }, {}),
                 inputPlaceholder: 'Select a membership',
                 showCancelButton: true,
-                confirmButtonText: 'Generate',
-                cancelButtonText: 'Cancel',
+                confirmButtonText: 'Generieren',
+                cancelButtonText: 'Abbrechen',
                 inputValidator: (value) => {
                     if (!value) {
                         return 'You need to select a membership!';
@@ -383,7 +383,7 @@ export default {
                     toast.error(res.data.error.message);
                 }
             } catch (error) {
-                toast.error("Something went wrong!");
+                toast.error("Etwas ist schief gelaufen!");
             }
         },
 
@@ -393,8 +393,8 @@ export default {
                 input: "text",
                 inputPlaceholder: "Enter the coupon code here",
                 showCancelButton: true,
-                confirmButtonText: "Send",
-                cancelButtonText: "Cancel",
+                confirmButtonText: "Senden",
+                cancelButtonText: "Abbrechen",
                 inputValidator: (value) => {
                     if (!value) {
                         return 'You need to enter a coupon code!';
@@ -448,21 +448,21 @@ export default {
         async approveUser(userid, statusid) {
             await this.statusUpdate(userid, statusid);
             await this.getdata();
-            toast.success("Status Updated successfully!");
+            toast.success("Status erfolgreich aktualisiert!");
         },
 
         // Method to reject a user and delete associated images from S3
         async rejectUser(userid, statusid) {
             await this.statusUpdate(userid, statusid);
             await this.getdata();
-            toast.success("Status Updated successfully!");
+            toast.success("Status erfolgreich aktualisiert!");
         },
 
         // Method to reactivate a user
         async reactivate_User(userid, statusid) {
             await this.statusUpdate(userid, statusid);
             await this.getdata();
-            toast.success("Status Updated successfully!");
+            toast.success("Status erfolgreich aktualisiert!");
         },
         // Method to set the selected user for email modal
         setModal(userId) {
@@ -482,7 +482,7 @@ export default {
                     body: this.emailBody
                 })
                 .then(response => {
-                    toast.success("Email sent successfully!");
+                    toast.success("E-Mail erfolgreich gesendet!");
                     this.closeModal();
                 })
                 .catch(error => {
@@ -508,16 +508,16 @@ export default {
         // Method to show admin password reset modal
         async showAdminPasswordResetModal() {
             const { value: email } = await Swal.fire({
-                title: "Admin Password Reset",
-                text: "Enter your admin email address to receive a password reset link",
+                title: "Admin-Passwort zurücksetzen",
+                text: "Geben Sie Ihre Admin-E-Mail-Adresse ein, um einen Passwort-Reset-Link zu erhalten",
                 input: "email",
-                inputPlaceholder: "Enter your admin email",
+                inputPlaceholder: "Geben Sie Ihre Admin-E-Mail ein",
                 showCancelButton: true,
-                confirmButtonText: "Send Reset Link",
-                cancelButtonText: "Cancel",
+                confirmButtonText: "Reset-Link senden",
+                cancelButtonText: "Abbrechen",
                 inputValidator: (value) => {
                     if (!value) {
-                        return 'Email address is required!';
+                        return 'E-Mail-Adresse ist erforderlich!';
                     }
                     if (!/\S+@\S+\.\S+/.test(value)) {
                         return 'Please enter a valid email address!';
@@ -537,25 +537,25 @@ export default {
                     email: email
                 });
                 
-                toast.success("Password reset link sent successfully! Check your email.");
+                toast.success("Passwort-Reset-Link erfolgreich gesendet! Überprüfen Sie Ihre E-Mail.");
                 
                 Swal.fire({
-                    title: "Reset Link Sent",
-                    text: "A password reset link has been sent to your email address. Please check your inbox and follow the instructions to reset your password.",
+                    title: "Reset-Link gesendet",
+                    text: "Ein Passwort-Reset-Link wurde an Ihre E-Mail-Adresse gesendet. Bitte überprüfen Sie Ihren Posteingang und folgen Sie den Anweisungen zum Zurücksetzen Ihres Passworts.",
                     icon: "success",
                     confirmButtonText: "OK"
                 });
                 
             } catch (error) {
                 if (error.response && error.response.data) {
-                    toast.error(error.response.data.value || "Failed to send password reset email");
+                    toast.error(error.response.data.value || "Fehler beim Senden der Passwort-Reset-E-Mail");
                 } else {
-                    toast.error("Failed to send password reset email. Please try again.");
+                    toast.error("Fehler beim Senden der Passwort-Reset-E-Mail. Bitte versuchen Sie es erneut.");
                 }
                 
                 Swal.fire({
-                    title: "Error",
-                    text: "Failed to send password reset email. Please check the email address and try again.",
+                    title: "Fehler",
+                    text: "Fehler beim Senden der Passwort-Reset-E-Mail. Bitte überprüfen Sie die E-Mail-Adresse und versuchen Sie es erneut.",
                     icon: "error",
                     confirmButtonText: "OK"
                 });
