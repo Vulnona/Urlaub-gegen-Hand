@@ -7,3 +7,4 @@
 * * [Verzeichnisstruktur](20.guide/10.directory-structure.md)
 * * [Interfaces](20.guide/20.interfaces.md)
 * * [API](20.guide/30.api.md)
+* * [Skripte](20.guide/40.scripts.md)
