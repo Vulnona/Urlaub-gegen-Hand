@@ -39,12 +39,18 @@
     "vue-toastification": "^2.0.0-rc.5",
     "vue3-datepicker": "^0.4.0",
     "vue3-perfect-scrollbar": "^2.0.0",
-    "vuetify": "^3.0.0"
+    "vuetify": "^3.0.0",
+    "qrcode": "^1.5.3",
+    "qrcode-vue3": "^1.6.8"
   },
   "devDependencies": {
     "@babel/types": "^7.21.4",
     "@types/markdown-it": "^14.1.2",
+<<<<<<< HEAD
     "@types/node": "^18.19.120",
+=======
+    "@types/node": "^18.15.0",
+>>>>>>> b80002b7822c218d8ac94bf44fb58c5eb0929d68
     "@types/qrcode": "^1.5.5",
     "@vitejs/plugin-vue": "^5.2.4",
     "@vue/eslint-config-typescript": "^14.3.0",

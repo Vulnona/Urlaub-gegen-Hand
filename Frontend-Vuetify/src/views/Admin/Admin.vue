@@ -38,8 +38,13 @@
                     </button>
     
                             <!-- Admin Password Reset Button -->
+<<<<<<< HEAD
                             <button class="btn btn-warning" @click="showAdminPasswordResetModal()" title="Admin-Passwort zurücksetzen">
                       <i class="ri-lock-password-line"></i> Admin-Passwort zurücksetzen
+=======
+                            <button class="btn btn-warning" @click="showAdminPasswordResetModal()" title="Reset Admin Password">
+                      <i class="ri-lock-password-line"></i> Reset Admin Password
+>>>>>>> b80002b7822c218d8ac94bf44fb58c5eb0929d68
                     </button>
 
                             <!-- Generate Button -->
@@ -508,6 +513,7 @@ export default {
         // Method to show admin password reset modal
         async showAdminPasswordResetModal() {
             const { value: email } = await Swal.fire({
+<<<<<<< HEAD
                 title: "Admin-Passwort zurücksetzen",
                 text: "Geben Sie Ihre Admin-E-Mail-Adresse ein, um einen Passwort-Reset-Link zu erhalten",
                 input: "email",
@@ -518,6 +524,18 @@ export default {
                 inputValidator: (value) => {
                     if (!value) {
                         return 'E-Mail-Adresse ist erforderlich!';
+=======
+                title: "Admin Password Reset",
+                text: "Enter your admin email address to receive a password reset link",
+                input: "email",
+                inputPlaceholder: "Enter your admin email",
+                showCancelButton: true,
+                confirmButtonText: "Send Reset Link",
+                cancelButtonText: "Cancel",
+                inputValidator: (value) => {
+                    if (!value) {
+                        return 'Email address is required!';
+>>>>>>> b80002b7822c218d8ac94bf44fb58c5eb0929d68
                     }
                     if (!/\S+@\S+\.\S+/.test(value)) {
                         return 'Please enter a valid email address!';
@@ -537,17 +555,26 @@ export default {
                     email: email
                 });
                 
+<<<<<<< HEAD
                 toast.success("Passwort-Reset-Link erfolgreich gesendet! Überprüfen Sie Ihre E-Mail.");
                 
                 Swal.fire({
                     title: "Reset-Link gesendet",
                     text: "Ein Passwort-Reset-Link wurde an Ihre E-Mail-Adresse gesendet. Bitte überprüfen Sie Ihren Posteingang und folgen Sie den Anweisungen zum Zurücksetzen Ihres Passworts.",
+=======
+                toast.success("Password reset link sent successfully! Check your email.");
+                
+                Swal.fire({
+                    title: "Reset Link Sent",
+                    text: "A password reset link has been sent to your email address. Please check your inbox and follow the instructions to reset your password.",
+>>>>>>> b80002b7822c218d8ac94bf44fb58c5eb0929d68
                     icon: "success",
                     confirmButtonText: "OK"
                 });
                 
             } catch (error) {
                 if (error.response && error.response.data) {
+<<<<<<< HEAD
                     toast.error(error.response.data.value || "Fehler beim Senden der Passwort-Reset-E-Mail");
                 } else {
                     toast.error("Fehler beim Senden der Passwort-Reset-E-Mail. Bitte versuchen Sie es erneut.");
@@ -556,6 +583,16 @@ export default {
                 Swal.fire({
                     title: "Fehler",
                     text: "Fehler beim Senden der Passwort-Reset-E-Mail. Bitte überprüfen Sie die E-Mail-Adresse und versuchen Sie es erneut.",
+=======
+                    toast.error(error.response.data.value || "Failed to send password reset email");
+                } else {
+                    toast.error("Failed to send password reset email. Please try again.");
+                }
+                
+                Swal.fire({
+                    title: "Error",
+                    text: "Failed to send password reset email. Please check the email address and try again.",
+>>>>>>> b80002b7822c218d8ac94bf44fb58c5eb0929d68
                     icon: "error",
                     confirmButtonText: "OK"
                 });
