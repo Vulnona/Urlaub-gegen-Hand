@@ -57,16 +57,16 @@ Das System prüft AUTOMATISCH vor jeder Migration:
 - **Manuelle Backups** jederzeit möglich
 - **Einfache Wiederherstellung** bei Problemen
 
-## 🎯 Wann welches Kommando verwenden?
+## Wann welches Kommando verwenden?
 
 | Situation | Kommando | Beschreibung |
 |-----------|----------|--------------|
-| 📦 **Neue Migration anwenden** | `.\migrate-db.ps1 run` | Sicherste Option mit automatischer Validierung |
-| 🔍 **Probleme checken** | `.\migrate-db.ps1 validate` | Prüft Datenintegrität ohne Änderungen |
-| 🚨 **Migration fehlgeschlagen** | `.\migrate-db.ps1 cleanup` dann `run` | Behebt Datenprobleme, dann Migration |
-| 📊 **Status anzeigen** | `.\migrate-db.ps1 status` | Zeigt aktuelle Migration-Historie |
-| 💾 **Backup erstellen** | `.\migrate-db.ps1 backup` | Manuelles Sicherheitsbackup |
-| ⚡ **Notfall (gefährlich!)** | `.\migrate-db.ps1 run -SkipValidation` | Nur bei absoluter Notwendigkeit! |
+| **Neue Migration anwenden** | `.\migrate-db.ps1 run` | Sicherste Option mit automatischer Validierung |
+| **Probleme checken** | `.\migrate-db.ps1 validate` | Prüft Datenintegrität ohne Änderungen |
+| **Migration fehlgeschlagen** | `.\migrate-db.ps1 cleanup` dann `run` | Behebt Datenprobleme, dann Migration |
+| **Status anzeigen** | `.\migrate-db.ps1 status` | Zeigt aktuelle Migration-Historie |
+| **Backup erstellen** | `.\migrate-db.ps1 backup` | Manuelles Sicherheitsbackup |
+| **Notfall** | `.\migrate-db.ps1 run -SkipValidation` | Nur bei absoluter Notwendigkeit! |
 
 ## Kommando-Referenz
 
@@ -301,7 +301,7 @@ docker-compose build migration
 - Backups werden automatisch bei jedem `cleanup` erstellt
 - Container wird automatisch neu gebaut bei Script-Änderungen
 
-## 🔧 Entwickler-Hinweise
+## Entwickler-Hinweise
 
 ### **Nach Skript-Änderungen:**
 ```powershell
