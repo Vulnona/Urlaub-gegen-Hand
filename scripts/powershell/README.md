@@ -4,6 +4,13 @@ Dieser Ordner enthält alle PowerShell-Skripte für das UGH-Projekt.
 
 **Cross-Platform:** Alle Skripte laufen auf Windows, Linux und macOS mit PowerShell Core.
 
+## ⚠ Migration zu Docs/
+
+**Wichtig**: Viele Skripte wurden nach `Docs/` verschoben für bessere Organisation:
+
+- **Migration Management**: Siehe `Docs/migration/README.md`
+- **Port Management**: Siehe `Docs/infrastructure/README.md`
+
 ## Installation PowerShell (Linux/macOS)
 [Link](https://learn.microsoft.com/en-us/powershell/scripting/install/installing-powershell-on-linux?view=powershell-7.5)
 
@@ -22,12 +29,8 @@ Wichtig: Unter Linux brauchen Interaktionen mit Dockercontainern root-Rechte. D.
 
 ## Verfügbare Skripte
 
-### 📊 update-ports.ps1
-**Zweck:** Automatisierte Port-Konfiguration für alle Projektdateien
-
-```powershell
-.\update-ports.ps1 [-DryRun] [-Verbose] [-Help]
-```
+### 📊 Admin & Security Tools
+**Hinweis:** Port-Management wurde nach `Docs/infrastructure/` verschoben
 
 **Parameter:**
 - `-DryRun`: Zeigt nur an, welche Änderungen gemacht würden

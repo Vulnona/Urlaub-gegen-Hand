@@ -1,6 +1,66 @@
+# Migration Management System - Übersicht
+
+Für die vollständige Migrati#### PowerShell (Windows/Linux/macOS)
+```powershell
+# Check system health
+.\scripts\migration\enhanced-migration.ps1 validate
+
+# Run full migration pipeline
+.\scripts\migration\enhanced-migration.ps1 run
+
+# Create new migration
+.\scripts\migration\enhanced-migration.ps1 add -MigrationName AddUserProfile
+
+# Remove last migration
+.\scripts\migration\enhanced-migration.ps1 remove -Force
+
+# Dry run (preview changes)
+.\scripts\migration\enhanced-migration.ps1 sync -DryRun
+```he: **[Migration Tools](../scripts/migration/)**
+
+## Schnellstart
+
+```powershell
+# Status aller Migrationen anzeigen
+.\scripts\migration\enhanced-migration.ps1 status
+
+# Neue Migration hinzufügen
+.\scripts\migration\enhanced-migration.ps1 add -MigrationName "NeueFeature"
+
+# Migrationen ausführen
+.\scripts\migration\enhanced-migration.ps1 run
+```
+
+## Migration System Architektur
+
+Das UGH-Projekt verwendet ein **zweistufiges Migration-System**:
+
+### 1. Docker Migration Container (`/.docker/migration/`)
+- **Zweck**: Basis-Setup und Datenbank-Initialisierung
+- **Ausführung**: Automatisch beim Container-Start
+- **Funktion**: Database Health Checks, Backup-Erstellung
+
+### 2. Enhanced Migration Tools (`/scripts/migration/`)
+- **Zweck**: Entwickler-Tools für erweiterte Migration-Verwaltung
+- **Ausführung**: Manuell via PowerShell-Skript
+- **Funktionen**: validate, cleanup, run, add, remove, status, sync
+
+## Integration mit Infrastructure
+
+Das Migration-System arbeitet eng mit dem Port-Management zusammen:
+- **Port-Konfiguration**: Via `Docs/infrastructure/ports.config`
+- **Container-Kommunikation**: Dynamische Port-Resolution
+- **Service-Koordination**: Automatische Container-Abhängigkeiten
+
+Für Details siehe: **[Infrastructure Management](./infrastructure/README.md)**
+
+---
+
+> **⚠ Legacy Dokumentation unten** - Verwende die neuen Tools in `/Docs/migration/`
+
 # UGH Database Migration System
 
-*Auto-generated on 2025-07-23 18:26:00*
+*Auto-generated on 2025-07-23 20:45:09*
 
 ## Overview
 
@@ -27,41 +87,25 @@ This document is automatically generated and tracks all database migrations in t
 
 ### Command Examples
 
-#### PowerShell (Windows)
+#### PowerShell (Windows/Linux/macOS)
 ```powershell
 # Check system health
-.\scripts\powershell\enhanced-migration.ps1 validate
+.\scripts\migration\enhanced-migration.ps1 validate
 
 # Run full migration pipeline
-.\scripts\powershell\enhanced-migration.ps1 run
+.\scripts\migration\enhanced-migration.ps1 run
 
 # Create new migration
-.\scripts\powershell\enhanced-migration.ps1 add AddUserProfile
+.\scripts\migration\enhanced-migration.ps1 add -MigrationName AddUserProfile
 
 # Remove last migration
-.\scripts\powershell\enhanced-migration.ps1 remove -Force
+.\scripts\migration\enhanced-migration.ps1 remove -Force
 
 # Dry run (preview changes)
-.\scripts\powershell\enhanced-migration.ps1 sync -DryRun
+.\scripts\migration\enhanced-migration.ps1 sync -DryRun
 ```
 
-#### Bash (Linux/macOS)
-```bash
-# Check system health
-./scripts/bash/enhanced-migration.sh validate
-
-# Run full migration pipeline
-./scripts/bash/enhanced-migration.sh run
-
-# Create new migration
-./scripts/bash/enhanced-migration.sh add AddUserProfile
-
-# Remove last migration
-./scripts/bash/enhanced-migration.sh remove --force
-
-# Dry run (preview changes)
-./scripts/bash/enhanced-migration.sh sync --dry-run
-```
+**Hinweis**: PowerShell Core ist plattformübergreifend verfügbar und funktioniert auf Windows, Linux und macOS.
 
 ## Migration History
 
@@ -73,32 +117,6 @@ This document is automatically generated and tracks all database migrations in t
 | `20250723173500_AddProfileTables` | User profiles and skills | ✅ Applied | 7.0.0 |
 | `20250723174700_Add2FASupport` | Two-Factor Authentication support | ✅ Applied | 7.0.0 |
 
-## 2FA Implementation Status - COMPLETED ✅
-
-The Two-Factor Authentication (2FA) system has been fully implemented:
-
-### Database Schema Changes ✅
-- ✅ **IsTwoFactorEnabled** (TINYINT(1)): Flag to enable/disable 2FA per user
-- ✅ **TwoFactorSecret** (TEXT): Stores the TOTP secret key  
-- ✅ **BackupCodes** (TEXT): JSON array of backup recovery codes
-
-### Backend Implementation ✅
-- ✅ **TwoFactorAuthService.cs**: Complete TOTP implementation using Otp.NET 1.3.0
-- ✅ **AuthController.cs**: 8 new endpoints for 2FA management
-- ✅ **User.cs Model**: Extended with 2FA properties
-- ✅ **QR Code Generation**: Server-side using QRCoder 1.4.3
-
-### Frontend Implementation ✅
-- ✅ **TwoFactorSetup.vue**: 3-step setup wizard with QR code display
-- ✅ **TwoFactorLogin.vue**: Login verification component
-- ✅ **TwoFactorManagement.vue**: User settings management
-- ✅ **QR Code Display**: Using qrcode-vue3 1.6.8
-
-### Security Features ✅
-- ✅ **RFC 6238 Compliance**: Standard TOTP implementation
-- ✅ **Mandatory Admin 2FA**: Admin users require 2FA authentication
-- ✅ **Backup Codes**: Emergency access recovery codes
-- ✅ **Time-based Validation**: Secure time window verification
 
 ### Migration System Features ✅
 - ✅ **Automated Migration Tracking**: No manual intervention required

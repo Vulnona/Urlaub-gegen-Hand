@@ -1,0 +1,71 @@
+# Build stage
+FROM mcr.microsoft.com/dotnet/sdk:7.0-alpine AS backend-build
+WORKDIR /app
+
+# Copy project files and restore
+COPY Backend/UGHApi.csproj Backend/
+RUN dotnet restore Backend/UGHApi.csproj
+
+# Copy source code
+COPY Backend/ Backend/
+
+# Build and publish
+RUN dotnet publish Backend/UGHApi.csproj \
+    --configuration Release \
+    --output /app/binaries \
+    --no-restore
+
+# Copy Template folder
+COPY Backend/Template /app/Template
+
+# Runtime environment
+FROM mcr.microsoft.com/dotnet/aspnet:7.0-alpine AS backend-runtime
+WORKDIR /app
+
+# Install .NET SDK for EF Tools (required for migrations)
+RUN apk add --no-cache \
+    dotnet7-sdk \
+    chromium \
+    chromium-chromedriver \
+    bash \
+    icu-libs \
+    tzdata \
+    font-noto \
+    msttcorefonts-installer \
+    && update-ms-fonts \
+    && fc-cache -f
+
+# Install EF Core Tools globally (compatible with .NET 7.0)
+RUN dotnet tool install --global dotnet-ef --version 7.0.20
+
+# Set PATH environment variable correctly for EF tools (consolidated)
+ENV PATH="/root/.dotnet/tools:/usr/lib/chromium/:/usr/local/bin/:$PATH"
+
+# Copy appsettings.json
+COPY Backend/appsettings.json /app
+
+# Copy the published binaries
+COPY --from=backend-build /app/binaries /app/binaries
+
+# Copy Backend source code for EF migrations
+COPY ./Backend /app/Backend
+
+# Copy Template folder
+COPY --from=backend-build /app/Template /app/Template
+
+# Set environment variables for template paths
+ENV TemplateSettings__SuccessTemplate=/app/Template/confirmation.html
+ENV TemplateSettings__FailedTemplate=/app/Template/DeclinedConfirmation.html
+
+# Set working directory to app root for EF commands
+WORKDIR /app
+
+# Expose port 8080 (matching compose.yaml configuration)
+EXPOSE 8080
+
+# Set ASP.NET Core environment variables
+ENV ASPNETCORE_ENVIRONMENT=Development
+ENV ASPNETCORE_URLS=http://+:8080
+
+# Start the .NET application on port 8080
+CMD ["dotnet", "/app/binaries/UGHApi.dll"]
