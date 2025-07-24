@@ -2,7 +2,6 @@ using MediatR;
 using UGH.Domain.Core;
 using UGH.Domain.Entities;
 using UGH.Domain.Interfaces;
-using UGH.Domain.Interfaces;
 
 namespace UGHApi.Applications.Admin;
 

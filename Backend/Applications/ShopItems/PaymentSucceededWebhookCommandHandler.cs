@@ -5,7 +5,6 @@ using UGH.Domain.Core;
 using UGH.Domain.Interfaces;
 using UGH.Infrastructure.Services;
 using UGHApi.Extensions;
-using UGH.Domain.Interfaces;
 using UGHApi.Services.HtmlTemplate;
 using static UGH.Domain.Core.UGH_Enums;
 

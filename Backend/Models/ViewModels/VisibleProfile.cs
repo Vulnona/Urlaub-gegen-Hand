@@ -12,6 +12,7 @@ public class VisibleProfile
     public string Gender { get; set; }
     
     // Geographic location data (NEW) - simplified for public visibility
+    #nullable enable
     public string? City { get; set; } // From Address.City
     public string? Country { get; set; } // From Address.Country
     
@@ -24,4 +25,5 @@ public class VisibleProfile
     // if this flag is true more privileged information can be shared
     public bool contact { get; set; }
     public DateTime? MembershipEndDate { get; set; }
+    #nullable restore
 }

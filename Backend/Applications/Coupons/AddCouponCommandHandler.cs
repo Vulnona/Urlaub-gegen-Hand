@@ -3,7 +3,6 @@ using UGH.Domain.Core;
 using UGH.Domain.Entities;
 using UGH.Domain.Interfaces;
 using UGHApi.Extensions;
-using UGH.Domain.Interfaces;
 
 namespace UGHApi.Applications.Coupons;
 

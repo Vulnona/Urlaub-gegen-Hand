@@ -19,4 +19,5 @@ public interface IUserRepository
     Task<User> GetUserWithRatingByIdAsync(Guid userId);
     Task AddUserMembership(UserMembership userMembership);
     Task<User> GetUserForMembershipByIdAsync(Guid userId);
+    Task DeactivateExpiredMembershipsAsync();
 }

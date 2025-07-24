@@ -1,6 +1,8 @@
 using UGH.Domain.Entities;
-using UGHApi.Interfaces;
+using UGH.Domain.Core;
+using UGHApi.Extensions;
 using UGH.Domain.Interfaces;
+#nullable enable
 using Microsoft.Extensions.Logging;
 using static UGH.Domain.Core.UGH_Enums;
 
@@ -41,15 +43,18 @@ public class CouponService : ICouponService
 {
     private readonly ICouponRepository _couponRepository;
     private readonly IUserRepository _userRepository;
+    private readonly IMembershipRepository _membershipRepository;
     private readonly ILogger<CouponService> _logger;
 
     public CouponService(
         ICouponRepository couponRepository,
         IUserRepository userRepository,
+        IMembershipRepository membershipRepository,
         ILogger<CouponService> logger)
     {
         _couponRepository = couponRepository;
         _userRepository = userRepository;
+        _membershipRepository = membershipRepository;
         _logger = logger;
     }
 
@@ -58,7 +63,7 @@ public class CouponService : ICouponService
         try
         {
             // Validate membership exists
-            var membership = await _userRepository.GetMembershipByIdAsync(membershipId);
+            var membership = await _membershipRepository.GetMembershipByIdAsync(membershipId);
             if (membership == null)
             {
                 return Result.Failure<Coupon>(new Error("InvalidMembership", "Membership not found"));
@@ -187,7 +192,7 @@ public class CouponService : ICouponService
     {
         try
         {
-            var coupons = await _couponRepository.GetAllCouponsAsync();
+            var coupons = await _couponRepository.GetAllCouponsEntities();
             
             if (!includeRedeemed)
             {

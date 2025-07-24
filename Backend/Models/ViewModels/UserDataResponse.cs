@@ -11,11 +11,15 @@ public class UserDataResponse
     public string Gender { get; set; }
     
     // Geographic location data (NEW)
+    #nullable enable
     public Address? Address { get; set; }
+    #nullable restore
     
     public string Email_Address { get; set; }
     public bool IsEmailVerified { get; set; }
+    #nullable enable
     public int? MembershipId { get; set; }
+    #nullable restore
     public string Facebook_Link { get; set; }
     public string Link_RS { get; set; }
     public string Link_VS { get; set; }

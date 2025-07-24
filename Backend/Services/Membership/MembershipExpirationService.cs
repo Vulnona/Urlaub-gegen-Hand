@@ -56,16 +56,7 @@ public class MembershipExpirationService : BackgroundService
 
         try
         {
-            var expiredCount = await userRepository.DeactivateExpiredMembershipsAsync();
-            
-            if (expiredCount > 0)
-            {
-                _logger.LogInformation($"Deactivated {expiredCount} expired memberships");
-            }
-            else
-            {
-                _logger.LogDebug("No expired memberships found");
-            }
+            await userRepository.DeactivateExpiredMembershipsAsync();
         }
         catch (Exception ex)
         {

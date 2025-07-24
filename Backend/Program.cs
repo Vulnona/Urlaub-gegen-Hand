@@ -16,7 +16,6 @@ using UGHApi.Repositories;
 using UGH.Infrastructure.Services;
 using UGH.Domain.Services; // NEW: Geocoding services
 using UGHApi.DATA; // NEW: Database context
-using UGH.Domain.Interfaces;
 using UGHApi.Models;
 using UGHApi.Services.AWS;
 using UGHApi.Services.HtmlTemplate;

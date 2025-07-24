@@ -24,6 +24,7 @@ public class Address
     public string DisplayName { get; set; } // Full formatted address
 
     // Detailed address components
+    #nullable enable
     public string? HouseNumber { get; set; }
     public string? Road { get; set; } // Street name
     public string? Suburb { get; set; }
@@ -45,6 +46,7 @@ public class Address
     // Timestamps
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? UpdatedAt { get; set; }
+    #nullable restore
 
     // Navigation properties
     public ICollection<User> Users { get; set; } = new List<User>();

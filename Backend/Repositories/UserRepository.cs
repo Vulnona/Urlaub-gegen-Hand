@@ -40,6 +40,12 @@ public class UserRepository : IUserRepository
             .FirstOrDefaultAsync(u => u.User_Id == userId);
     }
 
+    public async Task DeactivateExpiredMembershipsAsync()
+    {
+        // TODO: Implement logic to deactivate expired memberships
+        await Task.CompletedTask;
+    }
+
     public async Task<UserDTO> GetUserDetailsByIdAsync(Guid userId)
     {
         var user = await _context
