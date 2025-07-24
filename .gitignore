@@ -4,8 +4,8 @@ obj/
 bin
 Backend/bin
 Backend/bin/Debug/net7.0/
-Backend/obj
 Backend/appsettings.json
+
 #Sec Stuff
 Backend/bin
 Backend/obj
