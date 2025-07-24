@@ -51,9 +51,14 @@ UGH/
 ## 🛠️ Entwicklungstools
 
 ### Migration Management
+# sichere Migrationen durchführen
+.\scripts\migration\migration.ps1
 
 
 ### Database Tools
+
+Die MySQL-Zugangsdaten werden automatisch und plattformübergreifend aus der `compose.yaml` und den Secret-Dateien gelesen – dank des Node.js-Hilfsskripts `scripts/get-mysql-creds.js`.
+
 ```powershell
 # Datenbank-Shell öffnen
 .\scripts\database\database-access.ps1
@@ -63,6 +68,15 @@ UGH/
 
 # Backup wiederherstellen
 .\scripts\database\database-restore.ps1 -BackupFile "backup_2025-07-23.sql"
+```
+#  Datenbank-Reset
+
+Das Skript `scripts/resetdb.ps1` setzt die Datenbank sicher zurück und erstellt vorher ein Backup
+
+**Verwendung:**
+```powershell
+cd scripts
+./resetdb.ps1
 ```
 
 ### Infrastructure Management

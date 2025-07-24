@@ -21,13 +21,28 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-# Passwort aus Secret-Datei lesen
-$passwordFile = ".docker\db\secrets\.db-root-password.txt"
-if (Test-Path $passwordFile) {
-    $password = Get-Content $passwordFile -Raw | ForEach-Object { $_.Trim() }
-} else {
-    Write-Host "⚠ Passwort-Datei nicht gefunden: $passwordFile" -ForegroundColor Yellow
+# MySQL Credentials mit Node.js-Skript auslesen
+$scriptRoot = Split-Path -Path $MyInvocation.MyCommand.Path -Parent
+# Projektroot ist ein Verzeichnis über scripts/database
+$projectRoot = Resolve-Path -Path (Join-Path $scriptRoot "..\..") | Select-Object -ExpandProperty Path
+$composePath = Join-Path $projectRoot "compose.yaml"
+# Node.js-Skript liegt im gleichen Ordner wie dieses Skript
+$nodeScript = Join-Path $scriptRoot "get-mysql-creds.js"
+$credsJson = node $nodeScript $composePath
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "Fehler beim Auslesen der MySQL-Credentials aus compose.yaml." -ForegroundColor Red
+    exit 1
+}
+$creds = $null
+try { $creds = $credsJson | ConvertFrom-Json } catch { Write-Host "Fehler beim Parsen der Credentials: $_" -ForegroundColor Red; exit 1 }
+$User = $creds.user
+$Database = $creds.db
+$passwordFile = Join-Path $projectRoot ($creds.pwFile -replace '/', [System.IO.Path]::DirectorySeparatorChar)
+if (-not (Test-Path $passwordFile)) {
+    Write-Host "Passwort-Datei nicht gefunden: $passwordFile" -ForegroundColor Yellow
     $password = "password"  # Fallback
+} else {
+    $password = Get-Content $passwordFile -Raw | ForEach-Object { $_.Trim() }
 }
 
 function Show-Help {
@@ -110,41 +125,34 @@ function Get-Memberships {
 }
 
 # Main Logic
-try {
-    if ($Help -or -not $Action) {
-        Show-Help
-        exit 0
-    }
-    
-    # Container-Verfügbarkeit prüfen
-    $containerStatus = docker ps --format "table {{.Names}}\t{{.Status}}" | Select-String $Container
-    if (-not $containerStatus) {
-        Write-Host "⚠ Container '$Container' nicht gefunden oder nicht aktiv" -ForegroundColor Red
-        Write-Host "Aktive Container:" -ForegroundColor Yellow
-        docker ps --format "table {{.Names}}\t{{.Status}}"
-        exit 1
-    }
-    
-    Write-Host "✓ Container '$Container' ist aktiv" -ForegroundColor Green
-    
-    switch ($Action.ToLower()) {
-        { $_ -in @("u", "users") } {
-            Get-Users
-        }
-        { $_ -in @("m", "memberships") } {
-            Get-Memberships
-        }
-        { $_ -in @("o", "open") } {
-            Open-DatabaseShell
-        }
-        default {
-            Write-Host "Unbekannte Aktion: $Action" -ForegroundColor Red
-            Show-Help
-            exit 1
-        }
-    }
-    
-} catch {
-    Write-Host "Fehler: $($_.Exception.Message)" -ForegroundColor Red
+
+
+
+if ($Help -or -not $Action) {
+    Show-Help
+    exit 0
+}
+
+# Container-Verfügbarkeit prüfen
+$containerStatus = docker ps --format "table {{.Names}}\t{{.Status}}" | Select-String $Container
+if (-not $containerStatus) {
+    Write-Host "Container '$Container' nicht gefunden oder nicht aktiv" -ForegroundColor Red
+    Write-Host "Aktive Container:" -ForegroundColor Yellow
+    docker ps --format "table {{.Names}}\t{{.Status}}"
+    exit 1
+}
+
+Write-Host "Container '$Container' ist aktiv" -ForegroundColor Green
+
+$actionLower = $Action.ToLower()
+if ($actionLower -eq "u" -or $actionLower -eq "users") {
+    Get-Users
+} elseif ($actionLower -eq "m" -or $actionLower -eq "memberships") {
+    Get-Memberships
+} elseif ($actionLower -eq "o" -or $actionLower -eq "open") {
+    Open-DatabaseShell
+} else {
+    Write-Host "Unbekannte Aktion: $Action" -ForegroundColor Red
+    Show-Help
     exit 1
 }
