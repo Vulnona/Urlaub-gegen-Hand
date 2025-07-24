@@ -57,7 +57,10 @@ UGH/
 
 ### Database Tools
 
+
 Die MySQL-Zugangsdaten werden automatisch und plattformübergreifend aus der `compose.yaml` und den Secret-Dateien gelesen – dank des Node.js-Hilfsskripts `scripts/get-mysql-creds.js`.
+
+**Hinweis:** Damit die Node.js-Tools im `scripts`-Verzeichnis funktionieren, muss dort einmalig `npm install` ausgeführt werden.
 
 ```powershell
 # Datenbank-Shell öffnen
