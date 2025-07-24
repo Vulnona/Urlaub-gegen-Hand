@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using Microsoft.Extensions.Logging;
 using UGH.Domain.Core;
 using UGH.Infrastructure.Services;

@@ -1,4 +1,4 @@
-﻿namespace UGHApi.Entities;
+namespace UGHApi.Entities;
 
 #pragma warning disable CS8632
 

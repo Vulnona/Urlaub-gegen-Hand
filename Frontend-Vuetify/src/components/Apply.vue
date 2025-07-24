@@ -46,7 +46,7 @@ export default {
       });
       if (result.isConfirmed) {
         try {
-          await axiosInstance.post(`${process.env.baseURL}offer/apply-offer?offerId=${offerId}`);
+          await axiosInstance.post(`offer/apply-offer?offerId=${offerId}`);
           toast.success("Deine Anfrage wurde gesendet.!");
           // Use router reload instead of location.reload()
           router.go(0);

@@ -136,7 +136,7 @@ export default {
       this.clearError()
 
       try {
-        const response = await axiosInstance.post(`${process.env.baseURL}authenticate/login-with-2fa`, {
+        const response = await axiosInstance.post(`authenticate/login-with-2fa`, {
           email: this.email,
           password: this.password,
           twoFactorCode: code,

@@ -1,4 +1,4 @@
-﻿namespace UGH.Domain.Core;
+namespace UGH.Domain.Core;
 
 public sealed class Error : ValueObject<Error>
 {

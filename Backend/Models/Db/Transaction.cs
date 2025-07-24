@@ -1,4 +1,4 @@
-﻿using UGH.Domain.Entities;
+using UGH.Domain.Entities;
 using static UGH.Domain.Core.UGH_Enums;
 
 namespace UGHApi.Entities;

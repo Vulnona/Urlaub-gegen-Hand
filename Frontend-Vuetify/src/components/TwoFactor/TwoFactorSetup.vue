@@ -149,7 +149,7 @@ export default {
       
       try {
         const userEmail = this.$store?.getters?.getUserEmail || 'user@example.com' // Fallback
-        const response = await axiosInstance.post(`${process.env.baseURL}authenticate/setup-2fa`, {
+        const response = await axiosInstance.post(`authenticate/setup-2fa`, {
           email: userEmail
         })
         
@@ -172,7 +172,7 @@ export default {
       
       try {
         const userEmail = this.$store?.getters?.getUserEmail || 'user@example.com'
-        const response = await axiosInstance.post(`${process.env.baseURL}authenticate/verify-2fa-setup`, {
+        const response = await axiosInstance.post(`authenticate/verify-2fa-setup`, {
           email: userEmail,
           secret: this.secret,
           code: this.verificationCode

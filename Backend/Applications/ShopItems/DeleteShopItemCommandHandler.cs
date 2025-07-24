@@ -1,5 +1,5 @@
-﻿using MediatR;
-using UGHApi.Interfaces;
+using MediatR;
+using UGH.Domain.Interfaces;
 
 namespace UGHApi.Applications.ShopItems;
 

@@ -1,4 +1,4 @@
-﻿namespace UGHApi.Models;
+namespace UGHApi.Models;
 
 public class SendCouponRequest
 {

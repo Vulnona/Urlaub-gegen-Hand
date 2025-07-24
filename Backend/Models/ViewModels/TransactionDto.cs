@@ -1,4 +1,4 @@
-﻿using UGHApi.Entities;
+using UGHApi.Entities;
 using static UGH.Domain.Core.UGH_Enums;
 
 namespace UGHApi.ViewModels;

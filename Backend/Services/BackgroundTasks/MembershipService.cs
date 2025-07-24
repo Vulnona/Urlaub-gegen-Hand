@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using UGHApi.DATA;
 
 namespace UGHApi.Services.BackgroundTasks;
@@ -19,7 +19,7 @@ public class MembershipService
         // Get all expired memberships
         var expiredMemberships = _context
             .usermembership.Include(u => u.User)
-            .Where(um => um.Expiration <= DateTime.UtcNow)
+            .Where(um => um.Expiration <= DateTime.Now)
             .ToList();
 
         foreach (var membership in expiredMemberships)

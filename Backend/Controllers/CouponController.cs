@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
@@ -7,7 +7,7 @@ using UGH.Domain.Entities;
 using UGHApi.Applications.Admin;
 using UGHApi.Applications.Coupons;
 using UGHApi.Applications.ShopItems;
-using UGHApi.Interfaces;
+using UGH.Domain.Interfaces;
 using UGHApi.Models;
 using UGHApi.Repositories;
 using UGHApi.Services.UserProvider;
@@ -161,7 +161,7 @@ namespace UGHApi.Controllers
         [Authorize]
         public async Task<IActionResult> RedeemCoupon([FromBody] RedeemCouponRequest request)
         {
-            _logger.LogInformation($"Coupon wird eingelöst userid:{_userProvider.UserId}, code:{request.CouponCode}");
+            _logger.LogInformation($"Coupon wird eingel�st userid:{_userProvider.UserId}, code:{request.CouponCode}");
             try
             {
                 var userId = _userProvider.UserId;                

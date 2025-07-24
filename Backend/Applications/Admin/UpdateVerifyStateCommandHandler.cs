@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 using UGH.Contracts.Confirmation;
 using UGH.Domain.Core;

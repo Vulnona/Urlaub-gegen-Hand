@@ -34,50 +34,70 @@ namespace UGHApi.Migrations
                     b.ToTable("accomodations");
                 });
 
-            modelBuilder.Entity("UGH.Domain.Entities.City", b =>
+            modelBuilder.Entity("UGH.Domain.Entities.Address", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<string>("Name")
+                    b.Property<string>("City")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Country")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("CountryCode")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("County")
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("DisplayName")
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<int>("StateId")
+                    b.Property<string>("HouseNumber")
+                        .HasColumnType("longtext");
+
+                    b.Property<double>("Latitude")
+                        .HasColumnType("double");
+
+                    b.Property<double>("Longitude")
+                        .HasColumnType("double");
+
+                    b.Property<long?>("OsmId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("OsmType")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("PlaceId")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Postcode")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Road")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("State")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Suburb")
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("Type")
                         .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("cities");
-                });
-
-            modelBuilder.Entity("UGH.Domain.Entities.Continent", b =>
-                {
-                    b.Property<int>("Continent_ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.HasKey("Continent_ID");
-
-                    b.ToTable("continents");
-                });
-
-            modelBuilder.Entity("UGH.Domain.Entities.Country", b =>
-                {
-                    b.Property<int>("Country_ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<string>("CountryName")
-                        .HasColumnType("longtext");
-
-                    b.Property<int?>("Region_ID")
-                        .HasColumnType("int");
-
-                    b.HasKey("Country_ID");
-
-                    b.ToTable("countries");
+                    b.ToTable("addresses");
                 });
 
             modelBuilder.Entity("UGH.Domain.Entities.Coupon", b =>
@@ -101,6 +121,15 @@ namespace UGHApi.Migrations
 
                     b.Property<int>("Duration")
                         .HasColumnType("int");
+
+                    b.Property<DateTime?>("EmailSentDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("EmailSentTo")
+                        .HasColumnType("longtext");
+
+                    b.Property<bool>("IsEmailSent")
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<int>("MembershipId")
                         .HasColumnType("int");
@@ -172,6 +201,9 @@ namespace UGHApi.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
+                    b.Property<int?>("AddressId")
+                        .HasColumnType("int");
+
                     b.Property<DateOnly>("CreatedAt")
                         .HasColumnType("date");
 
@@ -225,6 +257,8 @@ namespace UGHApi.Migrations
                         .HasColumnType("char(36)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("AddressId");
 
                     b.HasIndex("PictureId");
 
@@ -344,20 +378,6 @@ namespace UGHApi.Migrations
                     b.ToTable("redemptions");
                 });
 
-            modelBuilder.Entity("UGH.Domain.Entities.Region", b =>
-                {
-                    b.Property<int>("Region_ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<string>("RegionName")
-                        .HasColumnType("longtext");
-
-                    b.HasKey("Region_ID");
-
-                    b.ToTable("regions");
-                });
-
             modelBuilder.Entity("UGH.Domain.Entities.Review", b =>
                 {
                     b.Property<int>("Id")
@@ -413,23 +433,6 @@ namespace UGHApi.Migrations
                     b.ToTable("skills");
                 });
 
-            modelBuilder.Entity("UGH.Domain.Entities.State", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<int>("CountryId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("longtext");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("states");
-                });
-
             modelBuilder.Entity("UGH.Domain.Entities.SuitableAccommodation", b =>
                 {
                     b.Property<int>("Id")
@@ -454,12 +457,10 @@ namespace UGHApi.Migrations
                     b.Property<string>("About")
                         .HasColumnType("longtext");
 
-                    b.Property<string>("City")
-                        .IsRequired()
-                        .HasColumnType("longtext");
+                    b.Property<int>("AddressId")
+                        .HasColumnType("int");
 
-                    b.Property<string>("Country")
-                        .IsRequired()
+                    b.Property<string>("BackupCodes")
                         .HasColumnType("longtext");
 
                     b.Property<DateOnly>("DateOfBirth")
@@ -483,11 +484,10 @@ namespace UGHApi.Migrations
                     b.Property<string>("Hobbies")
                         .HasColumnType("longtext");
 
-                    b.Property<string>("HouseNumber")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
                     b.Property<bool>("IsEmailVerified")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<bool>("IsTwoFactorEnabled")
                         .HasColumnType("tinyint(1)");
 
                     b.Property<string>("LastName")
@@ -507,10 +507,6 @@ namespace UGHApi.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<string>("PostCode")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
                     b.Property<byte[]>("ProfilePicture")
                         .HasColumnType("longblob");
 
@@ -520,12 +516,7 @@ namespace UGHApi.Migrations
                     b.Property<string>("Skills")
                         .HasColumnType("longtext");
 
-                    b.Property<string>("State")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("Street")
-                        .IsRequired()
+                    b.Property<string>("TwoFactorSecret")
                         .HasColumnType("longtext");
 
                     b.Property<int>("UserRole")
@@ -535,6 +526,8 @@ namespace UGHApi.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("User_Id");
+
+                    b.HasIndex("AddressId");
 
                     b.HasIndex("MembershipId");
 
@@ -674,9 +667,6 @@ namespace UGHApi.Migrations
                     b.Property<string>("AdditionalLodgingProperties")
                         .HasColumnType("longtext");
 
-                    b.Property<string>("Location")
-                        .HasColumnType("longtext");
-
                     b.Property<string>("LodgingType")
                         .HasColumnType("longtext");
 
@@ -686,9 +676,6 @@ namespace UGHApi.Migrations
             modelBuilder.Entity("UGH.Domain.Entities.OfferTypeRequest", b =>
                 {
                     b.HasBaseType("UGH.Domain.Entities.Offer");
-
-                    b.Property<string>("PossibleLocations")
-                        .HasColumnType("longtext");
 
                     b.Property<string>("SpecialConditions")
                         .HasColumnType("longtext");
@@ -717,6 +704,10 @@ namespace UGHApi.Migrations
 
             modelBuilder.Entity("UGH.Domain.Entities.Offer", b =>
                 {
+                    b.HasOne("UGH.Domain.Entities.Address", "Address")
+                        .WithMany("Offers")
+                        .HasForeignKey("AddressId");
+
                     b.HasOne("UGH.Domain.Entities.Picture", "Picture")
                         .WithMany()
                         .HasForeignKey("PictureId");
@@ -726,6 +717,8 @@ namespace UGHApi.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Address");
 
                     b.Navigation("Picture");
 
@@ -810,9 +803,17 @@ namespace UGHApi.Migrations
 
             modelBuilder.Entity("UGH.Domain.Entities.User", b =>
                 {
+                    b.HasOne("UGH.Domain.Entities.Address", "Address")
+                        .WithMany("Users")
+                        .HasForeignKey("AddressId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("UGH.Domain.Entities.Membership", "CurrentMembership")
                         .WithMany()
                         .HasForeignKey("MembershipId");
+
+                    b.Navigation("Address");
 
                     b.Navigation("CurrentMembership");
                 });
@@ -925,6 +926,13 @@ namespace UGHApi.Migrations
                     b.Navigation("ShopItem");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("UGH.Domain.Entities.Address", b =>
+                {
+                    b.Navigation("Offers");
+
+                    b.Navigation("Users");
                 });
 
             modelBuilder.Entity("UGH.Domain.Entities.Coupon", b =>

@@ -1,4 +1,4 @@
-﻿namespace UGH.Infrastructure.Services;
+namespace UGH.Infrastructure.Services;
 
 public class MailSettings
 {

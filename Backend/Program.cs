@@ -16,7 +16,7 @@ using UGHApi.Repositories;
 using UGH.Infrastructure.Services;
 using UGH.Domain.Services; // NEW: Geocoding services
 using UGHApi.DATA; // NEW: Database context
-using UGHApi.Interfaces;
+using UGH.Domain.Interfaces;
 using UGHApi.Models;
 using UGHApi.Services.AWS;
 using UGHApi.Services.HtmlTemplate;
@@ -106,10 +106,45 @@ namespace UGHApi
             var config = builder.Configuration;
             MapsterConfig.RegisterMappings();
             var connectionString = config.GetConnectionString("DefaultConnection");
+
+static ServerVersion GetDesignTimeServerVersion(string connectionString)
+{
+    try 
+    {
+        // Fix connection string for design-time (localhost instead of docker container)
+        if (connectionString.Contains("Server=db;")) {
+            connectionString = connectionString.Replace("Server=db;", "Server=localhost;");
+        }
+        return ServerVersion.AutoDetect(connectionString);
+    }
+    catch 
+    {
+        // Fallback for design-time when database is not available
+        return ServerVersion.Create(Version.Parse("8.0.0"), Pomelo.EntityFrameworkCore.MySql.Infrastructure.ServerType.MySql);
+    }
+}
             builder.Services.AddHttpClient();
-            builder.Services.AddDbContext<Ugh_Context>(options =>
-                options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))
-            );
+            
+            // For design-time tools, use localhost and fixed MySQL version to avoid connection issues
+            // Check if we're running in a container or in development mode
+            var inContainer = Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER") == "true";
+            
+            if (!inContainer && connectionString?.Contains("Server=db") == true)
+            {
+                connectionString = connectionString?.Replace("Server=db", "Server=localhost")
+                                                  ?.Replace("User ID=user", "User ID=root");
+                var serverVersion = new MySqlServerVersion(new Version(8, 0, 21));
+                builder.Services.AddDbContext<Ugh_Context>(options =>
+                    options.UseMySql(connectionString, serverVersion)
+                );
+                Console.WriteLine("[Design-Time] Using localhost connection for EF tools");
+            }
+            else
+            {
+                builder.Services.AddDbContext<Ugh_Context>(options =>
+                    options.UseMySql(connectionString, GetDesignTimeServerVersion(connectionString))
+                );
+            }
             builder.Services.AddControllers();
             TypeAdapterConfig.GlobalSettings.Scan(Assembly.GetExecutingAssembly());
             builder.Services.AddEndpointsApiExplorer();
@@ -274,6 +309,7 @@ namespace UGHApi
         {
             app.UseMiddleware<ErrorHandlingMiddleware>();
             var connectionString = app.Configuration.GetConnectionString("DefaultConnection");
+
             DatabaseWaiter.WaitForDatabaseConnection(connectionString);
             if (app.Environment.IsDevelopment())
             {

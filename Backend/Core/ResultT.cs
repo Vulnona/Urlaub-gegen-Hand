@@ -1,4 +1,4 @@
-﻿namespace UGH.Domain.Core;
+namespace UGH.Domain.Core;
 
 public class Result<TValue> : Result
 {

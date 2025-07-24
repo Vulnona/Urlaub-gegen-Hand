@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace UGH.Domain.Entities;
@@ -25,7 +25,7 @@ public class UserMembership
     {
         get
         {
-            if (Expiration <= DateTime.UtcNow)
+            if (Expiration <= DateTime.Now)
             {
                 return "Expired";
             }
@@ -35,12 +35,12 @@ public class UserMembership
 
     public bool IsMembershipActive
     {
-        get { return StartDate <= DateTime.UtcNow && Expiration > DateTime.UtcNow; }
+        get { return StartDate <= DateTime.Now && Expiration > DateTime.Now; }
     }
 
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime CreatedAt { get; set; } = DateTime.Now;
 
-    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime UpdatedAt { get; set; } = DateTime.Now;
 
     [ForeignKey("User_Id")]
     public virtual User User { get; set; }

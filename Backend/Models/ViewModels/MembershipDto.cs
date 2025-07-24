@@ -1,4 +1,4 @@
-﻿namespace UGHApi.ViewModels;
+namespace UGHApi.ViewModels;
 
 public class MembershipDto
 {

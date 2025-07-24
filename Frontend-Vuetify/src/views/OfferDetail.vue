@@ -89,7 +89,7 @@ import VueMarkdown from "vue-markdown-render";
 import {useRoute} from 'vue-router';
 const {params} = useRoute();
 
-const pictureLink = `${process.env.baseURL}offer/get-preview-picture/${params.id}`;
+const pictureLink = `offer/get-preview-picture/${params.id}`;
 const offer = ref(null);
 const loading = ref(true);
 const defaultProfileImgSrc = '/defaultprofile.jpg';
@@ -100,7 +100,7 @@ const redirectToProfile = (userId) => {
 
 const fetchOfferDetail = async () => {
   try {
-    const response = await axiosInstance.get(`${process.env.baseURL}offer/get-offer-by-id/${params.id}`);
+    const response = await axiosInstance.get(`offer/get-offer-by-id/${params.id}`);
       offer.value = response.data;
   } catch (error) {
     console.error('Error fetching offer detail:', error);
@@ -121,7 +121,7 @@ const backtooffers = () => {
 };
 const closeOffer = async (offer) => {
     try {
-        const response = await axiosInstance.put(`${process.env.baseURL}offer/close-offer/${params.id}`);
+        const response = await axiosInstance.put(`offer/close-offer/${params.id}`);
         offer.status = 1;
     } catch {
         console.error('Error closing offer');

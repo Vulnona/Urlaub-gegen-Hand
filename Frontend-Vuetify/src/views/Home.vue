@@ -225,7 +225,7 @@ export default {
     async fetchOffers() {
       this.loading = true;
       try {
-        const response = await axiosInstance.get(`${process.env.baseURL}offer/get-all-offers`, {
+        const response = await axiosInstance.get(`offer/get-all-offers`, {
           params: {
             searchTerm: this.searchTerm,
             pageSize: this.pageSize,
@@ -280,7 +280,7 @@ export default {
       });
       if (result.isConfirmed) {
         try {
-          await axiosInstance.post(`${process.env.baseURL}offer/apply-offer?offerId=${offerId}`);
+          await axiosInstance.post(`offer/apply-offer?offerId=${offerId}`);
           toast.success("Deine Anfrage wurde gesendet.!");
           // await this.checkReviewStatus(offerId);
           this.fetchOffers();
@@ -324,7 +324,7 @@ export default {
     // Method to add rating for a specific offer
     async addRating(offerId, userRating, reviewText) {
       try {
-        const response = await axiosInstance.post(`${process.env.baseURL}review/add-review`, {
+        const response = await axiosInstance.post(`review/add-review`, {
           offerId: offerId,
           ratingValue: userRating,
           reviewComment: reviewText,

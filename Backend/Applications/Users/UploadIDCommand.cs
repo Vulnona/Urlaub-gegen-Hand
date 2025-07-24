@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using UGH.Domain.Core;
 
 namespace UGH.Application.Users;

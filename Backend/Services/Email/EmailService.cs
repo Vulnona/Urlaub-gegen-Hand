@@ -19,7 +19,7 @@ public class EmailService
         _logger = logger;        
     }
     #region email-services
-    public async Task SendEmailAsync(string recipientEmail, string subject, string body)
+    public async Task<bool> SendEmailAsync(string recipientEmail, string subject, string body)
     {
         try
         {
@@ -37,11 +37,12 @@ public class EmailService
                 await client.DisconnectAsync(true);
             }
              _logger.LogInformation($"Email sent successfully to {recipientEmail}");
+             return true;
         }
         catch (Exception ex)
         {
            _logger.LogError($"Exception occurred sending Mail: {ex.Message} | StackTrace: {ex.StackTrace}");
-           // will usually not be awaited. Throwing would be useless.
+           return false;
         }
     }
     public async Task<bool> SendVerificationEmailAsync(string email, Guid verificationToken)
@@ -49,9 +50,17 @@ public class EmailService
         try
         {
             String htmlBody = $"<h2><a href='{_configuration["BaseUrl"]}/api/authenticate/verify-email?token={verificationToken}'>Klicke hier</h2> </a>um deine Emailadresse zu verifizieren.</p>";
-            await SendEmailAsync(email,"Verifiziere deine Emailadresse", htmlBody); 
-            _logger.LogInformation("Verification Email Sent Successfully To The User: {email}",email);
-            return true;
+            var emailSent = await SendEmailAsync(email,"Verifiziere deine Emailadresse", htmlBody); 
+            if (emailSent)
+            {
+                _logger.LogInformation("Verification Email Sent Successfully To The User: {email}",email);
+                return true;
+            }
+            else
+            {
+                _logger.LogError("Failed to send verification email to {email}",email);
+                return false;
+            }
         }
         catch (Exception ex)
         {
@@ -65,9 +74,17 @@ public class EmailService
         try
         {
             String htmlBody = $"<h2><a href='{_configuration["BaseUrlFrontend"]}/change-password?token={verificationToken}'>Klicke hier</h2> </a>um dein Passwort neu zu setzen.</p>";
-            await SendEmailAsync(email,"Passwort-Reset-Link", htmlBody); 
-            _logger.LogInformation("Password-Reset-Link Sent Successfully To The User: {email}",email);
-            return true;
+            var emailSent = await SendEmailAsync(email,"Passwort-Reset-Link", htmlBody); 
+            if (emailSent)
+            {
+                _logger.LogInformation("Password-Reset-Link Sent Successfully To The User: {email}",email);
+                return true;
+            }
+            else
+            {
+                _logger.LogError("Failed to send password reset email to {email}",email);
+                return false;
+            }
         }
         catch (Exception ex)
         {
@@ -76,7 +93,7 @@ public class EmailService
         }
     }
     
-    public async Task SendTemplateEmailAsync(string RecipientEmail, string Template, string FirstName, String ExpirationDate = "", int DaysRemaining=0)
+    public async Task<bool> SendTemplateEmailAsync(string RecipientEmail, string Template, string FirstName, String ExpirationDate = "", int DaysRemaining=0)
     {
         try
         {
@@ -100,8 +117,17 @@ public class EmailService
                 body = body.Replace("FirstName", FirstName);
                 // if there is no ExpirationDate in the body, replace won't do anything (the cost is probably neglectable)
                 body = body.Replace("ExpirationDate", ExpirationDate);
-                await SendEmailAsync(RecipientEmail, subject, body); 
-                _logger.LogInformation("{1} Email sent successfully", Template);
+                var emailSent = await SendEmailAsync(RecipientEmail, subject, body); 
+                if (emailSent)
+                {
+                    _logger.LogInformation("{1} Email sent successfully", Template);
+                    return true;
+                }
+                else
+                {
+                    _logger.LogError("Failed to send {Template} email to {RecipientEmail}", Template, RecipientEmail);
+                    return false;
+                }
             }
             else
             {
@@ -111,7 +137,7 @@ public class EmailService
         catch (Exception ex)
         {
             _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
-            throw new Exception(ex.Message);
+            return false;
         }
     }
 

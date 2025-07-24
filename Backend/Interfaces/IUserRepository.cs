@@ -1,4 +1,4 @@
-﻿using UGH.Domain.Entities;
+using UGH.Domain.Entities;
 using UGHApi.Repositories;
 using UGHApi.Shared;
 using UGHApi.ViewModels;
@@ -15,6 +15,7 @@ public interface IUserRepository
     Task DeleteUserAsync(Guid userId);
     Task SaveChangesAsync();
     Task<User> GetUserByEmailAsync(string email);
+    Task<List<UserMembership>> GetActiveUserMembershipsAsync(Guid userId);
     Task<User> GetUserWithRatingByIdAsync(Guid userId);
     Task AddUserMembership(UserMembership userMembership);
     Task<User> GetUserForMembershipByIdAsync(Guid userId);

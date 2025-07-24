@@ -286,7 +286,7 @@ export default {
       };
 
       // Sending a POST request to the registration endpoint with the registration data
-      axiosInstance.post(`${process.env.baseURL}authenticate/register`, registrationData)
+      axiosInstance.post(`authenticate/register`, registrationData)
         .then(response => {
           Swal.close();
           toast.success('Registrierung erfolgreich!', 'Überprüfen Sie Ihre E-Mail und klicken Sie auf „Bestätigen“.');

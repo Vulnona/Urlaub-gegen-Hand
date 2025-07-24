@@ -1,4 +1,4 @@
-﻿using System.Text.RegularExpressions;
+using System.Text.RegularExpressions;
 using MediatR;
 using UGH.Contracts.Authentication;
 using UGH.Domain.Core;
@@ -80,7 +80,6 @@ public class RegisterUserCommandHandler
                 Longitude = request.Longitude,
                 DisplayName = request.DisplayName,
                 HouseNumber = request.HouseNumber,
-                Road = request.Road,
                 City = request.City,
                 Postcode = request.Postcode,
                 Country = request.Country,

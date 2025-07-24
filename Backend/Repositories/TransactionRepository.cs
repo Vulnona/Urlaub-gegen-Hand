@@ -1,7 +1,7 @@
-﻿using Mapster;
+using Mapster;
 using Microsoft.EntityFrameworkCore;
 using UGHApi.Entities;
-using UGHApi.Interfaces;
+using UGH.Domain.Interfaces;
 using UGHApi.Shared;
 using UGHApi.ViewModels;
 using UGHApi.DATA;

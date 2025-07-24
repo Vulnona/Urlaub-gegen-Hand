@@ -1,4 +1,4 @@
-﻿using UGH.Domain.ApplicationResponses;
+using UGH.Domain.ApplicationResponses;
 using UGH.Domain.Interfaces;
 using UGHApi.Services.AWS;
 using MediatR;

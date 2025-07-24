@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using UGH.Contracts.Authentication;
 using UGH.Domain.Core;
 
@@ -12,12 +12,11 @@ public class RegisterUserCommand : IRequest<Result<RegisterUserResponse>>
     public string DateOfBirth { get; set; }
     public string Gender { get; set; }
     
-    // NEW: Geographic location data (replacing old address fields)
+    // Address data for creating Address entity
     public double Latitude { get; set; }
     public double Longitude { get; set; }
     public string DisplayName { get; set; }
     public string? HouseNumber { get; set; }
-    public string? Road { get; set; }
     public string? City { get; set; }
     public string? Postcode { get; set; }
     public string? Country { get; set; }

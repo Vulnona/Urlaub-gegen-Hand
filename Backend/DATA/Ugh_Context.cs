@@ -39,6 +39,12 @@ namespace UGHApi.DATA
                 .AddJsonFile("appsettings.json")
                 .Build();
             var connectionString = configuration.GetConnectionString("DefaultConnection");
+            
+            // Fix connection string for design-time (localhost instead of docker container)
+            if (connectionString.Contains("Server=db;")) {
+                connectionString = connectionString.Replace("Server=db;", "Server=localhost;");
+            }
+            
             optionsBuilder.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
         }
 

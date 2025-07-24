@@ -1,4 +1,4 @@
-﻿using static UGH.Domain.Core.UGH_Enums;
+using static UGH.Domain.Core.UGH_Enums;
 
 namespace UGHApi.Extensions;
 

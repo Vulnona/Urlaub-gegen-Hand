@@ -97,7 +97,7 @@ const changePage = (newPage:Number) => {
 const fetchOffers = async(newPage:Number) => {
     loading.value = true;
     try {
-        const response = await axiosInstance.get(`${process.env.baseURL}offer/offer-applications`, {            
+        const response = await axiosInstance.get(`offer/offer-applications`, {            
             params: {
                 pageSize: pageSize,
                 pageNumber: newPage,
@@ -113,7 +113,7 @@ const fetchOffers = async(newPage:Number) => {
 }
 const respondToOffer = async (reviewId:Number, userId:Number, approve:Boolean) => {
     try {
-        const response = await axiosInstance.put(`${process.env.baseURL}offer/update-application-status?offerId=${reviewId}&isApproved=${approve}&userId=${userId}`);
+        const response = await axiosInstance.put(`offer/update-application-status?offerId=${reviewId}&isApproved=${approve}&userId=${userId}`);
         const index = offers.findIndex(item => item.id === reviewId);
         if (index !== -1) {
             if(approve)

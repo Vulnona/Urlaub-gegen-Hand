@@ -196,7 +196,7 @@ const createOffer = async() => {
       }
       try {
         const response = await axiosInstance.put(
-          `${process.env.baseURL}offer/put-offer`,
+          `offer/put-offer`,
           offerData, {
           headers: {
             'Content-Type': 'multipart/form-data'
@@ -230,9 +230,9 @@ const calcDate = (dateString) => {
 onMounted(async () => {    
     Securitybot();
     loading.value = true;
-    accommodations = (await axiosInstance.get(`${process.env.baseURL}accommodation/get-all-accommodations`)).data;
-    suitableAccommodations = (await axiosInstance.get(`${process.env.baseURL}accommodation-suitability/get-all-suitable-accommodations`)).data;
-    skills = (await axiosInstance.get(`${process.env.baseURL}skills/get-all-skills`)).data;
+    accommodations = (await axiosInstance.get(`accommodation/get-all-accommodations`)).data;
+    suitableAccommodations = (await axiosInstance.get(`accommodation-suitability/get-all-suitable-accommodations`)).data;
+    skills = (await axiosInstance.get(`skills/get-all-skills`)).data;
     if (props.offer.id != -1){        
         offer.title = props.offer.title;
         offer.description = props.offer.description;

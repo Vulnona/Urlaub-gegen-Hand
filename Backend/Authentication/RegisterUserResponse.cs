@@ -1,4 +1,4 @@
-﻿namespace UGH.Contracts.Authentication;
+namespace UGH.Contracts.Authentication;
 
 public class RegisterUserResponse
 {

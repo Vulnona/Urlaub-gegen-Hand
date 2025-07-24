@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using UGH.Domain.Core;
 using UGH.Domain.Entities;
 

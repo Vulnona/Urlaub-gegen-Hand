@@ -1,4 +1,4 @@
-﻿using Mapster;
+using Mapster;
 using Microsoft.EntityFrameworkCore;
 using UGH.Domain.Entities;
 using UGH.Domain.Interfaces;
@@ -8,6 +8,7 @@ using UGHApi.Shared;
 using UGHApi.ViewModels;
 using UGHApi.ViewModels.UserComponent;
 using UGHApi.DATA;
+using Microsoft.Extensions.Logging;
 
 namespace UGH.Infrastructure.Repositories;
 
@@ -17,11 +18,13 @@ public class UserRepository : IUserRepository
 {
     private readonly Ugh_Context _context;
     private readonly IUrlBuilderService _urlBuilderService;
+    private readonly ILogger<UserRepository> _logger;
 
-    public UserRepository(Ugh_Context context, IUrlBuilderService urlBuilderService)
+    public UserRepository(Ugh_Context context, IUrlBuilderService urlBuilderService, ILogger<UserRepository> logger)
     {
         _context = context;
         _urlBuilderService = urlBuilderService;
+        _logger = logger;
     }
 
     public async Task<User> GetUserByIdAsync(Guid userId)
@@ -183,9 +186,30 @@ public class UserRepository : IUserRepository
     public async Task<User> GetUserByEmailAsync(string email)
     {
         return await _context
-            .users.Include(u => u.UserMemberships)
+            .users
+            .Include(u => u.UserMemberships)
+                .ThenInclude(um => um.Membership)
             .Include(u => u.CurrentMembership)
             .FirstOrDefaultAsync(u => u.Email_Address == email);
+    }
+
+    public async Task<List<UserMembership>> GetActiveUserMembershipsAsync(Guid userId)
+    {
+        var now = DateTime.Now; // Deutsche lokale Zeit verwenden
+        
+        // Debug: Direkter SQL Query zur Sicherheit
+        var rawQuery = $"SELECT * FROM usermembership WHERE User_Id = '{userId}' AND StartDate <= '{now:yyyy-MM-dd HH:mm:ss}' AND Expiration > '{now:yyyy-MM-dd HH:mm:ss}'";
+        _logger.LogError($"=== DEBUG SQL: {rawQuery} ===");
+        _logger.LogError($"=== CURRENT UTC TIME: {now:yyyy-MM-dd HH:mm:ss} ===");
+        
+        var result = await _context.Set<UserMembership>()
+            .Include(um => um.Membership)
+            .Where(um => um.User_Id == userId && um.StartDate <= now && um.Expiration > now)
+            .ToListAsync();
+            
+        _logger.LogError($"=== FOUND {result.Count} ACTIVE MEMBERSHIPS ===");
+        
+        return result;
     }
 
     public async Task SaveChangesAsync()

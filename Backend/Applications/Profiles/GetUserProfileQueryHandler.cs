@@ -1,4 +1,4 @@
-﻿using UGH.Infrastructure.Services;
+using UGH.Infrastructure.Services;
 using UGH.Domain.ViewModels;
 using UGH.Domain.Interfaces;
 using MediatR;

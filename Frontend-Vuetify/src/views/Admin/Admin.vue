@@ -281,7 +281,7 @@ export default {
         // Method to fetch data from the server
         async getdata() {
             try {
-                const res = await axiosInstance.get(`${process.env.baseURL}admin/get-all-users`, {
+                const res = await axiosInstance.get(`admin/get-all-users`, {
                     params: {
                         pageSize: this.pageSize,
                         pageNumber: this.currentPage,
@@ -307,7 +307,7 @@ export default {
         },
         async fetchMemberships() {
             try {
-                const res = await axiosInstance.get(`${process.env.baseURL}membership/get-all-memberships`);
+                const res = await axiosInstance.get(`membership/get-all-memberships`);
                 // Filter out inactive memberships and map to correct structure
                 this.memberships = res.data
                     .filter(membership => membership.isActive)
@@ -344,7 +344,7 @@ export default {
             if (membershipId) {
                 try {
                     const res = await axiosInstance.post(
-                        `${process.env.baseURL}coupon/add-coupon`, 
+                        `coupon/add-coupon`, 
                         parseInt(membershipId),
                         {
                             headers: {
@@ -377,7 +377,7 @@ export default {
         async sendCouponCode(uid, code) {
             try {
                 const res = await axiosInstance.post(
-                    `${process.env.baseURL}coupon/send-coupon`, {
+                    `coupon/send-coupon`, {
                         userId: uid,
                         couponCode: code,
                     }
@@ -414,13 +414,13 @@ export default {
 
         // Method to update the verification status of a user
         async statusUpdate(uid, staid) {
-            await axiosInstance.post(`${process.env.baseURL}admin/update-verification-state/${uid}/${staid}`).then((res) => {}).catch((error) => {
+            await axiosInstance.post(`admin/update-verification-state/${uid}/${staid}`).then((res) => {}).catch((error) => {
                 this.handleAxiosError(error);
             });
         },
         // Method to fetch a user's profile
         getProfile(uid) {
-            axiosInstance.get(`${process.env.baseURL}admin/get-user-profile/${uid}`).then((res) => {
+            axiosInstance.get(`admin/get-user-profile/${uid}`).then((res) => {
                 sessionStorage.setItem("UserId", res.data.user_Id);
                 router.push("/account");
 
@@ -440,7 +440,7 @@ export default {
                 confirmButtonText: "Yes, delete it!",
             }).then((result) => {
                 if (result.isConfirmed) {
-                    axiosInstance.delete(`${process.env.baseURL}admin/delete-admin-user/${userid}`).then(() => {
+                    axiosInstance.delete(`admin/delete-admin-user/${userid}`).then(() => {
                         toast.success("User deleted successfully!");
                         this.getdata();
                     }).catch((error) => {
@@ -481,7 +481,7 @@ export default {
         // Method to send an email to the selected user
         sendEmail() {
             this.isSending = true;
-            axiosInstance.post(`${process.env.baseURL}custom-mail/send`, {
+            axiosInstance.post(`custom-mail/send`, {
                     to: this.selectedUser.email_Address,
                     subject: this.emailSubject,
                     body: this.emailBody
@@ -538,7 +538,7 @@ export default {
         // Method to send admin password reset request
         async sendAdminPasswordReset(email) {
             try {
-                const response = await axiosInstance.post(`${process.env.baseURL}authenticate/reset-password`, {
+                const response = await axiosInstance.post(`authenticate/reset-password`, {
                     email: email
                 });
                 

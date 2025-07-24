@@ -155,7 +155,7 @@ const updateUserLinks = async (userId: string, linkVS: string, linkRS: string) =
   userData.append('fileRS', backIdFile.value!);
 
   await axiosInstance.post(
-    `${process.env.baseURL}authenticate/upload-id?userId=${userId}`,
+    `authenticate/upload-id?userId=${userId}`,
     userData,
     {
       headers: { 'Content-Type': 'multipart/form-data' },

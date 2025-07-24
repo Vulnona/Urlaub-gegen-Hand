@@ -121,7 +121,7 @@ const changePage = (newPage: number) => {
 const fetchReview = async () => {
   try {
     const response = await axiosInstance.get(
-      `${process.env.baseURL}review/get-offer-reviews?offerId=${params.id}`,
+      `review/get-offer-reviews?offerId=${params.id}`,
       {
         params: {
           pageSize: pageSize,
@@ -138,7 +138,7 @@ const fetchReview = async () => {
 const fetchOfferDetail = async () => {
   try {
     fetchReview();
-    const response = await axiosInstance.get(`${process.env.baseURL}offer/get-offer-by-id/${params.id}`
+    const response = await axiosInstance.get(`offer/get-offer-by-id/${params.id}`
     );
     offer.value = response.data;
   } catch (error) {

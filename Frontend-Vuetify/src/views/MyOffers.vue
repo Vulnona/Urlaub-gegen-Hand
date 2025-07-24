@@ -99,7 +99,7 @@ export default {
   methods: {  
     async fetchOffers() {
       try {
-        const response = await axiosInstance.get(`${process.env.baseURL}offer/get-offer-by-user`, {
+        const response = await axiosInstance.get(`offer/get-offer-by-user`, {
           params: {
             searchTerm: this.searchTerm,
             pageSize: this.pageSize,

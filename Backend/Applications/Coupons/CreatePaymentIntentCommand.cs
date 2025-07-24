@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using UGHApi.Models;
 
 namespace UGHApi.Applications.Coupons;

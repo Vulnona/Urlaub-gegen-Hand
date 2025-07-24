@@ -112,14 +112,14 @@ export default {
     },
     async fetchSkills() {
       try {
-        const response = await axiosInstance.get(`${process.env.baseURL}skills/get-all-skills`);
+        const response = await axiosInstance.get(`skills/get-all-skills`);
         this.availableSkills = response.data.map(skill => skill.skillDescrition);
       } catch (error) {
       }
     },
     async fetchUserProfile() {
       try {
-        const response = await axiosInstance.get(`${process.env.baseURL}profile/get-user-profile`);
+        const response = await axiosInstance.get(`profile/get-user-profile`);
         if (response.data.profile) {
           this.profile = response.data.profile;
           this.profile.skills = Array.isArray(this.profile.skills) ? this.profile.skills : [];
@@ -155,7 +155,7 @@ export default {
     },
     async updateProfileAPI(updatedProfile) {
       try {
-        const response = await axiosInstance.put(`${process.env.baseURL}profile/update-profile`, updatedProfile);
+        const response = await axiosInstance.put(`profile/update-profile`, updatedProfile);
         if (response.status === 200) {
           toast.success("Profil erfolgreich gespeichert!");
           if (response.data && response.data.profile) {            

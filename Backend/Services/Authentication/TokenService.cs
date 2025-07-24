@@ -1,4 +1,4 @@
-﻿using System.IdentityModel.Tokens.Jwt;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
@@ -49,10 +49,13 @@ public class TokenService
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
             string role = await _userService.GetUserRoleByUserEmail(userName);
 
-            // Handle membership status, default to "Inactive" if membership is null
-            var membershipStatus = memberships.Count != 0 ? "Active" : "Inactive";
-
-            // Should be combined with other db requests
+            // Use the memberships parameter passed from LoginCommandHandler
+            var hasActiveMembership = memberships != null && memberships.Any();
+            var membershipStatus = hasActiveMembership ? "Active" : "Inactive";
+            
+            _logger.LogError($"=== TOKEN SERVICE: User {userName} has {memberships?.Count ?? 0} memberships, status: {membershipStatus} ===");
+            
+            // Get user for verification status (but don't use for membership check)
             var user = await _userService.GetUserByEmailAsync(userName);
             var verificationStatus = user.VerificationState;
             

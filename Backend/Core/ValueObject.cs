@@ -1,4 +1,4 @@
-﻿namespace UGH.Domain.Core;
+namespace UGH.Domain.Core;
 
 public abstract class ValueObject<T>
 where T : ValueObject<T>

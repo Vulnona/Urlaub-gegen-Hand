@@ -1,4 +1,4 @@
-﻿using UGHApi.Services.HtmlTemplate;
+using UGHApi.Services.HtmlTemplate;
 using UGH.Infrastructure.Services;
 using MediatR;
 

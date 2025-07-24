@@ -61,7 +61,7 @@ export default {
     async VerificationEmail() {
       this.loading = true; // Disable the button
       try {
-        const response = await axiosInstance.post(`${process.env.baseURL}authenticate/resend-email-verification`, {
+        const response = await axiosInstance.post(`authenticate/resend-email-verification`, {
           email: this.email
         });
         this.message = response.data.value;

@@ -1,4 +1,4 @@
-﻿using UGHApi.Models;
+using UGHApi.Models;
 
 namespace UGHApi.Services.HtmlTemplate;
 
@@ -73,7 +73,7 @@ public class HtmlTemplateService
         </head>
         <body>
             <div class='container'>
-                <div class='success-icon'>👍</div>
+                <div class='success-icon'>??</div>
                 <h1>Email Verified Successfully</h1>
                 <p>Congratulations! Your email has been successfully verified.</p>
                 <a href='{_baseUrl}/login'>Go to Login Page</a>
@@ -142,7 +142,7 @@ public class HtmlTemplateService
                 </head>
                 <body>
                     <div class='container'>
-                        <div class='error-icon'>❌</div>
+                        <div class='error-icon'>?</div>
                         <h1>Invalid Token</h1>
                         <p>Sorry, the token provided is not valid. Please check the link or try again.</p>
                         <a href='{_baseUrl}/verify-email'>Request New Token</a>
@@ -235,7 +235,7 @@ public class HtmlTemplateService
     </head>
     <body>
         <div class='container'>
-            <div class='icon'>🎉</div>
+            <div class='icon'>??</div>
             <h1>Congratulations, {userFullName}!</h1>
             <p>You are now eligible for our exclusive membership benefits.</p>
             <p>Your membership coupon code is:</p>
@@ -334,7 +334,7 @@ public class HtmlTemplateService
 </head>
 <body>
     <div class='container'>
-        <div class='icon'>🎉</div>
+        <div class='icon'>??</div>
         <h1>Thank You, {userFullName}!</h1>
         <p>Your purchase was successful! You are now eligible for our exclusive membership benefits.</p>
         <p>Your membership coupon code is:</p>

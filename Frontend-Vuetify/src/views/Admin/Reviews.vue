@@ -102,7 +102,7 @@ export default {
   methods: {
     async fetchOffers() {
       try {
-        const response = await axiosInstance.get(`${process.env.baseURL}review/get-all-offers-for-reviews-admin`, {
+        const response = await axiosInstance.get(`review/get-all-offers-for-reviews-admin`, {
           params: {
             searchTerm: this.searchTerm,
             pageSize: this.pageSize,

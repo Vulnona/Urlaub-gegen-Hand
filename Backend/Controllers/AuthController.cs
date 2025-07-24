@@ -75,6 +75,8 @@ namespace UGHApi.Controllers
         {
             try
             {
+                _logger.LogError($"=== AUTH CONTROLLER LOGIN CALLED FOR {command.Email} ===");
+                
                 if (!ModelState.IsValid)
                 {
                     _logger.LogError($"Bad request: {ModelState}");
@@ -82,6 +84,8 @@ namespace UGHApi.Controllers
                 }
 
                 var response = await _mediator.Send(command);
+                
+                _logger.LogError($"=== MEDIATOR RESPONSE FOR {command.Email}: IsFailure={response.IsFailure} ===");
 
                 if (response.IsFailure)
                 {
@@ -264,6 +268,12 @@ namespace UGHApi.Controllers
                 if (user.IsTwoFactorEnabled)
                     return BadRequest("2FA is already enabled for this user");
 
+                // Admin users must enable 2FA
+                if (user.UserRole == UserRoles.Admin)
+                {
+                    _logger.LogInformation($"Setting up mandatory 2FA for admin user: {request.Email}");
+                }
+
                 var secret = _twoFactorAuthService.GenerateSecret();
                 var qrCodeUri = _twoFactorAuthService.GenerateQrCodeUri(user.Email_Address, secret);
                 var qrCodeImage = _twoFactorAuthService.GenerateQrCode(qrCodeUri);
@@ -323,50 +333,6 @@ namespace UGHApi.Controllers
             }
         }
 
-        [HttpPost("2fa/verify")]
-        public async Task<IActionResult> Verify2FA([FromBody] Verify2FARequest request)
-        {
-            try
-            {
-                if (!ModelState.IsValid)
-                    return BadRequest(ModelState);
-
-                var user = await _userRepository.GetUserByEmailAsync(request.Email);
-                if (user == null)
-                    return NotFound("User not found");
-
-                if (!user.IsTwoFactorEnabled)
-                    return BadRequest("2FA is not enabled for this user");
-
-                bool isValid = false;
-
-                if (request.IsBackupCode)
-                {
-                    isValid = _twoFactorAuthService.ValidateBackupCode(user.BackupCodes, request.Code);
-                    if (isValid)
-                    {
-                        // Remove used backup code
-                        user.BackupCodes = _twoFactorAuthService.RemoveUsedBackupCode(user.BackupCodes, request.Code);
-                        await _userRepository.UpdateUserAsync(user);
-                    }
-                }
-                else
-                {
-                    isValid = _twoFactorAuthService.ValidateCode(user.TwoFactorSecret, request.Code);
-                }
-
-                if (!isValid)
-                    return BadRequest("Invalid verification code");
-
-                return Ok(new { Message = "2FA verification successful" });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"Exception occurred during 2FA verification: {ex.Message} | StackTrace: {ex.StackTrace}");
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
-        }
-
         [HttpPost("login-2fa")]
         public async Task<IActionResult> LoginWith2FA([FromBody] LoginWith2FARequest request)
         {
@@ -406,8 +372,9 @@ namespace UGHApi.Controllers
                 if (!isValid)
                     return BadRequest("Invalid 2FA code");
 
-                // Generate JWT token
-                var token = await _tokenService.GenerateJwtToken(user.Email_Address, user.User_Id);
+                // Generate JWT token with correct memberships
+                var activeMemberships = await _userRepository.GetActiveUserMembershipsAsync(user.User_Id);
+                var token = await _tokenService.GenerateJwtToken(user.Email_Address, user.User_Id, activeMemberships);
 
                 return Ok(new LoginResponse
                 {
@@ -438,6 +405,10 @@ namespace UGHApi.Controllers
 
                 if (!user.IsTwoFactorEnabled)
                     return BadRequest("2FA is not enabled for this user");
+
+                // Admin users cannot disable 2FA
+                if (user.UserRole == UserRoles.Admin)
+                    return BadRequest("Admin accounts must keep 2FA enabled");
 
                 // Verify password
                 if (!_passwordService.VerifyPassword(request.Password, user.Password, user.SaltKey))

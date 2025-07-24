@@ -1,4 +1,4 @@
-﻿using Mapster;
+using Mapster;
 using Microsoft.EntityFrameworkCore;
 using UGH.Domain.Entities;
 using UGH.Domain.Interfaces;

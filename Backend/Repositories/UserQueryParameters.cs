@@ -1,4 +1,4 @@
-﻿using UGHApi.Shared;
+using UGHApi.Shared;
 
 namespace UGHApi.Repositories
 {

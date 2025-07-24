@@ -1,4 +1,4 @@
-﻿namespace UGH.Contracts.Authentication;
+namespace UGH.Contracts.Authentication;
 
 public class LoginResponse
 {
@@ -7,4 +7,6 @@ public class LoginResponse
     public string Email { get; set; }
     public Guid UserId { get; set; }
     public string FirstName { get; set; }
+    public bool RequiresTwoFactor { get; set; } = false;
+    public string Message { get; set; }
 }

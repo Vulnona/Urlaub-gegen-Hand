@@ -1,4 +1,4 @@
-﻿using UGHApi.Services.UserProvider;
+using UGHApi.Services.UserProvider;
 using System.Security.Claims;
 
 public class UserProvider : IUserProvider

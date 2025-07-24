@@ -1,4 +1,4 @@
-﻿namespace UGHApi.Shared;
+namespace UGHApi.Shared;
 
 public class PaginatedList<T>
 {

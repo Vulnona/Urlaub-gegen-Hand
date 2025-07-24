@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using UGHApi.Entities;
 
 namespace UGHApi.Applications.ShopItems;

@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using UGH.Contracts.Authentication;
 using UGH.Domain.Core;
 using UGH.Domain.Entities;
@@ -104,7 +104,7 @@ public class UserService
                 return Result.Failure(Errors.General.InvalidOperation("Membership not found."));
             }
 
-            DateTime startDate = DateTime.UtcNow;
+            DateTime startDate = DateTime.Now;
             DateTime expirationDate = startDate.AddDays(membership.DurationDays);
 
             var userMembership = new UserMembership

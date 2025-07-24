@@ -1,4 +1,4 @@
-﻿namespace UGHApi.Services.Stripe;
+namespace UGHApi.Services.Stripe;
 
 #pragma warning disable CS8632
 

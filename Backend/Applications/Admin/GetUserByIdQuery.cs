@@ -1,4 +1,4 @@
-﻿using UGH.Domain.ApplicationResponses;
+using UGH.Domain.ApplicationResponses;
 using MediatR;
 
 namespace UGH.Application.Admin;

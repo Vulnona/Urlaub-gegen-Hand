@@ -283,7 +283,7 @@ export default {
     },
     async showReviews(userId) {
       try {
-        const response = await axiosInstance.get(`${process.env.baseURL}review/get-user-reviews?userId=${userId}&page=${this.currentPage}`);
+        const response = await axiosInstance.get(`review/get-user-reviews?userId=${userId}&page=${this.currentPage}`);
         this.reviews.push(...response.data.items); // Append new reviews
         this.totalPages = response.data.totalPages; // Update total pages
       } catch (error) {
@@ -296,7 +296,7 @@ export default {
     // Method to fetch user data
     async fetchUserData(id) {
       try {
-        const response = await axiosInstance.get(`${process.env.baseURL}profile/get-user-profile/${id}`);
+        const response = await axiosInstance.get(`profile/get-user-profile/${id}`);
         this.user = response.data;
         this.profileImgSrc = `data:image/jpeg;base64,${response.data.profilePicture}`;
       } catch (error) {

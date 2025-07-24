@@ -1,8 +1,8 @@
-﻿using MediatR;
+using MediatR;
 using UGH.Domain.Core;
 using UGH.Domain.Interfaces;
 using UGHApi.Entities;
-using UGHApi.Interfaces;
+using UGH.Domain.Interfaces;
 using UGHApi.Models;
 
 namespace UGHApi.Applications.Coupons;

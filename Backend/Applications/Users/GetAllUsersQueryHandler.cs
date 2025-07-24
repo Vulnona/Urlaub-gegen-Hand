@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using UGH.Domain.Interfaces;
 using UGHApi.Shared;
 using UGHApi.ViewModels;

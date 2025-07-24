@@ -1,4 +1,4 @@
-﻿using UGH.Domain.Entities;
+using UGH.Domain.Entities;
 using UGHApi.ViewModels.UserComponent;
 namespace UGH.Domain.ViewModels;
 

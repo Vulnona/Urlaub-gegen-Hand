@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using UGH.Application.Admin;
 using UGH.Domain.Core;
 using UGH.Domain.Interfaces;

@@ -1,6 +1,6 @@
-﻿using MediatR;
+using MediatR;
 using UGH.Domain.Core;
-using UGHApi.Interfaces;
+using UGH.Domain.Interfaces;
 using UGHApi.Services.Stripe;
 
 namespace UGHApi.Applications.Transactions;

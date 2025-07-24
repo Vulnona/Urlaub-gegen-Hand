@@ -201,7 +201,7 @@ export default {
   methods: {
     async loadStatus() {
       try {
-        const response = await axiosInstance.get(`${process.env.baseURL}authenticate/2fa-status`)
+        const response = await axiosInstance.get(`authenticate/2fa-status`)
         this.is2FAEnabled = response.data.isEnabled
         this.backupCodesRemaining = response.data.backupCodesRemaining
       } catch (error) {
@@ -227,7 +227,7 @@ export default {
     async showBackupCodes() {
       this.loading = true
       try {
-        const response = await axiosInstance.get(`${process.env.baseURL}authenticate/backup-codes`)
+        const response = await axiosInstance.get(`authenticate/backup-codes`)
         this.displayedBackupCodes = response.data.codes
         this.showBackupModal = true
       } catch (error) {
@@ -245,7 +245,7 @@ export default {
     async regenerateBackupCodes() {
       this.loading = true
       try {
-        const response = await axiosInstance.post(`${process.env.baseURL}authenticate/regenerate-backup-codes`)
+        const response = await axiosInstance.post(`authenticate/regenerate-backup-codes`)
         this.displayedBackupCodes = response.data.codes
         this.showBackupModal = true
         await this.loadStatus()
@@ -272,7 +272,7 @@ export default {
 
       this.disabling = true
       try {
-        await axiosInstance.post(`${process.env.baseURL}authenticate/disable-2fa`, {
+        await axiosInstance.post(`authenticate/disable-2fa`, {
           password: this.disablePassword
         })
         

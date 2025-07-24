@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using static UGH.Domain.Core.UGH_Enums;
 
@@ -14,9 +14,14 @@ public class Coupon
     [Required(ErrorMessage = "Coupon name is required.")]
     public string Name { get; set; }
     public string Description { get; set; }
-    public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
+    public DateTime CreatedDate { get; set; } = DateTime.Now;
     public CouponDuration Duration { get; set; }
     public Guid CreatedBy { get; set; }
+
+    // Email tracking fields
+    public bool IsEmailSent { get; set; } = false;
+    public DateTime? EmailSentDate { get; set; }
+    public string EmailSentTo { get; set; }
 
     public int MembershipId { get; set; }
     public Membership Membership { get; set; }

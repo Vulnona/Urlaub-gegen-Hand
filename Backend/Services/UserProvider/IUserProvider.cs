@@ -1,4 +1,4 @@
-﻿namespace UGHApi.Services.UserProvider
+namespace UGHApi.Services.UserProvider
 {
     public interface IUserProvider
     {

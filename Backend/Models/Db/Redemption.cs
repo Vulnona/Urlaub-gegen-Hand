@@ -1,4 +1,4 @@
-﻿namespace UGH.Domain.Entities;
+namespace UGH.Domain.Entities;
 
 public class Redemption
 {

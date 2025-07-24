@@ -1,4 +1,4 @@
-﻿using UGH.Domain.Entities;
+using UGH.Domain.Entities;
 
 namespace UGH.Domain.ApplicationResponses;
 

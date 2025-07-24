@@ -1,11 +1,11 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using MediatR;
 using Stripe;
 using UGH.Domain.Core;
 using UGH.Domain.Interfaces;
 using UGH.Infrastructure.Services;
 using UGHApi.Extensions;
-using UGHApi.Interfaces;
+using UGH.Domain.Interfaces;
 using UGHApi.Services.HtmlTemplate;
 using static UGH.Domain.Core.UGH_Enums;
 

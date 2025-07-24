@@ -446,7 +446,7 @@
       },
       async showReviews(userid) {
         try {
-          const response = await axiosInstance.get(`${process.env.baseURL}review/get-user-reviews?userId=${userid}`);
+          const response = await axiosInstance.get(`review/get-user-reviews?userId=${userid}`);
           this.reviews = response.data.items;
         } catch (error) {
           console.error('Error fetching reviews:', error);
@@ -480,7 +480,7 @@
           };
 
           try {
-            const response = await axiosInstance.put(`${process.env.baseURL}profile/update-profile-picture`, requestBody, {
+            const response = await axiosInstance.put(`profile/update-profile-picture`, requestBody, {
               headers: {
                 'Content-Type': 'application/json'
               }
@@ -526,7 +526,7 @@
           confirmButtonText: "Ja, löschen!",
         }).then((result) => {
           if (result.isConfirmed) {
-            axiosInstance.delete(`${process.env.baseURL}user/delete-user`).then(() => {
+            axiosInstance.delete(`user/delete-user`).then(() => {
               toast.success("Benutzerdaten erfolgreich gelöscht!");
               sessionStorage.clear();
               router.push({ name: 'Login' });
@@ -540,7 +540,7 @@
       // Function to fetch user data using API request
       async fetchUserData() {
         try {
-          const response = await axiosInstance.get(`${process.env.baseURL}profile/get-user-profile`);
+          const response = await axiosInstance.get(`profile/get-user-profile`);
           this.user = response.data.profile;
           this.profileImgSrc = `data:image/jpeg;base64,${response.data.profile.profilePicture}`;
         } catch (error) {

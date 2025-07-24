@@ -94,7 +94,7 @@ export default {
           return;
         }
 
-        const response = await axiosInstance.post(`${process.env.baseURL}authenticate/login`, {
+        const response = await axiosInstance.post(`authenticate/login`, {
           email: this.email,
           password: this.password
         });

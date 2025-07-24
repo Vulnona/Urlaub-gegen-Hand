@@ -1,4 +1,4 @@
-﻿namespace UGHApi.Services.AWS;
+namespace UGHApi.Services.AWS;
 
 public interface IUrlBuilderService
 {

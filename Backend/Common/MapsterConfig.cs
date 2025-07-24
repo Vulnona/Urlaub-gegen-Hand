@@ -1,4 +1,4 @@
-﻿using Mapster;
+using Mapster;
 using UGH.Domain.Entities;
 using UGHApi.Entities;
 using UGHApi.Extensions;

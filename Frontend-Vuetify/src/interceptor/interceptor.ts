@@ -4,7 +4,7 @@ import router from '@/router';
 
 // Create an Axios instance
 const axiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_BASE_URL || 'http://localhost:8081/api/',
+  baseURL: '/api/',  // Use relative URL for Vite proxy
 });
 
 // Function to decrypt token using CryptoJS.
@@ -20,6 +20,13 @@ const decryptToken = (encryptedToken: string): string | null => {
 // Interceptor for adding authorization token to headers
 axiosInstance.interceptors.request.use(
   config => {
+    console.log('🔍 AXIOS REQUEST DEBUG:', {
+      url: config.url,
+      baseURL: config.baseURL,
+      fullURL: config.baseURL + config.url,
+      method: config.method
+    });
+    
     const token = sessionStorage.getItem('token');
     if (token) {
       const decryptedToken = decryptToken(token);
@@ -32,6 +39,7 @@ axiosInstance.interceptors.request.use(
     return config;
   },
   error => {
+    console.error('🚨 AXIOS REQUEST ERROR:', error);
     return Promise.reject(error);
   }
 );
@@ -39,9 +47,22 @@ axiosInstance.interceptors.request.use(
 // Response interceptor to handle 401 errors and redirect to login
 axiosInstance.interceptors.response.use(
   response => {
+    console.log('✅ AXIOS RESPONSE SUCCESS:', {
+      status: response.status,
+      url: response.config.url,
+      fullURL: response.config.baseURL + response.config.url
+    });
     return response;
   },
   error => {
+    console.error('❌ AXIOS RESPONSE ERROR:', {
+      status: error.response?.status,
+      url: error.config?.url,
+      fullURL: error.config?.baseURL + error.config?.url,
+      message: error.message,
+      response: error.response?.data
+    });
+    
     if (error.response && error.response.status === 401) {
       // Clear session storage
       sessionStorage.clear();

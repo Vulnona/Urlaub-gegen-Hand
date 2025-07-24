@@ -1,8 +1,9 @@
-﻿using MediatR;
+using MediatR;
 using UGH.Contracts.Authentication;
 using UGH.Domain.Core;
 using UGH.Domain.Interfaces;
 using UGH.Infrastructure.Services;
+using UGH.Domain.Entities;
 
 namespace UGH.Application.Authentication;
 
@@ -33,6 +34,8 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, Result<LoginRes
     {
         try
         {
+            _logger.LogError($"=== LOGIN COMMAND HANDLER CALLED FOR {request.Email} ===");
+            
             var userValid = _userService.ValidateUser(request.Email, request.Password);
 
             if (!userValid.IsValid)
@@ -44,9 +47,31 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, Result<LoginRes
 
             var user = await _userRepository.GetUserByEmailAsync(request.Email);
 
-            var activeMemberships = user
-                .UserMemberships.Where(um => um.IsMembershipActive)
-                .ToList();
+            // Check if user is Admin - Admin MUST use 2FA
+            if (user.UserRole == UserRoles.Admin && !user.IsTwoFactorEnabled)
+            {
+                return Result.Failure<LoginResponse>(
+                    Errors.General.InvalidOperation("Admin accounts must have 2FA enabled")
+                );
+            }
+
+            // Check if user has 2FA enabled - redirect to 2FA login
+            if (user.IsTwoFactorEnabled)
+            {
+                return Result.Success(new LoginResponse
+                {
+                    RequiresTwoFactor = true,
+                    Email = request.Email,
+                    UserId = user.User_Id,
+                    FirstName = user.FirstName,
+                    Message = "Two-factor authentication required"
+                });
+            }
+
+            // Use explicit query to get active memberships
+            var activeMemberships = await _userRepository.GetActiveUserMembershipsAsync(user.User_Id);
+            
+            _logger.LogError($"=== USER {request.Email} HAS {activeMemberships.Count} ACTIVE MEMBERSHIPS ===");
 
             if (activeMemberships.Any())
             {

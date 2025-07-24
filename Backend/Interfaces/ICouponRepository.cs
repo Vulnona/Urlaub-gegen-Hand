@@ -1,15 +1,17 @@
-﻿using UGH.Domain.Entities;
+using UGH.Domain.Entities;
 using UGHApi.Shared;
 using UGHApi.ViewModels;
 
-namespace UGHApi.Interfaces;
+namespace UGH.Domain.Interfaces;
 
 public interface ICouponRepository
 {
     Task<Coupon> AddCoupon(Coupon coupon);
     Task UpdateCoupon(Coupon updatedCoupon);
+    Task UpdateCouponAsync(Coupon coupon);
     Task<Coupon> GetCouponById(int couponId);
     Task<Coupon> GetCouponByCode(string couponCode);
+    Task<Coupon> GetCouponByCodeAsync(string couponCode);
     Task<bool> IsCouponExists(string couponCode);
     Task<bool> IsCouponRedeemed(int couponId);
     Task<PaginatedList<CouponDto>> GetAllCoupons(int pageNumber, int pageSize);

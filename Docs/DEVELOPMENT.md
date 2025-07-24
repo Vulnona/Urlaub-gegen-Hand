@@ -2,7 +2,7 @@
 
 Entwicklerleitfaden für das UGH-Projekt mit allen wichtigen Informationen für Setup, Entwicklung und Deployment.
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Ersteinrichtung
 ```powershell
@@ -44,23 +44,14 @@ UGH/
 │   ├── migration/            # Migration Management
 │   ├── infrastructure/       # Port & Service Management
 │   └── database/            # Database Tools
-├── Docs/                     # Projektdokumentation
+├── docs/                     # Projektdokumentation
 └── docker-compose.yaml      # Container-Orchestrierung
 ```
 
 ## 🛠️ Entwicklungstools
 
 ### Migration Management
-```powershell
-# Neue Migration erstellen
-.\scripts\migration\enhanced-migration.ps1 add -MigrationName "AddNewFeature"
 
-# Migration anwenden
-.\scripts\migration\enhanced-migration.ps1 sync
-
-# Migration zurückrollen
-.\scripts\migration\enhanced-migration.ps1 remove -Force
-```
 
 ### Database Tools
 ```powershell
@@ -83,7 +74,7 @@ UGH/
 .\scripts\infrastructure\port-management.ps1 restart
 ```
 
-## 🐳 Docker Environment
+## Docker Environment
 
 ### Services
 
@@ -109,7 +100,7 @@ docker-compose logs -f [service-name]
 docker-compose down
 ```
 
-## 🔧 Konfiguration
+## Konfiguration
 
 ### Environment Variables
 ```yaml
@@ -127,7 +118,7 @@ NGINX_PORT=81
 MYSQL_PORT=3306
 ```
 
-## 🧪 Testing
+## Testing
 
 ### Backend Tests
 ```powershell
@@ -148,6 +139,129 @@ npm run test:unit
 # E2E Tests
 npm run test:e2e
 ```
+
+### API Testing
+
+### Login Process
+1. **POST** `/api/login` - User login
+   - Returns JWT token with user information
+   - Contains `MembershipStatus` claim
+
+2. **POST** `/api/login-2fa` - Two-factor authentication login
+   - Required for Admin users
+   - Optional for regular users
+
+### User Verification via API
+
+#### Endpoint: POST /api/login
+```json
+{
+  "email": "test@example.com",
+  "password": "TestPassword123!"
+}
+```
+
+#### Response:
+```json
+{
+  "token": "eyJ...",
+  "user": {
+    "email": "test@example.com",
+    "membershipStatus": "Active",
+    "roles": ["User"]
+  }
+}
+```
+
+## Coupon System
+
+### Admin Endpoints (Admin Role Required)
+
+#### Create Coupon
+- **POST** `/api/coupon/add-coupon`
+- Body: `{ "membershipId": 1 }`
+- Creates a new coupon for active membership
+
+#### Send Coupon
+- **POST** `/api/coupon/send-coupon`
+- Sends coupon via email
+
+#### Get All Coupons
+- **GET** `/api/coupon/get-all-coupon`
+- Returns paginated list of all coupons
+
+#### Delete Coupon
+- **DELETE** `/api/coupon/delete-coupon/{couponId}`
+
+### User Endpoints
+
+#### Redeem Coupon
+- **POST** `/api/coupon/redeem`
+- Body: `{ "couponCode": "XXXXX" }`
+- Activates membership for user
+
+## Testing New Account + Coupon Flow
+
+### Step 1: Create Test User
+```bash
+# Register new user via Frontend or API
+POST /api/register
+{
+  "email": "newuser@example.com",
+  "password": "TestPassword123!",
+  "firstName": "Test",
+  "lastName": "User"
+}
+```
+
+### Step 2: Verify User (Admin Action)
+```bash
+# Admin creates and sends coupon
+POST /api/coupon/add-coupon
+Authorization: Bearer {admin_token}
+Content-Type: application/json
+{
+  "membershipId": 1
+}
+```
+
+### Step 3: User Redeems Coupon
+```bash
+# User redeems coupon to activate membership
+POST /api/coupon/redeem
+Authorization: Bearer {user_token}
+Content-Type: application/json
+{
+  "couponCode": "GENERATED_CODE"
+}
+```
+
+### Step 4: Verify Active Membership
+```bash
+# User logs in again to get updated token
+POST /api/login
+{
+  "email": "newuser@example.com",
+  "password": "TestPassword123!"
+}
+
+# Response should show "membershipStatus": "Active"
+```
+
+## Important Notes
+
+- **Timezone**: System uses German local time (`DateTime.Now`)
+- **Admin 2FA**: Mandatory for Admin users
+- **User 2FA**: Optional for regular users  
+- **Coupon Duration**: Based on membership type (1-3 years or lifetime)
+- **Debug Logs**: Enabled in UserRepository for troubleshooting
+
+## Current Test User
+- **Email**: `test@example.com`
+- **Password**: `TestPassword123!`
+- **Status**: ✅ Active Membership
+- **JWT**: Contains correct `MembershipStatus: "Active"`
+
 
 ## 📦 Deployment
 
@@ -280,18 +394,223 @@ docker-compose build --no-cache
 
 ## 📚 API Dokumentation
 
-Die API-Dokumentation ist über Swagger UI verfügbar:
+Die vollständige API-Dokumentation ist über Swagger UI verfügbar:
 - **Development**: http://localhost:8081/swagger
 - **Production**: http://your-domain/api/swagger
 
-## 🔗 Useful Links
+### Wichtige API-Endpunkte
 
-- [.NET 7.0 Documentation](https://docs.microsoft.com/en-us/dotnet/)
-- [Vue.js 3 Guide](https://vuejs.org/guide/)
-- [Vuetify 3 Documentation](https://vuetifyjs.com/)
-- [Entity Framework Core](https://docs.microsoft.com/en-us/ef/core/)
-- [Docker Compose Reference](https://docs.docker.com/compose/)
+#### Authentication & User Management
+
+**User Registration**
+```http
+POST /api/authenticate/register
+Content-Type: application/json
+
+{
+  "FirstName": "Test",
+  "LastName": "User",
+  "Email_Address": "test@example.com",
+  "Password": "TestPassword123!",
+  "DateOfBirth": "1990-01-01",
+  "Gender": "M",
+  "Latitude": 52.5200,
+  "Longitude": 13.4050,
+  "DisplayName": "Berlin, Deutschland",
+  "City": "Berlin",
+  "Country": "Deutschland",
+  "CountryCode": "DE"
+}
+```
+
+**User Login (Standard)**
+```http
+POST /api/authenticate/login
+Content-Type: application/json
+
+{
+  "Email": "test@example.com",
+  "Password": "TestPassword123!"
+}
+
+Response: {
+  "success": true,
+  "value": {
+    "token": "jwt-token-here",
+    "expires": "2025-07-24T15:00:00Z",
+    "membershipStatus": "Active",
+    "requires2FA": false
+  }
+}
+```
+
+**User Login (with 2FA)**
+```http
+POST /api/authenticate/login-2fa
+Content-Type: application/json
+
+{
+  "Email": "admin@example.com",
+  "Password": "AdminPassword123!",
+  "TwoFactorCode": "123456"
+}
+```
+
+#### 2FA Management
+
+**Setup 2FA**
+```http
+POST /api/authenticate/setup-2fa
+Authorization: Bearer {jwt-token}
+
+Response: {
+  "qrCodeDataUrl": "data:image/png;base64,...",
+  "manualEntryKey": "ABCD1234EFGH5678",
+  "backupCodes": ["12345678", "87654321", ...]
+}
+```
+
+**Verify 2FA Setup**
+```http
+POST /api/authenticate/verify-2fa-setup
+Authorization: Bearer {jwt-token}
+Content-Type: application/json
+
+{
+  "verificationCode": "123456"
+}
+```
+
+**Disable 2FA**
+```http
+POST /api/authenticate/disable-2fa
+Authorization: Bearer {jwt-token}
+Content-Type: application/json
+
+{
+  "password": "UserPassword123!",
+  "verificationCode": "123456"
+}
+```
+
+#### Coupon System
+
+**Get Available Coupons**
+```http
+GET /api/coupons
+Authorization: Bearer {jwt-token}
+
+Response: {
+  "success": true,
+  "value": [
+    {
+      "id": 1,
+      "code": "WELCOME2025",
+      "name": "Welcome Bonus",
+      "description": "30 days premium membership",
+      "isActive": true,
+      "membershipId": 1
+    }
+  ]
+}
+```
+
+**Redeem Coupon**
+```http
+POST /api/coupons/redeem
+Authorization: Bearer {jwt-token}
+Content-Type: application/json
+
+{
+  "couponCode": "WELCOME2025"
+}
+
+Response: {
+  "success": true,
+  "value": {
+    "message": "Coupon successfully redeemed",
+    "newMembershipExpiry": "2025-08-23T12:00:00"
+  }
+}
+```
+
+**Create Admin Coupon**
+```http
+POST /api/coupons/create
+Authorization: Bearer {admin-jwt-token}
+Content-Type: application/json
+
+{
+  "code": "ADMIN-SPECIAL",
+  "name": "Admin Special Offer",
+  "description": "60 days premium access",
+  "membershipId": 2,
+  "duration": "TwoMonths"
+}
+```
+
+#### Membership Management
+
+**Get User Memberships**
+```http
+GET /api/memberships/user/{userId}
+Authorization: Bearer {jwt-token}
+
+Response: {
+  "success": true,
+  "value": [
+    {
+      "id": 1,
+      "membershipId": 1,
+      "startDate": "2025-07-24T00:00:00",
+      "expiration": "2025-08-23T23:59:59",
+      "status": "Active",
+      "membership": {
+        "name": "Basic Membership",
+        "durationDays": 30
+      }
+    }
+  ]
+}
+```
+
+**Admin: Grant Membership**
+```http
+POST /api/admin/grant-membership
+Authorization: Bearer {admin-jwt-token}
+Content-Type: application/json
+
+{
+  "userId": "user-guid-here",
+  "membershipId": 1,
+  "durationDays": 30
+}
+```
+
+#### User Profile
+
+**Get User Profile**
+```http
+GET /api/profile/{userId}
+Authorization: Bearer {jwt-token}
+
+Response: {
+  "success": true,
+  "value": {
+    "userId": "guid",
+    "firstName": "Test",
+    "lastName": "User",
+    "email": "test@example.com",
+    "membershipStatus": "Active",
+    "has2FAEnabled": false,
+    "location": {
+      "city": "Berlin",
+      "country": "Deutschland"
+    }
+  }
+}
+```
 
 ---
 
-**Letzte Aktualisierung**: 2025-07-23
+**Letzte Aktualisierung**: 2025-07-24

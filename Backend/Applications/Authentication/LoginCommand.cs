@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using UGH.Contracts.Authentication;
 using UGH.Domain.Core;
 

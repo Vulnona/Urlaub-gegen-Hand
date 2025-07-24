@@ -1,8 +1,8 @@
-﻿using Mapster;
+using Mapster;
 using Microsoft.EntityFrameworkCore;
 using UGH.Domain.Entities;
 using UGHApi.Extensions;
-using UGHApi.Interfaces;
+using UGH.Domain.Interfaces;
 using UGHApi.Shared;
 using UGHApi.ViewModels;
 using UGHApi.DATA;
@@ -155,6 +155,19 @@ public class CouponRepository : ICouponRepository
         return await _context
             .coupons.Include(c => c.Membership)
             .FirstOrDefaultAsync(c => c.Code == couponCode.ToUpper().Trim());
+    }
+
+    public async Task<Coupon> GetCouponByCodeAsync(string couponCode)
+    {
+        return await _context
+            .coupons.Include(c => c.Membership)
+            .FirstOrDefaultAsync(c => c.Code == couponCode.ToUpper().Trim());
+    }
+
+    public async Task UpdateCouponAsync(Coupon coupon)
+    {
+        _context.coupons.Update(coupon);
+        await _context.SaveChangesAsync();
     }
 
     public class CouponNotFoundException : Exception

@@ -1,4 +1,4 @@
-﻿namespace UGHApi.Common;
+namespace UGHApi.Common;
 
 public class FacebookDetails
 {

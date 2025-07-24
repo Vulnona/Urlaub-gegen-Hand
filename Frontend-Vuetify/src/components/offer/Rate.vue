@@ -57,7 +57,7 @@ watch (() => props.active, async () => {
         return;
     loadingImage.value = true;
     try {
-        const response = await axiosInstance.get(`${process.env.baseURL}offer/get-offer-by-id/${props.offer.offerId}`);
+        const response = await axiosInstance.get(`offer/get-offer-by-id/${props.offer.offerId}`);
         image.value = response.data.imageData;
         loadingImage.value=false;
   } catch (error) {
@@ -70,7 +70,7 @@ const submitRating = async () => {
     if (selectedRating.value > 0) {
         await nextTick();
         try {
-              const response = await axiosInstance.post(`${process.env.baseURL}review/add-review`, {
+              const response = await axiosInstance.post(`review/add-review`, {
                   offerId: props.offer.offerId,
                   ratingValue: selectedRating.value,
                   reviewComment: reviewText,

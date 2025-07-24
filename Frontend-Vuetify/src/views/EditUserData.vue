@@ -141,7 +141,7 @@ export default {
     },
     async fetchUserProfile() {
       try {
-        const response = await axiosInstance.get(`${process.env.baseURL}profile/get-user-profile`);
+        const response = await axiosInstance.get(`profile/get-user-profile`);
         if (response.data.profile) {
           this.profile = response.data.profile;
         } else {
@@ -173,7 +173,7 @@ async updateProfileAPI(updatedProfile) {
         }).then( async(result) => {
             if (result.isConfirmed) {
       try {
-          const response = await axiosInstance.put(`${process.env.baseURL}profile/update-user-data`, updatedProfile);
+          const response = await axiosInstance.put(`profile/update-user-data`, updatedProfile);
           if (response.status === 200) {
               toast.success("Profile saved successfully!");
               if (response.data && response.data.profile) {

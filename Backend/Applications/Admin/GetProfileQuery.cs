@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using UGHApi.ViewModels;
 
 namespace UGH.Application.Admin;

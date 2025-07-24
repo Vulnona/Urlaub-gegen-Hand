@@ -1,4 +1,4 @@
-﻿namespace UGHApi.ViewModels;
+namespace UGHApi.ViewModels;
 
 public class CouponDto
 {
@@ -10,4 +10,9 @@ public class CouponDto
     public string CreatedBy { get; set; }
     public bool IsRedeemed { get; set; }
     public string RedeemedBy { get; set; } = string.Empty;
+    
+    // Email tracking properties
+    public bool IsEmailSent { get; set; } = false;
+    public DateTime? EmailSentDate { get; set; }
+    public string EmailSentTo { get; set; } = string.Empty;
 }

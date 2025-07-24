@@ -1,8 +1,8 @@
-﻿using UGHApi.Entities;
+using UGHApi.Entities;
 using UGHApi.Shared;
 using UGHApi.ViewModels;
 
-namespace UGHApi.Interfaces;
+namespace UGH.Domain.Interfaces;
 
 public interface ITransactionRepository
 {

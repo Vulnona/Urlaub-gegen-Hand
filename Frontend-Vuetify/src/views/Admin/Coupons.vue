@@ -32,6 +32,7 @@
                     <th>Created By</th>
                     <th>Created Date</th>
                     <th>Duration</th>
+                    <th class="text-center">Email Status</th>
                     <th class="text-center">Redeemed by</th>
                     <th class="text-center">Status</th>
                     <!-- <th class="text-center">Actions</th> -->
@@ -54,6 +55,12 @@
                       <td>{{ formatDate(coupon.createdDate) }}</td>
                      <td v-if="coupon.duration">
                      {{ Math.round(coupon.duration / 365) }} Jahr<span v-if="Math.round(coupon.duration / 365) !== 1">e</span></td>
+                      <td class="text-center">
+                        <span v-if="coupon.isEmailSent" class="emailState badge badge-info">
+                          Sent {{ formatEmailDate(coupon.emailSentDate) }}
+                        </span>
+                        <span v-else class="emailState badge badge-warning">Not Sent</span>
+                      </td>
                       <td class="text-center">{{ coupon.redeemedBy }}<span v-if="coupon.redeemedBy == ''">N/A</span></td>
                       <td class="text-center">
                         <span v-if="coupon.isRedeemed" class="newState badge badge-primary">Redeemed</span>
@@ -129,6 +136,10 @@ export default {
 
     formatDate(date) {
       return dayjs(date).format("MMMM D, YYYY h:mm A"); // Example: January 21, 2025 1:23 PM
+    },
+    formatEmailDate(date) {
+      if (!date) return '';
+      return dayjs(date).format("MMM D, HH:mm"); // Example: Jan 21, 13:45
     },
     copyToClipboard(text) {
   if (navigator.clipboard && navigator.clipboard.writeText) {

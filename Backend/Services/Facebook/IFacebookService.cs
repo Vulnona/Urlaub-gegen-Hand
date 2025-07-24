@@ -1,4 +1,4 @@
-﻿namespace UGH.infrastructure.Services.Facebook;
+namespace UGH.infrastructure.Services.Facebook;
 
 public interface IFacebookService
 {
