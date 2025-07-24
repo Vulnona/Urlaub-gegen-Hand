@@ -1,8 +1,9 @@
 .vs
 Backend/.vs
-obj
+obj/
 bin
 Backend/bin
+Backend/bin/Debug/net7.0/
 Backend/obj
 Backend/appsettings.json
 #Sec Stuff
