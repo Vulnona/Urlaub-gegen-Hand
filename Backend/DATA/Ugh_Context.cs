@@ -39,13 +39,16 @@ namespace UGHApi.DATA
                 .AddJsonFile("appsettings.json")
                 .Build();
             var connectionString = configuration.GetConnectionString("DefaultConnection");
-            
-            // Fix connection string for design-time (localhost instead of docker container)
-            if (connectionString.Contains("Server=db;")) {
-                connectionString = connectionString.Replace("Server=db;", "Server=localhost;");
+            Console.WriteLine($"[EF DEBUG] Using connection string: {connectionString}");
+            try {
+                System.IO.File.AppendAllText("/app/connectionstring.log", $"[EF DEBUG] {connectionString}\n");
+            } catch {}
+            try {
+                optionsBuilder.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
+            } catch (Exception ex) {
+                Console.WriteLine($"[EF ERROR] Failed to connect: {ex.Message}\n{ex.StackTrace}");
+                throw;
             }
-            
-            optionsBuilder.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
         }
 
         protected override void OnModelCreating(ModelBuilder builder)

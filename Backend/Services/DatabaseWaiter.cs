@@ -1,5 +1,5 @@
 using System.Data;
-using MySql.Data.MySqlClient;
+using MySqlConnector;
 
 // Datenbankverbindung vor Start der Anwendung sicher stellen um unerwartetes Verhalten zu unterbinden (wenn nämlich die Anwendung vor der Db geladen wird)
 
@@ -7,6 +7,7 @@ public static class DatabaseWaiter
 {
     public static void WaitForDatabaseConnection(string connectionString)
     {
+        Console.WriteLine($"[DBWAITER DEBUG] Using connection string: {connectionString}");
         Console.WriteLine("Warte auf die Datenbankverbindung...");
 
         bool connected = false;

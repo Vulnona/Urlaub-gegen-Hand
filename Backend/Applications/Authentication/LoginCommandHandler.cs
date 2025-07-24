@@ -36,7 +36,7 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, Result<LoginRes
         {
             _logger.LogError($"=== LOGIN COMMAND HANDLER CALLED FOR {request.Email} ===");
             
-            var userValid = _userService.ValidateUser(request.Email, request.Password);
+            var userValid = await _userService.ValidateUser(request.Email, request.Password);
 
             if (!userValid.IsValid)
             {

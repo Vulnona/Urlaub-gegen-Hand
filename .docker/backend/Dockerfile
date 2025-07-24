@@ -35,7 +35,6 @@ COPY Backend/Template /app/Template
 FROM mcr.microsoft.com/dotnet/aspnet:7.0-alpine AS backend-runtime
 WORKDIR /app
 
-# Install .NET SDK for EF Tools (required for migrations)
 RUN apk add --no-cache \
     dotnet7-sdk \
     chromium \
@@ -45,6 +44,7 @@ RUN apk add --no-cache \
     tzdata \
     font-noto \
     msttcorefonts-installer \
+    mysql-client \
     && update-ms-fonts \
     && fc-cache -f
 

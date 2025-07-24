@@ -105,6 +105,7 @@ namespace UGHApi
             var config = builder.Configuration;
             MapsterConfig.RegisterMappings();
             var connectionString = config.GetConnectionString("DefaultConnection");
+            Console.WriteLine($"[EF DEBUG] Registering DbContext with connection string: {connectionString}");
 
 static ServerVersion GetDesignTimeServerVersion(string connectionString)
 {
@@ -128,22 +129,10 @@ static ServerVersion GetDesignTimeServerVersion(string connectionString)
             // Check if we're running in a container or in development mode
             var inContainer = Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER") == "true";
             
-            if (!inContainer && connectionString?.Contains("Server=db") == true)
-            {
-                connectionString = connectionString?.Replace("Server=db", "Server=localhost")
-                                                  ?.Replace("User ID=user", "User ID=root");
-                var serverVersion = new MySqlServerVersion(new Version(8, 0, 21));
-                builder.Services.AddDbContext<Ugh_Context>(options =>
-                    options.UseMySql(connectionString, serverVersion)
-                );
-                Console.WriteLine("[Design-Time] Using localhost connection for EF tools");
-            }
-            else
-            {
-                builder.Services.AddDbContext<Ugh_Context>(options =>
-                    options.UseMySql(connectionString, GetDesignTimeServerVersion(connectionString))
-                );
-            }
+            var serverVersion = new MySqlServerVersion(new Version(8, 0, 21));
+            builder.Services.AddDbContext<Ugh_Context>(options =>
+                options.UseMySql(connectionString, serverVersion)
+            );
             builder.Services.AddControllers();
             TypeAdapterConfig.GlobalSettings.Scan(Assembly.GetExecutingAssembly());
             builder.Services.AddEndpointsApiExplorer();
