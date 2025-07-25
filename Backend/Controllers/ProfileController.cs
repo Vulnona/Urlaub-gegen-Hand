@@ -146,8 +146,8 @@ public class ProfileController : ControllerBase
                         return BadRequest("Address with provided id not found.");
                     }
                     // Optionally update address fields if changed
-                    address.Latitude = profile.Latitude;
-                    address.Longitude = profile.Longitude;
+                    address.Latitude = profile.Latitude ?? 0.0;
+                    address.Longitude = profile.Longitude ?? 0.0;
                     address.DisplayName = profile.DisplayName;
                     address.Type = AddressType.Residential;
                     _context.addresses.Update(address);
@@ -157,8 +157,8 @@ public class ProfileController : ControllerBase
                     // Create new address
                     address = new Address
                     {
-                        Latitude = profile.Latitude,
-                        Longitude = profile.Longitude,
+                        Latitude = profile.Latitude ?? 0.0,
+                        Longitude = profile.Longitude ?? 0.0,
                         DisplayName = profile.DisplayName,
                         Type = AddressType.Residential
                     };

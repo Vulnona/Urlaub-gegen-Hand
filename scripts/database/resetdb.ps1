@@ -1,9 +1,10 @@
 # PowerShell script to safely reset the ugh-db Docker database
 # This script will create a backup before removing the container and volume
 
-$containerName = "ugh-db"
+$containerName = "db"
 $volumeName = "ugh_db-data"
-$backupDir = Join-Path $PSScriptRoot "..\backups\db-$(Get-Date -Format 'yyyyMMdd_HHmmss')"
+$workspaceRoot = Resolve-Path (Join-Path $PSScriptRoot '../..')
+$backupDir = Join-Path $workspaceRoot "backups\db-$(Get-Date -Format 'yyyyMMdd_HHmmss')"
 
 
 # --- MySQL Credentials mit Node.js-Skript auslesen ---

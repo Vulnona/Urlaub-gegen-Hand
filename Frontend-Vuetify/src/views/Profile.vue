@@ -321,7 +321,14 @@
     name: "UserCard",
     data() {
       return {
-        user: {},
+        user: {
+          firstName: '',
+          lastName: '',
+          gender: '',
+          dateOfBirth: '',
+          skills: '',
+          hobbies: '',
+        },
         profileImgSrc: '',
         defaultProfileImgSrc: '/defaultprofile.jpg',
         options: [],
@@ -514,15 +521,16 @@
             try {
               const response = await axiosInstance.get('profile/get-user-profile');
               const userData = response.data.profile;
+              // Nur die Felder, die das Backend erwartet:
               const updateData = {
                 firstName: userData.firstName,
                 lastName: userData.lastName,
-                gender: userData.gender,
                 dateOfBirth: userData.dateOfBirth,
+                gender: userData.gender,
                 displayName: userData.address?.displayName || '',
-                latitude: userData.address?.latitude || '',
-                longitude: userData.address?.longitude || '',
-                id: userData.address?.id || null,
+                latitude: userData.address?.latitude ?? null,
+                longitude: userData.address?.longitude ?? null,
+                id: userData.address?.id ?? null,
                 skills: '',
                 hobbies: ''
               };
@@ -530,7 +538,6 @@
               if (updateData.dateOfBirth instanceof Date) {
                 updateData.dateOfBirth = updateData.dateOfBirth.toISOString().slice(0, 10);
               } else if (typeof updateData.dateOfBirth === 'string' && updateData.dateOfBirth.length > 10) {
-                // Falls String mit Zeitanteil
                 updateData.dateOfBirth = updateData.dateOfBirth.slice(0, 10);
               }
               await axiosInstance.put('profile/update-user-data', updateData);

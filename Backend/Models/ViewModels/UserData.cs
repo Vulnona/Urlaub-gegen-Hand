@@ -17,18 +17,13 @@ public class UserData
 
     [Required]
     public string Gender { get; set; }
-
-    // Geographic location data (NEW) - replacing old address fields
-    [Required]
-    public double Latitude { get; set; }
     
-    [Required]
-    public double Longitude { get; set; }
     
-    [Required]
-    public string DisplayName { get; set; } // Full formatted address
-    
-    public int? Id { get; set; } 
+    // Geographic location data 
+    public double? Latitude { get; set; }
+    public double? Longitude { get; set; }
+    public string? DisplayName { get; set; } // Full formatted address
+    public int? Id { get; set; }
     public string? Hobbies { get; set; }
     public string? Skills { get; set; }
 }

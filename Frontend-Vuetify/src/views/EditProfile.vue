@@ -139,21 +139,25 @@ export default {
     },
     saveProfile() {
       if (this.validateForm()) {
-        const skillsString = this.profile.skills.join(', ');
-        const hobbiesString = this.profile.hobbies.join(', ');
-        const updatedProfile = {
-          ...this.profile,
-          skills: skillsString,
-          hobbies: hobbiesString
-        };
-        delete updatedProfile.countryName;
-        delete updatedProfile.stateName;
-        this.updateProfileAPI(updatedProfile);
-      } else {
-        toast.error("Bitte korrigieren Sie die Fehler im Formular vor dem Absenden.");
-        console.warn('Profil speichern fehlgeschlagen:', this.errors, this.profile);
-      }
-    },
+            const updateRequest = {
+                id: this.profile.id,
+                displayName: this.profile.displayName,
+                latitude: this.profile.latitude,
+                longitude: this.profile.longitude,
+                email: this.profile.email,
+                phoneNumber: this.profile.phoneNumber,
+                firstName: this.profile.firstName,
+                lastName: this.profile.lastName,
+                birthDate: this.profile.birthDate,
+                gender: this.profile.gender,
+                street: this.profile.street,
+                zipCode: this.profile.zipCode,
+                city: this.profile.city,
+                country: this.profile.country,
+                aboutMe: this.profile.aboutMe,
+                profileImageUrl: this.profile.profileImageUrl,
+                // ...existing code...
+            };
     async updateProfileAPI(updatedProfile) {
       try {
         const response = await axiosInstance.put(`profile/update-profile`, updatedProfile);

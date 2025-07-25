@@ -40,7 +40,7 @@ services:
     working_dir: /app/Backend
     environment:
       - ASPNETCORE_URLS=http://+:8081 #PORT
-      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_ENVIRONMENT=Production
       - TZ=Europe/Berlin
     volumes:
       - /etc/timezone:/etc/timezone:ro

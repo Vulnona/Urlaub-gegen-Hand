@@ -338,6 +338,10 @@ dotnet ef migrations list --verbose
 }
 ```
 
+### Restore data
+Get-Content ./backups/db-20250725_220412/db.sql | docker compose exec -T db mysql -u root -ppassword db
+
+
 ### Container Debugging
 ```powershell
 # Container-Shell öffnen
