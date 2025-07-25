@@ -227,26 +227,14 @@ SELECT * FROM __EFMigrationsHistory ORDER BY MigrationId;
 docker exec ugh-backend dotnet ef database update
 ```
 
-## ðŸ“š **Lessons Learned Archive**
 
-### âœ… **What Works (Battle-Tested)**
-1. **Container-First Migration Creation**: `docker exec ugh-backend dotnet ef migrations add`
-2. **File Sync with docker cp**: More reliable than volume mounting
-3. **Direct EF Commands**: `dotnet ef migrations list`, `dotnet ef database update`
-4. **Multi-Source Status Checking**: Database + Code + Files consistency analysis
-5. **Incremental Fixes**: Step-by-step repair rather than nuclear options
+### Troubleshooting 
+```bash
+# availability within docker container
 
-### âŒ **What Doesn't Work (Avoid)**
-1. **Volume Mounting for Active Development**: Sync issues between host/container
-2. **Complex PowerShell Array Operations**: Simple string operations more reliable
-3. **Hardcoded Migration Names**: Generic parameter-driven approach is superior
-4. **Overly Complex Error Handling**: Simple validation and clear error messages work better
+ docker exec ugh-backend dotnet tool restore
+```
 
-### ðŸ”„ **Evolution of the System**
-- **V1**: Manual commands (worked but not scalable)
-- **V2**: enhanced-migration.ps1 (too complex, failed frequently)
-- **V3**: migration-management.ps1 (test version, path issues)
-- **V4**: migration.ps1 (current - proven, reliable, battle-tested)
 
 ### ðŸŽ¯ **Success Metrics**
 - âœ… **12/12 migrations successfully applied**

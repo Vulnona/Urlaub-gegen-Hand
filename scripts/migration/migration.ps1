@@ -27,7 +27,8 @@ function Get-CodeMigrations {
 }
 
 function Get-FilesystemMigrations {
-    $files = Get-ChildItem "..\..\Backend\Migrations" -Filter "*.cs" | Where-Object { 
+    $migrationPath = Join-Path $PSScriptRoot "..\..\Backend\Migrations"
+    $files = Get-ChildItem $migrationPath -Filter "*.cs" | Where-Object {
         $_.Name -match '^\d{14}_.*\.cs$' -and $_.Name -notlike "*ModelSnapshot*" -and $_.Name -notlike "*.Designer.cs"
     }
     return $files | ForEach-Object { $_.Name -replace '\.cs$', '' }
@@ -148,8 +149,8 @@ function Fix-Inconsistencies {
                 Write-Host "  Removing orphaned files..." -ForegroundColor Yellow
                 if (-not $DryRun) {
                     $files = @(
-                        "..\..\Backend\Migrations\$($issue.Migration).cs",
-                        "..\..\Backend\Migrations\$($issue.Migration).Designer.cs"
+                        (Join-Path $PSScriptRoot "..\..\Backend\Migrations\$($issue.Migration).cs"),
+                        (Join-Path $PSScriptRoot "..\..\Backend\Migrations\$($issue.Migration).Designer.cs")
                     )
                     foreach ($file in $files) {
                         if (Test-Path $file) {
@@ -171,8 +172,8 @@ function Fix-Inconsistencies {
                     Write-Host "  Auto-removing test migration..." -ForegroundColor Yellow
                     if (-not $DryRun) {
                         $files = @(
-                            "..\..\Backend\Migrations\$($issue.Migration).cs",
-                            "..\..\Backend\Migrations\$($issue.Migration).Designer.cs"
+                            (Join-Path $PSScriptRoot "..\..\Backend\Migrations\$($issue.Migration).cs"),
+                            (Join-Path $PSScriptRoot "..\..\Backend\Migrations\$($issue.Migration).Designer.cs")
                         )
                         foreach ($file in $files) {
                             if (Test-Path $file) {
@@ -234,8 +235,8 @@ function Clean-Orphans {
     foreach ($orphan in $orphans) {
         if (-not $DryRun) {
             $files = @(
-                "..\..\Backend\Migrations\$orphan.cs",
-                "..\..\Backend\Migrations\$orphan.Designer.cs"
+                (Join-Path $PSScriptRoot "..\..\Backend\Migrations\$orphan.cs"),
+                (Join-Path $PSScriptRoot "..\..\Backend\Migrations\$orphan.Designer.cs")
             )
             foreach ($file in $files) {
                 if (Test-Path $file) {
@@ -322,7 +323,7 @@ function Add-Migration {
             Write-Host ""
             Write-Host "Syncing files to local filesystem..." -ForegroundColor Yellow
             foreach ($file in $containerFiles) {
-                docker exec ugh-backend cat "Migrations/$file" | Out-File "..\..\Backend\Migrations\$file" -Encoding UTF8
+                docker exec ugh-backend cat "Migrations/$file" | Out-File (Join-Path $PSScriptRoot "..\..\Backend\Migrations\$file") -Encoding UTF8
                 Write-Host "  • Synced: $file" -ForegroundColor Gray
             }
             
@@ -371,7 +372,7 @@ function Force-Rebuild {
     Write-Host "1. Creating backup..." -ForegroundColor Yellow
     $backupDir = "migration-backup-$(Get-Date -Format 'yyyyMMdd-HHmmss')"
     New-Item -ItemType Directory -Path $backupDir -Force | Out-Null
-    Copy-Item "..\..\Backend\Migrations\*" $backupDir -Force
+    Copy-Item (Join-Path $PSScriptRoot "..\..\Backend\Migrations\*") $backupDir -Force
     Write-Host "   Backup created in: $backupDir" -ForegroundColor Green
     
     # 2. Clear migration history
@@ -383,7 +384,7 @@ function Force-Rebuild {
     # 3. Remove all migration files except model snapshot
     Write-Host "3. Removing migration files..." -ForegroundColor Yellow
     if (-not $DryRun) {
-        Get-ChildItem "..\..\Backend\Migrations" -Filter "*.cs" | Where-Object { 
+        Get-ChildItem (Join-Path $PSScriptRoot "..\..\Backend\Migrations") -Filter "*.cs" | Where-Object { 
             $_.Name -notlike "*ModelSnapshot*" 
         } | Remove-Item -Force
     }
