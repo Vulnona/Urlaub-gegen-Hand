@@ -138,22 +138,16 @@ export default {
       }
     },
     saveProfile() {
+      console.log('Profil speichern Button geklickt');
       if (this.validateForm()) {
         const updateRequest = {
-          id: this.profile.id,
-          displayName: this.profile.displayName,
-          latitude: this.profile.latitude,
-          longitude: this.profile.longitude,
-          email: this.profile.email,
-          phoneNumber: this.profile.phoneNumber,
-          firstName: this.profile.firstName,
-          lastName: this.profile.lastName,
-          birthDate: this.profile.birthDate,
-          gender: this.profile.gender,
-          aboutMe: this.profile.aboutMe,
-          profileImageUrl: this.profile.profileImageUrl
+          Skills: Array.isArray(this.profile.skills) ? this.profile.skills.join(', ') : this.profile.skills,
+          Hobbies: Array.isArray(this.profile.hobbies) ? this.profile.hobbies.join(', ') : this.profile.hobbies
         };
+        console.log('Update-Request:', updateRequest);
         this.updateProfileAPI(updateRequest);
+      } else {
+        console.log('Formular ist nicht valide:', this.errors);
       }
     },
     async updateProfileAPI(updatedProfile) {
@@ -185,8 +179,7 @@ export default {
       this.errors = {};
       this.formIsValid = true;
       const requiredFields = [
-        'firstName', 'lastName', 'gender', 'dateOfBirth',
-        'displayName', 'latitude', 'longitude'
+        'firstName', 'lastName', 'gender', 'dateOfBirth'
       ];
       requiredFields.forEach(field => {
         if (!this.profile[field]) {
