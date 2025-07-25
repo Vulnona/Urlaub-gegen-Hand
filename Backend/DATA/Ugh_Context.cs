@@ -34,9 +34,11 @@ namespace UGHApi.DATA
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
+            var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
             IConfigurationRoot configuration = new ConfigurationBuilder()
                 .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
                 .AddJsonFile("appsettings.json")
+                .AddJsonFile($"appsettings.{environment}.json", optional: true)
                 .Build();
             var connectionString = configuration.GetConnectionString("DefaultConnection");
             Console.WriteLine($"[EF DEBUG] Using connection string: {connectionString}");

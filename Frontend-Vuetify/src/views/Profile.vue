@@ -535,7 +535,7 @@
               }
               await axiosInstance.put('profile/update-user-data', updateData);
               toast.success("Fertigkeiten und Hobbies erfolgreich gelöscht!");
-              window.location.reload();
+              this.fetchUserData();
             } catch (error) {
               toast.error("Fehler beim Löschen der Daten.");
             }

@@ -183,7 +183,6 @@ const createOffer = async() => {
         offerData.append('ToDate', offer.UntilDate.toISOString().split('+')[0]);
         offerData.append('FromDate', offer.FromDate.toISOString().split('+')[0]);
         offerData.append('skills', offer.skills.map(skill => skill.skillDescrition).join(', '));
-        // Removed legacy address fields (country, city)
         offerData.append('OfferId', offer.id.toString());
       if (offer.image) {
         offerData.append('image', offer.image);

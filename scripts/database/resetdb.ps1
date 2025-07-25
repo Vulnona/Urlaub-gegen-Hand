@@ -7,7 +7,8 @@ $backupDir = Join-Path $PSScriptRoot "..\backups\db-$(Get-Date -Format 'yyyyMMdd
 
 
 # --- MySQL Credentials mit Node.js-Skript auslesen ---
-$composePath = Join-Path $PSScriptRoot "..\compose.yaml"
+$projectRoot = Resolve-Path (Join-Path $PSScriptRoot '../..')
+$composePath = Join-Path $projectRoot "compose.yaml"
 $nodeScript = Join-Path $PSScriptRoot "get-mysql-creds.js"
 $credsJson = node $nodeScript $composePath
 if ($LASTEXITCODE -ne 0) {
@@ -20,11 +21,10 @@ $dbUser = $creds.user
 $dbName = $creds.db
 $pwFile = $creds.pwFile
 
-$projectRoot = Split-Path $PSScriptRoot -Parent
-if ([System.IO.Path]::DirectorySeparatorChar -eq '/') {
-    $pwFilePath = Join-Path $projectRoot $pwFile
+if ([System.IO.Path]::IsPathRooted($pwFile)) {
+    $pwFilePath = $pwFile
 } else {
-    $pwFilePath = Join-Path $projectRoot ($pwFile -replace '/', '\')
+    $pwFilePath = Join-Path $projectRoot $pwFile
 }
 if (-not (Test-Path $pwFilePath)) {
     Write-Error "MySQL-Passwortdatei nicht gefunden: $pwFilePath"

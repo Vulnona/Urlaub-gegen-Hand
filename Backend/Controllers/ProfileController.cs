@@ -169,7 +169,6 @@ public class ProfileController : ControllerBase
                 user.AddressId = address.Id;
                 user.Address = address;
 
-                user.VerificationState = UGH_Enums.VerificationState.IsNew;
                 await _userRepository.UpdateUserAsync(user);
             }
         }
