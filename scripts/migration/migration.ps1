@@ -3,7 +3,7 @@
 
 param(
     [Parameter(Mandatory=$true)]
-    [ValidateSet("status", "fix-inconsistencies", "clean-orphans", "force-rebuild", "add-migration")]
+    [ValidateSet("status", "fix-inconsistencies", "clean-orphans", "force-rebuild", "add-migration", "schema-check")]
     [string]$Action,
     
     [Parameter(Mandatory=$false)]
@@ -102,16 +102,66 @@ function Show-Status {
 
 function Fix-Inconsistencies {
     Write-Host "=== FIXING MIGRATION INCONSISTENCIES ===" -ForegroundColor Cyan
-    Write-Host ""
-    
-    $issues = Show-Status
-    if ($issues.Count -eq 0) {
-        Write-Host "No issues to fix" -ForegroundColor Green
+function Schema-Check {
+    Write-Host "=== SCHEMA CHECK (Model vs. DB) ===" -ForegroundColor Cyan
+    Write-Host "Checking for missing columns or tables in the database..." -ForegroundColor Yellow
+
+    # Use dotnet ef migrations script to generate SQL for the current model
+    $scriptResult = docker exec ugh-backend dotnet ef migrations script --idempotent 2>&1
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "[ERROR] Could not generate migration script: $scriptResult" -ForegroundColor Red
         return
     }
-    
+
+    # Heuristic: If the script contains 'ALTER TABLE' or 'ADD COLUMN', there are pending model changes
+    $hasAlter = $scriptResult -match 'ALTER TABLE' -or $scriptResult -match 'ADD COLUMN'
+    if ($hasAlter) {
+        Write-Host "[WARNING] Detected model changes not present in the database!" -ForegroundColor Red
+        Write-Host "You may have missing columns or tables (e.g., AddressId)." -ForegroundColor Red
+        Write-Host "\nNext steps:" -ForegroundColor Yellow
+        Write-Host "  1. Remove the model snapshot (UghContextModelSnapshot.cs)" -ForegroundColor Gray
+        Write-Host "  2. Re-add a migration (e.g., migration.ps1 -Action add-migration -MigrationName 'FixSchema')" -ForegroundColor Gray
+        Write-Host "  3. Apply the migration to update the DB schema" -ForegroundColor Gray
+        if (-not $Force -and -not $DryRun) {
+            $confirm = Read-Host "Do you want to auto-remove the snapshot and create a new migration now? (y/N)"
+            if ($confirm -ne 'y' -and $confirm -ne 'Y') {
+                Write-Host "Cancelled" -ForegroundColor Gray
+                return
+            }
+        }
+        # Remove snapshot
+        $snapshotPath = Join-Path $PSScriptRoot "..\..\Backend\Migrations\UghContextModelSnapshot.cs"
+        if (Test-Path $snapshotPath) {
+            Remove-Item $snapshotPath -Force
+            Write-Host "[OK] Removed model snapshot: $snapshotPath" -ForegroundColor Green
+        } else {
+            Write-Host "[INFO] Model snapshot already removed or missing." -ForegroundColor Yellow
+        }
+        # Add migration
+        $migrationName = "FixSchema"
+        Write-Host "Creating migration: $migrationName..." -ForegroundColor Yellow
+        $addResult = docker exec ugh-backend dotnet ef migrations add $migrationName 2>&1
+        if ($LASTEXITCODE -eq 0) {
+            Write-Host "[OK] Migration created: $migrationName" -ForegroundColor Green
+            Write-Host "Apply with: docker exec ugh-backend dotnet ef database update" -ForegroundColor Gray
+        } else {
+            Write-Host "[ERROR] Migration creation failed: $addResult" -ForegroundColor Red
+        }
+    } else {
+        Write-Host "[OK] No schema differences detected. DB matches model." -ForegroundColor Green
+    }
+}
     Write-Host ""
-    Write-Host "Proposed fixes:" -ForegroundColor Yellow
+    
+switch ($Action) {
+    "status" { Show-Status }
+    "fix-inconsistencies" { Fix-Inconsistencies }
+    "clean-orphans" { Clean-Orphans }
+    "force-rebuild" { Force-Rebuild }
+    "add-migration" { Add-Migration }
+    "schema-check" { Schema-Check }
+    default { Write-Host "Unknown action: $Action" -ForegroundColor Red }
+}
     foreach ($issue in $issues) {
         Write-Host "  • $($issue.Migration): $($issue.Action)" -ForegroundColor Yellow
     }
@@ -392,7 +442,8 @@ function Force-Rebuild {
     # 4. Create initial migration
     Write-Host "4. Creating fresh initial migration..." -ForegroundColor Yellow
     if (-not $DryRun) {
-        Push-Location "..\..\Backend"
+        $backendPath = Join-Path $PSScriptRoot "..\..\Backend"
+        Push-Location $backendPath
         try {
             $result = dotnet ef migrations add InitialMigration --force 2>&1
             if ($LASTEXITCODE -eq 0) {
@@ -415,8 +466,7 @@ function Force-Rebuild {
 
 function Update-MigrationDocumentation {
     Write-Host "Updating MIGRATION-SYSTEM.md documentation..." -ForegroundColor Yellow
-    
-    $docPath = "..\..\MIGRATION-SYSTEM.md"
+    $docPath = Join-Path $PSScriptRoot "..\..\docs\MIGRATION-SYSTEM.md"
     if (-not (Test-Path $docPath)) {
         Write-Host "Warning: MIGRATION-SYSTEM.md not found at $docPath" -ForegroundColor Yellow
         return
