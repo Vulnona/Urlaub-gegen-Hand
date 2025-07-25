@@ -24,8 +24,8 @@
                    alt="User Profile Picture">
             </span>
             <h5 class="fw-semibold mb-1">{{ user.firstName }} {{ user.lastName }}</h5>
-            <span @click="openReviewsModal()" class="action-link fs-13 font-normal">View All Reviews</span><br/>
-            <span class="fs-13 font-normal" v-if="isActiveMember">Membership Expiry: {{ formatMembershipDate(user.membershipEndDate) }}</span>
+            <span @click="openReviewsModal()" class="action-link fs-13 font-normal">Alle Bewertungen anzeigen</span><br/>
+            <span class="fs-13 font-normal" v-if="isActiveMember">Mitgliedschaft gültig bis: {{ formatMembershipDate(user.membershipEndDate) }}</span>
           </div>
         </div>
 
@@ -33,7 +33,7 @@
              class="rating_block d-flex mb-0 flex-wrap gap-3 p-3 justify-content-center border-bottom border-block-end-dashed">
           <div class="">
             <p class="card-text text-center mb-0">
-              User Ratings:<span class="average-rating">{{ user.userRating }}</span>
+              Nutzerbewertung:<span class="average-rating">{{ user.userRating }}</span>
               {{ " " }} <span class="star ri-star-fill gold"></span>
             </p>
           </div>
@@ -41,7 +41,7 @@
         </div>
         <div class="p-3 pb-1 d-flex flex-wrap justify-content-between">
           <div class="fw-medium fs-15 themeColor">
-            Basic Info:
+            Basisdaten:
 
           </div>
         </div>
@@ -58,12 +58,12 @@
             </li>
             <li class="list-group-item border-0">
               <div>
-                <span class="fw-medium me-2">DOB:</span><span class="text-muted">{{ user.dateOfBirth }}</span>
+                <span class="fw-medium me-2">Geburtsdatum:</span><span class="text-muted">{{ user.dateOfBirth }}</span>
               </div>
             </li>
             <li class="list-group-item border-0">
               <div>
-                <span class="fw-medium me-2">Gender:</span><span class="text-muted">{{ user.gender }}</span>
+                <span class="fw-medium me-2">Geschlecht:</span><span class="text-muted">{{ user.gender }}</span>
               </div>
             </li>
           </ul>
@@ -95,22 +95,7 @@
                       </span>
                       <span class="fw-medium text-default">Adresse: </span> {{ user.address.displayName }}
                     </p>
-                    <p class="mb-3">
-                      <span class="icon icon3">
-                        <i class="ri-building-line align-middle fs-15"></i>
-                      </span>
-                      <span class="fw-medium text-default">Details: </span>
-                      <span v-if="user.address.houseNumber">{{ user.address.houseNumber }}</span>
-                      <span v-if="user.address.road">, {{ user.address.road }}</span>
-                      <span v-if="user.address.city">, {{ user.address.city }}</span>
-                      <span v-if="user.address.postcode">, {{ user.address.postcode }}</span>
-                    </p>
-                    <p class="mb-3">
-                      <span class="icon icon4">
-                        <i class="ri-global-line align-middle fs-15"></i>
-                      </span>
-                      <span class="fw-medium text-default">Land: </span> {{ user.address.country }}
-                    </p>
+                    <!-- Nur Adresse und Koordinaten anzeigen, Details und Global entfernt -->
                     <p class="mb-0">
                       <span class="icon">
                         <i class="ri-navigation-line align-middle fs-15"></i>
@@ -182,8 +167,8 @@
               <button class="btn  btn-primary rounded" @click="changePassword">
                 Passwort ändern</button>
             </div>
-            <button class="btn btn-danger" @click="deleteUser()">
-              Löschen
+            <button class="btn btn-danger" @click="deleteSkillsAndHobbies()">
+              Skills & Hobbies löschen
             </button>
           </div>
         </div>
@@ -514,25 +499,70 @@
       upload_id() {
         router.push("/upload-id").then(() => { });
       },
-      // Method to delete a user and associated images from S3
-      deleteUser() {
+      // Method to delete skills and hobbies 
+      async deleteSkillsAndHobbies() {
         Swal.fire({
           title: "Sind Sie sicher?",
-          text: "Sie möchten Ihre Daten löschen!",
+          text: "Sie möchten Ihre Fertigkeiten und Hobbies löschen!",
           icon: "warning",
           showCancelButton: true,
           confirmButtonColor: "#3085d6",
           cancelButtonColor: "#d33",
           confirmButtonText: "Ja, löschen!",
-        }).then((result) => {
+        }).then(async (result) => {
           if (result.isConfirmed) {
-            axiosInstance.delete(`user/delete-user`).then(() => {
-              toast.success("Benutzerdaten erfolgreich gelöscht!");
-              sessionStorage.clear();
-              router.push({ name: 'Login' });
-            }).catch((error) => {
-              // console.log(error);
-            });
+            try {
+              const response = await axiosInstance.get('profile/get-user-profile');
+              const userData = response.data.profile;
+              const updateData = {
+                firstName: userData.firstName,
+                lastName: userData.lastName,
+                gender: userData.gender,
+                dateOfBirth: userData.dateOfBirth,
+                displayName: userData.address?.displayName || '',
+                latitude: userData.address?.latitude || '',
+                longitude: userData.address?.longitude || '',
+                id: userData.address?.id || null,
+                skills: '',
+                hobbies: ''
+              };
+              // dateOfBirth ggf. ins richtige Format bringen
+              if (updateData.dateOfBirth instanceof Date) {
+                updateData.dateOfBirth = updateData.dateOfBirth.toISOString().slice(0, 10);
+              } else if (typeof updateData.dateOfBirth === 'string' && updateData.dateOfBirth.length > 10) {
+                // Falls String mit Zeitanteil
+                updateData.dateOfBirth = updateData.dateOfBirth.slice(0, 10);
+              }
+              await axiosInstance.put('profile/update-user-data', updateData);
+              toast.success("Fertigkeiten und Hobbies erfolgreich gelöscht!");
+              window.location.reload();
+            } catch (error) {
+              toast.error("Fehler beim Löschen der Daten.");
+            }
+          }
+        });
+      },
+
+      // User und S3-Bilder löschen
+      async deleteUser() {
+        Swal.fire({
+          title: "Sind Sie sicher?",
+          text: "Ihr Account und alle zugehörigen Bilder werden unwiderruflich gelöscht!",
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "#3085d6",
+          cancelButtonColor: "#d33",
+          confirmButtonText: "Ja, Account löschen!",
+        }).then(async (result) => {
+          if (result.isConfirmed) {
+            try {
+              await axiosInstance.delete('profile/delete-user');
+              toast.success("Account und Bilder erfolgreich gelöscht!");
+              // Optional: Weiterleitung nach Logout
+              window.location.href = '/logout';
+            } catch (error) {
+              toast.error("Fehler beim Löschen des Accounts.");
+            }
           }
         });
       },

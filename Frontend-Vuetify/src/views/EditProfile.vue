@@ -19,17 +19,21 @@
             <div class="col-sm-12">
               <div class="form-group">
                 <label>Fertigkeiten </label>
-                <multiselect v-model="profile.skills" :options="availableSkills" placeholder="Select Fertigkeiten"
+                <multiselect v-model="profile.skills" :options="availableSkills" placeholder="Fertigkeiten auswählen"
                   class="skills-multiselect" :multiple="true">
                 </multiselect>
                 <small v-if="errors.skills" style="color: red;">{{ errors.skills }}</small>
               </div>
             </div>
+            <input type="hidden" v-model="profile.displayName" />
+            <input type="hidden" v-model="profile.latitude" />
+            <input type="hidden" v-model="profile.longitude" />
+            <input type="hidden" v-model="profile.id" />
             <div class="col-sm-12">
               <div class="form-group">
-                <label>Hobbies</label>
+                <label>Hobbys</label>
                 <div class="hobbies_inputBox input-group mb-3">
-                  <input type="text" v-model="newHobby" class="form-control" placeholder="Enter a hobby"
+                  <input type="text" v-model="newHobby" class="form-control" placeholder="Hobby eingeben"
                     @keyup.enter="addHobby">
                   <div class="input-group-append">
                     <button class="btn btn-outline-secondary" type="button" @click="addHobby">Hobby hinzufügen</button>
@@ -50,7 +54,7 @@
             <div class="col-sm-12">
               <div class="profile_btn">
                 <!-- Submit Button -->
-                <button type="button" @click="back()" class="btn btn-back rounded">Back</button>
+                <button type="button" @click="back()" class="btn btn-back rounded">Zurück</button>
                 <button type="submit" class="btn btn-primary  rounded">Profil speichern</button>
               </div>
             </div>
@@ -85,9 +89,6 @@ export default {
       skills: [],
       newHobby: '',
       availableSkills: [],
-      selectedCountry: null,
-      selectedState: null,
-      selectedCity: null,
       errors: {},
       formIsValid: true,
     };
@@ -137,7 +138,7 @@ export default {
       }
     },
     saveProfile() {
-      if (this.validateForm()) {        
+      if (this.validateForm()) {
         const skillsString = this.profile.skills.join(', ');
         const hobbiesString = this.profile.hobbies.join(', ');
         const updatedProfile = {
@@ -147,10 +148,10 @@ export default {
         };
         delete updatedProfile.countryName;
         delete updatedProfile.stateName;
-        delete updatedProfile.cityName;
         this.updateProfileAPI(updatedProfile);
       } else {
         toast.error("Bitte korrigieren Sie die Fehler im Formular vor dem Absenden.");
+        console.warn('Profil speichern fehlgeschlagen:', this.errors, this.profile);
       }
     },
     async updateProfileAPI(updatedProfile) {
@@ -183,7 +184,7 @@ export default {
       this.formIsValid = true;
       const requiredFields = [
         'firstName', 'lastName', 'gender', 'dateOfBirth',
-        'street', 'houseNumber', 'postCode'
+        'displayName', 'latitude', 'longitude'
       ];
       requiredFields.forEach(field => {
         if (!this.profile[field]) {
@@ -191,20 +192,17 @@ export default {
           this.formIsValid = false;
         }
       });
-      if (!this.profile.skills || this.profile.skills.length === 0) {
-        this.errors.skills = "Mindestens ein Skill ist erforderlich";
+      if ((!this.profile.skills || this.profile.skills.length === 0) &&
+          (!this.profile.hobbies || this.profile.hobbies.length === 0)) {
+        this.errors.skills = "Bitte geben Sie mindestens ein Skill oder ein Hobby an";
+        this.errors.hobbies = "Bitte geben Sie mindestens ein Skill oder ein Hobby an";
         this.formIsValid = false;
       } else {
         delete this.errors.skills;
+        delete this.errors.hobbies;
       }
       if (this.profile.facebookLink && !this.validateFacebookLink()) {
         this.formIsValid = false;
-      }
-      if (this.profile.hobbies.length === 0) {
-        this.errors.hobbies = "Bitte fügen Sie mindestens ein Hobby hinzu";
-        this.formIsValid = false;
-      } else {
-        delete this.errors.hobbies;
       }
       return this.formIsValid;
     }

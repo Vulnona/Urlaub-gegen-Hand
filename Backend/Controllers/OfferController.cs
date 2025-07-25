@@ -166,8 +166,6 @@ public class OfferController : ControllerBase
                 Latitude = offerViewModel.Latitude,
                 Longitude = offerViewModel.Longitude,
                 DisplayName = offerViewModel.DisplayName,
-                City = offerViewModel.City,
-                Country = offerViewModel.Country,
                 Type = AddressType.Tourism // Offers are typically tourism-related
             };
             
@@ -259,8 +257,8 @@ public class OfferController : ControllerBase
             await _offerRepository.AddOfferApplicationAsync(offerApplication);
            
             string body = $"<p>Hallo {offer.User.FirstName ?? ""} {offer.User.LastName ?? ""},</p><br>"
-                + $"<p>{user.FirstName} {user.LastName} hat sich auf dein Angebot {offer.Title} beworben.</p>" + "<br><p>Alles Gute wünscht,</p><p>das Team von Urlaub gegen Hand</p>";            
-            await _emailService.SendEmailAsync(offer.User.Email_Address, $"Neue Bewerbung für {offer.Title}", body).ConfigureAwait(false);
+                + $"<p>{user.FirstName} {user.LastName} hat sich auf dein Angebot {offer.Title} beworben.</p>" + "<br><p>Alles Gute wï¿½nscht,</p><p>das Team von Urlaub gegen Hand</p>";            
+            await _emailService.SendEmailAsync(offer.User.Email_Address, $"Neue Bewerbung fï¿½r {offer.Title}", body).ConfigureAwait(false);
             _logger.LogInformation("Application submitted successfully.");           
             return Ok("Application submitted successfully, and notification sent to the host.");
         }
@@ -297,7 +295,7 @@ public class OfferController : ControllerBase
                 string status = isApproved ? "angenommen" : "abgelehnt";
                 string subject = $"Bewerbung auf {offerApplication.Offer.Title} wurde {status}.";
                 string body = $"<p>Hallo {user.FirstName ?? ""} {user.LastName ?? ""},</p><br>"
-                + $"Deine Bewerbung auf das Angebot {offerApplication.Offer.Title} wurde {status}.</p>" + "<br><p>Alles Gute wünscht,</p><p>das Team von Urlaub gegen Hand</p>";            
+                + $"Deine Bewerbung auf das Angebot {offerApplication.Offer.Title} wurde {status}.</p>" + "<br><p>Alles Gute wï¿½nscht,</p><p>das Team von Urlaub gegen Hand</p>";            
             await _emailService.SendEmailAsync(user.Email_Address, subject, body).ConfigureAwait(false);                      
             }
 

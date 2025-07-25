@@ -28,11 +28,7 @@ public class UserData
     [Required]
     public string DisplayName { get; set; } // Full formatted address
     
-    // Optional detailed address components
-    public string? HouseNumber { get; set; }
-    public string? Road { get; set; }
-    public string? City { get; set; }
-    public string? Postcode { get; set; }
-    public string? Country { get; set; }
-    public string? CountryCode { get; set; }
+    public int? Id { get; set; } // AddressId, optional
+    public string? Hobbies { get; set; }
+    public string? Skills { get; set; }
 }

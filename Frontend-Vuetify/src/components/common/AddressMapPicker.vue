@@ -57,7 +57,7 @@
         <h6><i class="ri-map-pin-line"></i> Ausgewählte Adresse:</h6>
         <p class="mb-1"><strong>{{ selectedAddress.displayName }}</strong></p>
         <small class="text-muted">
-          Koordinaten: {{ selectedAddress.latitude }}, {{ selectedAddress.longitude }}
+          {{ $options.filters && $options.filters.formatAddressDisplay ? $options.filters.formatAddressDisplay(selectedAddress) : (selectedAddress.road || '') + (selectedAddress.houseNumber ? ' ' + selectedAddress.houseNumber : '') + (selectedAddress.postcode ? ', ' + selectedAddress.postcode : '') + (selectedAddress.city ? ' ' + selectedAddress.city : '') + (selectedAddress.country ? ', ' + selectedAddress.country : '') }}
         </small>
       </div>
     </div>

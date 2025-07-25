@@ -15,6 +15,9 @@ public class VisibleProfile
     #nullable enable
     public string? City { get; set; } // From Address.City
     public string? Country { get; set; } // From Address.Country
+    public double? Latitude { get; set; } // From Address.Latitude
+    public double? Longitude { get; set; } // From Address.Longitude
+    public string? DisplayName { get; set; } // From Address.DisplayName
     
     #nullable enable
     public string? FacebookLink { get; set; }

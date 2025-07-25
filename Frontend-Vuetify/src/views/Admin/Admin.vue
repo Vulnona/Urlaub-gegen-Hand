@@ -140,9 +140,7 @@
                             <!-- Geographic Address Information -->
                             <div v-if="userdata.address">
                                 <p><strong>Adresse:</strong> {{ userdata.address.displayName }}</p>
-                                <p><strong>Stadt:</strong> {{ userdata.address.city }}</p>
-                                <p><strong>Postleitzahl:</strong> {{ userdata.address.postcode }}</p>
-                                <p><strong>Land:</strong> {{ userdata.address.country }}</p>
+                                <!-- Address fields removed: now only displayName, latitude, longitude, id are used -->
                                 <p><strong>Koordinaten:</strong> {{ userdata.address.latitude }}, {{ userdata.address.longitude }}</p>
                             </div>
                             <div v-else>

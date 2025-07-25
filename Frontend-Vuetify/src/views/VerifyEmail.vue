@@ -11,20 +11,20 @@
               <div class="auth-card">
                 <form class="form-border" @submit.prevent="VerificationEmail">
                   <div class="custom-form">
-                    <label for="fname">Email</label>
-                    <input type="text" placeholder="Emailadresse eingeben" v-model="email" id="email" required>
+                    <label for="fname">E-Mail</label>
+                    <input type="text" placeholder="E-Mail-Adresse eingeben" v-model="email" id="email" required>
                   </div>
                   <div>
                     <div class="login-buttons">
                       <!-- Disable button when loading -->
                       <button type="submit" class="btn" :disabled="loading">
                         <!-- Show loader or text based on loading status -->
-                        <span v-if="loading">Sending...</span>
-                        <span v-else>Versende Bestätigungs-Email</span>
+                        <span v-if="loading">Sende...</span>
+                        <span v-else>Bestätigungs-E-Mail versenden</span>
                       </button>
                     </div>
                     <div class="back-login">
-                      <a href="/login"><i class="ri-arrow-left-double-fill"></i> Back to Login</a>
+                      <a href="/login"><i class="ri-arrow-left-double-fill"></i> Zurück zum Login</a>
                     </div>
                   </div>
                   <div v-if="message" :class="{ 'error-message': isError, 'success-message': !isError }">

@@ -53,6 +53,7 @@ public class UserRepository : IUserRepository
             .Include(u => u.UserMemberships)
             .Include(u => u.Offers)
             .ThenInclude(o => o.Reviews)
+            .Include(u => u.Address)
             .FirstOrDefaultAsync(u => u.User_Id == userId);
 
         if (user == null)
@@ -80,6 +81,7 @@ public class UserRepository : IUserRepository
             .users.Include(u => u.UserMemberships)
             .Include(u => u.Offers)
             .ThenInclude(o => o.Reviews)
+            .Include(u => u.Address)
             .FirstOrDefaultAsync(u => u.User_Id == userId);
     }
 

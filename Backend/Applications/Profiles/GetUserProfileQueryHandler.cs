@@ -48,7 +48,12 @@ public class GetUserProfileQueryHandler : IRequestHandler<GetUserProfileQuery, U
                 ProfilePicture = user.ProfilePicture,
                 DateOfBirth = user.DateOfBirth,
                 Gender = user.Gender,
-                Address = user.Address, // NEW: Use the Address navigation property
+                Address = user.Address == null ? null : new AddressDTO {
+                    Id = user.Address.Id,
+                    DisplayName = user.Address.DisplayName,
+                    Latitude = user.Address.Latitude,
+                    Longitude = user.Address.Longitude
+                },
                 FacebookLink = user.Facebook_link,
                 Link_RS = user.Link_RS,
                 Link_VS = user.Link_VS,

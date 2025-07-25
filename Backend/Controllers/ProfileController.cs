@@ -56,7 +56,30 @@ public class ProfileController : ControllerBase
             var query = new GetUserProfileQuery(userId);
             var userProfile = await _mediator.Send(query);
 
-            return Ok(new { Profile = userProfile });
+            // Debug-Logging: User-Profil inkl. Address
+            _logger.LogWarning($"[DEBUG] UserProfile-API-Response: {System.Text.Json.JsonSerializer.Serialize(userProfile)}");
+
+            // Explizit serialisieren, damit 'address' klein geschrieben wird und null explizit sichtbar ist
+            var response = new {
+                profile = new {
+                    userProfile.FirstName,
+                    userProfile.LastName,
+                    userProfile.ProfilePicture,
+                    userProfile.DateOfBirth,
+                    userProfile.Gender,
+                    address = userProfile.Address, // explizit klein
+                    userProfile.FacebookLink,
+                    userProfile.Link_RS,
+                    userProfile.Link_VS,
+                    userProfile.VerificationState,
+                    userProfile.UserRating,
+                    userProfile.Hobbies,
+                    userProfile.Skills,
+                    userProfile.MembershipEndDate
+                }
+            };
+            _logger.LogWarning($"[DEBUG] UserProfile-API-Response (custom): {System.Text.Json.JsonSerializer.Serialize(response)}");
+            return Ok(response);
         }
         catch (UnauthorizedAccessException)
         {
@@ -110,28 +133,42 @@ public class ProfileController : ControllerBase
                 user.LastName = profile.LastName;
                 user.DateOfBirth = profile.DateOfBirth;
                 user.Gender = profile.Gender;
-                
-                // Create or update Address entity from UserData geographic data
-                var address = new Address
+                user.Hobbies = profile.Hobbies;
+                user.Skills = profile.Skills;
+
+                Address address = null;
+                if (profile.Id.HasValue)
                 {
-                    Latitude = profile.Latitude,
-                    Longitude = profile.Longitude,
-                    DisplayName = profile.DisplayName,
-                    HouseNumber = profile.HouseNumber,
-                    Road = profile.Road,
-                    City = profile.City,
-                    Postcode = profile.Postcode,
-                    Country = profile.Country,
-                    CountryCode = profile.CountryCode,
-                    Type = AddressType.Residential
-                };
-                
-                // Add the address to context and assign to user
-                _context.addresses.Add(address);
-                await _context.SaveChangesAsync();
+                    // Use existing address if id is provided
+                    address = await _context.addresses.FindAsync(profile.Id.Value);
+                    if (address == null)
+                    {
+                        return BadRequest("Address with provided id not found.");
+                    }
+                    // Optionally update address fields if changed
+                    address.Latitude = profile.Latitude;
+                    address.Longitude = profile.Longitude;
+                    address.DisplayName = profile.DisplayName;
+                    address.Type = AddressType.Residential;
+                    _context.addresses.Update(address);
+                }
+                else
+                {
+                    // Create new address
+                    address = new Address
+                    {
+                        Latitude = profile.Latitude,
+                        Longitude = profile.Longitude,
+                        DisplayName = profile.DisplayName,
+                        Type = AddressType.Residential
+                    };
+                    _context.addresses.Add(address);
+                    await _context.SaveChangesAsync();
+                }
+
                 user.AddressId = address.Id;
                 user.Address = address;
-                
+
                 user.VerificationState = UGH_Enums.VerificationState.IsNew;
                 await _userRepository.UpdateUserAsync(user);
             }
@@ -199,16 +236,17 @@ public class ProfileController : ControllerBase
                 FirstName = user.FirstName,
                 LastName = user.LastName,
                 ProfilePicture = user.ProfilePicture,
-                Age =  (int.Parse(DateTime.Today.ToString("yyyyMMdd")) - int.Parse(user.DateOfBirth.ToString("yyyyMMdd")))/10000,
+                Age = (int.Parse(DateTime.Today.ToString("yyyyMMdd")) - int.Parse(user.DateOfBirth.ToString("yyyyMMdd"))) / 10000,
                 Gender = user.Gender,
-                City = user.Address?.City,
-                Country = user.Address?.Country,
                 FacebookLink = user.Facebook_link,
                 AverageRating = averageRating,
                 MembershipEndDate = user.UserMemberships
-                .Where(m => m.IsMembershipActive)
-                .OrderBy(m => m.CreatedAt)
-                .FirstOrDefault()?.Expiration
+                    .Where(m => m.IsMembershipActive)
+                    .OrderBy(m => m.CreatedAt)
+                    .FirstOrDefault()?.Expiration,
+                Latitude = user.Address?.Latitude,
+                Longitude = user.Address?.Longitude,
+                DisplayName = user.Address?.DisplayName,
             };
             if (user.Hobbies != null)
                 profile.Hobbies = user.Hobbies.Split(',').Select(h => h.Trim()).ToList() ?? new List<string>();

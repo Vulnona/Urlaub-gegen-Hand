@@ -11,8 +11,8 @@ public class UserProfileDataDTO
     public DateOnly DateOfBirth { get; set; }
     public string Gender { get; set; }
     
-    // Geographic location data (NEW) - replacing individual address fields
-    public Address? Address { get; set; }
+    // Geographic location data (flach, ohne Navigation Properties)
+    public AddressDTO? Address { get; set; }
     
     public string? FacebookLink { get; set; }
     public string? Link_RS { get; set; }

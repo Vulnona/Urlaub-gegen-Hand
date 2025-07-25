@@ -28,9 +28,7 @@ namespace UGH.Domain.ViewModels
         [Required]
         public string DisplayName { get; set; } // Full formatted address
         
-        // Optional location components
-        public string? City { get; set; }
-        public string? Country { get; set; }
+        // ...removed City and Country, use only DisplayName, Latitude, Longitude, Id...
 
         public int OfferId { get; set; }
         // modifications don't need a new image. If an image exists is checked in PutOffer
