@@ -89,10 +89,30 @@ namespace UGH.Infrastructure.Services
         }
 
         public async Task<User> GetUserByEmailAsync(string email)
+    {
+        try
         {
-            // ...stub implementation...
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                _logger.LogError("GetUserByEmailAsync: Email is null or empty.");
+                return null;
+            }
+            var user = await _context.users
+                .Include(u => u.UserMemberships)
+                .Include(u => u.CurrentMembership)
+                .FirstOrDefaultAsync(u => u.Email_Address == email);
+            if (user == null)
+            {
+                _logger.LogWarning($"GetUserByEmailAsync: No user found for email {email}.");
+            }
+            return user;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Exception in GetUserByEmailAsync: {ex.Message} | StackTrace: {ex.StackTrace}");
             return null;
         }
+    }
     }
     // ...existing code for UserService methods goes here, all inside the class and namespace...
 }

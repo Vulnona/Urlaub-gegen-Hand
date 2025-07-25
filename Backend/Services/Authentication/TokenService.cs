@@ -36,8 +36,7 @@ public class TokenService
     #region token-generation-service
 
     public async Task<string> GenerateJwtToken(
-        string userName,
-        Guid userId,
+        User user,
         List<UserMembership> memberships = null
     )
     {
@@ -47,39 +46,30 @@ public class TokenService
                 Encoding.UTF8.GetBytes(_configuration["Jwt:Key"])
             );
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
-            string role = await _userService.GetUserRoleByUserEmail(userName);
+            string role = user.UserRole.ToString();
 
-            // Use the memberships parameter passed from LoginCommandHandler
             var hasActiveMembership = memberships != null && memberships.Any();
             var membershipStatus = hasActiveMembership ? "Active" : "Inactive";
-            
-            _logger.LogError($"=== TOKEN SERVICE: User {userName} has {memberships?.Count ?? 0} memberships, status: {membershipStatus} ===");
-            
-            // Get user for verification status (but don't use for membership check)
-            var user = await _userService.GetUserByEmailAsync(userName);
-            var verificationStatus = user.VerificationState;
-            
-            String verified;
 
+            _logger.LogError($"=== TOKEN SERVICE: User {user.Email_Address} has {memberships?.Count ?? 0} memberships, status: {membershipStatus} ===");
+
+            var verificationStatus = user.VerificationState;
+            String verified;
             if(verificationStatus == UGH_Enums.VerificationState.Verified)
                 verified = "ok";
             else
                 verified = "not";
-            
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
-                new Claim(JwtRegisteredClaimNames.Sub, userName),
+                new Claim(ClaimTypes.NameIdentifier, user.User_Id.ToString()),
+                new Claim(JwtRegisteredClaimNames.Sub, user.Email_Address),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 new Claim("MembershipStatus", membershipStatus),
                 new Claim("VerificationStatus", verified)
             };
 
-            // Add roles to claims
-            // currently only the mutually exclusive Roles User and Admin are supported.
             claims.Add(new Claim(ClaimTypes.Role, role));
 
-            // Create the token
             var token = new JwtSecurityToken(
                 _configuration["Jwt:Issuer"],
                 _configuration["Jwt:Audience"],
@@ -88,7 +78,6 @@ public class TokenService
                 signingCredentials: credentials
             );
 
-            // Return the generated token
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
         catch (Exception ex)

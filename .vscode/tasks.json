@@ -1,0 +1,14 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "shell",
+			"label": "Build Backend",
+			"command": "dotnet build Backend/UGHApi.csproj",
+			"group": "build",
+			"problemMatcher": [
+				"$msCompile"
+			]
+		}
+	]
+}

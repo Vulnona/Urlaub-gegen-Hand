@@ -46,6 +46,13 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, Result<LoginRes
             }
 
             var user = await _userRepository.GetUserByEmailAsync(request.Email);
+            if (user == null)
+            {
+                _logger.LogError($"User not found for email: {request.Email}");
+                return Result.Failure<LoginResponse>(
+                    Errors.General.NotFound("Email", $"User with email {request.Email} not found.")
+                );
+            }
 
             // Check if user is Admin - Admin MUST use 2FA
             if (user.UserRole == UserRoles.Admin && !user.IsTwoFactorEnabled)
@@ -91,8 +98,7 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, Result<LoginRes
             }
 
             var accessToken = await _tokenService.GenerateJwtToken(
-                request.Email,
-                user.User_Id,
+                user,
                 activeMemberships
             );
 

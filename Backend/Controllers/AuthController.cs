@@ -374,7 +374,7 @@ namespace UGHApi.Controllers
 
                 // Generate JWT token with correct memberships
                 var activeMemberships = await _userRepository.GetActiveUserMembershipsAsync(user.User_Id);
-                var token = await _tokenService.GenerateJwtToken(user.Email_Address, user.User_Id, activeMemberships);
+                var token = await _tokenService.GenerateJwtToken(user, activeMemberships);
 
                 return Ok(new LoginResponse
                 {
