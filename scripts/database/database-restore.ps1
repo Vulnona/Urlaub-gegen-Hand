@@ -32,7 +32,7 @@ if ($LASTEXITCODE -ne 0) {
 }
 $creds = $null
 try { $creds = $credsJson | ConvertFrom-Json } catch { Write-Host "Fehler beim Parsen der Credentials: $_" -ForegroundColor Red; exit 1 }
-$User = $creds.user
+$User = "root"
 $Database = $creds.db
 $passwordFile = Join-Path $projectRoot ($creds.pwFile -replace '/', [System.IO.Path]::DirectorySeparatorChar)
 if (-not (Test-Path $passwordFile)) {
@@ -78,9 +78,14 @@ function Test-Prerequisites {
     
     Write-Host "Container '$Container' ist aktiv" -ForegroundColor Green
     
+    # Debug-Ausgabe: Passwort und Docker-Befehl
+    Write-Host "[DEBUG] Teste Verbindung mit: docker exec $Container mysql -u$User -p'$password' -e 'SELECT 1;'" -ForegroundColor Cyan
+    Write-Host "[DEBUG] Verwendetes Passwort: $password" -ForegroundColor Yellow
     # Datenbankverbindung testen
     try {
-        docker exec $Container mysql -u$User -p"$password" -e "SELECT 1;" 2>$null
+        $cmd = 'docker exec {0} mysql -u{1} -p{2} -e "SELECT 1;"' -f $Container, $User, $password
+        Write-Host "[DEBUG] Ausführung: cmd.exe /c $cmd" -ForegroundColor Magenta
+        $result = & cmd.exe /c $cmd
         if ($LASTEXITCODE -eq 0) {
             Write-Host "Datenbankverbindung erfolgreich" -ForegroundColor Green
         } else {
@@ -97,7 +102,10 @@ function Invoke-DatabaseRestore {
     try {
         # 1. Backup-Datei in Container kopieren
         Write-Host "1. Kopiere Backup-Datei in Container..." -ForegroundColor Yellow
-        docker cp $BackupFile "${Container}:/backup.sql"
+        Write-Host "[DEBUG] docker cp $BackupFile ${Container}:/backup.sql" -ForegroundColor Cyan
+        $cmd = "docker cp `"$BackupFile`" ${Container}:/backup.sql"
+        Write-Host "[DEBUG] Ausführung: cmd.exe /c $cmd" -ForegroundColor Magenta
+        & cmd.exe /c $cmd
         if ($LASTEXITCODE -ne 0) {
             throw "Fehler beim Kopieren der Backup-Datei"
         }
@@ -105,7 +113,10 @@ function Invoke-DatabaseRestore {
         
         # 2. Datenbank löschen
         Write-Host "2. Lösche bestehende Datenbank..." -ForegroundColor Yellow
-        docker exec $Container mysql -u$User -p"$password" -e "DROP DATABASE IF EXISTS $Database;" 2>$null
+        Write-Host "[DEBUG] docker exec $Container mysql -u$User -p'$password' -e 'DROP DATABASE IF EXISTS $Database;'" -ForegroundColor Cyan
+        $cmd = 'docker exec {0} mysql -u{1} -p{2} -e "DROP DATABASE IF EXISTS {3};"' -f $Container, $User, $password, $Database
+        Write-Host "[DEBUG] Ausführung: cmd.exe /c $cmd" -ForegroundColor Magenta
+        & cmd.exe /c $cmd
         if ($LASTEXITCODE -ne 0) {
             throw "Fehler beim Löschen der Datenbank"
         }
@@ -113,15 +124,20 @@ function Invoke-DatabaseRestore {
         
         # 3. Neue Datenbank erstellen
         Write-Host "3. Erstelle neue Datenbank..." -ForegroundColor Yellow
-        docker exec $Container mysql -u$User -p"$password" -e "CREATE DATABASE $Database;" 2>$null
+        Write-Host "[DEBUG] docker exec $Container mysql -u$User -p'$password' -e 'CREATE DATABASE $Database;'" -ForegroundColor Cyan
+        $cmd = 'docker exec {0} mysql -u{1} -p{2} -e "CREATE DATABASE {3};"' -f $Container, $User, $password, $Database
+        Write-Host "[DEBUG] Ausführung: cmd.exe /c $cmd" -ForegroundColor Magenta
+        & cmd.exe /c $cmd
         if ($LASTEXITCODE -ne 0) {
             throw "Fehler beim Erstellen der Datenbank"
         }
         Write-Host "   Datenbank erstellt" -ForegroundColor Green
         
-        # 4. Backup einspielen
+        # 4. Backup einspielen 
         Write-Host "4. Spiele Backup ein..." -ForegroundColor Yellow
-        docker exec $Container sh -c "mysql -u$User -p'$password' -A $Database < /backup.sql" 2>$null
+        $cmd = "type `"$BackupFile`" | docker exec -i $Container mysql -u$User -p$password -A $Database"
+        Write-Host "[DEBUG] Restore-Befehl: cmd.exe /c $cmd" -ForegroundColor Magenta
+        & cmd.exe /c $cmd
         if ($LASTEXITCODE -ne 0) {
             throw "Fehler beim Einspielen des Backups"
         }
@@ -129,7 +145,10 @@ function Invoke-DatabaseRestore {
         
         # 5. Aufräumen
         Write-Host "5. Räume temporäre Dateien auf..." -ForegroundColor Yellow
-        docker exec $Container rm -f /backup.sql 2>$null
+        Write-Host "[DEBUG] docker exec $Container rm -f /backup.sql" -ForegroundColor Cyan
+        $cmd = "docker exec $Container rm -f /backup.sql"
+        Write-Host "[DEBUG] Ausführung: cmd.exe /c $cmd" -ForegroundColor Magenta
+        & cmd.exe /c $cmd
         Write-Host "   Aufräumung abgeschlossen" -ForegroundColor Green
         
         # Erfolgsmeldung
