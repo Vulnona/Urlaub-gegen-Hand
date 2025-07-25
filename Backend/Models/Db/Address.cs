@@ -3,10 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace UGH.Domain.Entities;
 
-/// <summary>
-/// Geographic address model using OpenStreetMap/Nominatim data structure
-/// This replaces the old separate Street, City, State, Country fields
-/// </summary>
+
 public class Address
 {
     [Key]
@@ -22,18 +19,6 @@ public class Address
     // Structured address components from Nominatim
     [Required]
     public string DisplayName { get; set; } // Full formatted address
-
-    // Detailed address components
-    #nullable enable
-    public string? HouseNumber { get; set; }
-    public string? Road { get; set; } // Street name
-    public string? Suburb { get; set; }
-    public string? City { get; set; }
-    public string? County { get; set; }
-    public string? State { get; set; }
-    public string? Postcode { get; set; }
-    public string? Country { get; set; }
-    public string? CountryCode { get; set; } // ISO country code (e.g., "DE", "AT", "CH")
 
     // OpenStreetMap metadata
     public long? OsmId { get; set; } // OpenStreetMap ID for reference

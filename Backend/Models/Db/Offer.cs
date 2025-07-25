@@ -55,15 +55,9 @@ public class Offer {
 public class OfferTypeLodging : Offer {    
     public string? LodgingType { get; set; }
     public string? AdditionalLodgingProperties { get; set; }
-    // OLD: string? Location - now using Address system
-}
+
 
 public class OfferTypeRequest : Offer {
-    // NOTE: Multiple locations for requests will use a separate many-to-many table in future
-    // For now, using single address like other offers
-    // public string? PossibleLocations { get; set; } // DEPRECATED
-    
-    // health or other important individual factors. Not searchable.
     public string? SpecialConditions { get; set; }
 }
 
