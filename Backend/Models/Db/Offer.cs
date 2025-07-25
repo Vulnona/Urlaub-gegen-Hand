@@ -52,10 +52,11 @@ public class Offer {
     public ICollection<Review> Reviews { get; set; } = new List<Review>();
 }
 
-public class OfferTypeLodging : Offer {    
+public class OfferTypeLodging : Offer
+{
     public string? LodgingType { get; set; }
     public string? AdditionalLodgingProperties { get; set; }
-
+}
 
 public class OfferTypeRequest : Offer {
     public string? SpecialConditions { get; set; }

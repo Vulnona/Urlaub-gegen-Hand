@@ -19,12 +19,24 @@ public class Address
     // Structured address components from Nominatim
     [Required]
     public string DisplayName { get; set; } // Full formatted address
+    public string? HouseNumber { get; set; }
+    public string? Road { get; set; }
+    // Alias für Road, falls benötigt
+    [NotMapped]
+    public string? Street { get => Road; set => Road = value; }
+    public string? Suburb { get; set; }
+    public string? City { get; set; }
+    public string? County { get; set; }
+    public string? State { get; set; }
+    public string? Postcode { get; set; }
+    public string? Country { get; set; }
+    public string? CountryCode { get; set; }
 
     // OpenStreetMap metadata
     public long? OsmId { get; set; } // OpenStreetMap ID for reference
     public string? OsmType { get; set; } // node, way, relation
     public string? PlaceId { get; set; } // Nominatim place ID
-    
+
     // Address type classification
     public AddressType Type { get; set; } = AddressType.Residential;
 
