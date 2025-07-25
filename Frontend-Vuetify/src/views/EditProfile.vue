@@ -139,25 +139,23 @@ export default {
     },
     saveProfile() {
       if (this.validateForm()) {
-            const updateRequest = {
-                id: this.profile.id,
-                displayName: this.profile.displayName,
-                latitude: this.profile.latitude,
-                longitude: this.profile.longitude,
-                email: this.profile.email,
-                phoneNumber: this.profile.phoneNumber,
-                firstName: this.profile.firstName,
-                lastName: this.profile.lastName,
-                birthDate: this.profile.birthDate,
-                gender: this.profile.gender,
-                street: this.profile.street,
-                zipCode: this.profile.zipCode,
-                city: this.profile.city,
-                country: this.profile.country,
-                aboutMe: this.profile.aboutMe,
-                profileImageUrl: this.profile.profileImageUrl,
-                // ...existing code...
-            };
+        const updateRequest = {
+          id: this.profile.id,
+          displayName: this.profile.displayName,
+          latitude: this.profile.latitude,
+          longitude: this.profile.longitude,
+          email: this.profile.email,
+          phoneNumber: this.profile.phoneNumber,
+          firstName: this.profile.firstName,
+          lastName: this.profile.lastName,
+          birthDate: this.profile.birthDate,
+          gender: this.profile.gender,
+          aboutMe: this.profile.aboutMe,
+          profileImageUrl: this.profile.profileImageUrl
+        };
+        this.updateProfileAPI(updateRequest);
+      }
+    },
     async updateProfileAPI(updatedProfile) {
       try {
         const response = await axiosInstance.put(`profile/update-profile`, updatedProfile);
@@ -168,7 +166,7 @@ export default {
               (typeof this.profile.skills === 'string' ? this.profile.skills.split(', ') : []);
             this.profile = {
               ...response.data.profile,
-              skills: skillsArray
+              skills: this.profile.skills
             };
             this.profile.skills = this.profile.skills.map(userSkill =>
               this.skills.find(skill => skill.skill_ID === userSkill.skill_ID) || userSkill
