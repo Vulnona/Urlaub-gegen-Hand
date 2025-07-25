@@ -23,7 +23,6 @@ public class User
     [Required]
     public string Gender { get; set; }
 
-    // NEW: Geographic address system replacing old Street, HouseNumber, PostCode, City, Country, State
     [Required]
     public int AddressId { get; set; }
     

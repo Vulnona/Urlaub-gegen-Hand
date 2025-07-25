@@ -18,7 +18,6 @@ namespace UGH.Domain.ViewModels
         [Required]
         public string Skills { get; set; }
         
-        // Geographic location data (NEW) - replacing old Country/State/City fields
         [Required]
         public double Latitude { get; set; }
         
@@ -27,8 +26,6 @@ namespace UGH.Domain.ViewModels
         
         [Required]
         public string DisplayName { get; set; } // Full formatted address
-        
-        // ...removed City and Country, use only DisplayName, Latitude, Longitude, Id...
 
         public int OfferId { get; set; }
         // modifications don't need a new image. If an image exists is checked in PutOffer
