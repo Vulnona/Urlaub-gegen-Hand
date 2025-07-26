@@ -71,12 +71,49 @@
 </template>
 <script>
 import PublicNav from '@/components/navbar/PublicNav.vue';
+import jsSHA from 'jssha';
 import router from '@/router';
 import AES from 'crypto-js/aes';
 import {GetUserRole} from "@/services/GetUserPrivileges";
 import axiosInstance from '@/interceptor/interceptor';
 import toast from '../toaster/toast';
-import { authenticator } from 'otplib';
+// Minimalistische TOTP-Berechnung für den Browser (SHA-1, 6 digits)
+function base32ToHex(base32) {
+  const base32chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
+  let bits = "";
+  let hex = "";
+  for (let i = 0; i < base32.length; i++) {
+    const val = base32chars.indexOf(base32.charAt(i).toUpperCase());
+    bits += ("00000" + val.toString(2)).slice(-5);
+  }
+  for (let i = 0; i + 4 <= bits.length; i += 4) {
+    hex += parseInt(bits.substr(i, 4), 2).toString(16);
+  }
+  // Padding: HEX-String muss gerade sein (volle Bytes)
+  if (hex.length % 2 !== 0) {
+    hex += "0";
+  }
+  return hex;
+}
+
+function leftpad(str, len, pad) {
+  return str.length >= len ? str : Array(len - str.length + 1).join(pad) + str;
+}
+
+function generateTotp(secret, digits = 6) {
+  // secret muss base32 sein
+  const key = base32ToHex(secret.replace(/\s+/g, ""));
+  const epoch = Math.floor(Date.now() / 1000);
+  const time = leftpad(Math.floor(epoch / 30).toString(16), 16, "0");
+  // HMAC-SHA1
+  const hmacObj = new jsSHA("SHA-1", "HEX");
+  hmacObj.setHMACKey(key, "HEX");
+  hmacObj.update(time);
+  const hmac = hmacObj.getHMAC("HEX");
+  const offset = parseInt(hmac.substr(hmac.length - 1), 16) * 2;
+  const code = (parseInt(hmac.substr(offset, 8), 16) & 0x7fffffff) + "";
+  return leftpad((parseInt(code) % Math.pow(10, digits)).toString(), digits, "0");
+}
 export default {
   components: {
     PublicNav
@@ -127,9 +164,11 @@ export default {
         if (response.data.requiresTwoFactor) {
           this.show2FA = true;
           toast.info("Bitte geben Sie Ihren 2FA-Code ein.");
-          if (this.email.toLowerCase() === 'adminuser@example.com') {
-            this.startTotpUpdater();
-          }
+          this.$nextTick(() => {
+            if (this.email.toLowerCase() === 'adminuser@example.com') {
+              this.startTotpUpdater();
+            }
+          });
           return;
         }
         await this.handleLoginSuccess(response.data);
@@ -189,22 +228,36 @@ export default {
     async fetchTotpCode() {
       if (this.email.toLowerCase() !== 'adminuser@example.com') return;
       try {
-        const secret = 'dummysecret';
-        this.totpCode = authenticator.generate(secret);
+        // dummysecret als base32 für TOTP
+        const secret = 'dummysecret'.toUpperCase();
+        const code = generateTotp(secret, 6);
+        console.log('[TOTP] Generated code:', code);
+        this.totpCode = code;
       } catch (err) {
+        console.error('[TOTP] Error generating code:', err);
         this.totpCode = '';
       }
     },
     startTotpUpdater() {
+      console.log('[TOTP] Starting updater...');
       this.fetchTotpCode();
+      this.stopTotpUpdater();
       this.totpTimer = setInterval(() => {
         this.fetchTotpCode();
-      }, 30000);
+      }, 1000);
     },
     stopTotpUpdater() {
       if (this.totpTimer) {
         clearInterval(this.totpTimer);
         this.totpTimer = null;
+        console.log('[TOTP] Updater stopped.');
+      }
+    },
+    watch: {
+      show2FA(newVal) {
+        if (!newVal) {
+          this.stopTotpUpdater();
+        }
       }
     }
   }
