@@ -29,18 +29,28 @@ public class GetUserProfileQueryHandler : IRequestHandler<GetUserProfileQuery, U
             var userId = request.UserId;
 
             var user = await _userRepository.GetUserWithRatingByIdAsync(userId);
-
             if (user == null)
             {
                 _logger.LogWarning($"User with ID {userId} not found.");
                 return null;
             }
-
-            var membershipEndDate = user.UserMemberships
-                .Where(m => m.IsMembershipActive)
-                .OrderBy(m => m.CreatedAt)
-                .FirstOrDefault()?.Expiration;
-
+            if (user.Address == null)
+            {
+                _logger.LogError($"User {userId} has no Address object.");
+            }
+            if (user.UserMemberships == null)
+            {
+                _logger.LogError($"User {userId} has no UserMemberships object.");
+            }
+            if (user.Hobbies == null)
+            {
+                _logger.LogError($"User {userId} has no Hobbies.");
+            }
+            if (user.Skills == null)
+            {
+                _logger.LogError($"User {userId} has no Skills.");
+            }
+            var membershipEndDate = user.UserMemberships?.Where(m => m.IsMembershipActive).OrderBy(m => m.CreatedAt).FirstOrDefault()?.Expiration;
             var userProfileDataDTO = new UserProfileDataDTO
             {
                 FirstName = user.FirstName,
@@ -62,7 +72,6 @@ public class GetUserProfileQueryHandler : IRequestHandler<GetUserProfileQuery, U
                 Skills = user?.Skills?.Split(',').ToList(),
                 VerificationState = user.VerificationState.ToString()
             };
-
             return userProfileDataDTO;
         }
         catch (Exception ex)

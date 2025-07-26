@@ -167,8 +167,8 @@
               <button class="btn  btn-primary rounded" @click="changePassword">
                 Passwort ändern</button>
             </div>
-            <button class="btn btn-danger" @click="deleteSkillsAndHobbies()">
-              Skills & Hobbies löschen
+            <button class="btn btn-danger" @click="confirmDeleteAccount">
+              Lösche Account
             </button>
           </div>
         </div>
@@ -356,6 +356,33 @@
       },
     },
     methods: {
+      async confirmDeleteAccount() {
+        const result = await Swal.fire({
+          title: 'Ganz sicher?',
+          text: 'Mit Löschen des Accounts wird ein Backup angelegt, welches nach 14 Tagen automatisch gelöscht wird. Danach ist eine Herstellung der Daten unmöglich.',
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonText: 'Bestätigen',
+          cancelButtonText: 'Ablehnen',
+        });
+        if (result.isConfirmed) {
+          try {
+            await axiosInstance.post('profile/delete-user-and-backup');
+            await Swal.fire({
+              icon: 'success',
+              title: 'Account ist gelöscht',
+              text: 'Du wirst jetzt ausgeloggt.'
+            });
+            window.location.href = '/login';
+          } catch (error) {
+            Swal.fire({
+              icon: 'error',
+              title: 'Fehler',
+              text: 'Account konnte nicht gelöscht werden. Bitte Support kontaktieren.'
+            });
+          }
+        }
+      },
       formatMembershipDate(dateString) {
         if (!dateString) return '';
         const date = new Date(dateString);
@@ -506,73 +533,7 @@
       upload_id() {
         router.push("/upload-id").then(() => { });
       },
-      // Method to delete skills and hobbies 
-      async deleteSkillsAndHobbies() {
-        Swal.fire({
-          title: "Sind Sie sicher?",
-          text: "Sie möchten Ihre Fertigkeiten und Hobbies löschen!",
-          icon: "warning",
-          showCancelButton: true,
-          confirmButtonColor: "#3085d6",
-          cancelButtonColor: "#d33",
-          confirmButtonText: "Ja, löschen!",
-        }).then(async (result) => {
-          if (result.isConfirmed) {
-            try {
-              const response = await axiosInstance.get('profile/get-user-profile');
-              const userData = response.data.profile;
-              // Nur die Felder, die das Backend erwartet:
-              const updateData = {
-                firstName: userData.firstName,
-                lastName: userData.lastName,
-                dateOfBirth: userData.dateOfBirth,
-                gender: userData.gender,
-                displayName: userData.address?.displayName || '',
-                latitude: userData.address?.latitude ?? null,
-                longitude: userData.address?.longitude ?? null,
-                id: userData.address?.id ?? null,
-                skills: '',
-                hobbies: ''
-              };
-              // dateOfBirth ggf. ins richtige Format bringen
-              if (updateData.dateOfBirth instanceof Date) {
-                updateData.dateOfBirth = updateData.dateOfBirth.toISOString().slice(0, 10);
-              } else if (typeof updateData.dateOfBirth === 'string' && updateData.dateOfBirth.length > 10) {
-                updateData.dateOfBirth = updateData.dateOfBirth.slice(0, 10);
-              }
-              await axiosInstance.put('profile/update-user-data', updateData);
-              toast.success("Fertigkeiten und Hobbies erfolgreich gelöscht!");
-              this.fetchUserData();
-            } catch (error) {
-              toast.error("Fehler beim Löschen der Daten.");
-            }
-          }
-        });
-      },
 
-      // User und S3-Bilder löschen
-      async deleteUser() {
-        Swal.fire({
-          title: "Sind Sie sicher?",
-          text: "Ihr Account und alle zugehörigen Bilder werden unwiderruflich gelöscht!",
-          icon: "warning",
-          showCancelButton: true,
-          confirmButtonColor: "#3085d6",
-          cancelButtonColor: "#d33",
-          confirmButtonText: "Ja, Account löschen!",
-        }).then(async (result) => {
-          if (result.isConfirmed) {
-            try {
-              await axiosInstance.delete('profile/delete-user');
-              toast.success("Account und Bilder erfolgreich gelöscht!");
-              // Optional: Weiterleitung nach Logout
-              window.location.href = '/logout';
-            } catch (error) {
-              toast.error("Fehler beim Löschen des Accounts.");
-            }
-          }
-        });
-      },
 
       // Function to fetch user data using API request
       async fetchUserData() {

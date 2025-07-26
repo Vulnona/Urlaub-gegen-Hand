@@ -444,6 +444,10 @@ Content-Type: application/json
 }
 ```
 
+**Beispiel** 
+
+docker exec -i ugh-db mysql -uuser -ppassword db -e "SET @guid = '33333333-3333-3333-3333-333333333333'; DELETE FROM users WHERE User_Id = @guid; DELETE FROM addresses WHERE Id = 3; DELETE FROM userprofiles WHERE User_Id = @guid; DELETE FROM usermembership WHERE User_Id = @guid; INSERT INTO users (User_Id, FirstName, LastName, DateOfBirth, Gender, Email_Address, Password, SaltKey, IsEmailVerified, MembershipId, Facebook_link, Link_RS, Link_VS, VerificationState, Hobbies, Skills, AddressId) VALUES (@guid, 'Test3', 'User3', '1990-03-03', 'Female', 'testuser3@example.com', 'testpassword3', 'testsalt3', 1, 1, 'https://facebook.com/test3', 'https://rs3.test', 'https://vs3.test', 3, 'Lesen, Schwimmen', 'Programmieren, Kochen', 3); INSERT INTO addresses (Id, Latitude, Longitude, DisplayName, City, Country, CountryCode, CreatedAt) VALUES (3, 50.110924, 8.682127, 'Römerberg, 60311 Frankfurt am Main, Deutschland', 'Frankfurt', 'Deutschland', 'DE', NOW()); INSERT INTO userprofiles (User_Id, Options, Hobbies, Skills) VALUES (@guid, 0, 'Lesen, Schwimmen', 'Programmieren, Kochen'); INSERT INTO usermembership (User_Id, MembershipID, StartDate, Expiration, CreatedAt, UpdatedAt) VALUES (@guid, 1, NOW(), DATE_ADD(NOW(), INTERVAL 1 MONTH), NOW(), NOW());"
+
 **User Login (Standard)**
 ```http
 POST /api/authenticate/login

@@ -18,7 +18,7 @@ namespace UGHApi.DATA
         public DbSet<Membership> memberships { get; set; }
         public DbSet<UserMembership> usermembership { get; set; }
         public DbSet<Skill> skills { get; set; }
-        
+        public DbSet<Review> reviews { get; set; }
         public DbSet<EmailVerificator> emailverificators { get; set; }
         public DbSet<PasswordResetToken> passwordresettokens { get; set; }
         public DbSet<Coupon> coupons { get; set; }
@@ -30,7 +30,8 @@ namespace UGHApi.DATA
         public DbSet<OfferApplication> offerapplication { get; set; }
         public DbSet<Accommodation> accomodations { get; set; }
         public DbSet<SuitableAccommodation> accommodationsuitables { get; set; }
-        public DbSet<Review> reviews { get; set; }
+
+        public DbSet<Backend.Models.DeletedUserBackup> DeletedUserBackups { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -56,8 +57,21 @@ namespace UGHApi.DATA
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
-            
+            builder.ApplyConfiguration(new Backend.DATA.Configurations.DeletedUserBackupConfiguration());
             builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+
+            // Configure Review-User relationships
+            builder.Entity<Review>()
+                .HasOne(r => r.Reviewer)
+                .WithMany(u => u.Reviews)
+                .HasForeignKey(r => r.ReviewerId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<Review>()
+                .HasOne(r => r.Reviewed)
+                .WithMany(u => u.ReceivedReviews)
+                .HasForeignKey(r => r.ReviewedId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

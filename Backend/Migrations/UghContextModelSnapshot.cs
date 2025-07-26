@@ -19,6 +19,57 @@ namespace UGHApi.Migrations
                 .HasAnnotation("ProductVersion", "7.0.20")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
+            modelBuilder.Entity("Backend.Models.DeletedUserBackup", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<string>("Address")
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime?>("DateOfBirth")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime>("DeletedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Email")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("FirstName")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Gender")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Hobbies")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("LastName")
+                        .HasColumnType("longtext");
+
+                    b.Property<double?>("Latitude")
+                        .HasColumnType("double");
+
+                    b.Property<double?>("Longitude")
+                        .HasColumnType("double");
+
+                    b.Property<string>("ProfilePicture")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Skills")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("DeletedUserBackups", (string)null);
+                });
+
             modelBuilder.Entity("UGH.Domain.Entities.Accommodation", b =>
                 {
                     b.Property<int>("Id")
@@ -593,7 +644,8 @@ namespace UGHApi.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("User_Id");
+                    b.HasIndex("User_Id")
+                        .IsUnique();
 
                     b.ToTable("userprofiles");
                 });
@@ -783,15 +835,15 @@ namespace UGHApi.Migrations
                         .IsRequired();
 
                     b.HasOne("UGH.Domain.Entities.User", "Reviewed")
-                        .WithMany()
+                        .WithMany("ReceivedReviews")
                         .HasForeignKey("ReviewedId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("UGH.Domain.Entities.User", "Reviewer")
-                        .WithMany()
+                        .WithMany("Reviews")
                         .HasForeignKey("ReviewerId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Offer");
@@ -840,8 +892,8 @@ namespace UGHApi.Migrations
             modelBuilder.Entity("UGH.Domain.Entities.UserProfile", b =>
                 {
                     b.HasOne("UGH.Domain.Entities.User", "User")
-                        .WithMany()
-                        .HasForeignKey("User_Id")
+                        .WithOne("UserProfile")
+                        .HasForeignKey("UGH.Domain.Entities.UserProfile", "User_Id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -953,9 +1005,15 @@ namespace UGHApi.Migrations
 
                     b.Navigation("Offers");
 
+                    b.Navigation("ReceivedReviews");
+
+                    b.Navigation("Reviews");
+
                     b.Navigation("Transactions");
 
                     b.Navigation("UserMemberships");
+
+                    b.Navigation("UserProfile");
                 });
 #pragma warning restore 612, 618
         }

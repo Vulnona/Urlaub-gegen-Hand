@@ -7,7 +7,8 @@ const axiosInstance = axios.create({
   baseURL: '/api/',  // Use relative URL for Vite proxy
 });
 
-// Function to decrypt token using CryptoJS.
+
+// Function to decrypt token using CryptoJS AES
 const decryptToken = (encryptedToken: string): string | null => {
   try {
     const bytes = CryptoJS.AES.decrypt(encryptedToken, import.meta.env.VITE_SECRET_KEY || 'thisismytestsecretkey');
@@ -26,7 +27,6 @@ axiosInstance.interceptors.request.use(
       fullURL: config.baseURL + config.url,
       method: config.method
     });
-    
     const token = sessionStorage.getItem('token');
     if (token) {
       const decryptedToken = decryptToken(token);

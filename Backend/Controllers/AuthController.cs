@@ -76,7 +76,8 @@ namespace UGHApi.Controllers
             try
             {
                 _logger.LogError($"=== AUTH CONTROLLER LOGIN CALLED FOR {command.Email} ===");
-                
+                _logger.LogError($"[DEBUG] LoginCommand received: Email={command.Email}, Password={command.Password}");
+
                 if (!ModelState.IsValid)
                 {
                     _logger.LogError($"Bad request: {ModelState}");
@@ -84,7 +85,7 @@ namespace UGHApi.Controllers
                 }
 
                 var response = await _mediator.Send(command);
-                
+
                 _logger.LogError($"=== MEDIATOR RESPONSE FOR {command.Email}: IsFailure={response.IsFailure} ===");
 
                 if (response.IsFailure)
