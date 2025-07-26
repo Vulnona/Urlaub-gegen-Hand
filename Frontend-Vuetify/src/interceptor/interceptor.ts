@@ -30,7 +30,14 @@ axiosInstance.interceptors.request.use(
     const token = sessionStorage.getItem('token');
     if (token) {
       const decryptedToken = decryptToken(token);
+      console.log('🔑 DECRYPTED TOKEN:', decryptedToken);
       if (decryptedToken) {
+        try {
+          const decoded = JSON.parse(atob(decryptedToken.split('.')[1]));
+          console.log('🧩 DECODED JWT PAYLOAD:', decoded);
+        } catch (e) {
+          console.warn('⚠️ Could not decode JWT payload:', e);
+        }
         config.headers['Authorization'] = `Bearer ${decryptedToken}`;
       } else {
         sessionStorage.removeItem('token');

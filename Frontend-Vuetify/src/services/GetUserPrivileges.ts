@@ -4,16 +4,14 @@ import CryptoJS from 'crypto-js';
 // Function to decrypt token using CryptoJS.
 const decryptToken = (encryptedToken: string): string | null => {
   try {
-    const bytes = CryptoJS.AES.decrypt(encryptedToken, process.env.SECRET_KEY || '');
+    const bytes = CryptoJS.AES.decrypt(encryptedToken, import.meta.env.VITE_SECRET_KEY || 'thisismytestsecretkey');
     const decrypted = bytes.toString(CryptoJS.enc.Utf8);
-    
     // If decryption failed, the result will be empty
     if (!decrypted) {
       console.warn('Token decryption failed - clearing invalid token');
       sessionStorage.removeItem('token');
       return null;
     }
-    
     return decrypted;
   } catch (e) {
     console.warn('Token decryption error - clearing invalid token:', e);

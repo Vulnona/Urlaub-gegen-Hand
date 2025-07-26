@@ -202,6 +202,7 @@ export default {
       selectedRating: 0,
       currentOfferId: null,
       userRole: GetUserRole(),
+      userRole: GetUserRole(),
       isActiveMember: isActiveMembership(),
       searchTimeout: null,
       reviewText: '',
@@ -214,11 +215,14 @@ export default {
   },
   mounted() {
     this.debouncedSearchOffers = debounce(this.searchOffers, 300);
-    this.fetchOffers();
+    console.log('[DEBUG] Home.vue userRole:', this.userRole);
+    if (this.userRole !== 'Admin') {
+      this.fetchOffers();
+    }
   },
   methods: {
     resetSearch(search) {
-      if (search == '') {
+      if (search == '' && this.userRole !== 'Admin') {
         this.fetchOffers();
       }
     },
@@ -242,7 +246,7 @@ export default {
     },
 
     async changePage(newPage) {
-      if (newPage >= 1 && newPage <= this.totalPages) {
+      if (newPage >= 1 && newPage <= this.totalPages && this.userRole !== 'Admin') {
         this.currentPage = newPage;
         await this.fetchOffers(); 
 
@@ -283,7 +287,9 @@ export default {
           await axiosInstance.post(`offer/apply-offer?offerId=${offerId}`);
           toast.success("Deine Anfrage wurde gesendet.!");
           // await this.checkReviewStatus(offerId);
-          this.fetchOffers();
+          if (this.userRole !== 'Admin') {
+            this.fetchOffers();
+          }
         } catch (error) {
           toast.info("Leider konnte deine Anfrage nicht versendet werden!");
         }
@@ -291,8 +297,10 @@ export default {
     },
     // Method to search offers based on the searchTerm
     searchOffers() {
-      this.loading = true;
-      this.fetchOffers();
+      if (this.userRole !== 'Admin') {
+        this.loading = true;
+        this.fetchOffers();
+      }
     },
     debouncedSearch() {
       this.currentPage = 1;
