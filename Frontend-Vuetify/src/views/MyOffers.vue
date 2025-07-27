@@ -16,11 +16,11 @@
       <div class="row">
         <div class="col-sm-12">
           <div class="sort-new-button ">
-            <div class="sort-select"><label>Sort by</label>
+            <div class="sort-select"><label>Sortieren nach</label>
               <select class="form-control">
-                <option value="1">Most Recent</option>
-                <option value="4">Positive First</option>
-                <option value="3">Negative First</option>
+                <option value="1">Neueste zuerst</option>
+                <option value="4">Positive zuerst</option>
+                <option value="3">Negative zuerst</option>
               </select>
             </div>
             <div class="SearchBox">
@@ -29,7 +29,7 @@
                 placeholder="Suche Angebote / Regionen / Skills" class="form-control ">
             </div>
             <div class="add-new-offer">
-              <router-link class="btn themeBtn" to="/add-offer"><i class="ri-add-circle-line"></i> Add New Offer
+              <router-link class="btn themeBtn" to="/add-offer"><i class="ri-add-circle-line"></i> Neues Angebot hinzufügen
               </router-link>
             </div>
           </div>
@@ -54,7 +54,7 @@
             </div>
           </div>
           <div v-else>
-            <h2 class="text-center">No Offers Found!</h2>
+            <h2 class="text-center">Keine Angebote gefunden!</h2>
           </div>
         </div>
       </div>
@@ -71,6 +71,12 @@ import toast from '@/components/toaster/toast';
 import axiosInstance from "@/interceptor/interceptor"
 import Securitybot from '@/services/SecurityBot';
 
+
+declare global {
+  interface Window {
+    FontAwesomeConfig?: any;
+  }
+}
 
 window.FontAwesomeConfig = {
   autoReplaceSvg: false
