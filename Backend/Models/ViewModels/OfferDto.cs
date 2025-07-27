@@ -23,6 +23,9 @@ public class OfferDTO
     public byte[] HostPicture { get; set; }
     public OfferStatus Status { get; set; }
     public bool ApplicationsExist { get; set; }
+    public bool CanReactivate { get; set; }
+    public bool IsExpiringSoon { get; set; }
+    public int DaysUntilExpiration { get; set; }
     public OfferDTO(OfferTypeLodging o, User? u, OfferApplication? oa, bool applicationsExist=false){
         string appliedStatus = oa == null ? "CanApply" : oa.Status switch {
             OfferApplicationStatus.Pending => "Applied",
@@ -51,5 +54,10 @@ public class OfferDTO
         Status = o.Status;
         // only relevant for OfferDetail
         ApplicationsExist = applicationsExist;
+        // Backend-gesteuerte Logik für Reaktivierung
+        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+        CanReactivate = (o.Status == OfferStatus.Closed && o.ToDate >= today);
+        DaysUntilExpiration = (o.ToDate > today) ? o.ToDate.DayNumber - today.DayNumber : 0;
+        IsExpiringSoon = (o.Status == OfferStatus.Active && o.ToDate > today && o.ToDate <= today.AddDays(3));
     }
 }

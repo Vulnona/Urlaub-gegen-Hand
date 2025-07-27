@@ -7,6 +7,9 @@
       <span v-else-if="offer.status === 1" class="badge badge-warning">Geschlossen</span>
       <span v-else-if="offer.status === 2" class="badge badge-danger">Versteckt</span>
     </div>
+    <span v-if="offer.isExpiringSoon" class="expiring-soon-badge" :title="`Achtung: Der Angebotszeitraum endet am ${offer.toDate}. Das Angebot wird danach automatisch deaktiviert.`">
+      <i class="ri-error-warning-fill"></i>
+    </span>
     
     <div class="item_img">
       <img loading="lazy" :src="'data:' + offer.imageMimeType + ';base64,' + offer.imageData"
@@ -96,5 +99,15 @@ const redirectToOfferDetail = (offerId: String) => {
 
 .all_items {
   position: relative;
+}
+
+.expiring-soon-badge {
+  position: absolute;
+  top: 10px;
+  right: 48px;
+  z-index: 11;
+  color: #dc3545;
+  font-size: 1.5rem;
+  cursor: pointer;
 }
 </style>

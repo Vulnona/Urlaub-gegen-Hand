@@ -62,6 +62,14 @@
         </div>
         <div v-else>
           <button class="btn btn-blocked">Angebot geschlossen</button>
+          <button
+            class="btn btn-outline-success ms-2"
+            @click="reactivateOffer(offer.id)"
+            :disabled="!offer.canReactivate"
+            :title="!offer.canReactivate ? 'Angebotszeitraum abgelaufen. Reaktivierung nicht möglich.' : 'Angebot reaktivieren'"
+          >
+            <i class="ri-refresh-line"></i> Reaktivieren
+          </button>
         </div>        
       </div>
     </div>
@@ -122,18 +130,27 @@ const backtooffers = () => {
   window.history.back();
 };
 const closeOffer = async (offer) => {
-    try {
-        const response = await axiosInstance.put(`offer/close-offer/${params.id}`);
-        offer.status = 1;
-    } catch (error) {
-        console.error('Fehler beim Schließen des Angebots:', error);
-        toast.error('Angebot konnte nicht geschlossen werden. Bitte versuchen Sie es erneut.');
-    }
+  try {
+    await axiosInstance.put(`/offer/close-offer/${offer.id}`);
+    toast.success('Angebot wurde geschlossen.');
+    await fetchOfferDetail(); // Angebot neu laden, damit canReactivate stimmt
+  } catch (error) {
+    toast.error('Fehler beim Schließen des Angebots.');
+  }
 };
 const modifyOffer = () => {
       router.push({
         name: 'ModifyOffer', params: {id: params.id}
       });
+};
+const reactivateOffer = async (offerId) => {
+  try {
+    await axiosInstance.put(`/offer/reactivate/${offerId}`);
+    toast.success('Angebot wurde reaktiviert.');
+    window.location.reload();
+  } catch (error) {
+    toast.error((error && typeof error === 'object' && 'response' in error && (error as any).response?.data) ? (error as any).response.data : 'Fehler beim Reaktivieren des Angebots.');
+  }
 };
 
 onMounted(fetchOfferDetail);

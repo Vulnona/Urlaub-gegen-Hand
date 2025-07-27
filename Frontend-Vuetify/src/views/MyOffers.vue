@@ -51,7 +51,23 @@
             <div v-else class="row">
               <div v-for="offer in filteredOffers" :key="offer.id" class="col-md-3 mb-4">
                 <div class="all_items card-offer">
-                <OfferCard :offer=offer :showStatus=true />
+                  <div class="d-flex align-items-center mb-1">
+                    <span v-if="offer.isExpiringSoon" class="text-danger me-2" style="cursor:pointer;" :title="`Achtung: Der Angebotszeitraum endet am ${offer.toDate}. Das Angebot wird danach automatisch deaktiviert.`">
+                      <i class="ri-error-warning-fill"></i>
+                    </span>
+                    <span class="fw-bold">{{ offer.title }}</span>
+                  </div>
+                  <OfferCard :offer=offer :showStatus=true />
+                  <div v-if="offer.status === 1" class="mt-1 d-flex justify-content-center">
+                    <button
+                      class="btn btn-outline-success btn-sm"
+                      @click="reactivateOffer(offer.id)"
+                      :disabled="!offer.canReactivate"
+                      :title="!offer.canReactivate ? 'Angebotszeitraum abgelaufen. Reaktivierung nicht möglich.' : 'Angebot reaktivieren'"
+                    >
+                      <i class="ri-refresh-line"></i> Reaktivieren
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -191,6 +207,16 @@ export default {
         this.fetchOffers();
       } catch (error) {
         toast.error('Fehler beim Deaktivieren der Angebote.');
+      }
+    },
+    async reactivateOffer(offerId) {
+      try {
+        const response = await axiosInstance.put(`/offer/reactivate/${offerId}`);
+        toast.success('Angebot wurde reaktiviert.');
+        this.fetchOffers();
+      } catch (error) {
+        const msg = ((error && typeof error === 'object' && 'response' in error) ? (error as any).response?.data : null) || 'Fehler beim Reaktivieren des Angebots.';
+        toast.error(msg);
       }
     },
   }

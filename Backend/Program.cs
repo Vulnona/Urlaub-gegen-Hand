@@ -165,6 +165,7 @@ static ServerVersion GetDesignTimeServerVersion(string connectionString)
                             QueueLimit = policyConfig.QueueLimit
                         }));
             });
+            builder.Services.AddHostedService<UGHApi.Services.BackgroundTasks.OfferExpirationService>();
         }
 
         private static void ConfigureAuthentication(WebApplicationBuilder builder)

@@ -425,5 +425,29 @@ public class OfferController : ControllerBase
             return StatusCode(500, $"Internal server error.");
         }
     }
+
+    [HttpPut("reactivate/{OfferId:int}")]
+    public async Task<IActionResult> ReactivateOffer([Required] int OfferId)
+    {
+        try
+        {
+            var userId = _userProvider.UserId;
+            var offer = await _context.offers.FirstOrDefaultAsync(o => o.Id == OfferId && o.UserId == userId);
+            if (offer == null)
+                return NotFound("Offer not found or not owned by user.");
+            if (offer.Status != OfferStatus.Closed)
+                return BadRequest("Offer is not closed.");
+            if (offer.ToDate < DateOnly.FromDateTime(DateTime.UtcNow))
+                return BadRequest("Offer period has already ended. Cannot reactivate.");
+            offer.Status = OfferStatus.Active;
+            await _context.SaveChangesAsync();
+            return Ok("Offer reactivated successfully.");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Exception occurred in ReactivateOffer: {ex.Message} | StackTrace: {ex.StackTrace}");
+            return StatusCode(500, $"Internal server error.");
+        }
+    }
     #endregion
 }
