@@ -14,9 +14,9 @@
       <div class="item_description">
         <p class="card-text">{{ offer.fromDate }} - {{ offer.toDate }}</p>
         <p class="card-text"><strong>Fähigkeiten:</strong> {{ offer.skills }}</p>
-        <p class="card-text"><strong>Unterbringung:</strong> {{ offer.accomodation }}</p>
-        <p class="card-text"><strong>Geeignet für:</strong> {{ offer.accomodationsuitable }}</p>
-        <p class="card-text"><strong>Region/Ort:</strong> {{ offer.region }} {{ offer.location }}</p>
+        <p class="card-text"><strong>Unterbringung:</strong> {{ offer.accomodation || 'Nicht angegeben' }}</p>
+        <p class="card-text"><strong>Geeignet für:</strong> {{ offer.accomodationsuitable || 'Nicht angegeben' }}</p>
+        <p class="card-text"><strong>Region/Ort:</strong> {{ offer.location || 'Nicht angegeben' }}</p>
       </div>
     </div>
     <Apply :offer=offer :isActiveMember=isActiveMember :logId=logId />                    

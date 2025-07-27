@@ -33,7 +33,7 @@ public class OfferRepository
     ) {    
         IQueryable<OfferTypeLodging> query = _context
             .offertypelodgings.Include(o => o.User).Include(o => o.Picture)
-            .Include(o => o.OfferApplications)            
+            .Include(o => o.OfferApplications).Include(o => o.Address)            
         .OrderBy(o => o.CreatedAt);
 
          if (forUser)
@@ -147,7 +147,7 @@ public class OfferRepository
     {
         var offer = await _context
             .offertypelodgings.Include(o => o.User)
-            .Include(o => o.OfferApplications).Include(o => o.Picture)
+            .Include(o => o.OfferApplications).Include(o => o.Picture).Include(o => o.Address)
             .FirstOrDefaultAsync(o => o.Id == offerId);
 
         if (offer == null)

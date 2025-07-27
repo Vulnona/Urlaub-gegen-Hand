@@ -79,7 +79,7 @@
 </template>
 
 <script>
-import { ref, onMounted, onUnmounted, watch } from 'vue'
+import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import axiosInstance from '@/interceptor/interceptor'
 import toast from '@/components/toaster/toast'
 
@@ -109,26 +109,65 @@ export default {
     let searchTimeout = null
 
     // Initialize map (using OpenStreetMap with Leaflet)
+    let initMapRetryCount = 0;
+    const maxRetries = 10;
+    let isComponentMounted = true;
+    
     const initMap = () => {
+      // Check if component is still mounted
+      if (!isComponentMounted) {
+        console.log('Component unmounted, skipping map initialization');
+        return;
+      }
+      
+      // Check retry count to prevent infinite loop
+      if (initMapRetryCount >= maxRetries) {
+        console.error('Max retries reached for map initialization. Giving up.');
+        toast.error('Karte konnte nicht geladen werden. Bitte laden Sie die Seite neu.');
+        return;
+      }
+      
+      initMapRetryCount++;
+      
+      // Check if map container exists
+      const mapElement = document.getElementById('map')
+      if (!mapElement) {
+        console.error(`Map container not found, retry ${initMapRetryCount}/${maxRetries}...`)
+        setTimeout(initMap, 200)
+        return
+      }
+
       // Default center (Germany)
       const defaultLat = 51.1657
       const defaultLng = 10.4515
       const defaultZoom = 6
 
-      // Create map
-      map = L.map('map').setView([defaultLat, defaultLng], defaultZoom)
+      try {
+        // Create map
+        map = L.map('map').setView([defaultLat, defaultLng], defaultZoom)
 
-      // Add OpenStreetMap tiles
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors'
-      }).addTo(map)
+        // Add OpenStreetMap tiles
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '© OpenStreetMap contributors'
+        }).addTo(map)
 
-      // Add click handler
-      map.on('click', onMapClick)
+        // Add click handler
+        map.on('click', onMapClick)
 
-      // Set initial address if provided
-      if (props.initialAddress) {
-        setAddressOnMap(props.initialAddress)
+        // Set initial address if provided
+        if (props.initialAddress) {
+          setAddressOnMap(props.initialAddress)
+        }
+        
+        console.log('Map initialized successfully');
+      } catch (error) {
+        console.error('Error initializing map:', error)
+        if (initMapRetryCount < maxRetries && isComponentMounted) {
+          // Retry after a short delay
+          setTimeout(initMap, 500)
+        } else {
+          toast.error('Karte konnte nicht geladen werden. Bitte laden Sie die Seite neu.');
+        }
       }
     }
 
@@ -313,33 +352,58 @@ export default {
       )
     }
 
+    let isInitializing = false;
+    
     onMounted(() => {
-      // Load Leaflet if not already loaded
-      if (typeof L === 'undefined') {
-        // Add Leaflet CSS
-        const css = document.createElement('link')
-        css.rel = 'stylesheet'
-        css.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'
-        document.head.appendChild(css)
-        
-        // Add Leaflet JS
-        const script = document.createElement('script')
-        script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'
-        script.onload = () => {
-          setTimeout(initMap, 100)
+      if (isInitializing) return; // Prevent multiple initializations
+      isInitializing = true;
+      
+      // Wait for next tick to ensure DOM is ready
+      nextTick(() => {
+        // Load Leaflet if not already loaded
+        if (typeof L === 'undefined') {
+          // Add Leaflet CSS
+          const css = document.createElement('link')
+          css.rel = 'stylesheet'
+          css.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'
+          document.head.appendChild(css)
+          
+          // Add Leaflet JS
+          const script = document.createElement('script')
+          script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'
+          script.onload = () => {
+            setTimeout(() => {
+              initMap()
+              isInitializing = false
+            }, 500)
+          }
+          script.onerror = () => {
+            console.error('Failed to load Leaflet library')
+            toast.error('Kartenbibliothek konnte nicht geladen werden.')
+            isInitializing = false
+          }
+          document.head.appendChild(script)
+        } else {
+          setTimeout(() => {
+            initMap()
+            isInitializing = false
+          }, 500)
         }
-        document.head.appendChild(script)
-      } else {
-        setTimeout(initMap, 100)
-      }
+      })
     })
 
     onUnmounted(() => {
+      isComponentMounted = false; // Mark component as unmounted
       if (searchTimeout) {
         clearTimeout(searchTimeout)
       }
       if (map) {
-        map.remove()
+        try {
+          map.remove()
+          map = null
+        } catch (error) {
+          console.log('Error removing map:', error)
+        }
       }
     })
 

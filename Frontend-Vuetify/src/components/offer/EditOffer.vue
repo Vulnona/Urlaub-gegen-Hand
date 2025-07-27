@@ -38,13 +38,13 @@
                     <div class="row">
                       <div class="col">
                         <label for="offer.FromDate">Möglich ab<b style="color: red;">*</b></label>
-                 <Datepicker date v-model="offer.FromDate" :locale="de" :enable-time-picker="false"
-                             :auto-apply="true" placeholder="dd.mm.yyyy" :typeable="true" input-class-name="datepicker-input" startingView='month'  inputFormat="dd.MM.yyyy"/>
+                                         <Datepicker date v-model="offer.FromDate" :locale="de" :enable-time-picker="false"
+                             :auto-apply="true" placeholder="dd.mm.yyyy" :typeable="true" input-class-name="datepicker-input" startingView='month'  inputFormat="dd.MM.yyyy" @update:model-value="validateDateRange"/>
                       </div>
                       <div class="col">
                         <label for="offer.UntilDate">Möglich bis<b style="color: red;">*</b></label>
                         <Datepicker date v-model="offer.UntilDate" :locale="de" :enable-time-picker="false"
-                                    :auto-apply="true" placeholder="dd.mm.yyyy" :typeable="true" input-class-name="datepicker-input" startingView='month'  inputFormat="dd.MM.yyyy"/>
+                                    :auto-apply="true" placeholder="dd.mm.yyyy" :typeable="true" input-class-name="datepicker-input" startingView='month'  inputFormat="dd.MM.yyyy" @update:model-value="validateDateRange"/>
                       </div>
                       </div>
                    </div>
@@ -154,9 +154,17 @@ const onAddressSelected = (address) => {
     offer.address = address;
 };
 
+const validateDateRange = () => {
+    if (offer.FromDate && offer.UntilDate && offer.FromDate > offer.UntilDate) {
+        toast.warning("Das 'Möglich ab' Datum darf nicht nach dem 'Möglich bis' Datum liegen.");
+        return false;
+    }
+    return true;
+};
+
 const createOffer = async() => {
         loading.value = true;
-      if (offer.image && offer.image.size > 17 * 1024 * 1024) {
+      if (offer.image && (offer.image as unknown as File).size > 17 * 1024 * 1024) {
           toast.warning("Das Bild darf nicht größer als 17 MB sein.");
           loading.value = false;
           return;
@@ -166,18 +174,39 @@ const createOffer = async() => {
           loading.value = false;
           return;
       }
+      
+      // Validate date range
+      if (offer.FromDate && offer.UntilDate && offer.FromDate > offer.UntilDate) {
+          toast.warning("Das 'Möglich ab' Datum darf nicht nach dem 'Möglich bis' Datum liegen.");
+          loading.value = false;
+          return;
+      }
+    
     const offerData = new FormData();
     offer.description = offer.description.replaceAll("\n","\ \ \n");
     offerData.append('title', offer.title);
-        offerData.append('description', offer.description);
-        offerData.append('location', offer.address ? offer.address.displayName : '');
-        // Add address data
-        if (offer.address) {
-            offerData.append('latitude', offer.address.latitude?.toString() || '');
-            offerData.append('longitude', offer.address.longitude?.toString() || '');
-            offerData.append('displayName', offer.address.displayName || '');
-            offerData.append('id', offer.address.id?.toString() || '');
-        }
+    offerData.append('description', offer.description);
+    offerData.append('location', offer.address ? offer.address.displayName : '');
+    // Add address data
+    if (offer.address) {
+        offerData.append('latitude', offer.address.latitude?.toString() || '');
+        offerData.append('longitude', offer.address.longitude?.toString() || '');
+        // Try different possible property names for displayName
+        const displayName = offer.address.displayName || offer.address.DisplayName || offer.address.display_name || '';
+        offerData.append('DisplayName', displayName);
+        offerData.append('id', offer.address.id?.toString() || '');
+        
+        // Debug: Log address data being sent
+        console.log('DEBUG: Address data being sent:', {
+            latitude: offer.address.latitude,
+            longitude: offer.address.longitude,
+            displayName: displayName,
+            id: offer.address.id
+        });
+    } else {
+        console.warn('DEBUG: No address data available!');
+    }
+        
         offerData.append('accommodation', offer.accommodation.join(', '));
         offerData.append('accommodationSuitable', offer.accommodationSuitable.join(', '));
         offerData.append('ToDate', offer.UntilDate.toISOString().split('+')[0]);
@@ -195,17 +224,18 @@ const createOffer = async() => {
             'Content-Type': 'multipart/form-data'
           }
         }
-        ).then(() => {
-            if(modify)
-                toast.success("Das Angebot wurde bearbeitet.");
-            else
-                toast.success("Das Angebot wurde erstellt.");
-          router.push('/my-offers');
-        });
-      } catch (error) {
-          if (error.request.status == 412)
+        );
+        
+        if(modify)
+            toast.success("Das Angebot wurde bearbeitet.");
+        else
+            toast.success("Das Angebot wurde erstellt.");
+        router.push('/my-offers');
+        
+      } catch (error: any) {
+          if (error.request?.status == 412)
               toast.info("Es existieren bereits Bewerbungen, das Angebot ist schreibgeschützt.");
-          else if (error.request.status == 403)
+          else if (error.request?.status == 403)
               toast.info("Du hast nicht die Autorisierung das Angebot zu erstellen/bearbeiten.");
           else
               toast.info("Das Angebot kann nicht bearbeitet/erstellt werden");

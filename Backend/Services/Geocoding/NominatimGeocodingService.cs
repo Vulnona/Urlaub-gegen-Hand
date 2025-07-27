@@ -61,12 +61,22 @@ public class NominatimGeocodingService : IGeocodingService
             _logger.LogInformation("Reverse geocoding for coordinates: {Lat}, {Lon}", latitude, longitude);
             
             var response = await _httpClient.GetStringAsync(url);
+            _logger.LogInformation("Nominatim raw response: {Response}", response);
+            
             var nominatimResult = JsonSerializer.Deserialize<NominatimSearchResult>(response, new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true
             });
 
-            return nominatimResult != null ? MapToAddressSearchResult(nominatimResult) : null;
+            if (nominatimResult != null)
+            {
+                var result = MapToAddressSearchResult(nominatimResult);
+                _logger.LogInformation("Mapped result - DisplayName: '{DisplayName}', City: '{City}', Country: '{Country}'", 
+                    result.DisplayName, result.City, result.Country);
+                return result;
+            }
+            
+            return null;
         }
         catch (Exception ex)
         {
@@ -98,19 +108,39 @@ public class NominatimGeocodingService : IGeocodingService
 
     private static AddressSearchResult MapToAddressSearchResult(NominatimSearchResult nominatimResult)
     {
+        var city = nominatimResult.Address?.City ?? nominatimResult.Address?.Town ?? nominatimResult.Address?.Village;
+        var country = nominatimResult.Address?.Country;
+        var road = nominatimResult.Address?.Road;
+        var houseNumber = nominatimResult.Address?.HouseNumber;
+        var postcode = nominatimResult.Address?.Postcode;
+        
+        // Create a fallback displayName if Nominatim doesn't provide one
+        var displayName = nominatimResult.DisplayName;
+        if (string.IsNullOrEmpty(displayName))
+        {
+            var parts = new List<string>();
+            if (!string.IsNullOrEmpty(houseNumber)) parts.Add(houseNumber);
+            if (!string.IsNullOrEmpty(road)) parts.Add(road);
+            if (!string.IsNullOrEmpty(city)) parts.Add(city);
+            if (!string.IsNullOrEmpty(postcode)) parts.Add(postcode);
+            if (!string.IsNullOrEmpty(country)) parts.Add(country);
+            
+            displayName = parts.Count > 0 ? string.Join(", ", parts) : $"Location ({nominatimResult.Lat}, {nominatimResult.Lon})";
+        }
+        
         return new AddressSearchResult
         {
             Latitude = double.Parse(nominatimResult.Lat ?? "0"),
             Longitude = double.Parse(nominatimResult.Lon ?? "0"),
-            DisplayName = nominatimResult.DisplayName ?? string.Empty,
-            HouseNumber = nominatimResult.Address?.HouseNumber,
-            Road = nominatimResult.Address?.Road,
+            DisplayName = displayName,
+            HouseNumber = houseNumber,
+            Road = road,
             Suburb = nominatimResult.Address?.Suburb,
-            City = nominatimResult.Address?.City ?? nominatimResult.Address?.Town ?? nominatimResult.Address?.Village,
+            City = city,
             County = nominatimResult.Address?.County,
             State = nominatimResult.Address?.State,
-            Postcode = nominatimResult.Address?.Postcode,
-            Country = nominatimResult.Address?.Country,
+            Postcode = postcode,
+            Country = country,
             CountryCode = nominatimResult.Address?.CountryCode,
             OsmId = nominatimResult.OsmId,
             OsmType = nominatimResult.OsmType,

@@ -23,9 +23,9 @@
               </tbody>
               <tbody>
                 <tr><a class="b">Gesuchte Fähigkeiten:</a> {{ offer.skills }}</tr>
-                <tr><a class="b">Unterbringung:</a> {{ offer.accomodation }}</tr>
-                <tr><a class="b">Geeignet für:</a> {{ offer.accomodationsuitable }}</tr>
-                <tr><a class="b">Ort/Region:</a> {{ offer.location }}</tr>
+                <tr><a class="b">Unterbringung:</a> {{ offer.accomodation || 'Nicht angegeben' }}</tr>
+                <tr><a class="b">Geeignet für:</a> {{ offer.accomodationsuitable || 'Nicht angegeben' }}</tr>
+                <tr><a class="b">Ort/Region:</a> {{ offer.location || 'Nicht angegeben' }}</tr>
                 <tr><a class="b">Angebotszeitraum:</a> {{offer.fromDate}} - {{offer.toDate}}</tr>
                </tbody>
               </table>

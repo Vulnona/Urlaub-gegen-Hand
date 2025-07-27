@@ -161,6 +161,9 @@ public class OfferController : ControllerBase
             offer.AdditionalLodgingProperties = offerViewModel.Accommodation;
             
             // NEW: Create Address entity from geographic location data
+            _logger.LogInformation("Creating address with DisplayName: '{DisplayName}', Lat: {Lat}, Lon: {Lon}", 
+                offerViewModel.DisplayName, offerViewModel.Latitude, offerViewModel.Longitude);
+            
             offer.Address = new Address
             {
                 Latitude = offerViewModel.Latitude,
