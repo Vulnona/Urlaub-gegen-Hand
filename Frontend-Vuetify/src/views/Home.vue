@@ -238,7 +238,8 @@ export default {
         this.offers = response.data.items;
         this.totalPages = Math.ceil(response.data.totalCount / this.pageSize);
       } catch (error) {
-        console.error(error);
+        console.error('Fehler beim Laden der Angebote:', error);
+        toast.info('Angebote konnten nicht geladen werden. Bitte versuchen Sie es erneut.');
       } finally {
         this.loading = false;
       }
@@ -272,7 +273,7 @@ export default {
       const result = await Swal.fire({
         title: 'Bist du sicher?',
         text: 'Möchtest du diese Anfrage senden?',
-        icon: '',
+        icon: 'question',
         showCancelButton: true,
         confirmButtonText: 'Apply',
         customClass: {
@@ -290,7 +291,8 @@ export default {
             this.fetchOffers();
           }
         } catch (error) {
-          toast.info("Leider konnte deine Anfrage nicht versendet werden!");
+          console.error('Fehler beim Versenden der Anfrage:', error);
+          toast.info("Leider konnte deine Anfrage nicht versendet werden. Bitte versuchen Sie es erneut.");
         }
       }
     },
@@ -303,7 +305,7 @@ export default {
     },
     debouncedSearch() {
       this.currentPage = 1;
-      this.debouncedSearchOffers();
+      this.debouncedSearch();
     },
     async showAddRatingModal(offerId, userId, index) {
       this.selectedRating = 0;
@@ -341,12 +343,8 @@ export default {
           toast.success("Dein Rating wurde erfolgreich hinzugefügt.");
         }
       } catch (error) {
-        if (error.response.data.message == "The Review already exists.") {
-          toast.info("Du hast bereits ein Rating abgegeben.");
-        }
-        else {
-          toast.error("Fehler beim Absenden der Bewertungen!");
-        }
+        console.error('Fehler beim Absenden der Bewertung:', error);
+        toast.error("Bewertung konnte nicht abgesendet werden. Bitte versuchen Sie es erneut.");
       }
     },
   },

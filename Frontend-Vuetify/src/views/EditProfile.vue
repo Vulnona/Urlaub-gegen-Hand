@@ -116,6 +116,7 @@ export default {
         const response = await axiosInstance.get(`skills/get-all-skills`);
         this.availableSkills = response.data.map(skill => skill.skillDescrition);
       } catch (error) {
+        console.error('Fehler beim Laden der Skills:', error);
       }
     },
     async fetchUserProfile() {
@@ -134,6 +135,7 @@ export default {
           toast.info("Benutzerprofildaten nicht gefunden");
         }
       } catch (error) {
+        console.error('Fehler beim Laden des Benutzerprofils:', error);
         toast.info("Fehler beim Laden des Benutzerprofils!");
       }
     },
@@ -171,8 +173,8 @@ export default {
           toast.error("Fehler beim Speichern des Profils. Bitte versuchen Sie es erneut.");
         }
       } catch (error) {
-        console.error("Error updating profile:", error);
-        toast.error("Ein Fehler ist beim Speichern des Profils aufgetreten. Bitte versuchen Sie es später erneut.");
+        console.error('Fehler beim Speichern des Profils:', error);
+        toast.error("Profil konnte nicht gespeichert werden. Bitte versuchen Sie es erneut.");
       }
     },
     validateForm() {

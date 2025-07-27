@@ -67,13 +67,9 @@ export default {
         this.message = response.data.value;
         this.isError = false;
       } catch (error) {
-        if (error.response) {
-          this.message = error.response.data.value;
-          this.isError = true;
-        } else {
-          toast.info("Ein Fehler ist aufgetreten. Versuche es noch einmal");
-          this.isError = true;
-        }
+        console.error('Fehler beim Senden der Bestätigungs-E-Mail:', error);
+        this.message = 'Fehler beim Senden der Bestätigungs-E-Mail. Bitte versuchen Sie es erneut.';
+        this.isError = true;
       } finally {
         this.loading = false; // Enable the button
       }

@@ -205,8 +205,8 @@ export default {
         this.is2FAEnabled = response.data.isEnabled
         this.backupCodesRemaining = response.data.backupCodesRemaining
       } catch (error) {
-        console.error('Error loading 2FA status:', error)
-        toast.error('Fehler beim Laden des 2FA-Status')
+        console.error('Fehler beim Laden des 2FA-Status:', error)
+        toast.error('Status konnte nicht geladen werden. Bitte versuchen Sie es erneut.')
       }
     },
 
@@ -231,7 +231,8 @@ export default {
         this.displayedBackupCodes = response.data.codes
         this.showBackupModal = true
       } catch (error) {
-        toast.error('Fehler beim Laden der Backup-Codes')
+        console.error('Fehler beim Laden der Backup-Codes:', error);
+        toast.error('Backup-Codes konnten nicht geladen werden. Bitte versuchen Sie es erneut.')
       } finally {
         this.loading = false
       }
@@ -251,7 +252,8 @@ export default {
         await this.loadStatus()
         toast.success('Neue Backup-Codes wurden generiert')
       } catch (error) {
-        toast.error('Fehler beim Generieren neuer Backup-Codes')
+        console.error('Fehler beim Generieren neuer Backup-Codes:', error);
+        toast.error('Backup-Codes konnten nicht generiert werden. Bitte versuchen Sie es erneut.')
       } finally {
         this.loading = false
       }
@@ -280,10 +282,11 @@ export default {
         await this.loadStatus()
         toast.success('2FA wurde deaktiviert')
       } catch (error) {
+        console.error('Fehler beim Deaktivieren der 2FA:', error);
         if (error.response?.status === 401) {
           toast.error('Falsches Passwort')
         } else {
-          toast.error('Fehler beim Deaktivieren der 2FA')
+          toast.error('2FA konnte nicht deaktiviert werden. Bitte versuchen Sie es erneut.')
         }
       } finally {
         this.disabling = false

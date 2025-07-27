@@ -87,6 +87,8 @@ import getLoggedUserId from '@/services/LoggedInUserId';
 import UserLink from '@/components/offer/UserLink.vue';
 import VueMarkdown from "vue-markdown-render";
 import {useRoute} from 'vue-router';
+import { useToast } from 'vue-toastification';
+const toast = useToast();
 const {params} = useRoute();
 
 const pictureLink = `offer/get-preview-picture/${params.id}`;
@@ -101,9 +103,9 @@ const redirectToProfile = (userId) => {
 const fetchOfferDetail = async () => {
   try {
     const response = await axiosInstance.get(`offer/get-offer-by-id/${params.id}`);
-      offer.value = response.data;
+    offer.value = response.data;
   } catch (error) {
-    console.error('Error fetching offer detail:', error);
+    console.error('Fehler beim Laden der Angebotsdetails:', error);
   } finally {
     loading.value = false;
   }
@@ -123,8 +125,9 @@ const closeOffer = async (offer) => {
     try {
         const response = await axiosInstance.put(`offer/close-offer/${params.id}`);
         offer.status = 1;
-    } catch {
-        console.error('Error closing offer');
+    } catch (error) {
+        console.error('Fehler beim Schließen des Angebots:', error);
+        toast.error('Angebot konnte nicht geschlossen werden. Bitte versuchen Sie es erneut.');
     }
 };
 const modifyOffer = () => {
@@ -214,10 +217,6 @@ export default {
 .b {
     font-weight:bold;
     color:black;
-}
-.btn-blocked {
-   color: #fff;
-   background-color: grey;
-   border-color: darkgrey;
+    border-color: darkgrey;
 }
 </style>

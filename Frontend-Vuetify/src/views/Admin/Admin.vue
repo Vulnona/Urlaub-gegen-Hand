@@ -291,6 +291,7 @@ export default {
                 this.admin = res.data.items;
                 this.totalPages = Math.ceil(res.data.totalCount / this.pageSize);
             } catch (error) {
+                console.error('Fehler beim Abrufen der Admin-Daten:', error);
                 this.handleAxiosError(error);
             }
         },
@@ -317,6 +318,7 @@ export default {
                         price: membership.price
                     }));
             } catch (error) {
+                console.error('Fehler beim Abrufen der Mitgliedschaften:', error);
                 this.handleAxiosError(error);
             }
         },
@@ -353,6 +355,7 @@ export default {
                     this.couponCode = res.data.value;
                     toast.success("Coupon Code generated successfully!");
                 } catch (error) {
+                    console.error('Fehler beim Generieren des Coupon-Codes:', error);
                     this.handleAxiosError(error);
                 }
             }
@@ -365,7 +368,8 @@ export default {
                     toast.success("Coupon Code copied to clipboard!");
                 })
                 .catch(() => {
-                    toast.error("Failed to copy the code.");
+                console.error('Fehler beim Kopieren des Codes');
+                toast.error('Kopieren des Codes fehlgeschlagen.');
                 });
         },
         clearCode() {
@@ -383,9 +387,11 @@ export default {
                 if (res.data.isSuccess == true) {
                     toast.success(res.data.value);
                 } else {
-                    toast.error(res.data.error.message);
+                console.error('Fehler beim Senden des Coupon-Codes:', res.data.error);
+                toast.error('Etwas ist schief gelaufen!');
                 }
             } catch (error) {
+                console.error('Fehler beim Senden des Coupon-Codes:', error);
                 toast.error("Etwas ist schief gelaufen!");
             }
         },
@@ -551,7 +557,8 @@ export default {
                 
             } catch (error) {
                 if (error.response && error.response.data) {
-                    toast.error(error.response.data.value || "Fehler beim Senden der Passwort-Reset-E-Mail");
+                    console.error('Fehler beim Senden der Passwort-Reset-E-Mail:', error);
+                    toast.error("Fehler beim Senden der Passwort-Reset-E-Mail. Bitte versuchen Sie es erneut.");
                 } else {
                     toast.error("Fehler beim Senden der Passwort-Reset-E-Mail. Bitte versuchen Sie es erneut.");
                 }

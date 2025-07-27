@@ -159,7 +159,8 @@ export default {
         
         toast.success('QR-Code generiert!')
       } catch (error) {
-        this.errorMessage = error.response?.data?.message || 'Fehler beim Generieren des QR-Codes'
+        console.error('QR-Code Generierung Fehler:', error);
+        this.errorMessage = 'Fehler beim Generieren des QR-Codes. Bitte versuchen Sie es erneut.';
         toast.error(this.errorMessage)
       } finally {
         this.loading = false
@@ -181,7 +182,12 @@ export default {
         toast.success('2FA erfolgreich eingerichtet!')
         this.currentStep = 3
       } catch (error) {
-        this.errorMessage = error.response?.data?.message || 'Ungültiger Verifizierungscode'
+        console.error('2FA Verifizierung Fehler:', error);
+        if (error.response?.status === 400 || error.response?.status === 401) {
+          this.errorMessage = 'Ungültiger Verifizierungscode. Bitte überprüfen Sie Ihre Eingabe.';
+        } else {
+          this.errorMessage = 'Fehler bei der Verifizierung. Bitte versuchen Sie es erneut.';
+        }
         toast.error(this.errorMessage)
       } finally {
         this.verifying = false

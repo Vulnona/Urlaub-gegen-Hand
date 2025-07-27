@@ -161,17 +161,15 @@ export default {
 
       } catch (error) {
         this.hasError = true
-        
+        console.error('2FA Login Fehler:', error);
         if (error.response?.status === 401) {
           this.errorMessage = 'Ungültiger Authentifizierungscode. Bitte versuchen Sie es erneut.'
         } else if (error.response?.status === 400) {
-          this.errorMessage = error.response.data?.message || 'Ungültige Eingabe.'
+          this.errorMessage = 'Ungültige Eingabe. Bitte überprüfen Sie Ihre Daten.'
         } else {
-          this.errorMessage = 'Ein Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.'
+          this.errorMessage = 'Anmeldung nicht möglich. Bitte versuchen Sie es später erneut.'
         }
-        
         toast.error(this.errorMessage)
-        
         // Clear input on error
         if (isBackupCode) {
           this.backupCode = ''

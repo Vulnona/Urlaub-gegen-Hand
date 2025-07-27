@@ -67,6 +67,7 @@
 <script lang="ts">
 
 import Navbar from '@/components/navbar/Navbar.vue';
+import toast from '@/components/toaster/toast';
 import axiosInstance from "@/interceptor/interceptor"
 import Securitybot from '@/services/SecurityBot';
 
@@ -109,6 +110,8 @@ export default {
         this.offers = response.data.items;
         this.totalPages = Math.ceil(response.data.totalCount / this.pageSize);
       } catch (error) {
+        console.error('Fehler beim Laden der eigenen Angebote:', error);
+        toast.error('Eigene Angebote konnten nicht geladen werden. Bitte versuchen Sie es erneut.');
       } finally {
         this.loading = false;
       }

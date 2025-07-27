@@ -81,6 +81,7 @@ export default {
                 })
                 .catch(error => {
                     Swal.close();
+                    console.error('Fehler beim Ändern des Passworts:', error);
                     if(this.$route.query.token)
                         toast.error('Änderung fehlgeschlagen. So der Änderungslink älter als 2 Stunden ist, bitte einen neuen anfordern.')
                     else

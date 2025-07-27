@@ -114,7 +114,8 @@ export default {
         this.ShopItems = response.data.items;
         this.loading = false;
       } catch (error) {
-        console.error(error);
+        console.error('Fehler beim Laden der Shop-Items:', error);
+        Swal.fire("Fehler", "Shop-Items konnten nicht geladen werden. Bitte versuchen Sie es erneut.", "error");
       }
     },
     async confirmBuy(item) {
@@ -147,8 +148,8 @@ export default {
           Swal.fire("Fehler", "Etwas ist schief gelaufen. Bitte versuchen Sie es erneut.", "error");
         }
       } catch (error) {
-        console.error("Payment intent creation error:", error);
-        Swal.fire("Fehler", "Fehler beim Verarbeiten des Kaufs", "error");
+        console.error('Fehler beim Erstellen des Payment-Intents:', error);
+        Swal.fire("Fehler", "Kauf konnte nicht verarbeitet werden. Bitte versuchen Sie es erneut.", "error");
       }
     },
     async initializeStripeElements(clientSecret) {
@@ -189,8 +190,8 @@ export default {
         const form = document.querySelector('#submit');
         form.addEventListener('click', this.handleSubmit);
       } catch (error) {
-        console.error('Error initializing Stripe elements:', error);
-        Swal.fire("Fehler", "Fehler beim Initialisieren des Zahlungsformulars. Bitte versuchen Sie es erneut.", "error");
+        console.error('Fehler beim Initialisieren der Stripe-Elemente:', error);
+        Swal.fire("Fehler", "Zahlungsformular konnte nicht geladen werden. Bitte versuchen Sie es erneut.", "error");
       }
     },
     async handleSubmit(e) {
@@ -213,7 +214,7 @@ export default {
       if (error) {
         console.error('Payment confirmation error:', error);
         const messageDiv = document.querySelector('#payment-message');
-        messageDiv.textContent = error.message;
+        messageDiv.textContent = 'Zahlung fehlgeschlagen. Bitte versuchen Sie es erneut.';
         messageDiv.classList.remove('hidden');
         this.isPaymentProcessing = false;
       }

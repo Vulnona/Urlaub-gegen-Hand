@@ -135,10 +135,11 @@ const uploadImages = async () => {
         sessionStorage.clear();
         router.push({ name: 'Login' }); // Use named route instead of path
       } catch (error) {
-        if (error.response.status === 413) {
+        console.error('Fehler beim Upload:', error);
+        if (typeof error === 'object' && error !== null && 'isAxiosError' in error && (error as any).isAxiosError && (error as any).response && (error as any).response.status === 413) {
             toast.error("Bilddateien zu groß.");
         } else {
-        toast.error("Upload nicht erfolgreich");
+            toast.error("Upload nicht erfolgreich. Bitte versuchen Sie es erneut.");
         }
       } finally {
         isLoading.value = false; 

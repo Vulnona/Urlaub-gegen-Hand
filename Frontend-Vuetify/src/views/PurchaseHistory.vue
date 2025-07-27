@@ -203,21 +203,21 @@ export default {
     handleAxiosError(error) {
       if (error.response) {
         if (error.response.status === 401) {
-          toast.info("Your session has expired. Please log in again.")
-            .then(() => {
-              sessionStorage.clear();
-              router.push('/');
-            });
+            toast.info("Ihre Sitzung ist abgelaufen. Bitte erneut einloggen.")
+              .then(() => {
+                sessionStorage.clear();
+                router.push('/');
+              });
         } else {
-          // toast.info("An error occurred!");
+          console.error('Fehler beim Abrufen der Coupons:', error);
+          toast.error("Coupons konnten nicht geladen werden. Bitte versuchen Sie es erneut.");
         }
       } else if (error.request) {
-        toast.info("Ein Netzwerkfehler ist aufgetreten. Bitte überprüfen Sie Ihre Verbindung und versuchen Sie es erneut.")
-          .then(() => {
-            router.push('/');
-          });
+        console.error('Netzwerkfehler beim Abrufen der Coupons:', error);
+        toast.error("Netzwerkfehler. Bitte versuchen Sie es später erneut.");
       } else {
-        //  toast.success("An error occurred");
+        console.error('Unbekannter Fehler beim Abrufen der Coupons:', error);
+        toast.error("Unbekannter Fehler. Bitte versuchen Sie es erneut.");
       }
     }
   }

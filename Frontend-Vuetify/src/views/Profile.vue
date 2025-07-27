@@ -429,98 +429,108 @@
             } else {
               Swal.fire({
                 icon: '',
-                title: 'Unable To Redeem',
-                text: response.data.error.message || 'Fehler beim Einlösen des Coupons. Bitte versuchen Sie es erneut.'
+                title: 'Coupon konnte nicht eingelöst werden',
+                text: 'Fehler beim Einlösen des Coupons. Bitte versuchen Sie es erneut.'
               });
             }
           }
         } catch (error) {
+          console.error('Fehler beim Einlösen des Coupons:', error);
           Swal.fire({
             icon: '',
-            title: 'Oops!',
+            title: 'Fehler',
             text: 'Etwas ist schief gelaufen. Bitte versuchen Sie es erneut.'
           });
-          console.error(error);
         }
       },
       openReviewsModal() {
         this.showModal = true;
         this.showReviews(this.userId);
       },
-      redirectToOffer(offerId) {
-        this.$router.push({
-          name: 'OfferDetail',
-          params: {
-            id: offerId
-          }
-        });
-      },
-      redirectToProfile(userId) {
-        sessionStorage.setItem("UserId", userId);
-        router.push("/account");
-      },
-      formatDate(dateString) {
-        const options = { year: 'numeric', month: 'long', day: '2-digit' };
-        return new Date(dateString).toLocaleDateString(undefined, options);
-      },
-      async showReviews(userid) {
+      async redirectToOffer(offerId) {
         try {
-          const response = await axiosInstance.get(`review/get-user-reviews?userId=${userid}`);
-          this.reviews = response.data.items;
-        } catch (error) {
-          console.error('Error fetching reviews:', error);
-        }
-      },
-      // Preview selected profile picture
-      previewProfilePic(event) {
-        const file = event.target.files[0];
-        if (file) {
-          this.selectedFile = file;
-          const reader = new FileReader();
-          reader.onload = (e) => {
-            this.profilePic = e.target.result;
-          };
-          reader.readAsDataURL(file);
-        }
-      },
-
-      // Submit the profile picture as Base64 JSON to the API
-      async submitProfilePic() {
-        if (!this.selectedFile) {
-          toast.info("Bitte wählen Sie ein Profilbild aus!");
-          return;
-        }
-
-        const reader = new FileReader();
-        reader.onloadend = async () => {
-          const base64String = reader.result.split(',')[1];
-          const requestBody = {
-            ProfilePicture: base64String
-          };
-
-          try {
-            const response = await axiosInstance.put(`profile/update-profile-picture`, requestBody, {
-              headers: {
-                'Content-Type': 'application/json'
+          // Step 1: Open SweetAlert for user input
+          const { value: redeemCode } = await Swal.fire({
+            title: 'Coupon einlösen',
+            input: 'text',
+            inputLabel: 'Gib deinen Coupon-Code ein',
+            inputPlaceholder: 'Coupon-Code...',
+            showCancelButton: true,
+            confirmButtonText: 'Einreichen',
+            cancelButtonText: 'Abbrechen',
+            inputValidator: (value) => {
+              if (!value) {
+                return 'Sie müssen einen Coupon-Code eingeben!';
               }
-            });
-
-            if (response.status === 200) {
-              toast.success("Profilbild erfolgreich aktualisiert!");
-              this.showPicModal = false;
-              this.fetchUserData();
-            } else {
-              toast.info("Fehler beim Aktualisieren des Profilbilds!");
             }
-          } catch (error) {
-            console.error(error);
-            toast.info("Ein Fehler ist aufgetreten, bitte melden Sie sich beim Support");
-          }
-        };
+          });
 
+          // Step 2: Check if the user entered a redeem code
+          if (redeemCode) {
+            // Post the redeem code to your API
+            const response = await axiosInstance.post('coupon/redeem', {
+              couponCode: redeemCode,
+            });
+            // Step 3: Handle the API response
+            if (response.data.isSuccess == true) {
+              sessionStorage.clear();
+              router.push({ name: 'Login' });
+              Swal.fire({
+                icon: 'success',
+                title: 'Coupon erfolgreich eingelöst',
+                text: 'Bitte loggen Sie sich erneut ein!',
+              });
+
+            } else {
+              Swal.fire({
+                icon: '',
+                title: 'Coupon konnte nicht eingelöst werden',
+                text: 'Fehler beim Einlösen des Coupons. Bitte versuchen Sie es erneut.'
+              });
+            }
+          }
+        } catch (error) {
+          // Log technical details only in the console
+          console.error('redeemCoupon error:', error);
+          Swal.fire({
+            icon: '',
+            title: 'Fehler',
+            text: 'Etwas ist schief gelaufen. Bitte versuchen Sie es erneut.'
+          });
+        }
+      },
+
+      async updateProfilePicture(requestBody) {
+        try {
+          const response = await axiosInstance.put(`profile/update-profile-picture`, requestBody, {
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          });
+
+          if (response.status === 200) {
+            toast.success("Profilbild erfolgreich aktualisiert!");
+            this.showPicModal = false;
+            this.fetchUserData();
+          } else {
+            toast.info("Fehler beim Aktualisieren des Profilbilds!");
+          }
+        } catch (error) {
+          console.error(error);
+          toast.info("Ein Fehler ist aufgetreten, bitte melden Sie sich beim Support");
+        }
+      },
+
+      handleProfilePicUpload(event) {
+        const reader = new FileReader();
+        reader.onload = async () => {
+          const requestBody = {
+            profilePicture: reader.result
+          };
+          await this.updateProfilePicture(requestBody);
+        };
         reader.readAsDataURL(this.selectedFile);
-      }
-      ,
+      },
       onImageError(event) {
         event.target.src = this.defaultProfileImgSrc;
       },
@@ -542,7 +552,8 @@
           this.user = response.data.profile;
           this.profileImgSrc = `data:image/jpeg;base64,${response.data.profile.profilePicture}`;
         } catch (error) {
-          toast.info("Benutzerdaten konnten nicht abgerufen werden");
+          console.error('Fehler beim Abrufen der Benutzerdaten:', error);
+          toast.info("Benutzerdaten konnten nicht abgerufen werden.");
         }
       },
       editProfile() {

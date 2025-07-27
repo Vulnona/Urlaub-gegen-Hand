@@ -300,7 +300,8 @@ export default {
           if (error.response && error.response.data.error.message === "E-Mail Adresse existiert bereits") {
             toast.warning('Benutzer mit dieser E-Mail existiert bereits!', 'Versuchen Sie es mit einer anderen E-Mail-Adresse oder versuchen Sie sich anzumelden');
           } else {
-            this.errorMessage = error.response ? error.response.data.message : 'Ein Fehler ist bei der Registrierung aufgetreten';
+            console.error('Registrierungsfehler:', error);
+            this.errorMessage = 'Registrierung fehlgeschlagen. Bitte versuchen Sie es erneut.';
             toast.error('Registrierung fehlgeschlagen!', 'Es ist ein Fehler aufgetreten!');
           }
         });

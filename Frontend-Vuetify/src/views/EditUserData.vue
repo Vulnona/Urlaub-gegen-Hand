@@ -148,7 +148,8 @@ export default {
           toast.info("Benutzerdatenprofil nicht gefunden");
         }
       } catch (error) {
-        toast.info("Fehler beim Abrufen des Benutzerprofils!");
+        console.error('Fehler beim Abrufen des Benutzerprofils:', error);
+        toast.info('Benutzerdaten konnten nicht abgerufen werden. Bitte versuchen Sie es erneut.');
       }
     },
     saveProfile() {
@@ -187,8 +188,8 @@ async updateProfileAPI(updatedProfile) {
               toast.error("Fehler beim Speichern des Profils. Bitte versuchen Sie es erneut.");
           }
       } catch (error) {
-          console.error("Error updating profile:", error);
-          toast.error("Ein Fehler ist beim Speichern des Profils aufgetreten. Bitte versuchen Sie es später erneut.");
+          console.error('Fehler beim Speichern des Profils:', error);
+          toast.error('Profil konnte nicht gespeichert werden. Bitte versuchen Sie es erneut.');
       }
             }
         })

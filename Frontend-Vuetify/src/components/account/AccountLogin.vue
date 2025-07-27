@@ -179,10 +179,11 @@ export default {
         }
         await this.handleLoginSuccess(response.data);
       } catch (error) {
+        console.error('Fehler beim Login:', error);
         if (error.response && error.response.status === 401) {
           toast.info("Ungültige E-Mail oder Passwort oder bestätigen Sie zuerst Ihre E-Mail");
         } else {
-          toast.info("Wir haben ein Problem auf dem Server. Bitte versuchen Sie es erneut!");
+          toast.info("Login nicht möglich. Bitte versuchen Sie es erneut.");
         }
       }
     },
@@ -203,7 +204,8 @@ export default {
         this.show2FA = false;
         this.twoFactorCode = '';
       } catch (error) {
-        toast.info("Ungültiger 2FA-Code!");
+        console.error('Fehler beim 2FA-Login:', error);
+        toast.info("2FA-Code ungültig oder Serverfehler. Bitte versuchen Sie es erneut.");
       }
     },
     async handleLoginSuccess(data) {

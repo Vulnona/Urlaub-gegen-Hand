@@ -67,13 +67,9 @@ export default {
         this.message = response.data.value;
         this.isError = false;
       } catch (error) {
-        if (error.response) {
-          this.message = error.response.data.value;
+          console.error('Fehler beim Zurücksetzen des Passworts:', error);
           this.isError = true;
-        } else {
-          toast.info("Ein Fehler ist aufgetreten. Versuche es noch einmal");
-          this.isError = true;
-        }
+          this.message = 'Fehler beim Zurücksetzen des Passworts. Bitte versuchen Sie es erneut.';
       } finally {
         this.loading = false; // Enable the button
       }

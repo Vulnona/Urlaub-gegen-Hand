@@ -159,7 +159,7 @@ export default {
           config: error.config,
           coordinates: { lat, lng }
         })
-        toast.error('Fehler beim Abrufen der Adressdaten: ' + error.message)
+        toast.error('Adressdaten konnten nicht abgerufen werden. Bitte versuchen Sie es erneut.')
       } finally {
         isLoading.value = false
       }

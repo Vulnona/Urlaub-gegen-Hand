@@ -191,6 +191,7 @@ export default {
         this.coupons = res.data.items;
         this.totalPages = Math.ceil(res.data.totalCount / this.pageSize);
       } catch (error) {
+        console.error('Fehler beim Abrufen der Coupons:', error);
         this.handleAxiosError(error);
       }
     },
@@ -203,13 +204,13 @@ export default {
     handleAxiosError(error) {
       if (error.response) {
         if (error.response.status === 401) {
-          toast.info("Your session has expired. Please log in again.")
+          toast.info("Die Session ist abgelaufen. Erneuter Login notwendig.")
             .then(() => {
               sessionStorage.clear();
               router.push('/');
             });
         } else {
-          // toast.info("An error occurred!");
+            console.error('Admin/Coupons error:', error);
         }
       } else if (error.request) {
         toast.info("Ein Netzwerkfehler ist aufgetreten. Bitte überprüfen Sie Ihre Verbindung und versuchen Sie es erneut.")
@@ -218,6 +219,7 @@ export default {
           });
       } else {
         //  toast.success("An error occurred");
+          console.error('Admin/Coupons error:', error);
       }
     }
   }
