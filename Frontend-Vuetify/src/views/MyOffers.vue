@@ -33,14 +33,24 @@
               </router-link>
             </div>
           </div>
+          
+          <!-- Status Filter -->
+          <div class="status-filter mt-3 mb-3">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" v-model="showInactive" id="showInactiveCheck">
+              <label class="form-check-label" for="showInactiveCheck">
+                Deaktivierte Angebote einblenden
+              </label>
+            </div>
+          </div>
           <div v-if="offers && offers.length > 0" class="offers_group">
             <div v-if="loading" class="spinner-container text-center">
               <div class="spinner"></div>
             </div>
             <div v-else class="row">
-              <div v-for="offer in offers" :key="offer.id" class="col-md-3 mb-4">
+              <div v-for="offer in filteredOffers" :key="offer.id" class="col-md-3 mb-4">
                 <div class="all_items card-offer">
-                <OfferCard :offer=offer />
+                <OfferCard :offer=offer :showStatus=true />
                 </div>
               </div>
             </div>
@@ -97,12 +107,22 @@ export default {
       currentPage: 1,
       totalPages: 1,
       pageSize: 8,
+      showInactive: false,
     };
   },
 
   mounted() {
     this.fetchOffers();
     Securitybot();
+  },
+  computed: {
+    filteredOffers() {
+      if (this.showInactive) {
+        return this.offers;
+      } else {
+        return this.offers.filter(offer => offer.status === 0);
+      }
+    }
   },
   methods: {  
     async fetchOffers() {

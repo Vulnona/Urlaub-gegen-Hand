@@ -87,6 +87,16 @@ body .custom-card .card-text strong {
                 <button type="button"  @click="debouncedSearch" class="btn themeBtn">Suchen</button>
               </div>
             </div>
+            
+          <!-- Status Filter -->
+          <div class="status-filter mt-3 mb-3 text-center">
+            <div class="form-check d-inline-block">
+              <input class="form-check-input" type="checkbox" v-model="showInactive" id="showInactiveCheckHome" @change="onCheckboxChange">
+              <label class="form-check-label" for="showInactiveCheckHome">
+                Deaktivierte Angebote einblenden
+              </label>
+            </div>
+          </div>
           </div>
         </div>
       </div>
@@ -102,7 +112,7 @@ body .custom-card .card-text strong {
             </div>
             <div v-else class="row">
               <div v-for="(offer, index) in offers" :key="offer.id" class="col-md-3 mb-4">
-                <OfferCard :offer=offer :logId=logId :isActiveMember=isActiveMember />
+                <OfferCard :offer=offer :logId=logId :isActiveMember=isActiveMember :showStatus=true />
               </div>
             </div>
             <!-- Pagination Section -->
@@ -210,6 +220,7 @@ export default {
       totalPages: 1,
       pageSize: 12,
       debouncedSearchOffers: null,
+      showInactive: false,
     };
   },
   mounted() {
@@ -222,6 +233,9 @@ export default {
     console.log('[DEBUG] Home.vue - calling fetchOffers()');
     this.fetchOffers();
   },
+  computed: {
+    // Remove client-side filtering since backend handles it
+  },
   methods: {
     resetSearch(search) {
       if (search == '' && this.userRole !== 'Admin') {
@@ -231,18 +245,21 @@ export default {
     async fetchOffers() {
       this.loading = true;
       try {
-        console.log('🔍 Fetching offers...');
-        const response = await axiosInstance.get(`offer/get-all-offers`, {
-          params: {
-            searchTerm: this.searchTerm,
-            pageSize: this.pageSize,
-            pageNumber: this.currentPage
-          }
-        });
-        console.log('✅ Response received:', response.data);
+        const params = {
+          searchTerm: this.searchTerm,
+          pageSize: this.pageSize,
+          pageNumber: this.currentPage,
+          includeInactive: this.showInactive
+        };
+        const urlParams = new URLSearchParams();
+        urlParams.append('searchTerm', params.searchTerm || '');
+        urlParams.append('pageSize', params.pageSize.toString());
+        urlParams.append('pageNumber', params.pageNumber.toString());
+        urlParams.append('includeInactive', params.includeInactive.toString());
+        const url = `offer/get-all-offers?${urlParams.toString()}`;
+        const response = await axiosInstance.get(url);
         this.offers = response.data.items || response.data.Items || [];
         this.totalPages = Math.ceil((response.data.totalCount || response.data.TotalCount || 0) / this.pageSize);
-        console.log('📊 Offers set:', this.offers.length, 'Total pages:', this.totalPages);
       } catch (error) {
         console.error('❌ Fehler beim Laden der Angebote:', error);
         toast.info('Angebote konnten nicht geladen werden. Bitte versuchen Sie es erneut.');
@@ -313,6 +330,10 @@ export default {
       this.currentPage = 1;
       this.fetchOffers();
     },
+                    onCheckboxChange() {
+                  this.currentPage = 1;
+                  this.fetchOffers();
+                },
     async showAddRatingModal(offerId, userId, index) {
       this.selectedRating = 0;
       this.showRatingModal = true;

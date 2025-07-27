@@ -32,10 +32,9 @@ public class OfferRepository
         string searchTerm = null,
         int pageNumber = 1,
         int pageSize =10,
-        bool forUser = false
+        bool forUser = false,
+        bool includeInactive = false
     ) {    
-        _logger.LogInformation("GetOffersAsync called - userId: {UserId}, forUser: {ForUser}, searchTerm: {SearchTerm}", userId, forUser, searchTerm);
-        
         IQueryable<OfferTypeLodging> query = _context
             .offertypelodgings.Include(o => o.User).Include(o => o.Picture)
             .Include(o => o.OfferApplications).Include(o => o.Address)            
@@ -43,10 +42,12 @@ public class OfferRepository
 
          if (forUser) {
              query = query.Where(o => o.UserId == userId && o.Status != OfferStatus.Hidden);
-             _logger.LogInformation("Filtering for user offers - userId: {UserId}", userId);
          } else {
-             query = query.Where(o => o.Status == OfferStatus.Active);
-             _logger.LogInformation("Filtering for active offers");
+             if (includeInactive) {
+                 query = query.Where(o => o.Status != OfferStatus.Hidden);
+             } else {
+                 query = query.Where(o => o.Status == OfferStatus.Active);
+             }
          }
          
         if (!string.IsNullOrEmpty(searchTerm)) {

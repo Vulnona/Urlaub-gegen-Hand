@@ -63,12 +63,14 @@ public class OfferController : ControllerBase
     }
 
     [HttpGet("get-all-offers")]
-    public async Task<IActionResult> GetOffersAsync(string searchTerm, int pageNumber = 1, int pageSize = 10) {
+    public async Task<IActionResult> GetOffersAsync(string searchTerm, int pageNumber = 1, int pageSize = 10, [FromQuery] string includeInactive = "false") {
         try {
             var userId = _userProvider.UserId;
-            _logger.LogInformation("GetOffersAsync called - userId: {UserId}, searchTerm: {SearchTerm}, pageNumber: {PageNumber}", userId, searchTerm, pageNumber);
             
-            PaginatedList<OfferDTO> paginatedOffers = await _offerRepository.GetOffersAsync(userId, searchTerm, pageNumber, pageSize, false);
+            // Convert string to bool
+            bool includeInactiveBool = includeInactive?.ToLower() == "true";
+            
+            PaginatedList<OfferDTO> paginatedOffers = await _offerRepository.GetOffersAsync(userId, searchTerm, pageNumber, pageSize, false, includeInactiveBool);
             if (paginatedOffers == null)
             {
                 _logger.LogWarning("GetOffersAsync returned null");

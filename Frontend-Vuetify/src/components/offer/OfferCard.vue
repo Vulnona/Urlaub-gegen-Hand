@@ -1,12 +1,20 @@
 <template>
 <div @click="redirectToOfferDetail(offer.id)">
-  <div class="all_items card-offer">
+  <div class="all_items card-offer" :class="{ 'inactive-offer': !isActive }">
+    <!-- Status Badge -->
+    <div class="status-badge" v-if="showStatus">
+      <span v-if="offer.status === 0" class="badge badge-success">Aktiv</span>
+      <span v-else-if="offer.status === 1" class="badge badge-warning">Geschlossen</span>
+      <span v-else-if="offer.status === 2" class="badge badge-danger">Versteckt</span>
+    </div>
+    
     <div class="item_img">
       <img loading="lazy" :src="'data:' + offer.imageMimeType + ';base64,' + offer.imageData"
            class="card-img-top" alt="Offer Image">
       <div class="rating"
-           v-if="isActiveMember && offer.hostId != logId && offer.appliedStatus == 'Approved'"
-           @click="showAddRatingModal(offer.id, offer.hostId, index)"><i class="ri-star-line"></i></div>
+           v-if="isActiveMember && offer.hostId != logId && offer.appliedStatus == 'Approved'">
+           <i class="ri-star-line"></i>
+      </div>
     </div>
     <div class="item_text">
       
@@ -26,11 +34,67 @@
 <script setup lang="ts">
 import Apply from '@/components/Apply.vue';
 import router from '@/router';
-  const props= defineProps({offer:Object,logId:String,isActiveMember:Boolean});
-  const redirectToOfferDetail = (offerId:String) => {
-      router.push({
-        name: 'OfferDetail',
-        params: {id: props.offer.id}
-      });
-    };
+import { computed } from 'vue';
+
+const props = defineProps({
+  offer: Object,
+  logId: String,
+  isActiveMember: Boolean,
+  showStatus: {
+    type: Boolean,
+    default: false
+  },
+  index: {
+    type: Number,
+    default: 0
+  }
+});
+
+const isActive = computed(() => props.offer?.status === 0);
+
+const redirectToOfferDetail = (offerId: String) => {
+  router.push({
+    name: 'OfferDetail',
+    params: { id: props.offer.id }
+  });
+};
 </script>
+
+<style scoped>
+.inactive-offer {
+  opacity: 0.6;
+  filter: grayscale(50%);
+}
+
+.status-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 10;
+}
+
+.badge {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: bold;
+  color: white;
+}
+
+.badge-success {
+  background-color: #28a745;
+}
+
+.badge-warning {
+  background-color: #ffc107;
+  color: #212529;
+}
+
+.badge-danger {
+  background-color: #dc3545;
+}
+
+.all_items {
+  position: relative;
+}
+</style>
