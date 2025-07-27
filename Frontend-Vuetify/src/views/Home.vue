@@ -96,7 +96,7 @@ body .custom-card .card-text strong {
     <div class="container">
       <div class="row">
         <div class="col-sm-12">
-          <div v-if="offers" class="offers_group">
+          <div v-if="offers && offers.length > 0" class="offers_group">
             <div v-if="loading" class="spinner-container text-center">
               <div class="spinner"></div>
             </div>
@@ -114,8 +114,9 @@ body .custom-card .card-text strong {
                 :hidden="currentPage === totalPages">Weiter<i class="ri-arrow-right-s-line"></i></button>
             </div>
           </div>
-          <div v-else>
-            <h2 class="text-center">No Offers Found!</h2>
+          <div v-else-if="!loading">
+            <h2 class="text-center">Keine Angebote gefunden!</h2>
+            <p class="text-center">Debug: offers.length = {{ offers ? offers.length : 'undefined' }}</p>
           </div>
         </div>
       </div>
@@ -208,14 +209,18 @@ export default {
       currentPage: 1,
       totalPages: 1,
       pageSize: 12,
+      debouncedSearchOffers: null,
     };
   },
   mounted() {
     this.debouncedSearchOffers = debounce(this.searchOffers, 300);
-    console.log('[DEBUG] Home.vue userRole:', this.userRole);
-    if (this.userRole !== 'Admin') {
-      this.fetchOffers();
-    }
+    console.log('[DEBUG] Home.vue mounted - userRole:', this.userRole);
+    console.log('[DEBUG] Home.vue mounted - logId:', this.logId);
+    console.log('[DEBUG] Home.vue mounted - isActiveMember:', this.isActiveMember);
+    
+    // Always try to fetch offers, regardless of role
+    console.log('[DEBUG] Home.vue - calling fetchOffers()');
+    this.fetchOffers();
   },
   methods: {
     resetSearch(search) {
@@ -226,6 +231,7 @@ export default {
     async fetchOffers() {
       this.loading = true;
       try {
+        console.log('🔍 Fetching offers...');
         const response = await axiosInstance.get(`offer/get-all-offers`, {
           params: {
             searchTerm: this.searchTerm,
@@ -233,10 +239,12 @@ export default {
             pageNumber: this.currentPage
           }
         });
-        this.offers = response.data.items;
-        this.totalPages = Math.ceil(response.data.totalCount / this.pageSize);
+        console.log('✅ Response received:', response.data);
+        this.offers = response.data.items || response.data.Items || [];
+        this.totalPages = Math.ceil((response.data.totalCount || response.data.TotalCount || 0) / this.pageSize);
+        console.log('📊 Offers set:', this.offers.length, 'Total pages:', this.totalPages);
       } catch (error) {
-        console.error('Fehler beim Laden der Angebote:', error);
+        console.error('❌ Fehler beim Laden der Angebote:', error);
         toast.info('Angebote konnten nicht geladen werden. Bitte versuchen Sie es erneut.');
       } finally {
         this.loading = false;
@@ -303,7 +311,7 @@ export default {
     },
     debouncedSearch() {
       this.currentPage = 1;
-      this.debouncedSearch();
+      this.fetchOffers();
     },
     async showAddRatingModal(offerId, userId, index) {
       this.selectedRating = 0;
@@ -321,7 +329,7 @@ export default {
         await this.addRating(this.currentOfferId, this.selectedRating, this.reviewText);
         this.cancelRating();
       } else {
-        toast.info("Please select a Rating");
+                    toast.info("Bitte wählen Sie eine Bewertung");
       }
     },
     cancelRating() {
@@ -345,21 +353,6 @@ export default {
         toast.error("Bewertung konnte nicht abgesendet werden. Bitte versuchen Sie es erneut.");
       }
     },
-  },
-  computed: {
-    filteredOffers() {
-      return this.offers.filter(offer => {
-        const title = offer.title ? offer.title.toLowerCase() : '';
-        const skills = offer.skills ? offer.skills.toLowerCase() : '';
-        const region = offer.region ? offer.region.toLowerCase() : '';
-        const isValidOffer = offer.hostId != offer.id;
-        return isValidOffer && (
-          title.includes(this.searchTerm.toLowerCase()) ||
-          region.includes(this.searchTerm.toLowerCase()) ||
-          skills.includes(this.searchTerm.toLowerCase())
-        );
-      });
-    }
   }
 };
 </script>

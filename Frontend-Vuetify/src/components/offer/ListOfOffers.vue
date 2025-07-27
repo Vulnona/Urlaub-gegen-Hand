@@ -48,7 +48,7 @@
                         <button v-if="item.status === 1 && item.hasReview === false"
                                 @click="showAddRatingModal(item.offerId, item.HostId, index)" class="icon_btn bg_ltblue">Bewerten
                         </button>
-                        <button v-if="item.status === 1 && item.hasReview" class="icon_btn bg_ltblue">Bereits bewertet. </button>
+                        <button v-if="item.status === 1 && item.hasReview" class="icon_btn bg_ltblue">Bereits bewertet</button>
                       </div>
                     </td>
                   </tr>

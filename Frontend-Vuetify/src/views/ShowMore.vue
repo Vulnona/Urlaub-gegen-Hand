@@ -3,7 +3,7 @@
     <!-- Dropdown Toggle Button -->
     <button @click="toggleDropdown"
       class="w-full bg-white border border-gray-300 rounded-lg px-4 py-2 text-left focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent flex justify-between items-center">
-      {{ selectedItem || 'Select an option' }}
+              {{ selectedItem || 'Option auswählen' }}
       <svg :class="{ 'transform rotate-180': isOpen }" class="w-5 h-5 transition-transform duration-200"
         xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
         <path fill-rule="evenodd"

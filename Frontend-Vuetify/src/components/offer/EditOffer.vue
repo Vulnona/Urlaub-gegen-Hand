@@ -38,7 +38,7 @@
                     <div class="row">
                       <div class="col">
                         <label for="offer.FromDate">Möglich ab<b style="color: red;">*</b></label>
-                                         <Datepicker date v-model="offer.FromDate" :locale="de" :enable-time-picker="false"
+                 <Datepicker date v-model="offer.FromDate" :locale="de" :enable-time-picker="false"
                              :auto-apply="true" placeholder="dd.mm.yyyy" :typeable="true" input-class-name="datepicker-input" startingView='month'  inputFormat="dd.MM.yyyy" @update:model-value="validateDateRange"/>
                       </div>
                       <div class="col">
@@ -59,7 +59,7 @@
                 <div class="card-body">
                   <div class="form-group">
                     <label>Fertigkeiten <b style="color: red;">*</b></label>
-                    <multiselect v-model="offer.skills" :options="skills" placeholder="Select Fertigkeiten"
+                    <multiselect v-model="offer.skills" :options="skills" placeholder="Fertigkeiten auswählen"
                                  label="skillDescrition" track-by="skill_ID" multiple></multiselect>
                   </div>
                   <div class="amenities-wrapper">
@@ -104,6 +104,7 @@
               </div>
             </div>
             <div class="text-right">
+              <button type="button" class="btn btn-secondary me-2" @click="goBack">Zurück</button>
               <button type="submit" class="btn themeBtn"><a v-if="!modify">Erstelle Angebot</a><a v-else>Modifiziere Angebot</a>&nbsp;<i class="ri-add-circle-line"></i></button>
               </div>
             </div>
@@ -185,16 +186,16 @@ const createOffer = async() => {
     const offerData = new FormData();
     offer.description = offer.description.replaceAll("\n","\ \ \n");
     offerData.append('title', offer.title);
-    offerData.append('description', offer.description);
-    offerData.append('location', offer.address ? offer.address.displayName : '');
-    // Add address data
-    if (offer.address) {
-        offerData.append('latitude', offer.address.latitude?.toString() || '');
-        offerData.append('longitude', offer.address.longitude?.toString() || '');
+        offerData.append('description', offer.description);
+        offerData.append('location', offer.address ? offer.address.displayName : '');
+        // Add address data
+        if (offer.address) {
+            offerData.append('latitude', offer.address.latitude?.toString() || '');
+            offerData.append('longitude', offer.address.longitude?.toString() || '');
         // Try different possible property names for displayName
         const displayName = offer.address.displayName || offer.address.DisplayName || offer.address.display_name || '';
         offerData.append('DisplayName', displayName);
-        offerData.append('id', offer.address.id?.toString() || '');
+            offerData.append('id', offer.address.id?.toString() || '');
         
         // Debug: Log address data being sent
         console.log('DEBUG: Address data being sent:', {
@@ -226,11 +227,11 @@ const createOffer = async() => {
         }
         );
         
-        if(modify)
-            toast.success("Das Angebot wurde bearbeitet.");
-        else
-            toast.success("Das Angebot wurde erstellt.");
-        router.push('/my-offers');
+            if(modify)
+                toast.success("Das Angebot wurde bearbeitet.");
+            else
+                toast.success("Das Angebot wurde erstellt.");
+          router.push('/my-offers');
         
       } catch (error: any) {
           if (error.request?.status == 412)
@@ -248,6 +249,9 @@ const onFileChange = (event) => {
 const calcDate = (dateString) => {
     var dateArray = dateString.split('.');
     return new Date(dateArray[2]+'-'+dateArray[1]+'-'+dateArray[0]);
+    }
+const goBack = () => {
+    router.go(-1);
     }
 
 onMounted(async () => {    

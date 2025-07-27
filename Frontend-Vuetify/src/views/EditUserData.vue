@@ -36,7 +36,7 @@
               <div class="form-group">
                 <label for="gender">Geschlecht</label>
                 <select v-model="profile.gender" class="form-control" id="gender">
-                  <option value="">Select Gender</option>
+                  <option value="">Geschlecht auswählen</option>
                   <option value="Male">Männlich</option>
                   <option value="Female">Weiblich</option>
                   <option value="Other">Möchte ich nicht bekannt geben</option>

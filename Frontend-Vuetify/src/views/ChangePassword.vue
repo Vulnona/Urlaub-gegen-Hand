@@ -31,7 +31,7 @@
         Passwortbestätigung ist erforderlich und muss mit dem Passwort übereinstimmen.
       </span>
       <div class="login-buttons">
-      <button type="submit" class="btn">Passwort ändern.</button>
+              <button type="submit" class="btn">Passwort ändern</button>
     </div>
     </div>    
   </div>

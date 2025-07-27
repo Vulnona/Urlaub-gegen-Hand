@@ -34,15 +34,48 @@ public class OfferController : ControllerBase
     }
 
     #region offers
+    [HttpGet("debug-offers")]
+    [AllowAnonymous]
+    public async Task<IActionResult> DebugOffers() {
+        try {
+            var allOffers = await _context.offertypelodgings
+                .Include(o => o.User)
+                .Include(o => o.Address)
+                .ToListAsync();
+            
+            var result = allOffers.Select(o => new {
+                Id = o.Id,
+                Title = o.Title,
+                Status = o.Status,
+                UserId = o.UserId,
+                UserName = o.User?.FirstName + " " + o.User?.LastName,
+                Address = o.Address?.DisplayName,
+                CreatedAt = o.CreatedAt
+            }).ToList();
+            
+            _logger.LogInformation("DebugOffers found {Count} offers", result.Count);
+            return Ok(new { totalCount = result.Count, offers = result });
+        }
+        catch (Exception ex) {
+            _logger.LogError($"DebugOffers exception: {ex.Message}");
+            return StatusCode(500, $"Internal server error: {ex.Message}");
+        }
+    }
+
     [HttpGet("get-all-offers")]
     public async Task<IActionResult> GetOffersAsync(string searchTerm, int pageNumber = 1, int pageSize = 10) {
         try {
             var userId = _userProvider.UserId;
-            PaginatedList<OfferDTO> paginatedOffers =await _offerRepository.GetOffersAsync(userId, searchTerm, pageNumber, pageSize ,false);
+            _logger.LogInformation("GetOffersAsync called - userId: {UserId}, searchTerm: {SearchTerm}, pageNumber: {PageNumber}", userId, searchTerm, pageNumber);
+            
+            PaginatedList<OfferDTO> paginatedOffers = await _offerRepository.GetOffersAsync(userId, searchTerm, pageNumber, pageSize, false);
             if (paginatedOffers == null)
             {
+                _logger.LogWarning("GetOffersAsync returned null");
                 return NotFound();
             }
+
+            _logger.LogInformation("GetOffersAsync returning {ItemCount} items, total: {TotalCount}", paginatedOffers.Items?.Count ?? 0, paginatedOffers.TotalCount);
 
             return Ok(
                 new
@@ -66,12 +99,27 @@ public class OfferController : ControllerBase
     public async Task<IActionResult> GetOfferAsync(string searchTerm, int pageNumber = 1, int pageSize = 10) {
         try {
             var userId = _userProvider.UserId;
-            var offers = await _offerRepository.GetOffersAsync(userId, searchTerm, pageNumber, pageSize, true);
+            _logger.LogInformation("GetOfferAsync (user offers) called - userId: {UserId}, searchTerm: {SearchTerm}, pageNumber: {PageNumber}", userId, searchTerm, pageNumber);
+            
+            var paginatedOffers = await _offerRepository.GetOffersAsync(userId, searchTerm, pageNumber, pageSize, true);
 
-            if (offers == null)           
+            if (paginatedOffers == null) {
+                _logger.LogWarning("GetOfferAsync (user offers) returned null");
                 return NotFound();           
+            }
 
-            return Ok(offers);
+            _logger.LogInformation("GetOfferAsync (user offers) returning {ItemCount} items, total: {TotalCount}", paginatedOffers.Items?.Count ?? 0, paginatedOffers.TotalCount);
+
+            return Ok(
+                new
+                {
+                    paginatedOffers.Items,
+                    paginatedOffers.TotalCount,
+                    paginatedOffers.PageNumber,
+                    paginatedOffers.PageSize,
+                    paginatedOffers.TotalPages,
+                }
+            );
         }
         catch (Exception ex)
         {

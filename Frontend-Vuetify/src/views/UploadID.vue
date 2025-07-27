@@ -28,7 +28,7 @@
                   <img :src="frontIdPreview" alt="Front ID Preview" class="card-img-top" />
                 </div>
                 <div v-else class="no-image-selected">
-                  No image selected
+                  Kein Bild ausgewählt
                 </div>
               </div>
             </div>
@@ -40,7 +40,7 @@
               <div class="custom-upload">
                 <input type="file" accept="image/x-png,image/gif,image/jpeg" @change="onBackIdChange" />
                 <button type="button" class="btn themeBtn">
-                  <i class="ri-upload-2-line"></i> Choose File
+                  <i class="ri-upload-2-line"></i> Datei auswählen
                 </button>
               </div>
               <div class="mt-3">
@@ -48,7 +48,7 @@
                   <img :src="backIdPreview" alt="Back ID Preview" class="card-img-top" />
                 </div>
                 <div v-else class="no-image-selected">
-                  No image selected
+                  Kein Bild ausgewählt
                 </div>
               </div>
             </div>

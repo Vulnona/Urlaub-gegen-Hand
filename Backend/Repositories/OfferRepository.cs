@@ -13,10 +13,13 @@ namespace UGHApi.Repositories;
 
 public class OfferRepository
 {
-    private readonly Ugh_Context _context;    
-    public OfferRepository(Ugh_Context context)
+    private readonly Ugh_Context _context;
+    private readonly ILogger<OfferRepository> _logger;
+    
+    public OfferRepository(Ugh_Context context, ILogger<OfferRepository> logger)
     {
         _context = context;
+        _logger = logger;
     }
 
     public async Task<Offer> GetOfferByIdAsync(int offerId)
@@ -31,31 +34,44 @@ public class OfferRepository
         int pageSize =10,
         bool forUser = false
     ) {    
+        _logger.LogInformation("GetOffersAsync called - userId: {UserId}, forUser: {ForUser}, searchTerm: {SearchTerm}", userId, forUser, searchTerm);
+        
         IQueryable<OfferTypeLodging> query = _context
             .offertypelodgings.Include(o => o.User).Include(o => o.Picture)
             .Include(o => o.OfferApplications).Include(o => o.Address)            
         .OrderBy(o => o.CreatedAt);
 
-         if (forUser)
+         if (forUser) {
              query = query.Where(o => o.UserId == userId && o.Status != OfferStatus.Hidden);
-         else
+             _logger.LogInformation("Filtering for user offers - userId: {UserId}", userId);
+         } else {
              query = query.Where(o => o.Status == OfferStatus.Active);
+             _logger.LogInformation("Filtering for active offers");
+         }
+         
         if (!string.IsNullOrEmpty(searchTerm)) {
             query = query.Where(o =>
                 o.Title.Contains(searchTerm)
                 || o.Skills.Contains(searchTerm)
                 || (o.Address != null && o.Address.DisplayName.Contains(searchTerm))
             );
+            _logger.LogInformation("Applied search filter: {SearchTerm}", searchTerm);
         }
 
         int totalCount = await query.CountAsync();
+        _logger.LogInformation("Total count before pagination: {TotalCount}", totalCount);
+        
         var offers = await query.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
+        _logger.LogInformation("Retrieved {OfferCount} offers after pagination", offers.Count);
+        
         var offerDTOs = offers
             .Select(o => {
-                var firstApplication = o.OfferApplications.FirstOrDefault(oa => oa.UserId == userId);                
-                return new OfferDTO(o ,o.User, firstApplication);
+                var firstApplication = o.OfferApplications.FirstOrDefault(oa => oa.UserId == userId);
+                var applicationsExist = o.OfferApplications.Any();
+                return new OfferDTO(o, o.User, firstApplication, applicationsExist);
             }).ToList();
 
+        _logger.LogInformation("Created {DtoCount} OfferDTOs", offerDTOs.Count);
         return PaginatedList<OfferDTO>.Create(offerDTOs, totalCount, pageNumber, pageSize);
     }
 

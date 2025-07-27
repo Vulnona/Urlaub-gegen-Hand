@@ -47,11 +47,11 @@
       <div v-if="logId == offer.hostId">
         <div v-if="offer.status == '0'">
           <button class="btn btn-danger" @click="closeOffer(offer)">
-            Angebot schließen.
+            Angebot schließen
           </button>
           <a v-if="!offer.applicationsExist">
            <button class="btn btn-primary" @click="modifyOffer()">
-            Angebot modifizieren.
+            Angebot modifizieren
            </button>
           </a>
           <a v-else>
@@ -61,13 +61,13 @@
           </a>
         </div>
         <div v-else>
-          <button class="btn btn-blocked">Angebot geschlossen.</button>
+          <button class="btn btn-blocked">Angebot geschlossen</button>
         </div>        
       </div>
     </div>
   </section>
   <div class="loading" v-else>
-    Loading...
+    Wird geladen...
   </div>
 </template>
 

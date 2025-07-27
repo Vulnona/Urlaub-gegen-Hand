@@ -26,7 +26,7 @@
     
                             <!-- Sort Dropdown -->
                             <select v-model="sortKey" class="sort-dropdown">
-                      <option value="" disabled selected>Sort By</option>
+                      <option value="" disabled selected>Sortieren nach</option>
                       <option value="FirstName">Name</option>
                       <option value="Email_Address">E-Mail</option>
                       <option value="VerificationState">Status</option>
@@ -324,19 +324,19 @@ export default {
         },
         async generateCode() {
             const { value: membershipId } = await Swal.fire({
-                title: 'Select Membership',
+                title: 'Mitgliedschaft auswählen',
                 input: 'select',
                 inputOptions: this.memberships.reduce((options, membership) => {
-                    options[membership.id] = `${membership.name} (${membership.durationDays} days)`;
+                    options[membership.id] = `${membership.name} (${membership.durationDays} Tage)`;
                     return options;
                 }, {}),
-                inputPlaceholder: 'Select a membership',
+                inputPlaceholder: 'Mitgliedschaft auswählen',
                 showCancelButton: true,
                 confirmButtonText: 'Generieren',
                 cancelButtonText: 'Abbrechen',
                 inputValidator: (value) => {
                     if (!value) {
-                        return 'You need to select a membership!';
+                        return 'Sie müssen eine Mitgliedschaft auswählen!';
                     }
                 }
             });
@@ -353,7 +353,7 @@ export default {
                         }
                     );
                     this.couponCode = res.data.value;
-                    toast.success("Coupon Code generated successfully!");
+                    toast.success("Coupon-Code erfolgreich generiert!");
                 } catch (error) {
                     console.error('Fehler beim Generieren des Coupon-Codes:', error);
                     this.handleAxiosError(error);
@@ -365,7 +365,7 @@ export default {
             navigator.clipboard
                 .writeText(this.couponCode)
                 .then(() => {
-                    toast.success("Coupon Code copied to clipboard!");
+                    toast.success("Coupon-Code in die Zwischenablage kopiert!");
                 })
                 .catch(() => {
                 console.error('Fehler beim Kopieren des Codes');
@@ -398,15 +398,15 @@ export default {
 
         async handleSendCode(user) {
             const { value: code } = await Swal.fire({
-                title: "Enter Coupon Code",
+                title: "Coupon-Code eingeben",
                 input: "text",
-                inputPlaceholder: "Enter the coupon code here",
+                inputPlaceholder: "Coupon-Code hier eingeben",
                 showCancelButton: true,
                 confirmButtonText: "Senden",
                 cancelButtonText: "Abbrechen",
                 inputValidator: (value) => {
                     if (!value) {
-                        return 'You need to enter a coupon code!';
+                        return 'Sie müssen einen Coupon-Code eingeben!';
                     }
                 }
             });

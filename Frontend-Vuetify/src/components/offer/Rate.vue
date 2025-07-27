@@ -10,7 +10,7 @@
                    alt="Offer Image" />
             </div>
               <div class="loading" v-else>
-                Loading...
+    Wird geladen...
               </div>
             <div class="rightSideBox">
               <h5>{{ offer.title }}</h5>
@@ -85,7 +85,7 @@ const submitRating = async () => {
       }
           cancelRating();
       } else {
-        toast.info("Please select a Rating");
+        toast.info("Bitte wählen Sie eine Bewertung");
       }
 }
 </script>

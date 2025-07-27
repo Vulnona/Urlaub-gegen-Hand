@@ -25,10 +25,10 @@
           <div id="payment-message" class="hidden"></div>
           <button id="submit" class="btn btn-primary w-100 mt-4" :disabled="isPaymentProcessing">
             <span v-if="isPaymentProcessing">
-              Processing...
+              Wird verarbeitet...
             </span>
             <span v-else>
-              Pay now
+              Jetzt bezahlen
             </span>
           </button>
         </div>
@@ -70,7 +70,7 @@
             </div>
           </div>
           <div v-else>
-            <h2 class="text-center">No Coupons Found!</h2>
+            <h2 class="text-center">Keine Coupons gefunden!</h2>
           </div>
         </div>
       </div>

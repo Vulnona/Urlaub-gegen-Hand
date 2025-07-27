@@ -5,7 +5,7 @@
       <div class="row">
         <div class="col-sm-12">
           <div class="inner_banner">
-            <h2>My Offers</h2>
+            <h2>Meine Angebote</h2>
           </div>
         </div>
       </div>
@@ -33,12 +33,12 @@
               </router-link>
             </div>
           </div>
-          <div v-if="offers.length" class="offers_group">
+          <div v-if="offers && offers.length > 0" class="offers_group">
             <div v-if="loading" class="spinner-container text-center">
               <div class="spinner"></div>
             </div>
             <div v-else class="row">
-              <div v-for="offer in filteredOffers" :key="offer.id" class="col-md-3 mb-4">
+              <div v-for="offer in offers" :key="offer.id" class="col-md-3 mb-4">
                 <div class="all_items card-offer">
                 <OfferCard :offer=offer />
                 </div>
@@ -53,8 +53,9 @@
                 :hidden="currentPage === totalPages">Weiter<i class="ri-arrow-right-s-line"></i></button>
             </div>
           </div>
-          <div v-else>
+          <div v-else-if="!loading">
             <h2 class="text-center">Keine Angebote gefunden!</h2>
+            <p class="text-center">Debug: offers.length = {{ offers ? offers.length : 'undefined' }}</p>
           </div>
         </div>
       </div>
@@ -113,8 +114,8 @@ export default {
             pageNumber: this.currentPage
           }
         });
-        this.offers = response.data.items;
-        this.totalPages = Math.ceil(response.data.totalCount / this.pageSize);
+        this.offers = response.data.items || response.data.Items || [];
+        this.totalPages = Math.ceil((response.data.totalCount || response.data.TotalCount || 0) / this.pageSize);
       } catch (error) {
         console.error('Fehler beim Laden der eigenen Angebote:', error);
         toast.error('Eigene Angebote konnten nicht geladen werden. Bitte versuchen Sie es erneut.');
@@ -135,25 +136,10 @@ export default {
     debouncedSearch() {
       clearTimeout(this.searchTimeout);
       this.searchTimeout = setTimeout(() => {
-        this.currentPage= 1,
+        this.currentPage = 1;
         this.searchOffers();
       }, 1000);
     },
-  },
-  computed: {
-    filteredOffers() {
-      return this.offers.filter(offer => {
-        const title = offer.title ? offer.title.toLowerCase() : '';
-        const skills = offer.skills ? offer.skills.toLowerCase() : '';
-        const region = offer.region ? offer.region.toLowerCase() : '';
-        const isValidOffer = true;
-        return isValidOffer && (
-          title.includes(this.searchTerm.toLowerCase()) ||
-          region.includes(this.searchTerm.toLowerCase()) ||   
-          skills.includes(this.searchTerm.toLowerCase())
-        );
-      });
-    }
   }
 };
 </script>

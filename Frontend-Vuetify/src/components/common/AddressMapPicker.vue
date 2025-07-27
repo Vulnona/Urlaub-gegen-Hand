@@ -143,20 +143,20 @@ export default {
       const defaultZoom = 6
 
       try {
-        // Create map
-        map = L.map('map').setView([defaultLat, defaultLng], defaultZoom)
+      // Create map
+      map = L.map('map').setView([defaultLat, defaultLng], defaultZoom)
 
-        // Add OpenStreetMap tiles
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          attribution: '© OpenStreetMap contributors'
-        }).addTo(map)
+      // Add OpenStreetMap tiles
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+      }).addTo(map)
 
-        // Add click handler
-        map.on('click', onMapClick)
+      // Add click handler
+      map.on('click', onMapClick)
 
-        // Set initial address if provided
-        if (props.initialAddress) {
-          setAddressOnMap(props.initialAddress)
+      // Set initial address if provided
+      if (props.initialAddress) {
+        setAddressOnMap(props.initialAddress)
         }
         
         console.log('Map initialized successfully');
@@ -353,25 +353,25 @@ export default {
     }
 
     let isInitializing = false;
-    
+
     onMounted(() => {
       if (isInitializing) return; // Prevent multiple initializations
       isInitializing = true;
       
       // Wait for next tick to ensure DOM is ready
       nextTick(() => {
-        // Load Leaflet if not already loaded
-        if (typeof L === 'undefined') {
-          // Add Leaflet CSS
-          const css = document.createElement('link')
-          css.rel = 'stylesheet'
-          css.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'
-          document.head.appendChild(css)
-          
-          // Add Leaflet JS
-          const script = document.createElement('script')
-          script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'
-          script.onload = () => {
+      // Load Leaflet if not already loaded
+      if (typeof L === 'undefined') {
+        // Add Leaflet CSS
+        const css = document.createElement('link')
+        css.rel = 'stylesheet'
+        css.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'
+        document.head.appendChild(css)
+        
+        // Add Leaflet JS
+        const script = document.createElement('script')
+        script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'
+        script.onload = () => {
             setTimeout(() => {
               initMap()
               isInitializing = false
@@ -381,14 +381,14 @@ export default {
             console.error('Failed to load Leaflet library')
             toast.error('Kartenbibliothek konnte nicht geladen werden.')
             isInitializing = false
-          }
-          document.head.appendChild(script)
-        } else {
+        }
+        document.head.appendChild(script)
+      } else {
           setTimeout(() => {
             initMap()
             isInitializing = false
           }, 500)
-        }
+      }
       })
     })
 
@@ -399,7 +399,7 @@ export default {
       }
       if (map) {
         try {
-          map.remove()
+        map.remove()
           map = null
         } catch (error) {
           console.log('Error removing map:', error)
