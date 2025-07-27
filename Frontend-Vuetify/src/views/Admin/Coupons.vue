@@ -46,7 +46,7 @@
                           <button @click="toggleReveal(index)" class="bg_ltred"><i class="ri-close-line"></i></button>
                         </span>
                         <span v-else>
-                          <button @click="toggleReveal(index, coupon.code)" class="bg_ltgreen">Click to reveal</button>
+                          <button @click="toggleReveal(index, coupon.code)" class="bg_ltgreen">Klicken zum Anzeigen</button>
                         </span>
                       </td>
 

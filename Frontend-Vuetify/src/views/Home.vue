@@ -73,9 +73,7 @@ body .custom-card .card-text strong {
         <div class="col-sm-12">
           <div class="text-center main_center_title">
             <h2>Suchen Sie nach Angeboten</h2>
-            <p>Looking for your dream vacation destination but don't know where to start? With the help of experienced
-              <br> and knowledgeable travel agents, you can plan the trip of a lifetime with ease.
-            </p>
+            <p>Du suchst nach deinem Traumurlaubsziel, weißt aber nicht, wo du anfangen sollst? Plane ganz einfach die Reise deines Lebens.</p>
           </div>
           <div class="offer_search_content" ref="searchContent">
             <div class="SearchBox_filter flexBox align-items-center">
@@ -110,10 +108,10 @@ body .custom-card .card-text strong {
             <!-- Pagination Section -->
             <div class="pagination">
               <button class="action-link" @click="changePage(currentPage - 1)" :hidden="currentPage === 1"><i
-                  class="ri-arrow-left-s-line"></i>Previous</button>
-              <span>Page {{ currentPage }} of {{ totalPages }}</span>
+                  class="ri-arrow-left-s-line"></i>Zurück</button>
+              <span>Seite {{ currentPage }} von {{ totalPages }}</span>
               <button class="action-link" @click="changePage(currentPage + 1)"
-                :hidden="currentPage === totalPages">Next<i class="ri-arrow-right-s-line"></i></button>
+                :hidden="currentPage === totalPages">Weiter<i class="ri-arrow-right-s-line"></i></button>
             </div>
           </div>
           <div v-else>
@@ -155,8 +153,8 @@ body .custom-card .card-text strong {
     </div>
     <div class="modal-footer">
       <div class="rating-buttons">
-        <button @click="submitRating" class="btn common-btn themeBtn">Submit</button>
-        <button @click="cancelRating" class="btn common-btn btn-cancel">Cancel</button>
+        <button @click="submitRating" class="btn common-btn themeBtn">Bewertung abschicken</button>
+        <button @click="cancelRating" class="btn common-btn btn-cancel">Abbrechen</button>
       </div>
     </div>
   </div>

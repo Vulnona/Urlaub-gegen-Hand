@@ -63,9 +63,9 @@
     <Rate :active="showModal" @update:active="$event => (showModal = $event)" @update:refresh="fetchOffers(currentPage)" :offer="ratedOffer" :user="ratedUser" :key="showModal.active" />
     <!-- Pagination Section -->
     <div class="pagination">
-      <button class="action-link" @click="changePage(currentPage - 1)" :hidden="currentPage === 1"><i class="ri-arrow-left-s-line"></i>Previous</button>
-      <span>Page {{ currentPage }} of {{ totalPages }}</span>
-      <button class="action-link" @click="changePage(currentPage + 1)" :hidden="currentPage === totalPages">Next<i class="ri-arrow-right-s-line"></i></button>
+      <button class="action-link" @click="changePage(currentPage - 1)" :hidden="currentPage === 1"><i class="ri-arrow-left-s-line"></i>Zurück</button>
+      <span>Seite {{ currentPage }} von {{ totalPages }}</span>
+      <button class="action-link" @click="changePage(currentPage + 1)" :hidden="currentPage === totalPages">Weiter<i class="ri-arrow-right-s-line"></i></button>
     </div>
 </div>
 </template>

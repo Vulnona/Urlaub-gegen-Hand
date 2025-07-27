@@ -12,7 +12,7 @@
                 <h2 class="h2">404</h2>
                 <h3 class="h2">Look like you're lost</h3>
                 <p>The page you are looking for is not available!</p>
-                <button @click="goback" class="link_404">Go Back</button>
+                <button @click="goback" class="link_404">Zurück</button>
               </div>
             </div>
           </div>

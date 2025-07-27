@@ -16,7 +16,7 @@
                 <!-- Common Home Link -->
                 <li class="nav-item">
                   <router-link class="nav-link" to="/home">
-                    <i class="ri-home-4-line"></i> Home <span class="sr-only">(current)</span>
+                    <i class="ri-home-4-line"></i> Startseite <span class="sr-only">(current)</span>
                   </router-link>
                 </li>
                 
@@ -61,10 +61,10 @@
                   </span>
                   <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
                     <a v-if="userRole != 'Admin'" class="dropdown-item" @click="openProfile">
-                      <i class="ri-file-user-line"></i> Profile
+                      <i class="ri-file-user-line"></i> Profil
                     </a>
                     <a v-if="userRole != 'Admin'" class="dropdown-item" @click="openPurchaseHistory">
-                      <i class="ri-money-dollar-box-line"></i> Purchases
+                      <i class="ri-money-dollar-box-line"></i> Käufe
                     </a>
                     <a class="dropdown-item" @click.prevent="doLogout">
                       <i class="ri-logout-circle-r-line"></i> Logout

@@ -5,7 +5,7 @@
       <div class="row">
         <div class="col-sm-12">
           <div class="inner_banner">
-            <h2>Purchases</h2>
+            <h2>Käufe</h2>
           </div>
         </div>
       </div>
@@ -89,11 +89,11 @@
     <!-- Pagination Section -->
     <div class="pagination">
       <button class="action-link" @click="changePage(currentPage - 1)" :hidden="currentPage === 1">
-        <i class="ri-arrow-left-s-line"></i>Previous
+        <i class="ri-arrow-left-s-line"></i>Zurück
       </button>
-      <span>Page {{ currentPage }} of {{ totalPages }}</span>
+      <span>Seite {{ currentPage }} von {{ totalPages }}</span>
       <button class="action-link" @click="changePage(currentPage + 1)" :hidden="currentPage === totalPages">
-        Next<i class="ri-arrow-right-s-line"></i>
+        Weiter<i class="ri-arrow-right-s-line"></i>
       </button>
     </div>
   </div>

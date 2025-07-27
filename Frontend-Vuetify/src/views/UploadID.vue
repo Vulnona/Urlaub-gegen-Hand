@@ -59,7 +59,7 @@
 
     <div class="row mt-3">
       <div class="col-sm-12 bottom_btn text-center">
-        <button @click="back" class="btn btn-primary rounded grey_btn" :disabled="isLoading">Cancel</button>
+        <button @click="back" class="btn btn-primary rounded grey_btn" :disabled="isLoading">Abbrechen</button>
         &nbsp;&nbsp;
         <button @click="uploadImages" class="btn btn-primary rounded" :disabled="isLoading">
           Upload

@@ -34,8 +34,8 @@
       </div>
       <div class="modal-footer">
         <div class="rating-buttons">
-          <button @click="submitRating" class="btn common-btn themeBtn">Submit</button>
-          <button @click="cancelRating" class="btn common-btn btn-cancel">Cancel</button>
+          <button @click="submitRating" class="btn common-btn themeBtn">Bewertung abschicken</button>
+          <button @click="cancelRating" class="btn common-btn btn-cancel">Abbrechen</button>
         </div>
       </div>
     </div>    

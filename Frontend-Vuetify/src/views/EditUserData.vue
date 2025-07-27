@@ -81,8 +81,8 @@
             <div class="col-sm-12">
               <div class="profile_btn">
                 <!-- Submit Button -->
-                <button type="button" @click="back()" class="btn btn-back rounded">Back</button>
-                <button type="submit" class="btn btn-primary  rounded">Save Profile</button>
+                <button type="button" @click="back()" class="btn btn-back rounded">Zurück</button>
+                <button type="submit" class="btn btn-primary  rounded">Profil speichern</button>
               </div>
             </div>
           </div>

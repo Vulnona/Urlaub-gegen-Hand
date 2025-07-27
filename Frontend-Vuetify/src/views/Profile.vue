@@ -21,7 +21,7 @@
               <i v-if="user.verificationState === 'Verified'" @click="editProfilePic"
                  class="ri-pencil-line edit_icon"></i>
               <img :src="profileImgSrc || defaultProfileImgSrc" @error="onImageError" class="profile-img"
-                   alt="User Profile Picture">
+                   alt="Benutzer Profilbild">
             </span>
             <h5 class="fw-semibold mb-1">{{ user.firstName }} {{ user.lastName }}</h5>
             <span @click="openReviewsModal()" class="action-link fs-13 font-normal">Alle Bewertungen anzeigen</span><br/>
@@ -74,7 +74,7 @@
             </a>
           </div>
           <div class="upload-btn text-center" v-if="user.verificationState == 'Verified' && !isActiveMember">
-            <button class="btn btn-primary" @click="redeemCoupon()">Redeem Coupon</button>
+            <button class="btn btn-primary" @click="redeemCoupon()">Coupon einlösen</button>
           </div>
         </div>
       </div>
@@ -86,7 +86,7 @@
           <div>
             <ul class="list-group list-group-flush border rounded-3">
               <li class="list-group-item p-3">
-                <span class="fw-medium fs-15 d-block mb-3">General Info:</span>
+                <span class="fw-medium fs-15 d-block mb-3">Allgemeine Informationen:</span>
                 <div class="text-muted">
                   <div v-if="user.address" class="address-section">
                     <p class="mb-3">
@@ -154,10 +154,7 @@
           </div>
           <div class="profile_btn">
             <div class="profile_group_btn" v-if="user.verificationState === 'Verified'">
-              <button class="btn  btn-primary rounded" @click="editProfile">
-                Editiere
-                Profil
-              </button>
+              <button class="btn  btn-primary rounded" @click="editProfile">Profil bearbeiten</button>
             </div>
             <div class="profile_group_btn" v-if="user.verificationState === 'Verified'">
               <button class="btn  btn-primary rounded" @click="editUserData">
@@ -282,21 +279,21 @@
       <div class="modal-body">
         <div class="upload_container">
           <div v-if="profilePic" class="profile_pic_preview">
-            <img :src="profilePic" alt="Profile Picture Preview">
+            <img :src="profilePic" alt="Profilbild Vorschau">
           </div>
           <div class="profile_pic_upload_layout">
             <input type="file" id="profilePicInput" accept="image/*" @change="previewProfilePic" style="display: none;">
             <label for="profilePicInput">
               <div class="profile_pic_upload_btn">
                 <i class="ri-upload-2-line"></i>
-                <span class="ml-1">Upload Profile Picture</span>
+                <span class="ml-1">Profilbild hochladen</span>
               </div>
             </label>
           </div>
         </div>
       </div>
       <div class="modal-footer justify-content-end">
-        <button type="button" class="btn themeBtn btn-sm" @click="submitProfilePic">Submit</button>
+        <button type="button" class="btn themeBtn btn-sm" @click="submitProfilePic">Speichern</button>
       </div>
     </div>
   </div>

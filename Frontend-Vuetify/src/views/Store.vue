@@ -55,14 +55,14 @@
                   <div class="card-body" style="z-index: 9;">
                     <h3 class="card-title">{{ item.name }}</h3>
                     <p class="card-text">
-                      <strong>Description:</strong> {{ item.description }}
+                      <strong>Beschreibung:</strong> {{ item.description }}
                     </p>
                     <p class="card-text">
-                      <strong>Price:</strong> {{ item.price.amount }}
+                      <strong>Preis:</strong> {{ item.price.amount }}
                       {{ item.price.currency }}
                     </p>
                     <button class="btn btn-success btn-block" @click="confirmBuy(item)">
-                      Buy
+                      Kaufen
                     </button>
                   </div>
                 </div>
