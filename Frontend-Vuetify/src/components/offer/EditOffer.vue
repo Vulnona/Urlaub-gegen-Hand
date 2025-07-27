@@ -109,12 +109,13 @@
                     <div>Bilder hochladen (max. 8)<b style="color: red;"><a v-if="!modify">*</a></b> </div>
                     <input ref="imageInput" type="file" accept="image/x-png,image/jpeg" @change="onFileChange" class="form-control" multiple :disabled="images.length >= 8" />
                     <div class="image-preview-list mt-2 d-flex flex-wrap gap-2">
-                      <draggable v-model="images" class="d-flex flex-wrap gap-2" :options="{animation:150, handle:'.drag-handle'}">
+                      <draggable v-model="images" class="d-flex flex-wrap gap-2" :options="{animation:150, handle:'.drag-handle'}" @end="onDragEnd">
                         <template #item="{element, index}">
-                          <div class="image-preview-box position-relative">
+                          <div class="image-preview-box position-relative" :class="{'main-image': index === 0}">
                             <span class="drag-handle" style="cursor:grab; position:absolute; left:4px; top:4px; z-index:2; font-size:18px;">☰</span>
                             <img :src="getImageUrl(element)" alt="Bild" style="max-width: 120px; max-height: 120px; border-radius: 6px; border: 1px solid #ccc;" />
                             <button type="button" class="remove-image-btn position-absolute top-0 end-0" @click="removeImage(index)" style="background:rgba(255,255,255,0.8); border:none; border-radius:50%; width:24px; height:24px; font-size:18px; cursor:pointer;">✖</button>
+                            <div v-if="index === 0" class="main-image-badge" style="position:absolute; bottom:4px; left:4px; background:#28a745; color:white; padding:2px 6px; border-radius:4px; font-size:10px; font-weight:bold;">HAUPTBILD</div>
                           </div>
                         </template>
                       </draggable>
@@ -279,10 +280,15 @@ const onFileChange = (event) => {
   // Füge nur bis zu 8 Bilder hinzu
   images.value = images.value.concat(files).slice(0, 8);
 };
+const onDragEnd = () => {
+  // Das erste Bild ist automatisch das Hauptbild nach dem Drag & Drop
+  console.log('Drag & Drop beendet. Neues Hauptbild:', images.value[0]);
+};
+
 const removeImage = async (idx) => {
   const img = images.value[idx];
   // Wenn es sich um ein bestehendes Bild-Objekt handelt, API-Call zum Löschen
-  if (typeof img === 'object' && img.id) {
+  if (typeof img === 'object' && 'id' in img && img.id) {
     try {
       await axiosInstance.delete(`/offer/delete-picture/${img.id}`);
     } catch (e) { toast.error('Bild konnte nicht gelöscht werden.'); }
@@ -381,4 +387,23 @@ onMounted(async () => {
 .image-preview-box { position: relative; display: inline-block; }
 .remove-image-btn { right: 2px; top: 2px; }
 .drag-handle { cursor: grab; color: #888; }
+
+.main-image {
+  border: 3px solid #28a745 !important;
+  box-shadow: 0 0 10px rgba(40, 167, 69, 0.3);
+}
+
+.main-image img {
+  border-color: #28a745 !important;
+}
+
+.main-image-badge {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.7; }
+  100% { opacity: 1; }
+}
 </style>
