@@ -40,8 +40,10 @@ public class OfferRepository
         double? radiusKm = null
     ) {    
         IQueryable<OfferTypeLodging> query = _context
-            .offertypelodgings.Include(o => o.User).Include(o => o.Picture)
-            .Include(o => o.OfferApplications).Include(o => o.Address);
+            .offertypelodgings.Include(o => o.User)
+            .Include(o => o.OfferApplications)
+            .Include(o => o.Address)
+            .Include(o => o.Pictures); // Multi-Bild-Unterstützung
 
         // Apply sorting
         if (sortBy?.ToLower() == "best") {
@@ -156,7 +158,7 @@ public class OfferRepository
     public async Task<PaginatedList<OfferApplicationDto>> GetOfferApplicationsByUserAsync(Guid requestingUserId, int pageNumber, int pageSize, bool isHost) {
         try {
             IQueryable<OfferApplication> query = _context
-                .offerapplication.Include(oa => oa.Offer).ThenInclude(Offer => Offer.Picture)
+                .offerapplication.Include(oa => oa.Offer).ThenInclude(Offer => Offer.Pictures)
                 .Include(oa => oa.User).Include(oa => oa.Host);
             if (isHost)
                 query = query.Where(app => app.HostId == requestingUserId);
@@ -199,7 +201,9 @@ public class OfferRepository
     {
         var offer = await _context
             .offertypelodgings.Include(o => o.User)
-            .Include(o => o.OfferApplications).Include(o => o.Picture).Include(o => o.Address)
+            .Include(o => o.OfferApplications)
+            .Include(o => o.Address)
+            .Include(o => o.Pictures)
             .FirstOrDefaultAsync(o => o.Id == offerId);
 
         if (offer == null)
@@ -248,28 +252,26 @@ public class OfferRepository
 
     // todo: generalize for different formats and other pictures (like profile pic)
     public async Task<Picture>AddPicture(byte[] data, User user){
-            using (MagickImage image = new MagickImage(data)) {
-                image.Thumbnail(new MagickGeometry(400));
-                var format = MagickFormat.Jpg;
-                var stream = new MemoryStream();
-                image.Write(stream, format);
-                stream.Position = 0;
-                byte[] hashBytes = MD5.Create().ComputeHash(stream);
-                String hash = BitConverter.ToString(hashBytes).Replace("-", "");
-                Picture alreadyExisting = await _context.pictures.FirstOrDefaultAsync(p => p.Owner == user && p.Hash == hash);
-                // a method for cleaning up unused pictures is still missing
-                if (alreadyExisting != null)
-                    return alreadyExisting;
-                Picture p = new Picture{
-                    ImageData = stream.ToArray(),
-                    Width = 100,
-                    Hash = hash,
-                    Owner = user
-                };
-                await _context.pictures.AddAsync(p);
-                await _context.SaveChangesAsync();
-                return p;
-            }
-
+        using (MagickImage image = new MagickImage(data)) {
+            image.Thumbnail(new MagickGeometry(400));
+            var format = MagickFormat.Jpg;
+            var stream = new MemoryStream();
+            image.Write(stream, format);
+            stream.Position = 0;
+            byte[] hashBytes = MD5.Create().ComputeHash(stream);
+            String hash = BitConverter.ToString(hashBytes).Replace("-", "");
+            Picture alreadyExisting = await _context.pictures.FirstOrDefaultAsync(p => p.Owner == user && p.Hash == hash);
+            if (alreadyExisting != null)
+                return alreadyExisting;
+            Picture p = new Picture{
+                ImageData = stream.ToArray(),
+                Width = 100,
+                Hash = hash,
+                Owner = user
+            };
+            await _context.pictures.AddAsync(p);
+            await _context.SaveChangesAsync();
+            return p;
+        }
     }
 }

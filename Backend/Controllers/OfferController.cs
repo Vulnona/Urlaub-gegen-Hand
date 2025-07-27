@@ -167,21 +167,7 @@ public class OfferController : ControllerBase
         }
     }
 
-    // url for the preview picture
-    [AllowAnonymous]
-    [HttpGet("get-preview-picture/{OfferId:int}")]
-    public async Task<IActionResult> GetPreviewPicture([Required] int OfferId){
-        try {
-        var offer = await _context.offers.Include(o => o.Picture).FirstOrDefaultAsync(o => o.Id == OfferId);
-        if (offer != null)
-            return File(offer.Picture.ImageData, "image/jpeg");
-        else
-            return BadRequest("OfferNotFound");
-        } catch (Exception ex) {
-            _logger.LogError($"Exception occurred fetching preview picture: {ex.Message} | StackTrace: {ex.StackTrace}");
-            return StatusCode(500, $"Internal server error.");
-        } 
-    }
+    // Multi-Bild-Unterstützung: Bilder werden über Images Array im DTO bereitgestellt
 
     public class OfferMeta{
         public int Id {get; set;}
@@ -248,13 +234,24 @@ public class OfferController : ControllerBase
             offer.GroupProperties = "";
             offer.FromDate = DateOnly.FromDateTime(DateTime.Parse(offerViewModel.FromDate));
             offer.ToDate = DateOnly.FromDateTime(DateTime.Parse(offerViewModel.ToDate));
-            if (offerViewModel.Image != null && offerViewModel.Image.Length > 0) {
-                using var memoryStream = new MemoryStream();
-                await offerViewModel.Image.CopyToAsync(memoryStream);                
-                offer.Picture = await _offerRepository.AddPicture(memoryStream.ToArray(), user);
-            } else if(offerId == -1){
-                return BadRequest("Image required");
+
+            // Multi-Bild-Unterstützung
+            if (offerViewModel.Images != null && offerViewModel.Images.Length > 0) {
+                offer.Pictures = new List<Picture>();
+                for (int i = 0; i < offerViewModel.Images.Length && i < 8; i++) {
+                    var imageFile = offerViewModel.Images[i];
+                    if (imageFile != null && imageFile.Length > 0) {
+                        using var memoryStream = new MemoryStream();
+                        await imageFile.CopyToAsync(memoryStream);
+                        var picture = await _offerRepository.AddPicture(memoryStream.ToArray(), user);
+                        picture.Offer = offer;
+                        offer.Pictures.Add(picture);
+                    }
+                }
+            } else if (offerId == -1) {
+                return BadRequest("Mindestens ein Bild ist erforderlich");
             }
+            
             // a new offer is only created if there is no old one to modify
             if(offerId == -1)
                 await _context.offers.AddAsync(offer);
@@ -450,4 +447,27 @@ public class OfferController : ControllerBase
         }
     }
     #endregion
+
+    [HttpDelete("delete-picture/{pictureId}")]
+    public async Task<IActionResult> DeletePicture(int pictureId)
+    {
+        try
+        {
+            var userId = _userProvider.UserId;
+            var picture = await _context.pictures.FindAsync(pictureId);
+            if (picture == null)
+                return NotFound();
+            // Nur Besitzer darf löschen
+            if (picture.UserId != userId)
+                return Forbid();
+            _context.pictures.Remove(picture);
+            await _context.SaveChangesAsync();
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Exception occurred deleting picture: {ex.Message} | StackTrace: {ex.StackTrace}");
+            return StatusCode(500, "Internal server error.");
+        }
+    }
 }

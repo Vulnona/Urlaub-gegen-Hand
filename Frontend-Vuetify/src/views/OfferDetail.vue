@@ -5,9 +5,29 @@
     <div class="container">
       <div class="row">
         <div class="col-xs-12 col-sm-6">
-          <div class="offer-image" v-if="offer.imageData">
-            <img :src="'data:' + 'image/jpeg' + ';base64,' + offer.imageData" alt="Offer Image" />
+          <!-- Galerie-Start -->
+          <div v-if="offer.images && offer.images.length > 0" class="gallery-container">
+            <div class="main-image" @click="openLightbox = true">
+              <img :src="offer.images[activeImage].src" alt="Angebotsbild" style="width:100%; max-height:350px; object-fit:contain; border-radius:8px; cursor: pointer;" />
+            </div>
+            <div v-if="offer.images.length > 1" class="thumbnails d-flex mt-2 gap-2">
+              <img v-for="(img, idx) in offer.images" :key="idx" :src="img.src" @click="activeImage = idx" :class="['thumbnail', {active: idx === activeImage}]" style="width:60px; height:60px; object-fit:cover; border-radius:6px; border:2px solid #eee; cursor:pointer;" />
+            </div>
+            <!-- Lightbox -->
+            <div v-if="openLightbox" class="lightbox" @click.self="openLightbox = false">
+              <span class="close-btn" @click="openLightbox = false">&times;</span>
+              <img :src="offer.images[activeImage].src" class="lightbox-img" />
+              <div class="lightbox-thumbs">
+                <img v-for="(img, idx) in offer.images" :key="idx" :src="img.src" @click.stop="activeImage = idx" :class="['lightbox-thumb', {active: idx === activeImage}]" />
+              </div>
+              <button v-if="activeImage > 0" class="lightbox-prev" @click.stop="activeImage--">&#8592;</button>
+              <button v-if="activeImage < offer.images.length-1" class="lightbox-next" @click.stop="activeImage++">&#8594;</button>
+            </div>
           </div>
+          <div v-else>
+            <img src="/defaultprofile.jpg" alt="Kein Bild verfügbar" style="width:100%; max-height:350px; object-fit:contain; border-radius:8px;" />
+          </div>
+          <!-- Galerie-Ende -->
         </div>
         <div class="col-xs-12 col-sm-6">
           <div class="offer-content">
@@ -83,7 +103,8 @@
 import {
   ref,
   onMounted,
-  computed
+  computed,
+  watch
 } from 'vue';
 import Navbar from '@/components/navbar/Navbar.vue';
 import PublicNav from '@/components/navbar/PublicNav.vue';
@@ -103,6 +124,8 @@ const pictureLink = `offer/get-preview-picture/${params.id}`;
 const offer = ref(null);
 const loading = ref(true);
 const defaultProfileImgSrc = '/defaultprofile.jpg';
+const activeImage = ref(0);
+const openLightbox = ref(false);
 const redirectToProfile = (userId) => {
   sessionStorage.setItem("UserId", userId);
   router.push("/account");
@@ -152,6 +175,8 @@ const reactivateOffer = async (offerId) => {
     toast.error((error && typeof error === 'object' && 'response' in error && (error as any).response?.data) ? (error as any).response.data : 'Fehler beim Reaktivieren des Angebots.');
   }
 };
+
+watch(() => offer.value?.images, (imgs) => { if (imgs && imgs.length > 0) activeImage.value = 0; });
 
 onMounted(fetchOfferDetail);
 </script>
@@ -236,4 +261,17 @@ export default {
     color:black;
     border-color: darkgrey;
 }
+.gallery-container { position: relative; }
+.main-image { position: relative; }
+.thumbnails .thumbnail { border: 2px solid #eee; margin-right: 4px; transition: border 0.2s; }
+.thumbnails .thumbnail.active { border: 2px solid #007bff; }
+.lightbox { position: fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:9999; }
+.lightbox-img { max-width:80vw; max-height:70vh; border-radius:8px; margin-bottom:16px; }
+.lightbox-thumbs { display:flex; gap:8px; margin-bottom:16px; }
+.lightbox-thumb { width:60px; height:60px; object-fit:cover; border-radius:6px; border:2px solid #eee; cursor:pointer; }
+.lightbox-thumb.active { border:2px solid #007bff; }
+.close-btn { position:absolute; top:24px; right:32px; font-size:2.5rem; color:#fff; cursor:pointer; z-index:10001; }
+.lightbox-prev, .lightbox-next { position:absolute; top:50%; transform:translateY(-50%); background:none; border:none; color:#fff; font-size:2.5rem; cursor:pointer; z-index:10001; }
+.lightbox-prev { left:32px; }
+.lightbox-next { right:32px; }
 </style>

@@ -89,16 +89,13 @@
   </section>
 </template>
 <script setup lang="ts">
-  import OfferCard from '@/components/offer/OfferCard.vue';
-  import Swal from 'sweetalert2';
-</script>
-<script lang="ts">
-
+import OfferCard from '@/components/offer/OfferCard.vue';
+import Swal from 'sweetalert2';
 import Navbar from '@/components/navbar/Navbar.vue';
 import toast from '@/components/toaster/toast';
 import axiosInstance from "@/interceptor/interceptor"
 import Securitybot from '@/services/SecurityBot';
-
+import { ref, onMounted, computed } from 'vue';
 
 declare global {
   interface Window {
@@ -110,117 +107,113 @@ window.FontAwesomeConfig = {
   autoReplaceSvg: false
 };
 
-export default {
-  components: {
-    Navbar,
-  },
-  data() {
-    return {
-      loading: true,
-      offers: [],
-      searchTerm: '',
-      searchTimeout: null,
-      currentIndex: 0,
-      currentPage: 1,
-      totalPages: 1,
-      pageSize: 8,
-      showInactive: false,
-      sortBy: 'newest',
-    };
-  },
+const loading = ref(true);
+const offers = ref([]);
+const searchTerm = ref('');
+const searchTimeout = ref(null);
+const currentIndex = ref(0);
+const currentPage = ref(1);
+const totalPages = ref(1);
+const pageSize = ref(8);
+const showInactive = ref(false);
+const sortBy = ref('newest');
 
-  mounted() {
-    this.fetchOffers();
-    Securitybot();
-  },
-  computed: {
-    filteredOffers() {
-      return this.offers;
-    }
-  },
-  methods: {  
-    async fetchOffers() {
-      try {
-        const response = await axiosInstance.get(`offer/get-offer-by-user`, {
-          params: {
-            searchTerm: this.searchTerm,
-            pageSize: this.pageSize,
-            pageNumber: this.currentPage,
-            sortBy: this.sortBy,
-            includeInactive: this.showInactive ? "true" : "false"
-          }
-        });
-        this.offers = response.data.items || response.data.Items || [];
-        this.totalPages = Math.ceil((response.data.totalCount || response.data.TotalCount || 0) / this.pageSize);
-      } catch (error) {
-        console.error('Fehler beim Laden der eigenen Angebote:', error);
-        toast.error('Eigene Angebote konnten nicht geladen werden. Bitte versuchen Sie es erneut.');
-      } finally {
-        this.loading = false;
+const filteredOffers = computed(() => {
+  return offers.value;
+});
+
+const fetchOffers = async () => {
+  try {
+    const response = await axiosInstance.get(`offer/get-offer-by-user`, {
+      params: {
+        searchTerm: searchTerm.value,
+        pageSize: pageSize.value,
+        pageNumber: currentPage.value,
+        sortBy: sortBy.value,
+        includeInactive: showInactive.value ? "true" : "false"
       }
-    },
-    changePage(newPage) {
-      if (newPage >= 1 && newPage <= this.totalPages) {
-        this.currentPage = newPage;
-        this.fetchOffers(); // fetch new data for the selected page
-      }
-    },
-    searchOffers() {
-      this.loading = true;
-      this.fetchOffers();
-    },
-    debouncedSearch() {
-      clearTimeout(this.searchTimeout);
-      this.searchTimeout = setTimeout(() => {
-        this.currentPage = 1;
-        this.searchOffers();
-      }, 1000);
-    },
-    onShowInactiveChange() {
-      this.currentPage = 1;
-      this.fetchOffers();
-    },
-    onSortChange() {
-      this.currentPage = 1;
-      this.fetchOffers();
-    },
-    getAverageRating(offer) {
-      if (!offer.reviews || offer.reviews.length === 0) return 0;
-      const sum = offer.reviews.reduce((acc, r) => acc + Number(r.stars || r.rating || 0), 0);
-      return sum / offer.reviews.length;
-    },
-    async deactivateAllOffers() {
-      const result = await Swal.fire({
-        title: 'Alle Angebote deaktivieren?',
-        text: 'Möchtest du wirklich alle aktiven Angebote deaktivieren? Diese Aktion kann nicht rückgängig gemacht werden.',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'Ja, deaktivieren',
-        cancelButtonText: 'Abbrechen',
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#3085d6',
-      });
-      if (!result.isConfirmed) return;
-      try {
-        const response = await axiosInstance.post('/offer/deactivate-all-by-user');
-        toast.success(`${response.data.deactivated} Angebote wurden deaktiviert.`);
-        this.fetchOffers();
-      } catch (error) {
-        toast.error('Fehler beim Deaktivieren der Angebote.');
-      }
-    },
-    async reactivateOffer(offerId) {
-      try {
-        const response = await axiosInstance.put(`/offer/reactivate/${offerId}`);
-        toast.success('Angebot wurde reaktiviert.');
-        this.fetchOffers();
-      } catch (error) {
-        const msg = ((error && typeof error === 'object' && 'response' in error) ? (error as any).response?.data : null) || 'Fehler beim Reaktivieren des Angebots.';
-        toast.error(msg);
-      }
-    },
+    });
+    offers.value = response.data.items || response.data.Items || [];
+    totalPages.value = Math.ceil((response.data.totalCount || response.data.TotalCount || 0) / pageSize.value);
+  } catch (error) {
+    console.error('Fehler beim Laden der eigenen Angebote:', error);
+    toast.error('Eigene Angebote konnten nicht geladen werden. Bitte versuchen Sie es erneut.');
+  } finally {
+    loading.value = false;
   }
 };
+
+const changePage = (newPage: number) => {
+  if (newPage >= 1 && newPage <= totalPages.value) {
+    currentPage.value = newPage;
+    fetchOffers();
+  }
+};
+
+const searchOffers = () => {
+  loading.value = true;
+  currentPage.value = 1;
+  fetchOffers();
+};
+
+const debouncedSearch = () => {
+  if (searchTimeout.value) {
+    clearTimeout(searchTimeout.value);
+  }
+  searchTimeout.value = setTimeout(searchOffers, 500);
+};
+
+const onSortChange = () => {
+  loading.value = true;
+  currentPage.value = 1;
+  fetchOffers();
+};
+
+const onShowInactiveChange = () => {
+  loading.value = true;
+  currentPage.value = 1;
+  fetchOffers();
+};
+
+const reactivateOffer = async (offerId: number) => {
+  try {
+    await axiosInstance.put(`offer/reactivate/${offerId}`);
+    toast.success('Angebot erfolgreich reaktiviert!');
+    fetchOffers();
+  } catch (error) {
+    console.error('Fehler beim Reaktivieren des Angebots:', error);
+    toast.error('Angebot konnte nicht reaktiviert werden.');
+  }
+};
+
+const deactivateAllOffers = async () => {
+  const result = await Swal.fire({
+    title: 'Alle Angebote deaktivieren?',
+    text: 'Möchten Sie wirklich alle Ihre aktiven Angebote deaktivieren?',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#d33',
+    cancelButtonColor: '#3085d6',
+    confirmButtonText: 'Ja, alle deaktivieren',
+    cancelButtonText: 'Abbrechen'
+  });
+
+  if (result.isConfirmed) {
+    try {
+      await axiosInstance.post('offer/deactivate-all-by-user');
+      toast.success('Alle Angebote wurden deaktiviert!');
+      fetchOffers();
+    } catch (error) {
+      console.error('Fehler beim Deaktivieren aller Angebote:', error);
+      toast.error('Angebote konnten nicht deaktiviert werden.');
+    }
+  }
+};
+
+onMounted(() => {
+  fetchOffers();
+  Securitybot();
+});
 </script>
 
 <style>

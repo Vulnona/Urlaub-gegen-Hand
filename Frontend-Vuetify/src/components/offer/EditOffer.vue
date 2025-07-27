@@ -59,8 +59,18 @@
                 <div class="card-body">
                   <div class="form-group">
                     <label>Fertigkeiten <b style="color: red;">*</b></label>
-                    <multiselect v-model="offer.skills" :options="skills" placeholder="Fertigkeiten auswählen"
-                                 label="skillDescrition" track-by="skill_ID" multiple></multiselect>
+                    <multiselect v-model="offer.skills" :options="skillOptions" placeholder="Fertigkeiten auswählen"
+                                 label="name" track-by="id" :group-label="'name'" :group-values="'children'" multiple>
+  <template #group="{ group, index, disabled, children, select, deselect }">
+    <div @click.stop="expandState[group.id] = !expandState[group.id]" style="font-weight:bold; cursor:pointer; padding:4px 8px; background:#f8f8f8;">
+      <span>{{ group.name }}</span>
+      <span v-if="expandState[group.id]">▼</span><span v-else>▶</span>
+    </div>
+    <div v-show="expandState[group.id] ?? false">
+      <slot name="options" :options="children" />
+    </div>
+  </template>
+</multiselect>
                   </div>
                   <div class="amenities-wrapper">
                     <div class="form-group"> <label> Unterbringung </label> <div class="contact_infoBox">                        
@@ -96,9 +106,19 @@
                     </div>
                   </div>
                   <div class="form-group">
-                    <div>Bild hochladen<b style="color: red;"><a v-if="!modify">*</a></b> </div>
-                    <input ref="imageInput" type="file" accept="image/x-png,image/jpeg" @change="onFileChange"
-                           class="form-control" />
+                    <div>Bilder hochladen (max. 8)<b style="color: red;"><a v-if="!modify">*</a></b> </div>
+                    <input ref="imageInput" type="file" accept="image/x-png,image/jpeg" @change="onFileChange" class="form-control" multiple :disabled="images.length >= 8" />
+                    <div class="image-preview-list mt-2 d-flex flex-wrap gap-2">
+                      <draggable v-model="images" class="d-flex flex-wrap gap-2" :options="{animation:150, handle:'.drag-handle'}">
+                        <template #item="{element, index}">
+                          <div class="image-preview-box position-relative">
+                            <span class="drag-handle" style="cursor:grab; position:absolute; left:4px; top:4px; z-index:2; font-size:18px;">☰</span>
+                            <img :src="getImageUrl(element)" alt="Bild" style="max-width: 120px; max-height: 120px; border-radius: 6px; border: 1px solid #ccc;" />
+                            <button type="button" class="remove-image-btn position-absolute top-0 end-0" @click="removeImage(index)" style="background:rgba(255,255,255,0.8); border:none; border-radius:50%; width:24px; height:24px; font-size:18px; cursor:pointer;">✖</button>
+                          </div>
+                        </template>
+                      </draggable>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -130,6 +150,7 @@ import Securitybot from '@/services/SecurityBot';
 import axiosInstance from '@/interceptor/interceptor';
 import toast from '@/components/toaster/toast';
 import AddressMapPicker from '@/components/common/AddressMapPicker.vue';
+import draggable from 'vuedraggable';
 const props = defineProps({banner: String, offer:{type: Object, default: {id: -1}, required: false} })
 
 let loading = ref(true);
@@ -147,9 +168,13 @@ let offer = reactive ({
     id: -1
 });
 let skills = [];
+let skillOptions = [];
 let accommodations = [];
 let suitableAccommodations = [];
 let modify = false;
+let expandState = ref<Record<number, boolean>>({});
+let images = ref<(File|string|{id:number,src:string})[]>([]); // Array für neue und bestehende Bilder
+let removedImageIds = ref<number[]>([]); // IDs der zu löschenden Bilder
 
 const onAddressSelected = (address) => {
     offer.address = address;
@@ -165,12 +190,12 @@ const validateDateRange = () => {
 
 const createOffer = async() => {
         loading.value = true;
-      if (offer.image && (offer.image as unknown as File).size > 17 * 1024 * 1024) {
-          toast.warning("Das Bild darf nicht größer als 17 MB sein.");
+      if (images.value.length > 8) {
+          toast.warning("Maximal 8 Bilder erlaubt.");
           loading.value = false;
           return;
       }
-      if (!offer.title || !offer.skills.length || !offer.image && !modify || !offer.description || !offer.address || !offer.UntilDate || !offer.FromDate) {
+      if (!offer.title || !offer.skills.length || (!images.value.length && !modify) || !offer.description || !offer.address || !offer.UntilDate || !offer.FromDate) {
           toast.info("Bitte alle mit * markierten Felder ausfüllen.");
           loading.value = false;
           return;
@@ -212,11 +237,17 @@ const createOffer = async() => {
         offerData.append('accommodationSuitable', offer.accommodationSuitable.join(', '));
         offerData.append('ToDate', offer.UntilDate.toISOString().split('+')[0]);
         offerData.append('FromDate', offer.FromDate.toISOString().split('+')[0]);
-        offerData.append('skills', offer.skills.map(skill => skill.skillDescrition).join(', '));
+        offerData.append('skills', offer.skills.map(skill => skill.name).join(', '));
         offerData.append('OfferId', offer.id.toString());
-      if (offer.image) {
-        offerData.append('image', offer.image);
-      }
+      // Bilder anhängen
+      images.value.forEach((img, idx) => {
+        if (typeof img === 'string') {
+          // Bestehendes Bild (Base64-String oder URL) – Backend muss das unterstützen
+          offerData.append('existingImages', img);
+        } else {
+          offerData.append('images', img);
+        }
+      });
       try {
         const response = await axiosInstance.put(
           `offer/put-offer`,
@@ -244,8 +275,20 @@ const createOffer = async() => {
        loading.value = false;
 }
 const onFileChange = (event) => {
-      offer.image = event.target.files[0];
-    }
+  const files = Array.from(event.target.files);
+  // Füge nur bis zu 8 Bilder hinzu
+  images.value = images.value.concat(files).slice(0, 8);
+};
+const removeImage = async (idx) => {
+  const img = images.value[idx];
+  // Wenn es sich um ein bestehendes Bild-Objekt handelt, API-Call zum Löschen
+  if (typeof img === 'object' && img.id) {
+    try {
+      await axiosInstance.delete(`/offer/delete-picture/${img.id}`);
+    } catch (e) { toast.error('Bild konnte nicht gelöscht werden.'); }
+  }
+  images.value.splice(idx, 1);
+};
 const calcDate = (dateString) => {
     var dateArray = dateString.split('.');
     return new Date(dateArray[2]+'-'+dateArray[1]+'-'+dateArray[0]);
@@ -254,20 +297,59 @@ const goBack = () => {
     router.go(-1);
     }
 
+const getImageUrl = (img: File | string | {id:number,src:string}) => {
+  if (typeof img === 'string') return img;
+  if (typeof img === 'object' && img.src) return img.src;
+  return window.URL.createObjectURL(img as File);
+};
+
 onMounted(async () => {    
     Securitybot();
     loading.value = true;
     accommodations = (await axiosInstance.get(`accommodation/get-all-accommodations`)).data;
     suitableAccommodations = (await axiosInstance.get(`accommodation-suitability/get-all-suitable-accommodations`)).data;
-    skills = (await axiosInstance.get(`skills/get-all-skills`)).data;
+    // Lade hierarchische Skills
+    skillOptions = (await axiosInstance.get(`skills/hierarchical`)).data;
     if (props.offer.id != -1){        
         offer.title = props.offer.title;
         offer.description = props.offer.description;
         offer.location = props.offer.location;
         offer.id = props.offer.id;
-        offer.skills = [];
+        // Adresse explizit mappen
+        offer.address = props.offer.address && typeof props.offer.address === 'object' ? {
+          latitude: props.offer.address.latitude || props.offer.latitude,
+          longitude: props.offer.address.longitude || props.offer.longitude,
+          displayName: props.offer.address.displayName || props.offer.displayName || props.offer.location,
+          id: props.offer.address.id || props.offer.addressId || undefined
+        } : null;
+        offer.accommodation = Array.isArray(props.offer.accommodation) ? props.offer.accommodation : (typeof props.offer.accommodation === 'string' ? props.offer.accommodation.split(',').map(s => s.trim()) : []);
+        offer.accommodationSuitable = Array.isArray(props.offer.accommodationSuitable) ? props.offer.accommodationSuitable : (typeof props.offer.accommodationSuitable === 'string' ? props.offer.accommodationSuitable.split(',').map(s => s.trim()) : []);
+        // Skills: Mappe gespeicherte Skill-IDs/Strings auf die Objekte aus skillOptions
+        let flatSkills = [];
+        skillOptions.forEach(group => {
+          if (group.children && group.children.length) flatSkills.push(...group.children);
+        });
+        if (Array.isArray(props.offer.skills)) {
+          offer.skills = props.offer.skills.map(s => typeof s === 'object' ? flatSkills.find(fs => fs.id === s.id || fs.name === s.name) : flatSkills.find(fs => fs.name === s || fs.id === s)).filter(Boolean);
+        } else if (typeof props.offer.skills === 'string') {
+          offer.skills = props.offer.skills.split(',').map(s => flatSkills.find(fs => fs.name === s.trim())).filter(Boolean);
+        } else {
+          offer.skills = [];
+        }
         offer.FromDate = calcDate(props.offer.fromDate);
         offer.UntilDate = calcDate(props.offer.toDate);
+        // Bild: Zeige bestehendes Bild, solange kein neues hochgeladen wird
+        offer.image = props.offer.image || '';
+        // Mapping für bestehende Bilder
+        if (Array.isArray(props.offer.images) && props.offer.images.length > 0) {
+            images.value = props.offer.images.map((img, idx) => {
+                if (typeof img === 'string') return img;
+                if (img && typeof img === 'object' && img.src) return img;
+                return img;
+            });
+        } else if (props.offer.image) {
+            images.value = [props.offer.image];
+        }
         modify = true;
     }
     loading.value = false;
@@ -280,4 +362,23 @@ onMounted(async () => {
 
 <style scoped>
 .desc-textarea {height: 90px;}
+
+/* Multiselect Parent (Group) fett, nicht ausgegraut */
+.multiselect__group {
+  font-weight: bold;
+  color: #222;
+  background: #f8f8f8;
+  cursor: default;
+  font-size: 1.05em;
+  opacity: 1 !important;
+}
+/* Child Skills normal, etwas kleiner */
+.multiselect__option {
+  font-size: 0.97em;
+  font-weight: normal;
+}
+.image-preview-list { gap: 8px; }
+.image-preview-box { position: relative; display: inline-block; }
+.remove-image-btn { right: 2px; top: 2px; }
+.drag-handle { cursor: grab; color: #888; }
 </style>

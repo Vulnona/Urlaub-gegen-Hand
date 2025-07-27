@@ -19,8 +19,8 @@
             <div class="col-sm-12">
               <div class="form-group">
                 <label>Fertigkeiten </label>
-                <multiselect v-model="profile.skills" :options="availableSkills" placeholder="Fertigkeiten auswählen"
-                  class="skills-multiselect" :multiple="true">
+                <multiselect v-model="profile.skills" :options="skillOptions" placeholder="Fertigkeiten auswählen"
+                  class="skills-multiselect" :multiple="true" label="name" track-by="id" :group-label="'name'" :group-values="'children'" group-select>
                 </multiselect>
                 <small v-if="errors.skills" style="color: red;">{{ errors.skills }}</small>
               </div>
@@ -87,6 +87,7 @@ export default {
         skills: true,
       },
       skills: [],
+      skillOptions: [],
       newHobby: '',
       availableSkills: [],
       errors: {},
@@ -113,8 +114,8 @@ export default {
     },
     async fetchSkills() {
       try {
-        const response = await axiosInstance.get(`skills/get-all-skills`);
-        this.availableSkills = response.data.map(skill => skill.skillDescrition);
+        const response = await axiosInstance.get(`skills/hierarchical`);
+        this.skillOptions = response.data;
       } catch (error) {
         console.error('Fehler beim Laden der Skills:', error);
       }

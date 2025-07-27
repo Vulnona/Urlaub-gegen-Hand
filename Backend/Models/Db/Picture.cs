@@ -13,4 +13,8 @@ public class Picture {
     public Guid UserId { get; init; }
     [ForeignKey("UserId")]
     public User Owner { get; set; }
+
+    public int? OfferId { get; set; }
+    [ForeignKey("OfferId")]
+    public Offer Offer { get; set; }
 }

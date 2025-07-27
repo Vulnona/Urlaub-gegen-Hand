@@ -6,7 +6,6 @@ public class OfferDTO
 {
 #pragma warning disable CS8632
     public int Id { get; set; }
-    public byte[] ImageData { get; set; }
     public string Title { get; set; }
     public string? Accomodation { get; set; }
     public string? Accomodationsuitable { get; set; }
@@ -26,6 +25,8 @@ public class OfferDTO
     public bool CanReactivate { get; set; }
     public bool IsExpiringSoon { get; set; }
     public int DaysUntilExpiration { get; set; }
+    public AddressDTO Address { get; set; }
+    public List<object> Images { get; set; }
     public OfferDTO(OfferTypeLodging o, User? u, OfferApplication? oa, bool applicationsExist=false){
         string appliedStatus = oa == null ? "CanApply" : oa.Status switch {
             OfferApplicationStatus.Pending => "Applied",
@@ -34,7 +35,6 @@ public class OfferDTO
             _ => "Unknown",
         };
         Id = o.Id;
-        ImageData = o.Picture.ImageData;
         Title = o.Title;
         Accomodation = o.AdditionalLodgingProperties;
         Accomodationsuitable = o.Requirements;
@@ -52,6 +52,14 @@ public class OfferDTO
             HostPicture = u.ProfilePicture;
         }
         Status = o.Status;
+        Address = o.Address == null ? null : new AddressDTO {
+            Latitude = o.Address.Latitude,
+            Longitude = o.Address.Longitude,
+            DisplayName = o.Address.DisplayName,
+            Id = o.Address.Id
+        };
+        // New structure: multiple pictures only
+        Images = o.Pictures?.Select(p => new { id = p.Id, src = $"data:image/png;base64,{Convert.ToBase64String(p.ImageData)}" }).ToList<object>() ?? new List<object>();
         // only relevant for OfferDetail
         ApplicationsExist = applicationsExist;
         // Backend-gesteuerte Logik für Reaktivierung

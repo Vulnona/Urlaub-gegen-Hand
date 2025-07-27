@@ -12,8 +12,11 @@
     </span>
     
     <div class="item_img">
-      <img loading="lazy" :src="'data:' + offer.imageMimeType + ';base64,' + offer.imageData"
+      <img loading="lazy" :src="offer.images && offer.images.length > 0 ? offer.images[0].src : '/defaultprofile.jpg'"
            class="card-img-top" alt="Offer Image">
+      <div v-if="offer.images && offer.images.length > 1" class="gallery-indicator">
+        +{{ offer.images.length }}
+      </div>
       <div class="rating"
            v-if="isActiveMember && offer.hostId != logId && offer.appliedStatus == 'Approved'">
            <i class="ri-star-line"></i>
@@ -109,5 +112,18 @@ const redirectToOfferDetail = (offerId: String) => {
   color: #dc3545;
   font-size: 1.5rem;
   cursor: pointer;
+}
+
+.gallery-indicator {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  background: rgba(0,0,0,0.7);
+  color: #fff;
+  border-radius: 12px;
+  padding: 2px 10px;
+  font-size: 1rem;
+  font-weight: bold;
+  z-index: 12;
 }
 </style>

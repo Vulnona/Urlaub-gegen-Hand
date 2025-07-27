@@ -11,10 +11,7 @@ public class Offer {
     public string Title { get; set; }
     [Required]
     public string Description { get; set; }
-    // pictures can be used by multiple offers. If an offer is deleted the linked picture might need to persist.
-    public int? PictureId { get; set; }
-    [ForeignKey("PictureId")]
-    public virtual Picture Picture { get; set; }
+    // Multi-Bild-Unterstützung über Pictures Collection
 
     public DateOnly CreatedAt { get; init; }
     public DateOnly ModifiedAt { get; set; }
@@ -50,6 +47,8 @@ public class Offer {
 
     public ICollection<OfferApplication> OfferApplications { get; set; }
     public ICollection<Review> Reviews { get; set; } = new List<Review>();
+    [InverseProperty("Offer")]
+    public ICollection<Picture> Pictures { get; set; } = new List<Picture>();
 }
 
 public class OfferTypeLodging : Offer
