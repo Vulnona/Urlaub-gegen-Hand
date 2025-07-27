@@ -33,15 +33,35 @@ public class OfferRepository
         int pageNumber = 1,
         int pageSize =10,
         bool forUser = false,
-        bool includeInactive = false
+        bool includeInactive = false,
+        string sortBy = "newest",
+        double? latitude = null,
+        double? longitude = null,
+        double? radiusKm = null
     ) {    
         IQueryable<OfferTypeLodging> query = _context
             .offertypelodgings.Include(o => o.User).Include(o => o.Picture)
-            .Include(o => o.OfferApplications).Include(o => o.Address)            
-        .OrderBy(o => o.CreatedAt);
+            .Include(o => o.OfferApplications).Include(o => o.Address);
+
+        // Apply sorting
+        if (sortBy?.ToLower() == "best") {
+            query = query.OrderByDescending(o =>
+                o.Reviews != null && o.Reviews.Count > 0
+                    ? o.Reviews.Average(r => (double?)r.RatingValue)
+                    : 0
+            );
+        } else if (sortBy?.ToLower() == "oldest") {
+            query = query.OrderBy(o => o.CreatedAt);
+        } else {
+            query = query.OrderByDescending(o => o.CreatedAt);
+        }
 
          if (forUser) {
-             query = query.Where(o => o.UserId == userId && o.Status != OfferStatus.Hidden);
+             if (includeInactive) {
+                 query = query.Where(o => o.UserId == userId && o.Status != OfferStatus.Hidden);
+             } else {
+                 query = query.Where(o => o.UserId == userId && o.Status == OfferStatus.Active);
+             }
          } else {
              if (includeInactive) {
                  query = query.Where(o => o.Status != OfferStatus.Hidden);
@@ -57,6 +77,21 @@ public class OfferRepository
                 || (o.Address != null && o.Address.DisplayName.Contains(searchTerm))
             );
             _logger.LogInformation("Applied search filter: {SearchTerm}", searchTerm);
+        }
+
+        // Apply radius search if coordinates are provided
+        if (latitude.HasValue && longitude.HasValue && radiusKm.HasValue && radiusKm.Value > 0)
+        {
+            // Convert radius from km to degrees (approximate)
+            double radiusInDegrees = radiusKm.Value / 111.0; // 1 degree ≈ 111 km
+            
+            query = query.Where(o => 
+                o.Address != null && 
+                Math.Abs(o.Address.Latitude - latitude.Value) <= radiusInDegrees &&
+                Math.Abs(o.Address.Longitude - longitude.Value) <= radiusInDegrees
+            );
+            
+            _logger.LogInformation("Applied radius filter: lat={Lat}, lon={Lon}, radius={Radius}km", latitude, longitude, radiusKm);
         }
 
         int totalCount = await query.CountAsync();

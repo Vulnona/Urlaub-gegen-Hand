@@ -62,6 +62,245 @@ body .custom-card .button-container .btn {
 body .custom-card .card-text strong {
   font-weight: 500;
 }
+
+.filters-container {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+.filter-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
+  align-items: end;
+}
+.filter-col {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+.location-input-row {
+  display: flex;
+  align-items: end;
+  gap: 0.5rem;
+}
+.location-input-container {
+  position: relative;
+  flex: 1 1 0%;
+}
+.filters-container .form-label {
+  font-weight: 600;
+  color: #495057;
+  margin-bottom: 4px;
+  margin-top: 0;
+  line-height: 1.2;
+  display: block;
+}
+.filters-container .form-select,
+.filters-container .form-control {
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  padding: 8px 12px;
+  background: #fff !important;
+  box-shadow: none !important;
+}
+.filters-container .form-select:focus,
+.filters-container .form-control:focus {
+  border-color: #b5b5b5;
+  box-shadow: 0 0 0 0.1rem rgba(11, 214, 214, 0.10);
+  background: #fff !important;
+}
+.location-input-with-badge {
+  background: #fff !important;
+  padding-right: 110px !important;
+}
+.current-location-badge-infield {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  background: #f1f3f4;
+  color: #495057;
+  border-radius: 12px;
+  padding: 2px 10px 2px 6px;
+  font-size: 0.95em;
+  display: flex;
+  align-items: center;
+  gap: 0.3em;
+  z-index: 2;
+  pointer-events: auto;
+  max-width: 100px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border: 1px solid #e0e0e0;
+}
+@media (max-width: 991px) {
+  .filter-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.btn-outline-primary {
+  color: #0bd6d6;
+  border-color: #0bd6d6;
+}
+
+.btn-outline-primary:hover {
+  background-color: #0bd6d6;
+  border-color: #0bd6d6;
+  color: white;
+}
+
+.btn-outline-secondary {
+  color: #6c757d;
+  border-color: #6c757d;
+}
+
+.btn-outline-secondary:hover {
+  background-color: #6c757d;
+  border-color: #6c757d;
+  color: white;
+}
+
+
+
+.suggestions-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #ced4da;
+  border-top: none;
+  border-radius: 0 0 6px 6px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.suggestion-item {
+  padding: 10px 15px;
+  cursor: pointer;
+  border-bottom: 1px solid #f8f9fa;
+  transition: background-color 0.2s;
+}
+
+.suggestion-item:hover {
+  background-color: #f8f9fa;
+}
+
+.suggestion-item:last-child {
+  border-bottom: none;
+}
+
+.suggestion-item i {
+  color: #6c757d;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1050;
+}
+
+.map-picker-modal {
+  background: white;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 800px;
+  max-height: 90vh;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border-bottom: 1px solid #dee2e6;
+  background: #f8f9fa;
+}
+
+.modal-header h5 {
+  margin: 0;
+  color: #495057;
+}
+
+.btn-close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #6c757d;
+}
+
+.btn-close:hover {
+  color: #343a40;
+}
+
+.modal-body {
+  padding: 1rem;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+.filters-container .location-group {
+  gap: 0.5rem;
+}
+@media (max-width: 767px) {
+  .filters-container .location-group {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .filters-container .map-btn-group {
+    flex-direction: row;
+    margin-top: 0.5rem;
+  }
+}
+.filters-container .map-btn-group {
+  gap: 0.5rem;
+  margin-left: 0.5rem;
+}
+.current-location-badge {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  background: #f1f3f4;
+  color: #495057;
+  border-radius: 12px;
+  padding: 2px 10px 2px 6px;
+  font-size: 0.95em;
+  display: flex;
+  align-items: center;
+  gap: 0.3em;
+  z-index: 2;
+  pointer-events: auto;
+  max-width: 180px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+@media (max-width: 767px) {
+  .current-location-badge {
+    position: static;
+    display: block;
+    margin-top: 0.25rem;
+    transform: none;
+    right: auto;
+    top: auto;
+    max-width: 100%;
+  }
+}
 </style>
 <template>
   <PublicNav />
@@ -72,7 +311,7 @@ body .custom-card .card-text strong {
       <div class="row">
         <div class="col-sm-12">
           <div class="text-center main_center_title">
-            <h2>Suchen Sie nach Angeboten</h2>
+            <h2>Suche nach Angeboten</h2>
             <p>Du suchst nach deinem Traumurlaubsziel, weißt aber nicht, wo du anfangen sollst? Plane ganz einfach die Reise deines Lebens.</p>
           </div>
           <div class="offer_search_content" ref="searchContent">
@@ -85,6 +324,70 @@ body .custom-card .card-text strong {
               </div>
               <div class="btn_outer">
                 <button type="button"  @click="debouncedSearch" class="btn themeBtn">Suchen</button>
+              </div>
+            </div>
+            
+            <!-- Sortierung und Umkreissuche -->
+            <div class="filters-container mt-3 mb-3">
+              <div class="filter-grid">
+                <div class="filter-col">
+                  <label for="sortSelect" class="form-label">Sortierung:</label>
+                  <select id="sortSelect" v-model="sortBy" @change="onFilterChange" class="form-select">
+                    <option value="newest">Neueste zuerst</option>
+                    <option value="oldest">Älteste zuerst</option>
+                  </select>
+                </div>
+                <div class="filter-col">
+                  <label for="radiusSelect" class="form-label">Umkreis:</label>
+                  <select id="radiusSelect" v-model="radiusKm" @change="onFilterChange" class="form-select" :disabled="!currentLocation">
+                    <option value="">Kein Umkreis</option>
+                    <option value="5">5 km</option>
+                    <option value="10">10 km</option>
+                    <option value="25">25 km</option>
+                    <option value="50">50 km</option>
+                    <option value="100">100 km</option>
+                    <option value="250">250 km</option>
+                  </select>
+                </div>
+                <div class="filter-col">
+                  <label for="locationInput" class="form-label">Standort:</label>
+                  <div class="location-input-row">
+                    <div class="location-input-container">
+                      <input 
+                        type="text" 
+                        id="locationInput" 
+                        v-model="locationSearch" 
+                        placeholder="Ort eingeben..." 
+                        class="form-control location-input-with-badge"
+                        @input="onLocationInput"
+                        @focus="showSuggestions = true"
+                        @blur="onLocationBlur"
+                        autocomplete="off"
+                      >
+                      <!-- Autovervollständigung Dropdown -->
+                      <div v-if="showSuggestions && locationSuggestions.length > 0" class="suggestions-dropdown">
+                        <div 
+                          v-for="suggestion in locationSuggestions" 
+                          :key="suggestion.displayName"
+                          class="suggestion-item"
+                          @click="selectSuggestion(suggestion)"
+                        >
+                          <i class="ri-map-pin-line me-2"></i>
+                          {{ suggestion.displayName }}
+                        </div>
+                      </div>
+                      <span v-if="currentLocation" class="current-location-badge-infield" :title="currentLocation">
+                        <i class="ri-map-pin-fill"></i> {{ currentLocation }}
+                      </span>
+                    </div>
+                    <button @click="openMapPicker" class="btn btn-outline-secondary btn-sm ms-2">
+                      <i class="ri-map-line"></i> Auf Karte auswählen
+                    </button>
+                    <button v-if="currentLocation" @click="clearLocation" class="btn btn-outline-secondary btn-sm ms-2">
+                      <i class="ri-close-line"></i> Standort löschen
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
             
@@ -126,7 +429,6 @@ body .custom-card .card-text strong {
           </div>
           <div v-else-if="!loading">
             <h2 class="text-center">Keine Angebote gefunden!</h2>
-            <p class="text-center">Debug: offers.length = {{ offers ? offers.length : 'undefined' }}</p>
           </div>
         </div>
       </div>
@@ -169,10 +471,28 @@ body .custom-card .card-text strong {
       </div>
     </div>
   </div>
+  
+  <!-- Map Picker Modal -->
+  <div v-if="showMapPicker" class="modal-overlay" @click="closeMapPicker">
+    <div class="map-picker-modal" @click.stop>
+      <div class="modal-header">
+        <h5><i class="ri-map-line"></i> Standort auf Karte auswählen</h5>
+        <button @click="closeMapPicker" class="btn-close" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <AddressMapPicker 
+          @address-selected="onAddressSelected" 
+          :hideSearch="true"
+          :showConfirmButton="true"
+        />
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
 import OfferCard from '@/components/offer/OfferCard.vue';
+import AddressMapPicker from '@/components/common/AddressMapPicker.vue';
 </script>
 <script lang="ts">
 import Navbar from '@/components/navbar/Navbar.vue';
@@ -221,6 +541,15 @@ export default {
       pageSize: 12,
       debouncedSearchOffers: null,
       showInactive: false,
+      sortBy: 'newest',
+      locationSearch: '',
+      radiusKm: '',
+      currentLocation: '',
+      latitude: null,
+      longitude: null,
+      showSuggestions: false,
+      locationSuggestions: [],
+      showMapPicker: false,
     };
   },
   mounted() {
@@ -249,13 +578,21 @@ export default {
           searchTerm: this.searchTerm,
           pageSize: this.pageSize,
           pageNumber: this.currentPage,
-          includeInactive: this.showInactive
+          includeInactive: this.showInactive,
+          sortBy: this.sortBy,
+          latitude: this.latitude,
+          longitude: this.longitude,
+          radiusKm: this.radiusKm
         };
         const urlParams = new URLSearchParams();
         urlParams.append('searchTerm', params.searchTerm || '');
         urlParams.append('pageSize', params.pageSize.toString());
         urlParams.append('pageNumber', params.pageNumber.toString());
         urlParams.append('includeInactive', params.includeInactive.toString());
+        urlParams.append('sortBy', params.sortBy);
+        if (params.latitude) urlParams.append('latitude', params.latitude.toString());
+        if (params.longitude) urlParams.append('longitude', params.longitude.toString());
+        if (params.radiusKm) urlParams.append('radiusKm', params.radiusKm.toString());
         const url = `offer/get-all-offers?${urlParams.toString()}`;
         const response = await axiosInstance.get(url);
         this.offers = response.data.items || response.data.Items || [];
@@ -266,6 +603,91 @@ export default {
       } finally {
         this.loading = false;
       }
+    },
+
+    onFilterChange() {
+      this.currentPage = 1;
+      this.fetchOffers();
+    },
+
+
+
+    async onLocationInput() {
+      if (this.locationSearch.length < 3) {
+        this.locationSuggestions = [];
+        this.showSuggestions = false;
+        return;
+      }
+
+      try {
+        console.log('🔍 Suche Vorschläge für:', this.locationSearch);
+        const response = await axiosInstance.get(`geocoding/suggestions?query=${encodeURIComponent(this.locationSearch)}`);
+        console.log('✅ Response erhalten:', response);
+        console.log('✅ Response.data:', response.data);
+        console.log('✅ Response.data type:', typeof response.data);
+        console.log('✅ Response.data length:', response.data ? response.data.length : 'undefined');
+        console.log('📋 Raw response data:', JSON.stringify(response.data, null, 2));
+        
+        // Debug: Zeige alle Properties der Response
+        console.log('📋 Response keys:', Object.keys(response));
+        console.log('📋 Response.data keys:', response.data ? Object.keys(response.data) : 'undefined');
+        
+        this.locationSuggestions = response.data || [];
+        this.showSuggestions = this.locationSuggestions.length > 0;
+        console.log('📋 Anzahl Vorschläge:', this.locationSuggestions.length);
+        if (this.locationSuggestions.length > 0) {
+          console.log('📋 Erster Vorschlag:', this.locationSuggestions[0]);
+          console.log('📋 Erster Vorschlag keys:', Object.keys(this.locationSuggestions[0]));
+        }
+      } catch (error) {
+        console.error('❌ Fehler bei der Autovervollständigung:', error);
+        this.locationSuggestions = [];
+        this.showSuggestions = false;
+      }
+    },
+
+    selectSuggestion(suggestion) {
+      this.locationSearch = suggestion.displayName;
+      this.latitude = suggestion.latitude;
+      this.longitude = suggestion.longitude;
+      this.currentLocation = suggestion.displayName;
+      this.showSuggestions = false;
+      this.locationSuggestions = [];
+      this.onFilterChange();
+      toast.success(`Standort ausgewählt: ${suggestion.displayName}`);
+    },
+
+    openMapPicker() {
+      this.showMapPicker = true;
+    },
+
+    closeMapPicker() {
+      this.showMapPicker = false;
+    },
+
+    onAddressSelected(address) {
+      this.locationSearch = address.displayName;
+      this.latitude = address.latitude;
+      this.longitude = address.longitude;
+      this.currentLocation = address.displayName;
+      this.showMapPicker = false;
+      this.onFilterChange();
+      toast.success(`Standort ausgewählt: ${address.displayName}`);
+    },
+
+    onLocationBlur() {
+      setTimeout(() => {
+        this.showSuggestions = false;
+      }, 200);
+    },
+
+    clearLocation() {
+      this.locationSearch = '';
+      this.currentLocation = '';
+      this.latitude = null;
+      this.longitude = null;
+      this.radiusKm = '';
+      this.onFilterChange();
     },
 
     async changePage(newPage) {

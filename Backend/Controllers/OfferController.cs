@@ -63,14 +63,34 @@ public class OfferController : ControllerBase
     }
 
     [HttpGet("get-all-offers")]
-    public async Task<IActionResult> GetOffersAsync(string searchTerm, int pageNumber = 1, int pageSize = 10, [FromQuery] string includeInactive = "false") {
+    public async Task<IActionResult> GetOffersAsync(
+        string searchTerm, 
+        int pageNumber = 1, 
+        int pageSize = 10, 
+        [FromQuery] string includeInactive = "false",
+        [FromQuery] string sortBy = "newest",
+        [FromQuery] double? latitude = null,
+        [FromQuery] double? longitude = null,
+        [FromQuery] double? radiusKm = null
+    ) {
         try {
             var userId = _userProvider.UserId;
             
             // Convert string to bool
             bool includeInactiveBool = includeInactive?.ToLower() == "true";
             
-            PaginatedList<OfferDTO> paginatedOffers = await _offerRepository.GetOffersAsync(userId, searchTerm, pageNumber, pageSize, false, includeInactiveBool);
+            PaginatedList<OfferDTO> paginatedOffers = await _offerRepository.GetOffersAsync(
+                userId, 
+                searchTerm, 
+                pageNumber, 
+                pageSize, 
+                false, 
+                includeInactiveBool,
+                sortBy,
+                latitude,
+                longitude,
+                radiusKm
+            );
             if (paginatedOffers == null)
             {
                 _logger.LogWarning("GetOffersAsync returned null");
@@ -98,20 +118,17 @@ public class OfferController : ControllerBase
     }
     
     [HttpGet("get-offer-by-user")]
-    public async Task<IActionResult> GetOfferAsync(string searchTerm, int pageNumber = 1, int pageSize = 10) {
+    public async Task<IActionResult> GetOfferAsync(string searchTerm, int pageNumber = 1, int pageSize = 10, [FromQuery] string sortBy = "newest", [FromQuery] string includeInactive = "false") {
         try {
             var userId = _userProvider.UserId;
-            _logger.LogInformation("GetOfferAsync (user offers) called - userId: {UserId}, searchTerm: {SearchTerm}, pageNumber: {PageNumber}", userId, searchTerm, pageNumber);
-            
-            var paginatedOffers = await _offerRepository.GetOffersAsync(userId, searchTerm, pageNumber, pageSize, true);
-
+            _logger.LogInformation("GetOfferAsync (user offers) called - userId: {UserId}, searchTerm: {SearchTerm}, pageNumber: {PageNumber}, sortBy: {SortBy}, includeInactive: {IncludeInactive}", userId, searchTerm, pageNumber, sortBy, includeInactive);
+            bool includeInactiveBool = includeInactive?.ToLower() == "true";
+            var paginatedOffers = await _offerRepository.GetOffersAsync(userId, searchTerm, pageNumber, pageSize, true, includeInactiveBool, sortBy);
             if (paginatedOffers == null) {
                 _logger.LogWarning("GetOfferAsync (user offers) returned null");
                 return NotFound();           
             }
-
             _logger.LogInformation("GetOfferAsync (user offers) returning {ItemCount} items, total: {TotalCount}", paginatedOffers.Items?.Count ?? 0, paginatedOffers.TotalCount);
-
             return Ok(
                 new
                 {
@@ -177,10 +194,15 @@ public class OfferController : ControllerBase
     {
         try
         {
+            var userId = _userProvider.UserId;
+            // Prüfe maximale Anzahl aktiver Angebote
+            var activeCount = await _context.offers.CountAsync(o => o.UserId == userId && o.Status == OfferStatus.Active);
+            if (offerViewModel.OfferId == -1 && activeCount >= 12) {
+                return BadRequest("Du hast bereits die maximale Anzahl (12) aktiver Angebote. Bitte deaktiviere ein Angebot, bevor du ein neues erstellst.");
+            }
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var userId = _userProvider.UserId;            
             var user = await _context.users.Include(u => u.CurrentMembership).FirstOrDefaultAsync(u => u.User_Id == userId);
             
             if (user == null)
@@ -380,6 +402,27 @@ public class OfferController : ControllerBase
                 500,
                 "Internal server error occurred while fetching offer applications."
             );
+        }
+    }
+
+    [HttpPost("deactivate-all-by-user")]
+    public async Task<IActionResult> DeactivateAllByUser()
+    {
+        try
+        {
+            var userId = _userProvider.UserId;
+            var offers = await _context.offers.Where(o => o.UserId == userId && o.Status == OfferStatus.Active).ToListAsync();
+            foreach (var offer in offers)
+            {
+                offer.Status = OfferStatus.Closed;
+            }
+            await _context.SaveChangesAsync();
+            return Ok(new { deactivated = offers.Count });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Exception occurred in DeactivateAllByUser: {ex.Message} | StackTrace: {ex.StackTrace}");
+            return StatusCode(500, $"Internal server error.");
         }
     }
     #endregion

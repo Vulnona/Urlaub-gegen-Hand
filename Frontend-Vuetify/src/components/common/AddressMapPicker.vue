@@ -1,6 +1,6 @@
 <template>
   <div class="address-map-picker">
-    <div class="search-container mb-3">
+    <div v-if="!hideSearch" class="search-container mb-3">
       <div class="form-group">
         <label for="address-search">Adresse suchen</label>
         <div class="input-group">
@@ -66,13 +66,24 @@
     <div class="text-center mt-3">
       <button
         type="button"
-        class="btn btn-outline-secondary"
+        class="btn btn-outline-secondary me-2"
         @click="getCurrentLocation"
         :disabled="isLocating"
       >
         <i class="ri-gps-line" v-if="!isLocating"></i>
         <i class="ri-loader-4-line spinning" v-else></i>
         Mein Standort verwenden
+      </button>
+      
+      <!-- Confirm Button -->
+      <button
+        v-if="showConfirmButton && selectedAddress"
+        type="button"
+        class="btn btn-primary"
+        @click="confirmSelection"
+      >
+        <i class="ri-check-line"></i>
+        Standort bestätigen
       </button>
     </div>
   </div>
@@ -94,6 +105,14 @@ export default {
     required: {
       type: Boolean,
       default: true
+    },
+    hideSearch: {
+      type: Boolean,
+      default: false
+    },
+    showConfirmButton: {
+      type: Boolean,
+      default: false
     }
   },
   setup(props, { emit }) {
@@ -407,6 +426,12 @@ export default {
       }
     })
 
+    const confirmSelection = () => {
+      if (selectedAddress.value) {
+        emit('address-selected', selectedAddress.value)
+      }
+    }
+
     return {
       searchQuery,
       searchResults,
@@ -417,7 +442,8 @@ export default {
       onSearchInput,
       searchAddress,
       selectAddress,
-      getCurrentLocation
+      getCurrentLocation,
+      confirmSelection
     }
   }
 }

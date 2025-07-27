@@ -17,10 +17,10 @@
         <div class="col-sm-12">
           <div class="sort-new-button ">
             <div class="sort-select"><label>Sortieren nach</label>
-              <select class="form-control">
-                <option value="1">Neueste zuerst</option>
-                <option value="4">Positive zuerst</option>
-                <option value="3">Negative zuerst</option>
+              <select class="form-control" v-model="sortBy" @change="onSortChange">
+                <option value="newest">Neueste zuerst</option>
+                <option value="oldest">Älteste zuerst</option>
+                <option value="best">Beliebteste zuerst</option>
               </select>
             </div>
             <div class="SearchBox">
@@ -31,13 +31,14 @@
             <div class="add-new-offer">
               <router-link class="btn themeBtn" to="/add-offer"><i class="ri-add-circle-line"></i> Neues Angebot hinzufügen
               </router-link>
+              <button class="btn btn-outline-secondary ms-2" @click="deactivateAllOffers"><i class="ri-close-circle-line"></i> Alle Angebote deaktivieren</button>
             </div>
           </div>
           
           <!-- Status Filter -->
           <div class="status-filter mt-3 mb-3">
             <div class="form-check">
-              <input class="form-check-input" type="checkbox" v-model="showInactive" id="showInactiveCheck">
+              <input class="form-check-input" type="checkbox" v-model="showInactive" id="showInactiveCheck" @change="onShowInactiveChange">
               <label class="form-check-label" for="showInactiveCheck">
                 Deaktivierte Angebote einblenden
               </label>
@@ -65,7 +66,6 @@
           </div>
           <div v-else-if="!loading">
             <h2 class="text-center">Keine Angebote gefunden!</h2>
-            <p class="text-center">Debug: offers.length = {{ offers ? offers.length : 'undefined' }}</p>
           </div>
         </div>
       </div>
@@ -74,6 +74,7 @@
 </template>
 <script setup lang="ts">
   import OfferCard from '@/components/offer/OfferCard.vue';
+  import Swal from 'sweetalert2';
 </script>
 <script lang="ts">
 
@@ -108,6 +109,7 @@ export default {
       totalPages: 1,
       pageSize: 8,
       showInactive: false,
+      sortBy: 'newest',
     };
   },
 
@@ -117,11 +119,7 @@ export default {
   },
   computed: {
     filteredOffers() {
-      if (this.showInactive) {
-        return this.offers;
-      } else {
-        return this.offers.filter(offer => offer.status === 0);
-      }
+      return this.offers;
     }
   },
   methods: {  
@@ -131,7 +129,9 @@ export default {
           params: {
             searchTerm: this.searchTerm,
             pageSize: this.pageSize,
-            pageNumber: this.currentPage
+            pageNumber: this.currentPage,
+            sortBy: this.sortBy,
+            includeInactive: this.showInactive ? "true" : "false"
           }
         });
         this.offers = response.data.items || response.data.Items || [];
@@ -159,6 +159,39 @@ export default {
         this.currentPage = 1;
         this.searchOffers();
       }, 1000);
+    },
+    onShowInactiveChange() {
+      this.currentPage = 1;
+      this.fetchOffers();
+    },
+    onSortChange() {
+      this.currentPage = 1;
+      this.fetchOffers();
+    },
+    getAverageRating(offer) {
+      if (!offer.reviews || offer.reviews.length === 0) return 0;
+      const sum = offer.reviews.reduce((acc, r) => acc + Number(r.stars || r.rating || 0), 0);
+      return sum / offer.reviews.length;
+    },
+    async deactivateAllOffers() {
+      const result = await Swal.fire({
+        title: 'Alle Angebote deaktivieren?',
+        text: 'Möchtest du wirklich alle aktiven Angebote deaktivieren? Diese Aktion kann nicht rückgängig gemacht werden.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Ja, deaktivieren',
+        cancelButtonText: 'Abbrechen',
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+      });
+      if (!result.isConfirmed) return;
+      try {
+        const response = await axiosInstance.post('/offer/deactivate-all-by-user');
+        toast.success(`${response.data.deactivated} Angebote wurden deaktiviert.`);
+        this.fetchOffers();
+      } catch (error) {
+        toast.error('Fehler beim Deaktivieren der Angebote.');
+      }
     },
   }
 };

@@ -95,7 +95,7 @@ public class NominatimGeocodingService : IGeocodingService
     {
         var searchResults = await SearchAddressesAsync(query, countryCode, 10);
         
-        return searchResults.Select(result => new AddressSuggestion
+        var suggestions = searchResults.Select(result => new AddressSuggestion
         {
             DisplayName = result.DisplayName,
             Latitude = result.Latitude,
@@ -104,6 +104,12 @@ public class NominatimGeocodingService : IGeocodingService
             Country = result.Country,
             Importance = result.Importance
         }).ToList();
+        
+        _logger.LogInformation("Generated {Count} suggestions for query '{Query}': {Suggestions}", 
+            suggestions.Count, query, 
+            string.Join(", ", suggestions.Select(s => $"'{s.DisplayName}'")));
+        
+        return suggestions;
     }
 
     private static AddressSearchResult MapToAddressSearchResult(NominatimSearchResult nominatimResult)

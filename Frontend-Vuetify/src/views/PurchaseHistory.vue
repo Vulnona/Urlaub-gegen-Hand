@@ -15,7 +15,7 @@
     <div class="offers_request_content">
       <div class="card">
         <div class="card-header">
-          <h1 class="main-title">Purchase History</h1>
+          <h1 class="main-title">Kaufhistorie</h1>
         </div>
         <div class="card-body">
           <!-- Add a wrapper with overflow-x: auto -->
@@ -80,7 +80,7 @@
             </table>
           </div>
           <div v-else>
-            <h2 class="text-center">No Transactions</h2>
+            <h2 class="text-center">Keine Transaktionen</h2>
           </div>
         </div>
       </div>
@@ -132,12 +132,12 @@ export default {
     Securitybot();
     const urlParams = new URLSearchParams(window.location.search);
   if (urlParams.get('success') === 'true') {
-    toast.success("Payment completed successfully!");
+    toast.success("Zahlung erfolgreich!");
     setTimeout(() => {
       this.getdata();
     }, 2000);
   } else if (urlParams.get('canceled') === 'true') {
-    toast.info("Payment was canceled.");
+    toast.info("Zahlung wurde abgebrochen.");
   }
   },
   methods: {
@@ -170,11 +170,11 @@ export default {
   if (navigator.clipboard && navigator.clipboard.writeText) {
     navigator.clipboard.writeText(text)
       .then(() => {
-        toast.success("Coupon code copied to clipboard!");
+        toast.success("Coupon code in der Zwischenablage gespeichert!");
       })
       .catch(err => {
-        toast.error("Failed to copy coupon code.");
-        console.error("Error copying text: ", err);
+        toast.error("Fehler beim Kopieren des Coupon-Codes.");
+        console.error("Fehler beim Kopieren des Coupon-Codes: ", err);
       });
   } else {
     // Fallback for insecure contexts
@@ -185,9 +185,9 @@ export default {
     textarea.select();
     try {
       document.execCommand("copy");
-      toast.success("Coupon code copied to clipboard!");
+      toast.success("Coupon code in der Zwischenablage gespeichert!");
     } catch (err) {
-      toast.error("Failed to copy coupon code.");
+      toast.error("Fehler beim Kopieren des Coupon-Codes.");
       console.error("Fallback copy failed: ", err);
     }
     document.body.removeChild(textarea);
