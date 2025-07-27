@@ -137,16 +137,22 @@ export default {
       this.showPassword = !this.showPassword;
     },
     async fetchBackupCodes(userId) {
-      try {
-        const response = await axiosInstance.get(`/admin/get-user-by-id/${userId}`);
-        if (response.data.backupCodes) {
-          this.backupCodes = JSON.parse(response.data.backupCodes);
-          this.showBackupCodes = true;
-        } else {
+      // Backup-Codes nur für Admins über die Admin-Route, sonst keine Abfrage
+      if (this.email && this.email.toLowerCase().includes('admin')) {
+        try {
+          const response = await axiosInstance.get(`/admin/get-user-by-id/${userId}`);
+          if (response.data.backupCodes) {
+            this.backupCodes = JSON.parse(response.data.backupCodes);
+            this.showBackupCodes = true;
+          } else {
+            this.backupCodes = [];
+            this.showBackupCodes = false;
+          }
+        } catch (error) {
           this.backupCodes = [];
           this.showBackupCodes = false;
         }
-      } catch (error) {
+      } else {
         this.backupCodes = [];
         this.showBackupCodes = false;
       }
@@ -204,21 +210,18 @@ export default {
       const token = data.accessToken;
       const logId = data.userId;
       const firstName = data.firstName;
+      const userRoleFromLogin = data.userRole || data.role;
       const encryptedToken = this.encryptItem(token);
       const encryptedLogId = this.encryptItem(logId);
       sessionStorage.setItem('token', encryptedToken);
       sessionStorage.setItem('logId', encryptedLogId);
       sessionStorage.setItem('firstName', firstName);
-      try {
-        const userResponse = await axiosInstance.get(`admin/get-user-by-id/${logId}`);
-        const userRole = userResponse.data.userRole || userResponse.data.role;
-        sessionStorage.setItem('userRole', userRole);
-        if (userRole && userRole.toLowerCase() === 'admin') {
-          router.push('/admin');
-        } else {
-          router.push('/home');
-        }
-      } catch (roleError) {
+      let userRole = userRoleFromLogin;
+      // get role from login response 
+      sessionStorage.setItem('userRole', userRole);
+      if (userRole && userRole.toLowerCase() === 'admin') {
+        router.push('/admin');
+      } else {
         router.push('/home');
       }
     },

@@ -118,7 +118,7 @@ public class TokenService
                 var userExists = _context.users.Any(u => u.User_Id == userId);
                 if (!userExists)
                 {
-                    //user doesnt exist
+                    // user doesn't exist
                     return Task.FromResult<Guid?>(null);
                 }
                 return Task.FromResult<Guid?>(userId);

@@ -30,28 +30,6 @@ public class UserController : ControllerBase
 
     #region users-info
 
-    [Authorize]
-    [HttpGet("get-user-by-id/{id}")]
-    public async Task<IActionResult> GetUser([Required] Guid id)
-    {
-        try
-        {
-            var query = new GetUserByIdQuery(id);
-            var result = await _mediator.Send(query);
-
-            if (result.IsFailure)
-            {
-                return NotFound(result.Error);
-            }
-
-            return Ok(result.Value);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
-            return StatusCode(500, $"Internal server error: {ex.Message}");
-        }
-    }
 
     [HttpPut("upload-id")]
     public async Task<IActionResult> UploadID([FromBody] UploadIdRequest model)
