@@ -202,7 +202,6 @@ export default {
       selectedRating: 0,
       currentOfferId: null,
       userRole: GetUserRole(),
-      userRole: GetUserRole(),
       isActiveMember: isActiveMembership(),
       searchTimeout: null,
       reviewText: '',

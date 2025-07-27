@@ -114,6 +114,13 @@ public class TokenService
 
             if (userIdClaim != null && Guid.TryParse(userIdClaim.Value, out Guid userId))
             {
+                // Check if user still exists in DB
+                var userExists = _context.users.Any(u => u.User_Id == userId);
+                if (!userExists)
+                {
+                    //user doesnt exist
+                    return Task.FromResult<Guid?>(null);
+                }
                 return Task.FromResult<Guid?>(userId);
             }
             else

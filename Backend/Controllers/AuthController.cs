@@ -310,7 +310,7 @@ namespace UGHApi.Controllers
                     return NotFound("Benutzer nicht gefunden");
 
                 if (user.IsTwoFactorEnabled)
-                    return BadRequest("2FA is already enabled for this user");
+                    return BadRequest("2FA ist für diesen Benutzer bereits aktiviert");
 
                 if (!_twoFactorAuthService.ValidateCode(request.Secret, request.Code))
                     return BadRequest("Ungültiger Verifizierungscode");

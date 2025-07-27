@@ -287,7 +287,7 @@ export default {
         this.reviews.push(...response.data.items); // Append new reviews
         this.totalPages = response.data.totalPages; // Update total pages
       } catch (error) {
-        console.error('Error fetching reviews:', error);
+        console.error('Fehler beim Laden der Reviews:', error);
       }
     },
     onImageError(event) {

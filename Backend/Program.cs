@@ -291,6 +291,7 @@ static ServerVersion GetDesignTimeServerVersion(string connectionString)
         private static void ConfigureMiddleware(WebApplication app)
         {
             app.UseMiddleware<ErrorHandlingMiddleware>();
+            app.UseMiddleware<UGHApi.Middleware.UserExistenceMiddleware>();
             var connectionString = app.Configuration.GetConnectionString("DefaultConnection");
 
             DatabaseWaiter.WaitForDatabaseConnection(connectionString);
