@@ -156,6 +156,10 @@ export default {
       if (this.validateForm()) {
         const updatedProfile = {
           ...this.profile,
+          latitude: this.profile.address?.latitude,
+          longitude: this.profile.address?.longitude,
+          displayName: this.profile.address?.displayName,
+          id: this.profile.address?.id
         };
         this.updateProfileAPI(updatedProfile);
       } else {

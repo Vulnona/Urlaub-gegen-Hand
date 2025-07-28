@@ -32,8 +32,7 @@ namespace UGH.Domain.ViewModels
         
         [Required]
         public string DisplayName { get; set; } // Full formatted address
-
-        public int OfferId { get; set; }
+        public int? Id { get; set; } // optional, falls für Update benötigt
         // Multi-Bild-Unterstützung
         public IFormFile[] Images { get; set; }
         public string[] ExistingImages { get; set; }

@@ -61,13 +61,13 @@
                     <label>Fertigkeiten <b style="color: red;">*</b></label>
                     <multiselect v-model="offer.skills" :options="skillOptions" placeholder="Fertigkeiten auswählen"
                                  label="name" track-by="id" :group-label="'name'" :group-values="'children'" multiple>
-  <template #group="{ group, index, disabled, children, select, deselect }">
-    <div @click.stop="expandState[group.id] = !expandState[group.id]" style="font-weight:bold; cursor:pointer; padding:4px 8px; background:#f8f8f8;">
-      <span>{{ group.name }}</span>
-      <span v-if="expandState[group.id]">▼</span><span v-else>▶</span>
+  <template #group="groupProps: any">
+    <div @click.stop="expandState[groupProps.group.id] = !(expandState[groupProps.group.id])" style="font-weight:bold; cursor:pointer; padding:4px 8px; background:#f8f8f8;">
+      <span>{{ groupProps.group.name }}</span>
+      <span v-if="expandState[groupProps.group.id]">▼</span><span v-else>▶</span>
     </div>
-    <div v-show="expandState[group.id] ?? false">
-      <slot name="options" :options="children" />
+    <div v-show="expandState[groupProps.group.id] ?? false">
+      <slot name="options" :options="groupProps.children" />
     </div>
   </template>
 </multiselect>
@@ -174,7 +174,7 @@ let accommodations = [];
 let suitableAccommodations = [];
 let modify = false;
 let expandState = ref<Record<number, boolean>>({});
-let images = ref<(File|string|{id:number,src:string})[]>([]); // Array für neue und bestehende Bilder
+let images = ref<(File|string)[]>([]); // Nur File oder string
 let removedImageIds = ref<number[]>([]); // IDs der zu löschenden Bilder
 
 const onAddressSelected = (address) => {
@@ -218,21 +218,10 @@ const createOffer = async() => {
         if (offer.address) {
             offerData.append('latitude', offer.address.latitude?.toString() || '');
             offerData.append('longitude', offer.address.longitude?.toString() || '');
-        // Try different possible property names for displayName
-        const displayName = offer.address.displayName || offer.address.DisplayName || offer.address.display_name || '';
-        offerData.append('DisplayName', displayName);
+            const displayName = offer.address.displayName || offer.address.DisplayName || offer.address.display_name || '';
+            offerData.append('DisplayName', displayName);
             offerData.append('id', offer.address.id?.toString() || '');
-        
-        // Debug: Log address data being sent
-        console.log('DEBUG: Address data being sent:', {
-            latitude: offer.address.latitude,
-            longitude: offer.address.longitude,
-            displayName: displayName,
-            id: offer.address.id
-        });
-    } else {
-        console.warn('DEBUG: No address data available!');
-    }
+        }
         
         offerData.append('accommodation', offer.accommodation.join(', '));
         offerData.append('accommodationSuitable', offer.accommodationSuitable.join(', '));
@@ -243,11 +232,11 @@ const createOffer = async() => {
       // Bilder anhängen
       images.value.forEach((img, idx) => {
         if (typeof img === 'string') {
-          // Bestehendes Bild (Base64-String oder URL) – Backend muss das unterstützen
           offerData.append('existingImages', img);
-        } else {
+        } else if (img instanceof File) {
           offerData.append('images', img);
         }
+        // Objekte mit id/src (z.B. {id: number, src: string}) werden ignoriert, da sie nicht direkt hochgeladen werden sollen
       });
       try {
         const response = await axiosInstance.put(
@@ -276,7 +265,7 @@ const createOffer = async() => {
        loading.value = false;
 }
 const onFileChange = (event) => {
-  const files = Array.from(event.target.files);
+  const files = Array.from(event.target.files).filter(f => f instanceof File);
   // Füge nur bis zu 8 Bilder hinzu
   images.value = images.value.concat(files).slice(0, 8);
 };
@@ -303,9 +292,8 @@ const goBack = () => {
     router.go(-1);
     }
 
-const getImageUrl = (img: File | string | {id:number,src:string}) => {
+const getImageUrl = (img: File | string) => {
   if (typeof img === 'string') return img;
-  if (typeof img === 'object' && img.src) return img.src;
   return window.URL.createObjectURL(img as File);
 };
 

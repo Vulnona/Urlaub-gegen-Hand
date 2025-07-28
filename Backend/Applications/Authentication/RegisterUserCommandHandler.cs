@@ -78,13 +78,8 @@ public class RegisterUserCommandHandler
             {
                 Latitude = request.Latitude,
                 Longitude = request.Longitude,
-                DisplayName = request.DisplayName,
-                HouseNumber = request.HouseNumber,
-                City = request.City,
-                Postcode = request.Postcode,
-                Country = request.Country,
-                CountryCode = request.CountryCode,
-                Type = AddressType.Residential
+                DisplayName = request.DisplayName
+                // Id wird von der DB vergeben, außer bei Update
             };
 
             var newUser = new User

@@ -226,8 +226,7 @@ public class OfferController : ControllerBase
             {
                 Latitude = offerViewModel.Latitude,
                 Longitude = offerViewModel.Longitude,
-                DisplayName = offerViewModel.DisplayName,
-                Type = AddressType.Tourism // Offers are typically tourism-related
+                DisplayName = offerViewModel.DisplayName
             };
             
             offer.Status = OfferStatus.Active;

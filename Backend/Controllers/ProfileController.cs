@@ -149,7 +149,6 @@ public class ProfileController : ControllerBase
                     address.Latitude = profile.Latitude ?? 0.0;
                     address.Longitude = profile.Longitude ?? 0.0;
                     address.DisplayName = profile.DisplayName;
-                    address.Type = AddressType.Residential;
                     _context.addresses.Update(address);
                 }
                 else
@@ -159,8 +158,7 @@ public class ProfileController : ControllerBase
                     {
                         Latitude = profile.Latitude ?? 0.0,
                         Longitude = profile.Longitude ?? 0.0,
-                        DisplayName = profile.DisplayName,
-                        Type = AddressType.Residential
+                        DisplayName = profile.DisplayName
                     };
                     _context.addresses.Add(address);
                     await _context.SaveChangesAsync();

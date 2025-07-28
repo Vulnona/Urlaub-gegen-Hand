@@ -35,14 +35,7 @@ public class RegisterRequest
     
     [Required]
     public string DisplayName { get; set; } // Full formatted address from map selection
-    
-    // Optional detailed address components (from Nominatim)
-    public string? HouseNumber { get; set; }
-    public string? Road { get; set; }
-    public string? City { get; set; }
-    public string? Postcode { get; set; }
-    public string? Country { get; set; }
-    public string? CountryCode { get; set; }
+    public int? Id { get; set; } // optional, falls für Update benötigt
     
     public string? Facebook_link { get; set; }
     public string Link_RS { get; set; }
