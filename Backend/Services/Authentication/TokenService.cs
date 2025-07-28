@@ -239,6 +239,7 @@ public class TokenService
         var claims = new List<Claim>
         {
             new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
+            new Claim(ClaimTypes.Email, email),
             new Claim(JwtRegisteredClaimNames.Sub, email),
             new Claim("TokenType", "2fa"),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
@@ -247,7 +248,7 @@ public class TokenService
             _configuration["Jwt:Issuer"],
             _configuration["Jwt:Audience"],
             claims,
-            expires: DateTime.UtcNow.AddMinutes(5),
+            expires: DateTime.UtcNow.AddMinutes(10),
             signingCredentials: credentials
         );
         return new JwtSecurityTokenHandler().WriteToken(token);

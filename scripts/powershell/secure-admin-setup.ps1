@@ -111,7 +111,7 @@ $RequestBody = @{
 
 try {
     # Make the reset request to the fixed backend URL
-    $ApiUrl = "http://localhost:8080"
+    $ApiUrl = "http://localhost:8081"
     $Response = Invoke-RestMethod -Uri "$ApiUrl/api/admin-setup/emergency-reset" -Method POST -ContentType "application/json" -Body $RequestBody
     
     Write-Host "✅ Admin password reset successful!" -ForegroundColor Green

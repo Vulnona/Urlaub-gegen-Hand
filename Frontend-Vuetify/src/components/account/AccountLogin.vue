@@ -44,7 +44,15 @@
                 <!-- 2FA input and backup codes for test environment -->
                 <div v-if="show2FA" class="twofa-section">
                   <label for="twoFactorCode">2FA Code eingeben:</label>
-                  <input type="text" id="twoFactorCode" v-model="twoFactorCode" placeholder="2FA Code oder Backup Code" />
+                  <input 
+                    type="text" 
+                    id="twoFactorCode" 
+                    v-model="twoFactorCode" 
+                    placeholder="2FA Code oder Backup Code" 
+                    @keyup.enter="submit2FA"
+                    maxlength="6"
+                    autofocus
+                  />
                   <button class="btn" @click="submit2FA">2FA bestätigen</button>
                   <!-- Show current TOTP code for admin in dev/test -->
                   <div v-if="email.toLowerCase() === 'adminuser@example.com' && process.env.NODE_ENV !== 'production'" class="totp-dev-code" style="margin-top:10px;">
@@ -214,16 +222,21 @@ export default {
         this.show2FA = false;
         this.twoFactorCode = '';
         this.twoFactorToken = '';
-      } catch (error) {
-        console.error('Fehler beim 2FA-Login:', error);
-        if (error.response && error.response.data && error.response.data.includes('2FA token')) {
-          toast.info("Ihr 2FA-Token ist abgelaufen oder ungültig. Bitte loggen Sie sich erneut ein.");
-          this.show2FA = false;
-          this.twoFactorToken = '';
-        } else {
-          toast.info("2FA-Code ungültig oder Serverfehler. Bitte versuchen Sie es erneut.");
+              } catch (error) {
+          console.error('Fehler beim 2FA-Login:', error);
+          if (error.response && error.response.data && (error.response.data.includes('2FA token') || error.response.data.includes('Invalid 2FA token'))) {
+            toast.info("Ihr 2FA-Token ist abgelaufen oder ungültig. Bitte loggen Sie sich erneut ein.");
+            this.show2FA = false;
+            this.twoFactorToken = '';
+            this.twoFactorCode = '';
+          } else if (error.response && error.response.data && error.response.data.includes('Invalid 2FA code')) {
+            toast.info("2FA-Code ungültig. Bitte überprüfen Sie den Code und versuchen Sie es erneut.");
+            this.twoFactorCode = '';
+          } else {
+            toast.info("2FA-Code ungültig oder Serverfehler. Bitte versuchen Sie es erneut.");
+            this.twoFactorCode = '';
+          }
         }
-      }
     },
     async handleLoginSuccess(data) {
       const token = data.accessToken;

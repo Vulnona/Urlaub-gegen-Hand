@@ -362,11 +362,12 @@ INSERT INTO `memberships` VALUES
 
 -- Insert users (VerificationState: 0=IsNew, 1=VerificationPending, 2=VerificationFailed, 3=Verified)
 -- UserRole: 0=User, 1=Admin
-INSERT INTO `users` (`User_Id`, `FirstName`, `LastName`, `DateOfBirth`, `Gender`, `AddressId`, `Email_Address`, `Password`, `SaltKey`, `IsEmailVerified`, `MembershipId`, `VerificationState`, `UserRole`) VALUES
-('08ddca8e-a8b9-48ef-8e0b-09db16414bfa', 'Test', 'User', '1990-01-01', 'Other', 1, 'test@example.com', '$2a$11$YourHashedPasswordHere', 'salt123', 1, 1, 3, 0),
-('08dcd23c-d4eb-456b-87e4-73837709fada', 'Admin', 'User', '1985-05-15', 'Male', 2, 'admin@example.com', '$2a$11$YourHashedPasswordHere', 'salt456', 1, 3, 3, 1),
-('08dcd23c-d4eb-45db-87e4-73837709fada', 'John', 'Doe', '1992-03-20', 'Male', 3, 'john@example.com', '$2a$11$YourHashedPasswordHere', 'salt789', 1, 1, 3, 0),
-('08dcd23c-d4eb-45db-88e4-73837709fada', 'Jane', 'Smith', '1988-07-12', 'Female', NULL, 'jane@example.com', '$2a$11$YourHashedPasswordHere', 'salt101', 1, 1, 3, 0);
+-- IsTwoFactorEnabled: 0=Disabled, 1=Enabled
+INSERT INTO `users` (`User_Id`, `FirstName`, `LastName`, `DateOfBirth`, `Gender`, `AddressId`, `Email_Address`, `Password`, `SaltKey`, `IsEmailVerified`, `MembershipId`, `VerificationState`, `UserRole`, `IsTwoFactorEnabled`, `TwoFactorSecret`, `BackupCodes`) VALUES
+('08ddca8e-a8b9-48ef-8e0b-09db16414bfa', 'Test', 'User', '1990-01-01', 'Other', 1, 'test@example.com', '$2a$11$rQZ9N0NpqN0NpqN0NpqN0O', 'testsalt', 1, 1, 3, 0, 0, NULL, NULL),
+('08dcd23c-d4eb-456b-87e4-73837709fada', 'Admin', 'User', '1985-05-15', 'Male', 2, 'admin@example.com', '$2a$11$rQZ9N0NpqN0NpqN0NpqN0O', 'testsalt', 1, 3, 3, 1, 1, 'JBSWY3DPEHPK3PXP', '["12345678", "87654321", "11111111", "22222222", "33333333", "44444444", "55555555", "66666666", "77777777", "88888888"]'),
+('08dcd23c-d4eb-45db-87e4-73837709fada', 'John', 'Doe', '1992-03-20', 'Male', 3, 'john@example.com', '$2a$11$rQZ9N0NpqN0NpqN0NpqN0O', 'testsalt', 1, 1, 3, 0, 0, NULL, NULL),
+('08dcd23c-d4eb-45db-88e4-73837709fada', 'Jane', 'Smith', '1988-07-12', 'Female', NULL, 'jane@example.com', '$2a$11$rQZ9N0NpqN0NpqN0NpqN0O', 'testsalt', 1, 1, 3, 0, 0, NULL, NULL);
 
 -- Insert usermembership
 INSERT INTO `usermembership` (`UserMembershipID`, `User_Id`, `MembershipID`, `StartDate`, `Expiration`, `CreatedAt`, `UpdatedAt`) VALUES

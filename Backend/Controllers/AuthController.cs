@@ -362,18 +362,26 @@ namespace UGHApi.Controllers
                     var principal = tokenHandler.ValidateToken(request.TwoFactorToken, validationParams, out var validatedToken);
                     var tokenType = principal.Claims.FirstOrDefault(x => x.Type == "TokenType")?.Value;
                     var userIdClaim = principal.Claims.FirstOrDefault(x => x.Type == System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-                    var emailClaim = principal.Claims.FirstOrDefault(x => x.Type == System.Security.Claims.ClaimTypes.Email || x.Type == System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Sub)?.Value;
+                    var emailClaim = principal.Claims.FirstOrDefault(x => x.Type == System.Security.Claims.ClaimTypes.Email)?.Value;
+                    if (string.IsNullOrEmpty(emailClaim))
+                        emailClaim = principal.Claims.FirstOrDefault(x => x.Type == System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Sub)?.Value;
+                    
+                    _logger.LogInformation($"Token validation - Type: {tokenType}, UserId: {userIdClaim}, Email: {emailClaim}");
+                    
                     if (tokenType != "2fa")
                         return BadRequest("Invalid 2FA token type");
                     if (userIdClaim == null || emailClaim == null)
                         return BadRequest("Invalid 2FA token claims");
                     // Prüfe, ob die UserId und Email mit dem Request übereinstimmen
-                    if (userIdClaim != null && request.Email != null && userIdClaim != (await _userRepository.GetUserByEmailAsync(request.Email))?.User_Id.ToString())
+                    var userFromEmail = await _userRepository.GetUserByEmailAsync(request.Email);
+                    if (userIdClaim != null && request.Email != null && userFromEmail != null && userIdClaim != userFromEmail.User_Id.ToString())
                         return BadRequest("Token/User mismatch");
                 }
                 catch (Exception ex)
                 {
                     _logger.LogError($"2FA token validation failed: {ex.Message}");
+                    _logger.LogError($"Token: {request.TwoFactorToken}");
+                    _logger.LogError($"Email: {request.Email}");
                     return BadRequest("Invalid or expired 2FA token");
                 }
 
