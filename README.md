@@ -93,9 +93,9 @@ docker-compose down
 ## 📚 Dokumentation
 
 - [Database Management](scripts/database/README.md) - Detaillierte Anleitung für Datenbank-Management
-- [Development Guide](docs/DEVELOPMENT.md) - Entwicklungsrichtlinien
-- [Migration System](docs/MIGRATION-SYSTEM.md) - EF Core Migrationen
-- [Admin Security](docs/ADMIN-SECURITY.md) - Admin-Sicherheit
+- [Development Guide](Docs/DEVELOPMENT.md) - Entwicklungsrichtlinien
+- [Migration System](Docs/MIGRATION-SYSTEM.md) - EF Core Migrationen
+- [Admin Security](Docs/ADMIN-SECURITY.md) - Admin-Sicherheit
 
 ## 🔄 Workflow für Updates
 
