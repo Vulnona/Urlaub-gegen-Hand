@@ -12,6 +12,8 @@ param(
     [Parameter(Mandatory=$false)]
     [string]$User = "root",
     [Parameter(Mandatory=$false)]
+    [string]$Password = "password",
+    [Parameter(Mandatory=$false)]
     [switch]$NoTablespaces,
     [Parameter(Mandatory=$false)]
     [switch]$SkipExtendedInsert,
@@ -55,7 +57,7 @@ function Create-DatabaseDump {
     if ($SkipExtendedInsert) {
         $dumpArgs += "--skip-extended-insert"
     }
-    $dumpArgs += @("-u$User", "-p`"$password`"", $Database)
+    $dumpArgs += @("-u$User", "-p$Password", $Database)
     Write-Host "Erstelle Datenbank-Backup..." -ForegroundColor Yellow
     Write-Host "  Container: $Container" -ForegroundColor Gray
     Write-Host "  Database:  $Database" -ForegroundColor Gray
