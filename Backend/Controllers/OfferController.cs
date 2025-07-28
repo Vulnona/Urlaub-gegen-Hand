@@ -62,6 +62,60 @@ public class OfferController : ControllerBase
         }
     }
 
+    [HttpGet("test-simple")]
+    [AllowAnonymous]
+    public async Task<IActionResult> TestSimpleOffers()
+    {
+        try
+        {
+            // Einfachste mögliche Query - nur die Offers ohne Includes
+            var offers = await _context.offertypelodgings
+                .Take(5)
+                .Select(o => new { 
+                    o.Id, 
+                    o.Title, 
+                    o.GroupSize,
+                    o.Mobility,
+                    o.Status,
+                    o.OfferType
+                })
+                .ToListAsync();
+            
+            return Ok(offers);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"TestSimpleOffers exception: {ex.Message}");
+            return StatusCode(500, $"Error: {ex.Message}");
+        }
+    }
+
+    [HttpGet("test-pictures")]
+    [AllowAnonymous]
+    public async Task<IActionResult> TestPicturesInclude()
+    {
+        try
+        {
+            // Test nur Pictures Include
+            var offers = await _context.offertypelodgings
+                .Include(o => o.Pictures)
+                .Take(2)
+                .Select(o => new { 
+                    o.Id, 
+                    o.Title,
+                    PictureCount = o.Pictures.Count()
+                })
+                .ToListAsync();
+            
+            return Ok(offers);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"TestPicturesInclude exception: {ex.Message}");
+            return StatusCode(500, $"Error: {ex.Message}");
+        }
+    }
+
     [HttpGet("get-all-offers")]
     public async Task<IActionResult> GetOffersAsync(
         string searchTerm, 
@@ -194,7 +248,7 @@ public class OfferController : ControllerBase
             if (user == null)
                 return BadRequest("UserNotFound");            
 
-            int offerId = offerViewModel.OfferId;
+            int offerId = offerViewModel.OfferId ?? -1;
             OfferTypeLodging offer;
             if (offerId != -1) {
                 offer = await _context.offertypelodgings.Include(o => o.OfferApplications).FirstOrDefaultAsync(o => o.Id == offerId);
@@ -222,12 +276,18 @@ public class OfferController : ControllerBase
             _logger.LogInformation("Creating address with DisplayName: '{DisplayName}', Lat: {Lat}, Lon: {Lon}", 
                 offerViewModel.DisplayName, offerViewModel.Latitude, offerViewModel.Longitude);
             
-            offer.Address = new Address
+            var address = new Address
             {
                 Latitude = offerViewModel.Latitude,
                 Longitude = offerViewModel.Longitude,
                 DisplayName = offerViewModel.DisplayName
             };
+            
+            // Add address to context first
+            await _context.addresses.AddAsync(address);
+            await _context.SaveChangesAsync(); // Save to get the ID
+            
+            offer.Address = address;
             
             offer.Status = OfferStatus.Active;
             offer.GroupProperties = "";

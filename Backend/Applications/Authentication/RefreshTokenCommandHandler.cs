@@ -41,7 +41,7 @@ public class RefreshTokenCommandHandler : IRequestHandler<RefreshTokenCommand, R
                 return Result.Failure(new Error("Unauthorized", "User not found for refresh token."));
             }
             var activeMemberships = await _userRepository.GetActiveUserMembershipsAsync(user.User_Id);
-            var accessToken = await _tokenService.GenerateJwtToken(user, activeMemberships);
+            var accessToken = _tokenService.GenerateJwtToken(user, activeMemberships);
 
             return Result.Success(new { accessToken });
         }

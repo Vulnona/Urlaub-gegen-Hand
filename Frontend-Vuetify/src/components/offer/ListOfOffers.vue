@@ -105,7 +105,7 @@ const fetchOffers = async(newPage:Number) => {
             }
         });
         offers = response.data.items;
-        totalPages = Math.ceil(response.data.totalCount / pageSize);
+        totalPages = Math.max(1, Math.ceil(response.data.totalCount / pageSize));
     } catch (error) {       
     } finally {
         loading.value = false;

@@ -35,7 +35,7 @@ public class TokenService
 
     #region token-generation-service
 
-    public async Task<string> GenerateJwtToken(
+    public string GenerateJwtToken(
         User user,
         List<UserMembership> memberships = null
     )
@@ -229,6 +229,28 @@ public class TokenService
             _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
             throw new InvalidOperationException(ex.Message);
         }
+    }
+
+    // 2FA-Token für temporäre Authentifizierung (max. Sicherheit)
+    public string GenerateTwoFactorToken(Guid userId, string email)
+    {
+        var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
+        var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+        var claims = new List<Claim>
+        {
+            new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
+            new Claim(JwtRegisteredClaimNames.Sub, email),
+            new Claim("TokenType", "2fa"),
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+        };
+        var token = new JwtSecurityToken(
+            _configuration["Jwt:Issuer"],
+            _configuration["Jwt:Audience"],
+            claims,
+            expires: DateTime.UtcNow.AddMinutes(5),
+            signingCredentials: credentials
+        );
+        return new JwtSecurityTokenHandler().WriteToken(token);
     }
 
     #endregion

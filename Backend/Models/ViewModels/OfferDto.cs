@@ -41,7 +41,7 @@ public class OfferDTO
         Skills = o.Skills;        
         AverageRating = 0;
         Location = o.Address?.DisplayName ?? ""; // NEW: Use Address.DisplayName instead of Location
-        Region = "";
+        Region = o.Address?.DisplayName ?? ""; // Set Region to the same as Location for now
         AppliedStatus = appliedStatus;
         Description = o.Description;
         FromDate = o.FromDate.ToString("dd.MM.yyyy");
@@ -49,7 +49,7 @@ public class OfferDTO
         if (u != null){
             HostName = $"{u.FirstName} {u.LastName}";
             HostId = o.UserId;
-            HostPicture = u.ProfilePicture;
+            HostPicture = u.ProfilePicture ?? Array.Empty<byte>();
         }
         Status = o.Status;
         Address = o.Address == null ? null : new AddressDTO {
@@ -59,7 +59,14 @@ public class OfferDTO
             Id = o.Address.Id
         };
         // New structure: multiple pictures only
-        Images = o.Pictures?.Select(p => new { id = p.Id, src = $"data:image/png;base64,{Convert.ToBase64String(p.ImageData)}" }).ToList<object>() ?? new List<object>();
+        if (o.Pictures != null && o.Pictures.Any()) {
+            Images = o.Pictures.Select(p => new { id = p.Id, src = $"data:image/png;base64,{Convert.ToBase64String(p.ImageData)}" }).ToList<object>();
+        } else {
+            // Dummy-Bild als Platzhalter (hier: leere Liste, alternativ: Platzhalter-Base64 einfügen)
+            Images = new List<object>();
+            // Beispiel für Platzhalter-Bild (optional):
+            // Images.Add(new { id = 0, src = "data:image/png;base64,<BASE64-PLATZHALTER>" });
+        }
         // only relevant for OfferDetail
         ApplicationsExist = applicationsExist;
         // Backend-gesteuerte Logik für Reaktivierung

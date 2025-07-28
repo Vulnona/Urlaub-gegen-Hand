@@ -125,7 +125,7 @@
                 <span class="fw-medium fs-15 d-block mb-3">Skills:</span>
                 <div class="w-75">
                   <a v-for="skill in user.skills" :key="skill" href="javascript:void(0);">
-                    <span class="badge bg-light text-muted m-1 border">{{ skill }}</span>
+                    <span class="badge bg-light text-muted m-1 border">{{ skill.name || skill }}</span>
                   </a>
                 </div>
               </li>
@@ -273,7 +273,7 @@
   <div class="modal profile_pic_modal_layout" v-if="showPicModal == true">
     <div class="modal-content profile_pic_modal">
       <div class="modal-header">
-        <h4 class="card-title mb-0 fs-14">Change Profile Picture</h4>
+        <h4 class="card-title mb-0 fs-14">Profilbild ändern</h4>
         <span class="close" @click="showPicModal = false">&times;</span>
       </div>
       <div class="modal-body">
@@ -339,6 +339,8 @@
         selectedFile: null,
         userId: getLoggedUserId(),
         reviews: [],
+        currentPage: 1,
+        totalPages: 1,
       };
     },
     mounted() {
@@ -444,6 +446,15 @@
         this.showModal = true;
         this.showReviews(this.userId);
       },
+      async showReviews(userId) {
+        try {
+          const response = await axiosInstance.get(`review/get-user-reviews?userId=${userId}&page=${this.currentPage}`);
+          this.reviews.push(...response.data.items); // Append new reviews
+          this.totalPages = response.data.totalPages; // Update total pages
+        } catch (error) {
+          console.error('Fehler beim Laden der Reviews:', error);
+        }
+      },
       async redirectToOffer(offerId) {
         try {
           // Step 1: Open SweetAlert for user input
@@ -521,8 +532,11 @@
       handleProfilePicUpload(event) {
         const reader = new FileReader();
         reader.onload = async () => {
+          // Convert base64 to byte array
+          const base64String = reader.result.split(',')[1]; // Remove data:image/jpeg;base64, prefix
+          const byteArray = this.base64ToByteArray(base64String);
           const requestBody = {
-            profilePicture: reader.result
+            profilePicture: byteArray
           };
           await this.updateProfilePicture(requestBody);
         };
@@ -537,6 +551,48 @@
       editProfilePic() {
         this.showPicModal = true;
       },
+      previewProfilePic(event) {
+        const file = event.target.files[0];
+        if (file) {
+          this.selectedFile = file;
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            this.profilePic = e.target.result;
+          };
+          reader.readAsDataURL(file);
+        }
+      },
+      async submitProfilePic() {
+        if (!this.selectedFile) {
+          toast.error('Bitte wählen Sie zuerst ein Bild aus.');
+          return;
+        }
+        
+        try {
+          const reader = new FileReader();
+          reader.onload = async () => {
+            // Convert base64 to byte array
+            const base64String = reader.result.split(',')[1]; // Remove data:image/jpeg;base64, prefix
+            const byteArray = this.base64ToByteArray(base64String);
+            const requestBody = {
+              profilePicture: byteArray
+            };
+            await this.updateProfilePicture(requestBody);
+          };
+          reader.readAsDataURL(this.selectedFile);
+        } catch (error) {
+          console.error('Fehler beim Hochladen des Profilbilds:', error);
+          toast.error('Fehler beim Hochladen des Profilbilds.');
+        }
+      },
+      base64ToByteArray(base64String) {
+        const binaryString = atob(base64String);
+        const bytes = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+          bytes[i] = binaryString.charCodeAt(i);
+        }
+        return Array.from(bytes);
+      },
       upload_id() {
         router.push("/upload-id").then(() => { });
       },
@@ -547,7 +603,13 @@
         try {
           const response = await axiosInstance.get(`profile/get-user-profile`);
           this.user = response.data.profile;
-          this.profileImgSrc = `data:image/jpeg;base64,${response.data.profile.profilePicture}`;
+          if (response.data.profile.profilePicture && response.data.profile.profilePicture.length > 0) {
+            // Convert byte array to base64
+            const base64String = btoa(String.fromCharCode(...response.data.profile.profilePicture));
+            this.profileImgSrc = `data:image/jpeg;base64,${base64String}`;
+          } else {
+            this.profileImgSrc = this.defaultProfileImgSrc;
+          }
         } catch (error) {
           console.error('Fehler beim Abrufen der Benutzerdaten:', error);
           toast.info("Benutzerdaten konnten nicht abgerufen werden.");

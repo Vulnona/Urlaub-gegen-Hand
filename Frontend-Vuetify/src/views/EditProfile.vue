@@ -125,13 +125,13 @@ export default {
         const response = await axiosInstance.get(`profile/get-user-profile`);
         if (response.data.profile) {
           this.profile = response.data.profile;
-          this.profile.skills = Array.isArray(this.profile.skills) ? this.profile.skills : [];
-          this.profile.hobbies = Array.isArray(this.profile.hobbies) ? this.profile.hobbies :
+          // Filter out empty skills and ensure they have the correct structure
+          this.profile.skills = Array.isArray(this.profile.skills) 
+            ? this.profile.skills.filter(skill => skill && skill.id && skill.name)
+            : [];
+          this.profile.hobbies = Array.isArray(this.profile.hobbies) ? this.profile.hobbies : 
             (typeof this.profile.hobbies === 'string' ? this.profile.hobbies.split(', ') : []);
           await this.fetchSkills();
-          this.profile.skills = this.profile.skills.map(userSkill =>
-            this.skills.find(skill => skill.skill_ID === userSkill.skill_ID) || userSkill
-          );
         } else {
           toast.info("Benutzerprofildaten nicht gefunden");
         }
@@ -144,7 +144,9 @@ export default {
       console.log('Profil speichern Button geklickt');
       if (this.validateForm()) {
         const updateRequest = {
-          Skills: Array.isArray(this.profile.skills) ? this.profile.skills.join(', ') : this.profile.skills,
+          Skills: Array.isArray(this.profile.skills) 
+            ? this.profile.skills.map(skill => skill.id || skill).filter(s => s && s !== '').join(', ')
+            : this.profile.skills,
           Hobbies: Array.isArray(this.profile.hobbies) ? this.profile.hobbies.join(', ') : this.profile.hobbies
         };
         console.log('Update-Request:', updateRequest);
@@ -159,15 +161,13 @@ export default {
         if (response.status === 200) {
           toast.success("Profil erfolgreich gespeichert!");
           if (response.data && response.data.profile) {            
-            this.profile.skills = Array.isArray(this.profile.skills) ? this.profile.skills :
-              (typeof this.profile.skills === 'string' ? this.profile.skills.split(', ') : []);
+            this.profile.skills = Array.isArray(this.profile.skills) 
+              ? this.profile.skills.filter(skill => skill && skill.id && skill.name)
+              : [];
             this.profile = {
               ...response.data.profile,
               skills: this.profile.skills
             };
-            this.profile.skills = this.profile.skills.map(userSkill =>
-              this.skills.find(skill => skill.skill_ID === userSkill.skill_ID) || userSkill
-            );
           }
           this.$router.push('/profile');
         } else {

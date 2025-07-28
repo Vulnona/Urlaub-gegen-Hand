@@ -1,3 +1,4 @@
+#nullable enable
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using UGH.Domain.Core;
@@ -23,11 +24,10 @@ namespace UGH.Domain.Entities
         [Required]
         public string Gender { get; set; }
 
-        [Required]
-        public int AddressId { get; set; }
+        public int? AddressId { get; set; }
         
         [ForeignKey("AddressId")]
-        public Address Address { get; set; } = null!;
+        public Address? Address { get; set; }
 
         [Required, EmailAddress]
         public string Email_Address { get; set; }
@@ -90,7 +90,7 @@ namespace UGH.Domain.Entities
             string lastName,
             DateOnly dateOfBirth,
             string gender,
-            int addressId,
+            int? addressId,
             string emailAddress,
             bool isEmailVerified,
             string password,

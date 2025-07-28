@@ -39,6 +39,7 @@ namespace UGHApi.Models.TwoFactor
         public string Password { get; set; } = string.Empty;
         public string TwoFactorCode { get; set; } = string.Empty;
         public bool IsBackupCode { get; set; } = false;
+        public string TwoFactorToken { get; set; }
     }
 
     public class TwoFactorStatusResponse

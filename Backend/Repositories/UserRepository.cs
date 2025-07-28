@@ -198,7 +198,7 @@ public class UserRepository : IUserRepository
             .Include(u => u.UserMemberships)
                 .ThenInclude(um => um.Membership)
             .Include(u => u.CurrentMembership)
-            .FirstOrDefaultAsync(u => u.Email_Address == email);
+            .FirstOrDefaultAsync(u => u.Email_Address.ToLower() == email.ToLower());
     }
 
     public async Task<List<UserMembership>> GetActiveUserMembershipsAsync(Guid userId)

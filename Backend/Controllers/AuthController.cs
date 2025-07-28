@@ -29,8 +29,9 @@ namespace UGHApi.Controllers
         private readonly PasswordService _passwordService;
         private readonly UserService _userService;
         private readonly ITwoFactorAuthService _twoFactorAuthService;        
+        private readonly IConfiguration _configuration;
 
-        public AuthController(Ugh_Context context, ILogger<AuthController> logger, IMediator mediator, TokenService tokenService, IUserRepository userRepository, EmailService emailService, PasswordService passwordService,IUserProvider userProvider, UserService userService, ITwoFactorAuthService twoFactorAuthService)
+        public AuthController(Ugh_Context context, ILogger<AuthController> logger, IMediator mediator, TokenService tokenService, IUserRepository userRepository, EmailService emailService, PasswordService passwordService,IUserProvider userProvider, UserService userService, ITwoFactorAuthService twoFactorAuthService, IConfiguration configuration)
         {
             _context = context;
             _logger = logger;
@@ -42,6 +43,7 @@ namespace UGHApi.Controllers
             _userProvider = userProvider;
             _userService = userService;
             _twoFactorAuthService = twoFactorAuthService;
+            _configuration = configuration;
         }
 
         #region user-authorization
@@ -342,13 +344,44 @@ namespace UGHApi.Controllers
                 if (!ModelState.IsValid)
                     return BadRequest(ModelState);
 
+                // Prüfe das temporäre 2FA-Token
+                var tokenHandler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
+                var key = System.Text.Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]);
+                try
+                {
+                    var validationParams = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidateAudience = true,
+                        ValidIssuer = _configuration["Jwt:Issuer"],
+                        ValidAudience = _configuration["Jwt:Audience"],
+                        ValidateLifetime = true,
+                        IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(key),
+                        ValidateIssuerSigningKey = true
+                    };
+                    var principal = tokenHandler.ValidateToken(request.TwoFactorToken, validationParams, out var validatedToken);
+                    var tokenType = principal.Claims.FirstOrDefault(x => x.Type == "TokenType")?.Value;
+                    var userIdClaim = principal.Claims.FirstOrDefault(x => x.Type == System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                    var emailClaim = principal.Claims.FirstOrDefault(x => x.Type == System.Security.Claims.ClaimTypes.Email || x.Type == System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Sub)?.Value;
+                    if (tokenType != "2fa")
+                        return BadRequest("Invalid 2FA token type");
+                    if (userIdClaim == null || emailClaim == null)
+                        return BadRequest("Invalid 2FA token claims");
+                    // Prüfe, ob die UserId und Email mit dem Request übereinstimmen
+                    if (userIdClaim != null && request.Email != null && userIdClaim != (await _userRepository.GetUserByEmailAsync(request.Email))?.User_Id.ToString())
+                        return BadRequest("Token/User mismatch");
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError($"2FA token validation failed: {ex.Message}");
+                    return BadRequest("Invalid or expired 2FA token");
+                }
+
                 var user = await _userRepository.GetUserByEmailAsync(request.Email);
                 if (user == null)
                     return BadRequest("Invalid credentials");
 
-                // Verify password first
-                if (!_passwordService.VerifyPassword(request.Password, user.Password, user.SaltKey))
-                    return BadRequest("Invalid credentials");
+                // Passwortprüfung entfällt, da sie bereits im ersten Schritt geprüft wurde
 
                 // Check if 2FA is enabled
                 if (!user.IsTwoFactorEnabled)
@@ -375,7 +408,7 @@ namespace UGHApi.Controllers
 
                 // Generate JWT token with correct memberships
                 var activeMemberships = await _userRepository.GetActiveUserMembershipsAsync(user.User_Id);
-                var token = await _tokenService.GenerateJwtToken(user, activeMemberships);
+                var token = _tokenService.GenerateJwtToken(user, activeMemberships);
 
                 return Ok(new LoginResponse
                 {

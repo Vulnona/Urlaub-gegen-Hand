@@ -1,3 +1,5 @@
+#nullable enable
+
 namespace UGH.Contracts.Authentication;
 
 public class LoginResponse
@@ -9,4 +11,5 @@ public class LoginResponse
     public string FirstName { get; set; }
     public bool RequiresTwoFactor { get; set; } = false;
     public string Message { get; set; }
+    public string? TwoFactorToken { get; set; }
 }

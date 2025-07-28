@@ -114,6 +114,8 @@ body .custom-card .card-text strong {
 .location-input-with-badge {
   background: #fff !important;
   padding-right: 110px !important;
+  color: #000 !important;
+  z-index: 1;
 }
 .current-location-badge-infield {
   position: absolute;

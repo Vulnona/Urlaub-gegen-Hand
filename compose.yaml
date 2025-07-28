@@ -69,7 +69,7 @@ services:
     volumes:
       - db-data:/var/lib/mysql
       - ./my.cnf:/etc/my.cnf
-      - ./data.sql:/docker-entrypoint-initdb.d/data.sql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
       

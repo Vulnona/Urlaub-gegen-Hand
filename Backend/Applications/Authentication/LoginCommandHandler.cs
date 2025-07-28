@@ -65,13 +65,15 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, Result<LoginRes
             // Check if user has 2FA enabled - redirect to 2FA login
             if (user.IsTwoFactorEnabled)
             {
+                var twoFactorToken = _tokenService.GenerateTwoFactorToken(user.User_Id, user.Email_Address);
                 return Result.Success(new LoginResponse
                 {
                     RequiresTwoFactor = true,
                     Email = request.Email,
                     UserId = user.User_Id,
                     FirstName = user.FirstName,
-                    Message = "Two-factor authentication required"
+                    Message = "Two-factor authentication required",
+                    TwoFactorToken = twoFactorToken
                 });
             }
 
@@ -97,7 +99,7 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, Result<LoginRes
                 }
             }
 
-            var accessToken = await _tokenService.GenerateJwtToken(
+            var accessToken = _tokenService.GenerateJwtToken(
                 user,
                 activeMemberships
             );

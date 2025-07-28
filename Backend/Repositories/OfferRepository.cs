@@ -41,9 +41,10 @@ public class OfferRepository
     ) {    
         IQueryable<OfferTypeLodging> query = _context
             .offertypelodgings.Include(o => o.User)
-            .Include(o => o.OfferApplications)
-            .Include(o => o.Address)
-            .Include(o => o.Pictures); // Multi-Bild-Unterstützung
+            .Include(o => o.Address) // Include Address
+            .Include(o => o.Pictures) // Multi-Bild-Unterstützung
+            .Include(o => o.OfferApplications) // Include OfferApplications
+            .Include(o => o.Reviews); // Include Reviews for sorting
 
         // Apply sorting
         if (sortBy?.ToLower() == "best") {
@@ -104,8 +105,9 @@ public class OfferRepository
         
         var offerDTOs = offers
             .Select(o => {
-                var firstApplication = o.OfferApplications.FirstOrDefault(oa => oa.UserId == userId);
-                var applicationsExist = o.OfferApplications.Any();
+                var applications = o.OfferApplications ?? new List<OfferApplication>();
+                var firstApplication = applications.FirstOrDefault(oa => oa.UserId == userId);
+                var applicationsExist = applications.Any();
                 return new OfferDTO(o, o.User, firstApplication, applicationsExist);
             }).ToList();
 

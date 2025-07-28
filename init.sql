@@ -1,0 +1,420 @@
+-- UGH Database Initialization Script
+-- Based on complete MySQL Dump
+
+-- Drop existing tables if they exist (for clean initialization)
+DROP TABLE IF EXISTS `reviews`;
+DROP TABLE IF EXISTS `offerapplication`;
+DROP TABLE IF EXISTS `pictures`;
+DROP TABLE IF EXISTS `offers`;
+DROP TABLE IF EXISTS `usermembership`;
+DROP TABLE IF EXISTS `memberships`;
+DROP TABLE IF EXISTS `users`;
+DROP TABLE IF EXISTS `addresses`;
+DROP TABLE IF EXISTS `shopitems`;
+DROP TABLE IF EXISTS `coupons`;
+DROP TABLE IF EXISTS `redemptions`;
+DROP TABLE IF EXISTS `transaction`;
+DROP TABLE IF EXISTS `skills`;
+DROP TABLE IF EXISTS `passwordresettokens`;
+DROP TABLE IF EXISTS `emailverificators`;
+DROP TABLE IF EXISTS `userprofiles`;
+DROP TABLE IF EXISTS `DeletedUserBackups`;
+DROP TABLE IF EXISTS `accommodationsuitables`;
+DROP TABLE IF EXISTS `accomodations`;
+DROP TABLE IF EXISTS `__EFMigrationsHistory`;
+
+-- Create DeletedUserBackups table
+CREATE TABLE `DeletedUserBackups` (
+    `Id` int NOT NULL AUTO_INCREMENT,
+    `UserId` longtext NOT NULL,
+    `FirstName` longtext,
+    `LastName` longtext,
+    `Gender` longtext,
+    `DateOfBirth` datetime(6) DEFAULT NULL,
+    `Email` longtext,
+    `Skills` longtext,
+    `Hobbies` longtext,
+    `Address` longtext,
+    `Latitude` double DEFAULT NULL,
+    `Longitude` double DEFAULT NULL,
+    `ProfilePicture` longtext,
+    `DeletedAt` datetime(6) NOT NULL,
+    PRIMARY KEY (`Id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Create __EFMigrationsHistory table
+CREATE TABLE `__EFMigrationsHistory` (
+    `MigrationId` varchar(150) NOT NULL,
+    `ProductVersion` varchar(32) NOT NULL,
+    PRIMARY KEY (`MigrationId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Create accommodationsuitables table
+CREATE TABLE `accommodationsuitables` (
+    `Id` int NOT NULL AUTO_INCREMENT,
+    `Name` longtext NOT NULL,
+    PRIMARY KEY (`Id`)
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Create accomodations table
+CREATE TABLE `accomodations` (
+    `Id` int NOT NULL AUTO_INCREMENT,
+    `NameAccommodationType` longtext NOT NULL,
+    PRIMARY KEY (`Id`)
+) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Create addresses table
+CREATE TABLE `addresses` (
+    `Id` int NOT NULL AUTO_INCREMENT,
+    `Latitude` double NOT NULL,
+    `Longitude` double NOT NULL,
+    `DisplayName` varchar(255) NOT NULL,
+    `HouseNumber` varchar(50) DEFAULT NULL,
+    `Road` varchar(255) DEFAULT NULL,
+    `Suburb` varchar(255) DEFAULT NULL,
+    `City` varchar(255) DEFAULT NULL,
+    `County` varchar(255) DEFAULT NULL,
+    `State` varchar(255) DEFAULT NULL,
+    `Postcode` varchar(50) DEFAULT NULL,
+    `Country` varchar(255) DEFAULT NULL,
+    `CountryCode` varchar(10) DEFAULT NULL,
+    `OsmId` bigint DEFAULT NULL,
+    `OsmType` varchar(20) DEFAULT NULL,
+    `PlaceId` varchar(50) DEFAULT NULL,
+    `Type` int DEFAULT 0,
+    `CreatedAt` datetime DEFAULT CURRENT_TIMESTAMP,
+    `UpdatedAt` datetime DEFAULT NULL,
+    PRIMARY KEY (`Id`)
+) ENGINE=InnoDB AUTO_INCREMENT=33 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Create memberships table
+CREATE TABLE `memberships` (
+    `MembershipID` int NOT NULL AUTO_INCREMENT,
+    `Description` longtext NOT NULL,
+    `DurationDays` int NOT NULL,
+    `IsActive` tinyint(1) NOT NULL DEFAULT 0,
+    `Name` varchar(100) NOT NULL DEFAULT '',
+    `Price` decimal(65,30) NOT NULL DEFAULT 0.000000000000000000000000000000,
+    PRIMARY KEY (`MembershipID`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Create users table
+CREATE TABLE `users` (
+    `User_Id` char(36) NOT NULL,
+    `FirstName` longtext NOT NULL,
+    `LastName` longtext NOT NULL,
+    `DateOfBirth` date NOT NULL,
+    `Gender` longtext NOT NULL,
+    `AddressId` int NULL,
+    `Email_Address` longtext NOT NULL,
+    `Password` longtext NOT NULL,
+    `SaltKey` longtext NULL,
+    `IsTwoFactorEnabled` tinyint(1) NOT NULL DEFAULT 0,
+    `TwoFactorSecret` longtext NULL,
+    `BackupCodes` longtext NULL,
+    `IsEmailVerified` tinyint(1) NOT NULL DEFAULT 0,
+    `MembershipId` int NULL,
+    `Facebook_link` longtext NULL,
+    `Link_RS` longtext NULL,
+    `Link_VS` longtext NULL,
+    `Hobbies` longtext NULL,
+    `Skills` longtext NULL,
+    `ProfilePicture` longblob NULL,
+    `About` longtext NULL,
+    `VerificationState` int NOT NULL DEFAULT 0,
+    `UserRole` int NOT NULL DEFAULT 0,
+    PRIMARY KEY (`User_Id`),
+    INDEX `IX_users_AddressId` (`AddressId`),
+    INDEX `IX_users_MembershipId` (`MembershipId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Create usermembership table
+CREATE TABLE `usermembership` (
+    `UserMembershipID` int NOT NULL AUTO_INCREMENT,
+    `User_Id` char(36) NOT NULL,
+    `MembershipID` int NOT NULL,
+    `StartDate` datetime(6) NOT NULL,
+    `Expiration` datetime(6) NOT NULL,
+    `CreatedAt` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    `UpdatedAt` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    PRIMARY KEY (`UserMembershipID`),
+    INDEX `IX_usermembership_User_Id` (`User_Id`),
+    INDEX `IX_usermembership_MembershipID` (`MembershipID`)
+) ENGINE=InnoDB AUTO_INCREMENT=34 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Create offers table
+CREATE TABLE `offers` (
+    `Id` int NOT NULL AUTO_INCREMENT,
+    `Title` longtext NOT NULL,
+    `Description` longtext NOT NULL,
+    `Location` longtext NULL,
+    `GroupProperties` longtext NOT NULL,
+    `AdditionalLodgingProperties` longtext NULL,
+    `LodgingType` longtext NULL,
+    `Skills` longtext NOT NULL,
+    `Requirements` longtext NULL,
+    `SpecialConditions` longtext NULL,
+    `PossibleLocations` longtext NULL,
+    `UserId` char(36) NOT NULL,
+    `CreatedAt` date NOT NULL,
+    `Discriminator` longtext NOT NULL,
+    `FromDate` date NOT NULL DEFAULT '0001-01-01',
+    `GroupSize` int NOT NULL DEFAULT 0,
+    `Mobility` int NOT NULL DEFAULT 0,
+    `ModifiedAt` date NOT NULL DEFAULT '0001-01-01',
+    `OfferType` int NOT NULL DEFAULT 0,
+    `Status` int NOT NULL DEFAULT 0,
+    `ToDate` date NOT NULL DEFAULT '0001-01-01',
+    `AddressId` int DEFAULT NULL,
+    PRIMARY KEY (`Id`),
+    INDEX `IX_offers_UserId` (`UserId`)
+) ENGINE=InnoDB AUTO_INCREMENT=130 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Create offerapplication table
+CREATE TABLE `offerapplication` (
+    `Id` int NOT NULL AUTO_INCREMENT,
+    `OfferId` int NOT NULL,
+    `UserId` char(36) NOT NULL,
+    `HostId` char(36) NOT NULL,
+    `Status` int NOT NULL,
+    `CreatedAt` datetime(6) NOT NULL,
+    `UpdatedAt` datetime(6) NOT NULL,
+    PRIMARY KEY (`Id`),
+    INDEX `IX_offerapplication_OfferId` (`OfferId`),
+    INDEX `IX_offerapplication_UserId` (`UserId`),
+    INDEX `IX_offerapplication_HostId` (`HostId`)
+) ENGINE=InnoDB AUTO_INCREMENT=131 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Create pictures table
+CREATE TABLE `pictures` (
+    `Id` int NOT NULL AUTO_INCREMENT,
+    `Hash` longtext NULL,
+    `Width` int NOT NULL,
+    `ImageData` longblob NOT NULL,
+    `UserId` char(36) NOT NULL,
+    `OfferId` int DEFAULT NULL,
+    PRIMARY KEY (`Id`),
+    INDEX `IX_pictures_UserId` (`UserId`),
+    INDEX `IX_pictures_OfferId` (`OfferId`)
+) ENGINE=InnoDB AUTO_INCREMENT=28 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Create reviews table
+CREATE TABLE `reviews` (
+    `Id` int NOT NULL AUTO_INCREMENT,
+    `OfferId` int NOT NULL,
+    `RatingValue` int NOT NULL,
+    `ReviewComment` longtext NULL,
+    `CreatedAt` datetime(6) NOT NULL,
+    `UpdatedAt` datetime(6) NOT NULL,
+    `ReviewerId` char(36) NOT NULL,
+    `ReviewedId` char(36) NOT NULL,
+    PRIMARY KEY (`Id`),
+    INDEX `IX_reviews_OfferId` (`OfferId`),
+    INDEX `IX_reviews_ReviewerId` (`ReviewerId`),
+    INDEX `IX_reviews_ReviewedId` (`ReviewedId`)
+) ENGINE=InnoDB AUTO_INCREMENT=70 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Create shopitems table
+CREATE TABLE `shopitems` (
+    `Id` int NOT NULL AUTO_INCREMENT,
+    `Name` varchar(100) NOT NULL,
+    `Duration` int NOT NULL,
+    `Price_Amount` decimal(18,2) DEFAULT NULL,
+    `Price_Currency` varchar(3) DEFAULT NULL,
+    `Description` longtext,
+    PRIMARY KEY (`Id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Create coupons table
+CREATE TABLE `coupons` (
+    `Id` int NOT NULL AUTO_INCREMENT,
+    `Code` longtext NOT NULL,
+    `Name` longtext NOT NULL,
+    `Description` longtext NOT NULL,
+    `CreatedDate` datetime(6) NOT NULL,
+    `CreatedBy` char(36) NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000',
+    `Duration` int NOT NULL DEFAULT 0,
+    `MembershipId` int NOT NULL DEFAULT 0,
+    `IsEmailSent` tinyint(1) NOT NULL DEFAULT 0,
+    `EmailSentDate` datetime DEFAULT NULL,
+    `EmailSentTo` varchar(255) DEFAULT NULL,
+    PRIMARY KEY (`Id`),
+    INDEX `IX_coupons_CreatedBy` (`CreatedBy`),
+    INDEX `IX_coupons_MembershipId` (`MembershipId`)
+) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Create redemptions table
+CREATE TABLE `redemptions` (
+    `Id` int NOT NULL AUTO_INCREMENT,
+    `CouponId` int NOT NULL,
+    `UserId` char(36) NOT NULL,
+    `RedeemedDate` datetime(6) NOT NULL,
+    `UserEmail` longtext,
+    PRIMARY KEY (`Id`),
+    UNIQUE KEY `IX_redemptions_CouponId` (`CouponId`)
+) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Create transaction table
+CREATE TABLE `transaction` (
+    `Id` int NOT NULL AUTO_INCREMENT,
+    `TransactionDate` datetime(6) NOT NULL,
+    `Amount_Value` decimal(18,2) DEFAULT NULL,
+    `Amount_Currency` varchar(3) DEFAULT NULL,
+    `ShopItemId` int NOT NULL,
+    `UserId` char(36) NOT NULL,
+    `TransactionId` varchar(50) NOT NULL,
+    `Status` int NOT NULL,
+    `CouponId` int DEFAULT NULL,
+    `PaymentMethod` longtext,
+    PRIMARY KEY (`Id`),
+    INDEX `IX_transaction_ShopItemId` (`ShopItemId`),
+    INDEX `IX_transaction_UserId` (`UserId`),
+    INDEX `IX_transaction_CouponId` (`CouponId`)
+) ENGINE=InnoDB AUTO_INCREMENT=31 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Create skills table
+CREATE TABLE `skills` (
+    `Skill_ID` int NOT NULL AUTO_INCREMENT,
+    `SkillDescrition` longtext,
+    `ParentSkill_ID` int DEFAULT NULL,
+    PRIMARY KEY (`Skill_ID`)
+) ENGINE=InnoDB AUTO_INCREMENT=45 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Create passwordresettokens table
+CREATE TABLE `passwordresettokens` (
+    `TokenId` int NOT NULL AUTO_INCREMENT,
+    `user_Id` char(36) NOT NULL,
+    `Token` char(36) NOT NULL,
+    `requestDate` datetime(6) NOT NULL,
+    PRIMARY KEY (`TokenId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Create emailverificators table
+CREATE TABLE `emailverificators` (
+    `verificationId` int NOT NULL AUTO_INCREMENT,
+    `user_Id` char(36) NOT NULL,
+    `verificationToken` char(36) NOT NULL,
+    `requestDate` datetime(6) NOT NULL,
+    PRIMARY KEY (`verificationId`)
+) ENGINE=InnoDB AUTO_INCREMENT=82 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Create userprofiles table
+CREATE TABLE `userprofiles` (
+    `Id` int NOT NULL AUTO_INCREMENT,
+    `User_Id` char(36) NOT NULL,
+    `UserPic` longblob,
+    `Options` int NOT NULL,
+    `Hobbies` longtext,
+    `Token` longtext,
+    `Skills` longtext,
+    PRIMARY KEY (`Id`),
+    INDEX `IX_userprofiles_User_Id` (`User_Id`)
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Insert sample data
+
+-- Insert EF Migrations History
+INSERT INTO `__EFMigrationsHistory` VALUES 
+('20241016071620_InitialMigration','7.0.0'),
+('20250725223915_InitialCreate','7.0.20'),
+('20250725231705_RemoveCountryFields','7.0.20'),
+('20250726154812_AddDeletedUserBackup','7.0.20'),
+('20250727164854_AddOfferIdToPictures','7.0.20');
+
+-- Insert accommodationsuitables
+INSERT INTO `accommodationsuitables` VALUES 
+(3,'Kinderfreundlich'),
+(4,'Hundehalter'),
+(5,'Alleinreisend'),
+(6,'Paare'),
+(7,'Senioren'),
+(8,'Gruppen'),
+(9,'Barrierefrei');
+
+-- Insert accomodations
+INSERT INTO `accomodations` VALUES 
+(1,'Hütte'),
+(4,'Zelt'),
+(5,'Wohnmobil'),
+(6,'Zimmer'),
+(7,'Bauwagen'),
+(8,'Tiny House'),
+(9,'Boot'),
+(10,'Baumhaus'),
+(11,'Scheune'),
+(12,'Wohnwagen'),
+(13,'Scheune'),
+(14,'Wohnwagen');
+
+-- Insert addresses
+INSERT INTO `addresses` VALUES 
+(1,52.520008,13.404954,'Brandenburger Tor, Pariser Platz, 10117 Berlin, Deutschland',NULL,NULL,NULL,'Berlin',NULL,NULL,NULL,'Deutschland','DE',NULL,NULL,NULL,0,'2025-07-26 18:30:26',NULL),
+(2,48.137154,11.576124,'Marienplatz, 80331 München, Deutschland',NULL,NULL,NULL,'München',NULL,NULL,NULL,'Deutschland','DE',NULL,NULL,NULL,0,'2025-07-26 18:31:54',NULL),
+(3,50.110924,8.682127,'Römerberg, 60311 Frankfurt am Main, Deutschland',NULL,NULL,NULL,'Frankfurt',NULL,NULL,NULL,'Deutschland','DE',NULL,NULL,NULL,0,'2025-07-26 18:33:30',NULL),
+(32,50.9924496,9.7711081,'Hinter den Zäunen, Lispenhausen, 36199, Deutschland',NULL,NULL,NULL,'Lispenhausen',NULL,NULL,'36199','Deutschland',NULL,NULL,NULL,NULL,0,'2025-07-28 08:33:00',NULL);
+
+-- Insert memberships
+INSERT INTO `memberships` VALUES 
+(1,'Perfect for individuals or small businesses just starting out. The Basic Package provides essential access to our services',30,1,'Basic',4.990000000000000000000000000000),
+(2,'N/A',0,0,'Default',0.000000000000000000000000000000),
+(3,'Ideal for growing businesses that need more support and flexibility. The Standard Package offers enhanced features',60,1,'Standard',7.990000000000000000000000000000),
+(4,'Designed for established businesses looking for comprehensive support and maximum benefits. The Premium Package includes',120,1,'Deluxe',9.990000000000000000000000000000);
+
+-- Insert users (VerificationState: 0=IsNew, 1=VerificationPending, 2=VerificationFailed, 3=Verified)
+-- UserRole: 0=User, 1=Admin
+INSERT INTO `users` (`User_Id`, `FirstName`, `LastName`, `DateOfBirth`, `Gender`, `AddressId`, `Email_Address`, `Password`, `SaltKey`, `IsEmailVerified`, `MembershipId`, `VerificationState`, `UserRole`) VALUES
+('08ddca8e-a8b9-48ef-8e0b-09db16414bfa', 'Test', 'User', '1990-01-01', 'Other', 1, 'test@example.com', '$2a$11$YourHashedPasswordHere', 'salt123', 1, 1, 3, 0),
+('08dcd23c-d4eb-456b-87e4-73837709fada', 'Admin', 'User', '1985-05-15', 'Male', 2, 'admin@example.com', '$2a$11$YourHashedPasswordHere', 'salt456', 1, 3, 3, 1),
+('08dcd23c-d4eb-45db-87e4-73837709fada', 'John', 'Doe', '1992-03-20', 'Male', 3, 'john@example.com', '$2a$11$YourHashedPasswordHere', 'salt789', 1, 1, 3, 0),
+('08dcd23c-d4eb-45db-88e4-73837709fada', 'Jane', 'Smith', '1988-07-12', 'Female', NULL, 'jane@example.com', '$2a$11$YourHashedPasswordHere', 'salt101', 1, 1, 3, 0);
+
+-- Insert usermembership
+INSERT INTO `usermembership` (`UserMembershipID`, `User_Id`, `MembershipID`, `StartDate`, `Expiration`, `CreatedAt`, `UpdatedAt`) VALUES
+(1, '08ddca8e-a8b9-48ef-8e0b-09db16414bfa', 1, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY), NOW(), NOW()),
+(2, '08dcd23c-d4eb-456b-87e4-73837709fada', 3, NOW(), DATE_ADD(NOW(), INTERVAL 60 DAY), NOW(), NOW()),
+(3, '08dcd23c-d4eb-45db-87e4-73837709fada', 1, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY), NOW(), NOW()),
+(4, '08dcd23c-d4eb-45db-88e4-73837709fada', 1, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY), NOW(), NOW());
+
+-- Insert offers
+INSERT INTO `offers` (`Id`, `Title`, `Description`, `Location`, `GroupProperties`, `AdditionalLodgingProperties`, `LodgingType`, `Skills`, `Requirements`, `SpecialConditions`, `PossibleLocations`, `UserId`, `CreatedAt`, `Discriminator`, `FromDate`, `GroupSize`, `Mobility`, `ModifiedAt`, `OfferType`, `Status`, `ToDate`, `AddressId`) VALUES
+(125,'Ferienhaus am See','Schönes Ferienhaus direkt am See mit Bootsverleih',NULL,'Familie mit Kindern',NULL,NULL,'Wände streichen, Gartenarbeit','Mindestens 2 Wochen Aufenthalt',NULL,NULL,'08dcd23c-d4eb-456b-87e4-73837709fada','2025-07-27','OfferTypeLodging','2025-07-27',4,0,'2025-07-27',1,0,'2025-08-26',NULL),
+(126,'Alpine Hütte','Traditionelle Berghütte mit Panoramablick',NULL,'Wanderer, Bergsteiger',NULL,NULL,'Holz hacken, Kamin reinigen','Erfahrung im Umgang mit Holzöfen',NULL,NULL,'08dcd23c-d4eb-45db-87e4-73837709fada','2025-07-27','OfferTypeLodging','2025-07-27',6,1,'2025-07-27',1,0,'2025-09-10',NULL),
+(127,'Stadtwohnung Zentrum','Moderne Wohnung im Herzen der Stadt',NULL,'Paare, Singles',NULL,NULL,'Putzen, Einkaufen, Haustiere versorgen','Keine Haustiere erlaubt',NULL,NULL,'08dcd23c-d4eb-45db-88e4-73837709fada','2025-07-27','OfferTypeLodging','2025-07-27',2,2,'2025-07-27',1,0,'2025-08-16',NULL),
+(128,'Mein tolles Haus','Kommt mich besuchen',NULL,'','Boot',NULL,'Metall','Senioren, Gruppen',NULL,NULL,'08ddca8e-a8b9-48ef-8e0b-09db16414bfa','2025-07-27','OfferTypeLodging','2025-01-01',0,0,'0001-01-01',0,0,'2025-08-08',31);
+
+-- Insert sample pictures (dummy base64 data)
+INSERT INTO `pictures` (`Id`, `Hash`, `Width`, `ImageData`, `UserId`, `OfferId`) VALUES
+(1, 'hash1', 800, 0x89504E470D0A1A0A0000000D49484452000000320000003208060000001E3F88B1000000097048597300000B1300000B1301009A9C180000000774494D4507E4010F0F1D1E3B3B3B3B0000001974455874436F6D6D656E740043726561746564207769746820546B696E7465720000000049454E44AE426082, '08ddca8e-a8b9-48ef-8e0b-09db16414bfa', 1),
+(2, 'hash2', 800, 0x89504E470D0A1A0A0000000D49484452000000320000003208060000001E3F88B1000000097048597300000B1300000B1301009A9C180000000774494D4507E4010F0F1D1E3B3B3B3B0000001974455874436F6D6D656E740043726561746564207769746820546B696E7465720000000049454E44AE426082, '18ddca8e-a8b9-48ef-8e0b-09db16414bfb', 2);
+
+-- Insert sample offer applications
+INSERT INTO `offerapplication` (`Id`, `OfferId`, `UserId`, `HostId`, `Status`, `CreatedAt`, `UpdatedAt`) VALUES
+(1, 1, '28ddca8e-a8b9-48ef-8e0b-09db16414bfc', '08ddca8e-a8b9-48ef-8e0b-09db16414bfa', 0, NOW(), NOW());
+
+-- Insert sample reviews
+INSERT INTO `reviews` (`Id`, `OfferId`, `RatingValue`, `ReviewComment`, `CreatedAt`, `UpdatedAt`, `ReviewerId`, `ReviewedId`) VALUES
+(1, 1, 5, 'Sehr netter Gastgeber und schöne Unterkunft!', NOW(), NOW(), '28ddca8e-a8b9-48ef-8e0b-09db16414bfc', '08ddca8e-a8b9-48ef-8e0b-09db16414bfa'),
+(2, 3, 4, 'Gute Erfahrung, gerne wieder!', NOW(), NOW(), '08ddca8e-a8b9-48ef-8e0b-09db16414bfa', '28ddca8e-a8b9-48ef-8e0b-09db16414bfc');
+
+-- Insert sample shop items
+INSERT INTO `shopitems` (`Id`, `Name`, `Duration`, `Price_Amount`, `Price_Currency`, `Description`) VALUES
+(1, 'test', 30, 0.50, 'eur', 'testbeschreibung'),
+(2, 'Testangebot', 1, 0.50, 'eur', 'Dies ist ein Test des Shops. Der Coupon hat minimale Laufzeit und kostet den im Zahlungssystem kleinstmoeglichen Betrag.');
+
+-- Insert sample coupons
+INSERT INTO `coupons` (`Id`, `Code`, `Name`, `Description`, `CreatedDate`, `CreatedBy`, `Duration`, `MembershipId`) VALUES
+(1, 'WELCOME2024', 'Welcome Coupon', 'Welcome discount for new users', NOW(), '18ddca8e-a8b9-48ef-8e0b-09db16414bfb', 365, 1),
+(2, 'PREMIUM50', 'Premium Discount', '50% off premium membership', NOW(), '18ddca8e-a8b9-48ef-8e0b-09db16414bfb', 365, 3);
+
+-- Insert sample redemptions
+INSERT INTO `redemptions` (`Id`, `CouponId`, `UserId`, `RedeemedDate`, `UserEmail`) VALUES
+(1, 1, '08ddca8e-a8b9-48ef-8e0b-09db16414bfa', NOW(), 'test@example.com');
+
+-- Insert sample transactions
+INSERT INTO `transaction` (`Id`, `TransactionDate`, `Amount_Value`, `Amount_Currency`, `ShopItemId`, `UserId`, `TransactionId`, `Status`) VALUES
+(1, NOW(), 0.50, 'EUR', 1, '08ddca8e-a8b9-48ef-8e0b-09db16414bfa', 'txn_test_001', 1),
+(2, NOW(), 0.50, 'EUR', 2, '18ddca8e-a8b9-48ef-8e0b-09db16414bfb', 'txn_test_002', 1);
+
+-- Insert sample skills
+INSERT INTO `skills` (`Skill_ID`, `SkillDescrition`, `ParentSkill_ID`) VALUES
+(1,'Handwerk',NULL),(2,'Haushalt',NULL),(3,'Holz',1),(4,'Metall',1),(5,'Tapezieren',1),(6,'Wände streichen',1),(7,'Putzen',2),(8,'Aufräumen',2),(9,'Einkaufen',2),(10,'Kochen',2),(11,'zur Hand gehen - keine speziellen Kenntnisse notwendig',NULL),(12,'Tiersitting',NULL),(13,'Haussitting',11),(14,'Pferde',12),(15,'Kleintiere',12),(16,'Vögel oder Amphibien',12),(17,'Gartenarbeit',2),(18,'Trockenbau',1),(19,'Estrichleger',1),(20,'Fliesen verlegen',1),(21,'Installationsarbeiten Bad/Heizung/Sanitär',1),(22,'Installationsarbeiten Elektro',1),(23,'Zimmermann',1),(24,'Tischler',1),(25,'Dachdecker',1),(26,'Maurer',1),(27,'KFZ Reparatur',1),(28,'Informatiker',1),(29,'Backen',2),(30,'Kreativ',NULL),(31,'Marketing',30),(32,'Social Media',30),(33,'Texter',30),(34,'Grafiker',30),(35,'Fotografen',30),(36,'Journalisten',30),(37,'Webseite - Blog schreiben',30),(38,'Finanzen/Buchhaltung',NULL),(39,'Körpertherapie (wie Massage, Jin Shin Jyutsu, Fußreflex)',NULL),(40,'Führerschein',NULL),(41,'Führerschein PKW',40),(42,'Führerschein LKW',40),(43,'Kettensägenschein vorhanden',1),(44,'Brennholz hacken',1); 

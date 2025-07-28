@@ -47,7 +47,7 @@
                   <input type="text" id="twoFactorCode" v-model="twoFactorCode" placeholder="2FA Code oder Backup Code" />
                   <button class="btn" @click="submit2FA">2FA bestätigen</button>
                   <!-- Show current TOTP code for admin in dev/test -->
-                  <div v-if="email.toLowerCase() === 'adminuser@example.com'" class="totp-dev-code" style="margin-top:10px;">
+                  <div v-if="email.toLowerCase() === 'adminuser@example.com' && process.env.NODE_ENV !== 'production'" class="totp-dev-code" style="margin-top:10px;">
                     <strong>Entwickler-Testcode:</strong>
                     <span v-if="totpCode">{{ totpCode }}</span>
                     <span v-else>Lade Code...</span>
@@ -67,6 +67,7 @@
         </div>
       </div>
     </div>
+    <TwoFactorSetupDialog v-if="show2FASetup" :email="email" @setup-success="on2FASetupSuccess" />
   </div>
 </template>
 <script>
@@ -77,6 +78,7 @@ import AES from 'crypto-js/aes';
 import {GetUserRole} from "@/services/GetUserPrivileges";
 import axiosInstance from '@/interceptor/interceptor';
 import toast from '../toaster/toast';
+import TwoFactorSetupDialog from '@/components/TwoFactor/TwoFactorSetupDialog.vue';
 // Minimalistische TOTP-Berechnung für den Browser (SHA-1, 6 digits)
 function base32ToHex(base32) {
   const base32chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
@@ -116,7 +118,8 @@ function generateTotp(secret, digits = 6) {
 }
 export default {
   components: {
-    PublicNav
+    PublicNav,
+    TwoFactorSetupDialog
   },
   data() {
     return {
@@ -130,6 +133,8 @@ export default {
       twoFactorCode: '',
       totpCode: '',
       totpTimer: null,
+      twoFactorToken: '', // temporäres 2FA-Token
+      show2FASetup: false,
     };
   },
   methods: {
@@ -169,9 +174,10 @@ export default {
         });
         if (response.data.requiresTwoFactor) {
           this.show2FA = true;
+          this.twoFactorToken = response.data.twoFactorToken || '';
           toast.info("Bitte geben Sie Ihren 2FA-Code ein.");
           this.$nextTick(() => {
-            if (this.email.toLowerCase() === 'adminuser@example.com') {
+            if (this.email.toLowerCase() === 'adminuser@example.com' && process.env.NODE_ENV !== 'production') {
               this.startTotpUpdater();
             }
           });
@@ -180,7 +186,11 @@ export default {
         await this.handleLoginSuccess(response.data);
       } catch (error) {
         console.error('Fehler beim Login:', error);
-        if (error.response && error.response.status === 401) {
+        // Prüfe auf Admin-2FA-Setup-Fehler
+        if (error.response && error.response.data && typeof error.response.data === 'object' && error.response.data.Message && error.response.data.Message.includes('Admin accounts must have 2FA enabled')) {
+          this.show2FASetup = true;
+          toast.info('Bitte richten Sie jetzt die Zwei-Faktor-Authentifizierung ein.');
+        } else if (error.response && error.response.status === 401) {
           toast.info("Ungültige E-Mail oder Passwort oder bestätigen Sie zuerst Ihre E-Mail");
         } else {
           toast.info("Login nicht möglich. Bitte versuchen Sie es erneut.");
@@ -196,16 +206,23 @@ export default {
       try {
         const response = await axiosInstance.post('authenticate/login-2fa', {
           email: this.email,
-          password: this.password,
           twoFactorCode: this.twoFactorCode,
-          isBackupCode: false
+          isBackupCode: false,
+          twoFactorToken: this.twoFactorToken
         });
         await this.handleLoginSuccess(response.data);
         this.show2FA = false;
         this.twoFactorCode = '';
+        this.twoFactorToken = '';
       } catch (error) {
         console.error('Fehler beim 2FA-Login:', error);
-        toast.info("2FA-Code ungültig oder Serverfehler. Bitte versuchen Sie es erneut.");
+        if (error.response && error.response.data && error.response.data.includes('2FA token')) {
+          toast.info("Ihr 2FA-Token ist abgelaufen oder ungültig. Bitte loggen Sie sich erneut ein.");
+          this.show2FA = false;
+          this.twoFactorToken = '';
+        } else {
+          toast.info("2FA-Code ungültig oder Serverfehler. Bitte versuchen Sie es erneut.");
+        }
       }
     },
     async handleLoginSuccess(data) {
@@ -257,6 +274,12 @@ export default {
         this.totpTimer = null;
         console.log('[TOTP] Updater stopped.');
       }
+    },
+    on2FASetupSuccess() {
+      this.show2FASetup = false;
+      toast.success('2FA erfolgreich eingerichtet! Bitte loggen Sie sich jetzt mit 2FA ein.');
+      // Optional: Automatisch 2FA-Login anzeigen
+      this.show2FA = true;
     },
     watch: {
       show2FA(newVal) {

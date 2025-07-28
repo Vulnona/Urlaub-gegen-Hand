@@ -20,6 +20,6 @@ public class UserProfileDataDTO
     public string? VerificationState { get; set; }
     public double? UserRating { get; set; }
     public List<string>? Hobbies { get; set; }
-    public List<string>? Skills { get; set; }
+    public List<object>? Skills { get; set; }
     public DateTime? MembershipEndDate { get; set; }
 }

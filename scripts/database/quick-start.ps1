@@ -88,38 +88,38 @@ function Start-Services {
 
 function Wait-ForServices {
     Write-Host "Warte auf Services..." -ForegroundColor Yellow
-    
+
     $maxAttempts = 30
     $attempt = 0
-    
+
     while ($attempt -lt $maxAttempts) {
         $attempt++
         Write-Host "  Prüfe Services... (Versuch $attempt/$maxAttempts)" -ForegroundColor Gray
-        
+
         # Prüfe Datenbank
         $dbStatus = docker ps --format "table {{.Names}}\t{{.Status}}" | Select-String "ugh-db"
         if ($dbStatus -and $dbStatus -match "healthy") {
             Write-Host "✓ Datenbank ist bereit" -ForegroundColor Green
             break
         }
-        
+
         # Prüfe Backend
         $backendStatus = docker ps --format "table {{.Names}}\t{{.Status}}" | Select-String "ugh-backend"
         if ($backendStatus -and $backendStatus -match "Up") {
             Write-Host "✓ Backend ist bereit" -ForegroundColor Green
         }
-        
+
         # Prüfe Frontend
         $frontendStatus = docker ps --format "table {{.Names}}\t{{.Status}}" | Select-String "ugh-frontend"
         if ($frontendStatus -and $frontendStatus -match "Up") {
             Write-Host "✓ Frontend ist bereit" -ForegroundColor Green
         }
-        
+
         if ($attempt -eq $maxAttempts) {
             Write-Host "⚠ Timeout beim Warten auf Services" -ForegroundColor Yellow
             break
         }
-        
+
         Start-Sleep -Seconds 2
     }
 }
