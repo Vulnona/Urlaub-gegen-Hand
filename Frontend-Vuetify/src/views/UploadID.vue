@@ -131,9 +131,9 @@ const uploadImages = async () => {
 
       try {
         await updateUserLinks(userId, frontFileName, backFileName);
-        toast.success("Upload erfolgreich!");
+        toast.success("Upload erfolgreich! Deine Registrierung ist jetzt in Bearbeitung. Ein Admin prüft deine Angaben. Du erhältst eine E-Mail, sobald du freigeschaltet bist.");
         sessionStorage.clear();
-        router.push({ name: 'Login' }); // Use named route instead of path
+        router.push({ name: 'Login' });
       } catch (error) {
         console.error('Fehler beim Upload:', error);
         if (typeof error === 'object' && error !== null && 'isAxiosError' in error && (error as any).isAxiosError && (error as any).response && (error as any).response.status === 413) {
