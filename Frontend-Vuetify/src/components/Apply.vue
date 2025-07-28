@@ -1,5 +1,5 @@
 <template>
-  <div v-if="offer != null && isActiveMember && offer.hostId != logId && offer.status == '0'">
+  <div v-if="offer != null && isActiveMember && offer.hostId != logId && offer.status == '0' && userRole !== 'Admin'">
     <button v-if="offer.appliedStatus === 'CanApply'" @click="sendRequest(offer.id)"
             class="btn btn-success OfferButtons">Apply</button>
     <button v-else-if="offer.appliedStatus === 'Applied'" class="btn btn-info OfferButtons"
@@ -15,7 +15,8 @@
 const props = defineProps({
     offer: Object,
     isActiveMember: Boolean,
-    logId: String
+    logId: String,
+    userRole: String
 })
 
 </script>
@@ -35,7 +36,7 @@ export default {
       const result = await Swal.fire({
         title: 'Bist du sicher?',
         text: 'Möchtest du diese Anfrage senden?',
-        icon: '',
+        icon: 'question',
         showCancelButton: true,
         confirmButtonText: 'Apply',
         customClass: {

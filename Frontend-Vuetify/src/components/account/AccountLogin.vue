@@ -48,11 +48,19 @@
                     type="text" 
                     id="twoFactorCode" 
                     v-model="twoFactorCode" 
-                    placeholder="2FA Code oder Backup Code" 
+                    placeholder="2FA Code (6 Ziffern) oder Backup Code (8 Zeichen)" 
                     @keyup.enter="submit2FA"
-                    maxlength="6"
+                    maxlength="8"
                     autofocus
                   />
+                  <div v-if="twoFactorCode" class="code-type-indicator">
+                    <small v-if="isBackupCode(twoFactorCode)" style="color: #28a745;">
+                      <i class="ri-shield-keyhole-line"></i> Backup-Code erkannt
+                    </small>
+                    <small v-else-if="twoFactorCode.length === 6" style="color: #007bff;">
+                      <i class="ri-time-line"></i> 2FA-Code erkannt
+                    </small>
+                  </div>
                   <button class="btn" @click="submit2FA">2FA bestätigen</button>
                   <!-- Show current TOTP code for admin in dev/test -->
                   <div v-if="email.toLowerCase() === 'adminuser@example.com' && process.env.NODE_ENV !== 'production'" class="totp-dev-code" style="margin-top:10px;">
@@ -61,7 +69,7 @@
                     <span v-else>Lade Code...</span>
                     <span style="color:#888; font-size:0.9em; margin-left:10px;">(automatisch aktualisiert)</span>
                   </div>
-                  <div v-if="showBackupCodes && backupCodes.length" class="backup-codes-test">
+                  <div v-if="showBackupCodes && backupCodes.length && process.env.NODE_ENV !== 'production'" class="backup-codes-test">
                     <p><strong>Test-Backup-Codes (nur Testumgebung):</strong></p>
                     <ul>
                       <li v-for="code in backupCodes" :key="code">{{ code }}</li>
@@ -205,19 +213,36 @@ export default {
         }
       }
     },
+    // Helper function to detect if input is a backup code
+    isBackupCode(code) {
+      // Backup codes are typically 8 characters long and contain only alphanumeric characters
+      // They might also have a specific format like "XXXX-XXXX" or just "XXXXXXXX"
+      const cleanCode = code.replace(/[^A-Za-z0-9]/g, ''); // Remove non-alphanumeric chars
+      return cleanCode.length === 8; // Backup codes are 8 characters
+    },
+
     async submit2FA() {
       if (!this.twoFactorCode.trim()) {
         toast.info("Bitte geben Sie Ihren 2FA-Code ein!");
         return;
       }
       this.stopTotpUpdater();
+      
+      // Automatically detect if it's a backup code
+      const isBackup = this.isBackupCode(this.twoFactorCode);
+      
       try {
         const response = await axiosInstance.post('authenticate/login-2fa', {
           email: this.email,
           twoFactorCode: this.twoFactorCode,
-          isBackupCode: false,
+          isBackupCode: isBackup,
           twoFactorToken: this.twoFactorToken
         });
+        // Check if backup code was used
+        if (response.data.requires2FAReset) {
+          await this.showBackupCodeWarning();
+        }
+        
         await this.handleLoginSuccess(response.data);
         this.show2FA = false;
         this.twoFactorCode = '';
@@ -266,15 +291,22 @@ export default {
         // dummysecret als base32 für TOTP
         const secret = 'dummysecret'.toUpperCase();
         const code = generateTotp(secret, 6);
-        console.log('[TOTP] Generated code:', code);
+        // Only log in development environment
+        if (process.env.NODE_ENV === 'development') {
+          console.log('[TOTP] Generated code:', code);
+        }
         this.totpCode = code;
       } catch (err) {
-        console.error('[TOTP] Error generating code:', err);
+        if (process.env.NODE_ENV === 'development') {
+          console.error('[TOTP] Error generating code:', err);
+        }
         this.totpCode = '';
       }
     },
     startTotpUpdater() {
-      console.log('[TOTP] Starting updater...');
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[TOTP] Starting updater...');
+      }
       this.fetchTotpCode();
       this.stopTotpUpdater();
       this.totpTimer = setInterval(() => {
@@ -285,9 +317,60 @@ export default {
       if (this.totpTimer) {
         clearInterval(this.totpTimer);
         this.totpTimer = null;
-        console.log('[TOTP] Updater stopped.');
+        if (process.env.NODE_ENV === 'development') {
+          console.log('[TOTP] Updater stopped.');
+        }
       }
     },
+    async showBackupCodeWarning() {
+      const result = await Swal.fire({
+        title: '⚠️ Backup-Code verwendet!',
+        html: `
+          <div style="text-align: left;">
+            <p><strong>Ein Backup-Code wurde soeben verwendet.</strong></p>
+            <p>Dieser Code ist jetzt unwiderruflich verbraucht und kann nicht mehr verwendet werden.</p>
+            
+            <div style="background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 8px; padding: 15px; margin: 15px 0;">
+              <h4 style="color: #856404; margin: 0 0 10px 0;">🔒 Sicherheitshinweis:</h4>
+              <ul style="margin: 0; padding-left: 20px; color: #856404;">
+                <li>Ihr Account ist jetzt weniger sicher</li>
+                <li>Sie haben weniger Backup-Codes verfügbar</li>
+                <li>Bei Verlust Ihres Handys könnten Sie ausgesperrt werden</li>
+              </ul>
+            </div>
+            
+            <div style="background: #d1ecf1; border: 1px solid #bee5eb; border-radius: 8px; padding: 15px; margin: 15px 0;">
+              <h4 style="color: #0c5460; margin: 0 0 10px 0;">📱 Empfohlene Maßnahmen:</h4>
+              <ul style="margin: 0; padding-left: 20px; color: #0c5460;">
+                <li>Überprüfen Sie Ihre Authenticator-App</li>
+                <li>Stellen Sie sicher, dass Ihr Handy funktioniert</li>
+                <li>Erwägen Sie die Generierung neuer Backup-Codes</li>
+              </ul>
+            </div>
+          </div>
+        `,
+        icon: 'warning',
+        confirmButtonText: 'Verstanden',
+        confirmButtonColor: '#dc3545',
+        showCancelButton: true,
+        cancelButtonText: '2FA neu einrichten',
+        cancelButtonColor: '#007bff',
+        reverseButtons: true,
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        customClass: {
+          popup: 'backup-warning-popup',
+          title: 'backup-warning-title',
+          htmlContainer: 'backup-warning-content'
+        }
+      });
+
+      if (result.dismiss === Swal.DismissReason.cancel) {
+        // User clicked "2FA neu einrichten"
+        this.show2FASetup = true;
+      }
+    },
+
     on2FASetupSuccess() {
       this.show2FASetup = false;
       toast.success('2FA erfolgreich eingerichtet! Bitte loggen Sie sich jetzt mit 2FA ein.');
@@ -307,5 +390,41 @@ export default {
 <style>
 .v-container {
   display: none !important;
+}
+
+/* Backup Code Warning Popup Styles */
+:deep(.backup-warning-popup) {
+  border-radius: 12px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+}
+
+:deep(.backup-warning-title) {
+  color: #dc3545;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+:deep(.backup-warning-content) {
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+:deep(.backup-warning-content h4) {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+:deep(.backup-warning-content ul) {
+  margin: 0;
+  padding-left: 20px;
+}
+
+:deep(.backup-warning-content li) {
+  margin-bottom: 5px;
+}
+
+:deep(.swal2-popup) {
+  max-width: 500px;
 }
 </style>

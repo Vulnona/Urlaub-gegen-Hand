@@ -1,7 +1,12 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using UGH.Infrastructure.Services;
+using UGH.Domain.Core;
 using UGH.Domain.Interfaces;
+using UGH.Infrastructure.Services;
+using UGHApi.Models;
+using UGHApi.Services;
 using UGHApi.DATA;
+using System.Text.Json;
 
 namespace UGHApi.Controllers
 {
@@ -11,16 +16,215 @@ namespace UGHApi.Controllers
     {
         private readonly Ugh_Context _context;
         private readonly PasswordService _passwordService;
+        private readonly ITwoFactorAuthService _twoFactorAuthService;
+        private readonly EmailService _emailService;
         private readonly ILogger<AdminSetupController> _logger;
 
         public AdminSetupController(
             Ugh_Context context, 
             PasswordService passwordService,
+            ITwoFactorAuthService twoFactorAuthService,
+            EmailService emailService,
             ILogger<AdminSetupController> logger)
         {
             _context = context;
             _passwordService = passwordService;
+            _twoFactorAuthService = twoFactorAuthService;
+            _emailService = emailService;
             _logger = logger;
+        }
+
+        /// <summary>
+        /// Sichere Admin-Ersteinrichtung für nicht-technische Admins
+        /// </summary>
+        [HttpPost("secure-setup")]
+        public async Task<IActionResult> SecureAdminSetup([FromBody] SecureAdminSetupRequest request)
+        {
+            try
+            {
+                // Prüfe Setup-Token (aus Umgebungsvariable oder Konfiguration)
+                var validSetupToken = Environment.GetEnvironmentVariable("ADMIN_SETUP_TOKEN") ?? "default-setup-token-2024";
+                if (request.SetupToken != validSetupToken)
+                {
+                    _logger.LogWarning($"Invalid admin setup token attempt from IP: {HttpContext.Connection.RemoteIpAddress}");
+                    return Unauthorized("Ungültiger Setup-Token");
+                }
+
+                // Prüfe ob bereits ein Admin existiert
+                var existingAdmin = _context.users.FirstOrDefault(u => u.UserRole == UserRoles.Admin);
+                if (existingAdmin != null)
+                {
+                    return BadRequest("Admin-Account bereits vorhanden. Setup nicht mehr möglich.");
+                }
+
+                // Erstelle Admin-Account
+                var adminUser = new UGH.Domain.Entities.User
+                {
+                    User_Id = Guid.NewGuid(),
+                    FirstName = request.FirstName,
+                    LastName = request.LastName,
+                    Email_Address = request.Email,
+                    DateOfBirth = request.DateOfBirth,
+                    Gender = request.Gender,
+                    UserRole = UserRoles.Admin,
+                    IsEmailVerified = true,
+                    VerificationState = UGH_Enums.VerificationState.Verified,
+                    IsTwoFactorEnabled = false // Wird später aktiviert
+                };
+
+                // Hash Passwort
+                var salt = _passwordService.GenerateSalt();
+                adminUser.Password = _passwordService.HashPassword(request.Password, salt);
+                adminUser.SaltKey = salt;
+
+                _context.users.Add(adminUser);
+                await _context.SaveChangesAsync();
+
+                // Generiere 2FA-Setup-Token (24 Stunden gültig)
+                var setupToken = Guid.NewGuid().ToString();
+                var setupExpiry = DateTime.UtcNow.AddHours(24);
+                
+                // Speichere Setup-Token (in Produktion: Redis oder Datenbank)
+                // Hier vereinfacht in Umgebungsvariable
+                Environment.SetEnvironmentVariable($"ADMIN_SETUP_{setupToken}", adminUser.User_Id.ToString());
+
+                // Sende E-Mail mit Setup-Link
+                var setupLink = $"{Request.Scheme}://{Request.Host}/admin-setup?token={setupToken}";
+                await SendAdminSetupEmail(adminUser.Email_Address, setupLink, adminUser.FirstName);
+
+                _logger.LogInformation($"Admin setup initiated for: {request.Email}");
+
+                return Ok(new { 
+                    message = "Admin-Setup erfolgreich initiiert. Prüfen Sie Ihre E-Mails für weitere Anweisungen.",
+                    email = request.Email
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error during admin setup: {ex.Message}");
+                return StatusCode(500, "Interner Serverfehler");
+            }
+        }
+
+        /// <summary>
+        /// 2FA-Setup für Admin über Setup-Token
+        /// </summary>
+        [HttpPost("setup-2fa")]
+        public async Task<IActionResult> SetupAdmin2FA([FromBody] Admin2FASetupRequest request)
+        {
+            try
+            {
+                // Validiere Setup-Token
+                var userIdString = Environment.GetEnvironmentVariable($"ADMIN_SETUP_{request.SetupToken}");
+                if (string.IsNullOrEmpty(userIdString) || !Guid.TryParse(userIdString, out var userId))
+                {
+                    return BadRequest("Ungültiger oder abgelaufener Setup-Token");
+                }
+
+                var adminUser = await _context.users.FindAsync(userId);
+                if (adminUser == null || adminUser.UserRole != UserRoles.Admin)
+                {
+                    return BadRequest("Admin-User nicht gefunden");
+                }
+
+                // Generiere 2FA-Secret und QR-Code
+                var secret = _twoFactorAuthService.GenerateSecret();
+                var qrCodeUri = _twoFactorAuthService.GenerateQrCodeUri(adminUser.Email_Address, secret);
+                var qrCodeImage = _twoFactorAuthService.GenerateQrCode(qrCodeUri);
+                var backupCodes = _twoFactorAuthService.GenerateBackupCodes();
+
+                return Ok(new
+                {
+                    secret = secret,
+                    qrCodeUri = qrCodeUri,
+                    qrCodeImage = Convert.ToBase64String(qrCodeImage),
+                    backupCodes = backupCodes,
+                    email = adminUser.Email_Address
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error during 2FA setup: {ex.Message}");
+                return StatusCode(500, "Interner Serverfehler");
+            }
+        }
+
+        /// <summary>
+        /// 2FA-Verifizierung und Aktivierung für Admin
+        /// </summary>
+        [HttpPost("verify-2fa")]
+        public async Task<IActionResult> VerifyAdmin2FA([FromBody] Admin2FAVerifyRequest request)
+        {
+            try
+            {
+                // Validiere Setup-Token
+                var userIdString = Environment.GetEnvironmentVariable($"ADMIN_SETUP_{request.SetupToken}");
+                if (string.IsNullOrEmpty(userIdString) || !Guid.TryParse(userIdString, out var userId))
+                {
+                    return BadRequest("Ungültiger oder abgelaufener Setup-Token");
+                }
+
+                var adminUser = await _context.users.FindAsync(userId);
+                if (adminUser == null)
+                {
+                    return BadRequest("Admin-User nicht gefunden");
+                }
+
+                // Verifiziere 2FA-Code
+                if (!_twoFactorAuthService.ValidateCode(request.Secret, request.Code))
+                {
+                    return BadRequest("Ungültiger 2FA-Code");
+                }
+
+                // Aktiviere 2FA
+                adminUser.IsTwoFactorEnabled = true;
+                adminUser.TwoFactorSecret = request.Secret;
+                adminUser.BackupCodes = JsonSerializer.Serialize(request.BackupCodes);
+
+                await _context.SaveChangesAsync();
+
+                // Lösche Setup-Token
+                Environment.SetEnvironmentVariable($"ADMIN_SETUP_{request.SetupToken}", null);
+
+                _logger.LogInformation($"2FA activated for admin: {adminUser.Email_Address}");
+
+                return Ok(new { 
+                    message = "2FA erfolgreich aktiviert! Sie können sich jetzt anmelden.",
+                    email = adminUser.Email_Address
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error during 2FA verification: {ex.Message}");
+                return StatusCode(500, "Interner Serverfehler");
+            }
+        }
+
+        private async Task SendAdminSetupEmail(string email, string setupLink, string firstName)
+        {
+            var subject = "UGH Admin Setup - Sicherheitslink";
+            var body = $@"
+                <h2>Willkommen bei UGH, {firstName}!</h2>
+                
+                <p>Ihr Admin-Account wurde erfolgreich erstellt. Um die Sicherheit zu gewährleisten, 
+                müssen Sie jetzt die Zwei-Faktor-Authentifizierung (2FA) einrichten.</p>
+                
+                <h3>Nächste Schritte:</h3>
+                <ol>
+                    <li>Klicken Sie auf den folgenden Link: <a href='{setupLink}'>2FA einrichten</a></li>
+                    <li>Folgen Sie den Anweisungen auf der Seite</li>
+                    <li>Scannen Sie den QR-Code mit Ihrer Authenticator-App</li>
+                    <li>Geben Sie den 6-stelligen Code ein</li>
+                </ol>
+                
+                <p><strong>Wichtig:</strong> Dieser Link ist 24 Stunden gültig.</p>
+                
+                <p>Falls Sie Fragen haben, kontaktieren Sie den Systemadministrator.</p>
+                
+                <p>Mit freundlichen Grüßen<br>Ihr UGH-Team</p>
+            ";
+
+            await _emailService.SendEmailAsync(email, subject, body);
         }
 
         /// <summary>
@@ -113,6 +317,31 @@ namespace UGHApi.Controllers
             }
         }
     }
+
+    public class SecureAdminSetupRequest
+    {
+        public string SetupToken { get; set; } = string.Empty;
+        public string FirstName { get; set; } = string.Empty;
+        public string LastName { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
+        public DateOnly DateOfBirth { get; set; }
+        public string Gender { get; set; } = string.Empty;
+    }
+
+    public class Admin2FASetupRequest
+    {
+        public string SetupToken { get; set; } = string.Empty;
+    }
+
+    public class Admin2FAVerifyRequest
+    {
+        public string SetupToken { get; set; } = string.Empty;
+        public string Secret { get; set; } = string.Empty;
+        public string Code { get; set; } = string.Empty;
+        public List<string> BackupCodes { get; set; } = new List<string>();
+    }
+
     public class EmergencyResetRequest
     {
         public string ResetToken { get; set; } = string.Empty;

@@ -89,7 +89,7 @@ namespace UGHApi
             // Configure Kestrel to listen on a specific port
             builder.WebHost.ConfigureKestrel(serverOptions =>
             {
-                serverOptions.ListenAnyIP(8080); // Set the desired port
+                serverOptions.ListenAnyIP(8081); // Set the desired port
             });
             builder.Configuration.AddJsonFile(
                 "appsettings.json",

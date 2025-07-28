@@ -9,6 +9,7 @@ using UGHApi.Applications.Coupons;
 using UGHApi.Applications.ShopItems;
 using UGH.Domain.Interfaces;
 using UGHApi.Models;
+using UGHApi.ViewModels;
 using UGHApi.Repositories;
 using UGHApi.Services.UserProvider;
 
@@ -38,15 +39,19 @@ namespace UGHApi.Controllers
         }
 
         #region Coupon-generation-by-admin
-        [HttpPost("coupon/add-coupon")]
+        [HttpPost("add-coupon")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> AddCoupon([FromBody] int membershipId)
+        public async Task<IActionResult> AddCoupon([FromBody] AddCouponRequest request)
         {
             try
             {
+                _logger.LogInformation($"=== DEBUG: AddCoupon called ===");
+                _logger.LogInformation($"Request: {System.Text.Json.JsonSerializer.Serialize(request)}");
+                
                 var userId = _userProvider.UserId;
-                var result = await _mediator.Send(new AddCouponCommand(userId, membershipId));
+                var result = await _mediator.Send(new AddCouponCommand(userId, request.MembershipId));
 
+                _logger.LogInformation($"AddCoupon result: {System.Text.Json.JsonSerializer.Serialize(result)}");
                 return Ok(result);
             }
             catch (Exception ex)
@@ -64,6 +69,44 @@ namespace UGHApi.Controllers
             {
                 var result = await _mediator.Send(
                     new SendCouponQuery(reuest.UserId, reuest.CouponCode)
+                );
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        [HttpPost("coupon/create-and-send")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> CreateAndSendCoupon([FromBody] CreateAndSendCouponRequest request)
+        {
+            try
+            {
+                var result = await _mediator.Send(
+                    new CreateAndSendCouponCommand(request.Email, request.MembershipId, request.Name)
+                );
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        [HttpPost("coupon/send-existing")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> SendExistingCoupon([FromBody] SendExistingCouponRequest request)
+        {
+            try
+            {
+                var result = await _mediator.Send(
+                    new SendExistingCouponCommand(request.CouponId)
                 );
 
                 return Ok(result);
@@ -107,6 +150,11 @@ namespace UGHApi.Controllers
         {
             try
             {
+                _logger.LogInformation($"=== DEBUG: GetAllCoupon called ===");
+                _logger.LogInformation($"Request URI: {Request.Path}{Request.QueryString}");
+                _logger.LogInformation($"Headers: {string.Join(", ", Request.Headers.Select(h => $"{h.Key}={h.Value}"))}");
+                _logger.LogInformation($"pageNumber: {pageNumber}, pageSize: {pageSize}");
+                
                 if (pageNumber < 1 || pageSize < 1)
                 {
                     return BadRequest("Page number and page size must be greater than 0.");
@@ -116,7 +164,15 @@ namespace UGHApi.Controllers
 
                 if (coupons.Items.IsNullOrEmpty())
                 {
-                    return NotFound("No coupons found.");
+                    _logger.LogWarning("No coupons found - returning empty list");
+                    return Ok(new
+                    {
+                        Items = new List<CouponDto>(),
+                        TotalCount = 0,
+                        PageNumber = pageNumber,
+                        PageSize = pageSize,
+                        TotalPages = 0
+                    });
                 }
 
                 var response = new
@@ -128,6 +184,7 @@ namespace UGHApi.Controllers
                     coupons.TotalPages,
                 };
 
+                _logger.LogInformation($"Returning {coupons.Items.Count()} coupons");
                 return Ok(response);
             }
             catch (Exception ex)
@@ -161,7 +218,7 @@ namespace UGHApi.Controllers
         [Authorize]
         public async Task<IActionResult> RedeemCoupon([FromBody] RedeemCouponRequest request)
         {
-            _logger.LogInformation($"Coupon wird eingelöst userid:{_userProvider.UserId}, code:{request.CouponCode}");
+            _logger.LogInformation($"Coupon wird eingelï¿½st userid:{_userProvider.UserId}, code:{request.CouponCode}");
             try
             {
                 var userId = _userProvider.UserId;                

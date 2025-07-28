@@ -397,6 +397,8 @@ namespace UGHApi.Controllers
 
                 // Verify 2FA code
                 bool isValid = false;
+                bool isBackupCodeUsed = false;
+                
                 if (request.IsBackupCode)
                 {
                     isValid = _twoFactorAuthService.ValidateBackupCode(user.BackupCodes, request.TwoFactorCode);
@@ -404,6 +406,10 @@ namespace UGHApi.Controllers
                     {
                         user.BackupCodes = _twoFactorAuthService.RemoveUsedBackupCode(user.BackupCodes, request.TwoFactorCode);
                         await _userRepository.UpdateUserAsync(user);
+                        isBackupCodeUsed = true;
+                        
+                        // Log backup code usage for security monitoring
+                        _logger.LogWarning($"Backup code used for user: {user.Email_Address}. Remaining codes: {user.BackupCodes?.Split(',').Length ?? 0}");
                     }
                 }
                 else
@@ -418,13 +424,22 @@ namespace UGHApi.Controllers
                 var activeMemberships = await _userRepository.GetActiveUserMembershipsAsync(user.User_Id);
                 var token = _tokenService.GenerateJwtToken(user, activeMemberships);
 
-                return Ok(new LoginResponse
+                var response = new LoginResponse
                 {
                     UserId = user.User_Id,
                     Email = user.Email_Address,
                     AccessToken = token,
                     FirstName = user.FirstName
-                });
+                };
+
+                // Add warning if backup code was used
+                if (isBackupCodeUsed)
+                {
+                    response.Message = "Backup-Code verwendet. Bitte richten Sie 2FA neu ein für maximale Sicherheit.";
+                    response.Requires2FAReset = true;
+                }
+
+                return Ok(response);
             }
             catch (Exception ex)
             {

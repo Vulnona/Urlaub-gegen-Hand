@@ -33,7 +33,7 @@
         <p class="card-text"><strong>Region/Ort:</strong> {{ offer.location || 'Nicht angegeben' }}</p>
       </div>
     </div>
-    <Apply :offer=offer :isActiveMember=isActiveMember :logId=logId />                    
+    <Apply :offer=offer :isActiveMember=isActiveMember :logId=logId :userRole=userRole />                    
   </div>
 </div>
 </template>
@@ -46,6 +46,7 @@ const props = defineProps({
   offer: Object,
   logId: String,
   isActiveMember: Boolean,
+  userRole: String,
   showStatus: {
     type: Boolean,
     default: false

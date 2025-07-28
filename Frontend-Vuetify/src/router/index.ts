@@ -92,6 +92,11 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/components/account/AccountRegister.vue'),
   },
   {
+    path: '/admin-setup',
+    name: 'AdminSetup',
+    component: () => import('@/views/AdminSetup.vue'),
+  },
+  {
     path: '/offer-request',
     name: 'OfferRequest',
     component: () => import('@/views/OfferRequests.vue'),

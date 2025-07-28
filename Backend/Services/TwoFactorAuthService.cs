@@ -72,10 +72,10 @@ namespace UGHApi.Services
             
             for (int i = 0; i < count; i++)
             {
-                var bytes = new byte[5]; // 10 characters
+                var bytes = new byte[4]; // 8 characters (4 bytes = 8 hex chars)
                 rng.GetBytes(bytes);
                 var code = Convert.ToHexString(bytes).ToLowerInvariant();
-                backupCodes.Add($"{code[..5]}-{code[5..]}");
+                backupCodes.Add(code);
             }
             
             return backupCodes;
@@ -89,7 +89,9 @@ namespace UGHApi.Services
             try
             {
                 var codes = JsonSerializer.Deserialize<List<string>>(userBackupCodes);
-                return codes?.Contains(providedCode.ToLowerInvariant()) == true;
+                // Clean the provided code (remove any formatting) and make case-insensitive
+                var cleanProvidedCode = providedCode.Replace("-", "").Replace(" ", "").ToLowerInvariant();
+                return codes?.Any(code => code.ToLowerInvariant() == cleanProvidedCode) == true;
             }
             catch
             {
@@ -107,8 +109,14 @@ namespace UGHApi.Services
                 var codes = JsonSerializer.Deserialize<List<string>>(userBackupCodes);
                 if (codes != null)
                 {
-                    codes.Remove(usedCode.ToLowerInvariant());
-                    return JsonSerializer.Serialize(codes);
+                    // Clean the used code and find the matching one
+                    var cleanUsedCode = usedCode.Replace("-", "").Replace(" ", "").ToLowerInvariant();
+                    var codeToRemove = codes.FirstOrDefault(code => code.ToLowerInvariant() == cleanUsedCode);
+                    if (codeToRemove != null)
+                    {
+                        codes.Remove(codeToRemove);
+                        return JsonSerializer.Serialize(codes);
+                    }
                 }
             }
             catch

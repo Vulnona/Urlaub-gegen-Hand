@@ -42,19 +42,7 @@
                       <i class="ri-lock-password-line"></i> Admin-Passwort zurücksetzen
                     </button>
 
-                            <!-- Generate Button -->
-                            <button v-if="!couponCode" class="btn btn-primary" @click="generateCode()">
-                      Generate Coupon Code
-                    </button>
 
-                            <!-- Display the Coupon Code if Available -->
-                            <p v-if="couponCode">
-                                <input type="text" :value="couponCode" class="coupon-input" disabled />&nbsp;
-                                <!-- Clear Button -->
-                                <button class="" title="Löschen" @click="clearCode()">
-                        <i class="ri-close-circle-line"></i>
-                      </button>
-                            </p>
                         </div>
                     </div>
     
@@ -234,11 +222,9 @@ export default {
             imageUrlToShow: null,
             isSending: false,
             userdata: null,
-            couponCode: "",
             searchQuery: '',
             sortKey: '',
             sortOrder: 'asc',
-            memberships: [],
         };
     },
     watch: {
@@ -249,7 +235,6 @@ export default {
     },
     mounted() {
         this.getdata();
-        this.fetchMemberships();
         Securitybot();
     },
     methods: {
@@ -304,78 +289,8 @@ export default {
         goHome() {
             router.push('/home');
         },
-        async fetchMemberships() {
-            try {
-                const res = await axiosInstance.get(`membership/get-all-memberships`);
-                // Filter out inactive memberships and map to correct structure
-                this.memberships = res.data
-                    .filter(membership => membership.isActive)
-                    .map(membership => ({
-                        id: membership.membershipID,
-                        name: membership.name,
-                        description: membership.description,
-                        durationDays: membership.durationDays,
-                        price: membership.price
-                    }));
-            } catch (error) {
-                console.error('Fehler beim Abrufen der Mitgliedschaften:', error);
-                this.handleAxiosError(error);
-            }
-        },
-        async generateCode() {
-            const { value: membershipId } = await Swal.fire({
-                title: 'Mitgliedschaft auswählen',
-                input: 'select',
-                inputOptions: this.memberships.reduce((options, membership) => {
-                    options[membership.id] = `${membership.name} (${membership.durationDays} Tage)`;
-                    return options;
-                }, {}),
-                inputPlaceholder: 'Mitgliedschaft auswählen',
-                showCancelButton: true,
-                confirmButtonText: 'Generieren',
-                cancelButtonText: 'Abbrechen',
-                inputValidator: (value) => {
-                    if (!value) {
-                        return 'Sie müssen eine Mitgliedschaft auswählen!';
-                    }
-                }
-            });
 
-            if (membershipId) {
-                try {
-                    const res = await axiosInstance.post(
-                        `coupon/add-coupon`, 
-                        parseInt(membershipId),
-                        {
-                            headers: {
-                                'Content-Type': 'application/json'
-                            }
-                        }
-                    );
-                    this.couponCode = res.data.value;
-                    toast.success("Coupon-Code erfolgreich generiert!");
-                } catch (error) {
-                    console.error('Fehler beim Generieren des Coupon-Codes:', error);
-                    this.handleAxiosError(error);
-                }
-            }
-        },
-        copyCode() {
-            // Copy the coupon code to the clipboard
-            navigator.clipboard
-                .writeText(this.couponCode)
-                .then(() => {
-                    toast.success("Coupon-Code in die Zwischenablage kopiert!");
-                })
-                .catch(() => {
-                console.error('Fehler beim Kopieren des Codes');
-                toast.error('Kopieren des Codes fehlgeschlagen.');
-                });
-        },
-        clearCode() {
-            // Clear the coupon code
-            this.couponCode = "";
-        },
+
         async sendCouponCode(uid, code) {
             try {
                 const res = await axiosInstance.post(

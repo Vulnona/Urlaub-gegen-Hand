@@ -19,7 +19,21 @@
       <div class="offers_request_content">
         <div class="card">
           <div class="card-header">
-            <h1 class="main-title">Coupons List</h1>
+            <div class="d-flex flex-column align-items-center">
+              <h1 class="main-title mb-3">Liste der Coupons</h1>
+              <div class="admin-actions mb-3">
+                <button class="btn btn-primary me-2 admin-action-btn" @click="showBulkEmailModal">
+                  <i class="ri-mail-line"></i> Massen-E-Mail
+                </button>
+                <button class="btn btn-success me-2 admin-action-btn" @click="showNewCouponModal">
+                  <i class="ri-add-line"></i> Neuer Coupon
+                </button>
+                <button class="btn btn-info admin-action-btn" @click="generateCouponCode">
+                  <i class="ri-coupon-line"></i> Code generieren
+                </button>
+              </div>
+
+            </div>
           </div>
           <div class="card-body">
             <!-- Add a responsive wrapper -->
@@ -29,17 +43,26 @@
                   <tr>
                     <th class="text-center">Coupon Code</th>
                     <th>Name</th>
-                    <th>Created By</th>
-                    <th>Created Date</th>
-                    <th>Duration</th>
-                    <th class="text-center">Email Status</th>
-                    <th class="text-center">Redeemed by</th>
+                    <th>Ersteller des Coupons</th>
+                    <th>Erstellungsdatum</th>
+                    <th>Gültigkeit</th>
+                    <th class="text-center">Email Status</th> 
+                    <th class="text-center">Eingelöst</th>
                     <th class="text-center">Status</th>
-                    <!-- <th class="text-center">Actions</th> -->
+                    <th class="text-center">Aktionen</th>
                   </tr>
                 </thead>
                   <tbody>
-                    <tr v-for="(coupon, index) in coupons" :key="index">
+                    <tr v-if="coupons.length === 0">
+                      <td colspan="9" class="text-center">
+                        <div class="empty-state">
+                          <i class="ri-coupon-line" style="font-size: 3rem; color: #ccc; margin-bottom: 1rem;"></i>
+                          <h4>Keine Coupons vorhanden</h4>
+                          <p>Es wurden noch keine Coupons erstellt.</p>
+                        </div>
+                      </td>
+                    </tr>
+                    <tr v-for="(coupon, index) in coupons" :key="index" v-else>
                       <td class="text-center">
                         <span class="codeReveal" v-if="revealedCodes.includes(index)">
                           <b>{{ coupon.code }}</b>
@@ -66,8 +89,33 @@
                         <span v-if="coupon.isRedeemed" class="newState badge badge-primary">Redeemed</span>
                         <span v-if="!coupon.isRedeemed" class="newState badge badge-success">Available</span>
                       </td>
-                      <!-- <td v-if="coupon.status=='Redeemed'" class="verState badge badge-success text-center">{{ coupon.status }}</td> -->
-                      <!-- <td class="text-center"></td> -->
+                      <td class="text-center">
+                        <div class="action-buttons">
+                          <button 
+                            v-if="!coupon.isEmailSent && !coupon.isRedeemed" 
+                            @click="sendCouponEmail(coupon)" 
+                            class="btn btn-sm btn-outline-primary me-1"
+                            title="E-Mail senden"
+                          >
+                            <i class="ri-mail-line"></i>
+                          </button>
+                          <button 
+                            @click="copyCouponCode(coupon.code)" 
+                            class="btn btn-sm btn-outline-secondary me-1"
+                            title="Code kopieren"
+                          >
+                            <i class="ri-file-copy-line"></i>
+                          </button>
+                          <button 
+                            v-if="!coupon.isRedeemed" 
+                            @click="console.log('Coupon object:', coupon); console.log('Coupon.id:', coupon.id); console.log('Coupon.Id:', coupon.Id); console.log('All coupon properties:', Object.keys(coupon)); deleteCoupon(coupon.id || coupon.Id)" 
+                            class="btn btn-sm btn-outline-danger"
+                            title="Coupon löschen"
+                          >
+                            <i class="ri-delete-bin-line"></i>
+                          </button>
+                        </div>
+                      </td>
                     </tr>
                   </tbody>
                 
@@ -80,12 +128,172 @@
     <!-- Pagination Section -->
     <div class="pagination">
       <button class="action-link" @click="changePage(currentPage - 1)" :hidden="currentPage === 1">
-        <i class="ri-arrow-left-s-line"></i>Previous
+        <i class="ri-arrow-left-s-line"></i>Vorherige
       </button>
       <span>Page {{ currentPage }} of {{ totalPages }}</span>
       <button class="action-link" @click="changePage(currentPage + 1)" :hidden="currentPage === totalPages">
-        Next<i class="ri-arrow-right-s-line"></i>
+        Nächste<i class="ri-arrow-right-s-line"></i>
       </button>
+    </div>
+
+    <!-- Bulk Email Modal -->
+    <div class="modal-container" v-if="showBulkEmail">
+      <div class="modal-overlay" @click="closeBulkEmailModal"></div>
+      <div class="modal-content">
+        <span class="close" @click="closeBulkEmailModal">&times;</span>
+        <h4>Bulk E-Mail - Coupons versenden</h4>
+        <div class="bulk-email-tabs">
+          <button 
+            :class="['tab-btn', { active: bulkEmailTab === 'upload' }]" 
+            @click="bulkEmailTab = 'upload'"
+          >
+            <i class="ri-upload-line"></i> E-Mail Liste hochladen
+          </button>
+          <button 
+            :class="['tab-btn', { active: bulkEmailTab === 'manual' }]" 
+            @click="bulkEmailTab = 'manual'"
+          >
+            <i class="ri-edit-line"></i> Manuell eingeben
+          </button>
+        </div>
+
+        <!-- Upload Tab -->
+        <div v-if="bulkEmailTab === 'upload'" class="tab-content">
+          <div class="form-group">
+            <label>CSV/Text Datei mit E-Mail Adressen:</label>
+            <input 
+              type="file" 
+              @change="handleFileUpload" 
+              accept=".csv,.txt"
+              class="form-control"
+            />
+            <small class="form-text text-muted">
+              Eine E-Mail-Adresse pro Zeile. Nur verifizierte Benutzer erhalten Coupons.
+            </small>
+          </div>
+        </div>
+
+        <!-- Manual Tab -->
+        <div v-if="bulkEmailTab === 'manual'" class="tab-content">
+          <div class="form-group">
+            <label>E-Mail Adressen (eine pro Zeile):</label>
+            <textarea 
+              v-model="manualEmails" 
+              rows="8" 
+              class="form-control"
+              placeholder="user1@example.com&#10;user2@example.com&#10;user3@example.com"
+            ></textarea>
+            <small class="form-text text-muted">
+              Nur verifizierte Benutzer erhalten Coupons!
+            </small>
+          </div>
+        </div>
+
+        <!-- Membership Selection -->
+        <div class="form-group">
+          <label>Mitgliedschaft auswählen:</label>
+          <select v-model="selectedMembershipId" class="form-control" required>
+            <option value="">Bitte wählen...</option>
+            <option v-for="membership in memberships" :key="membership.id" :value="membership.id">
+              {{ membership.name }} ({{ membership.durationDays }} Tage)
+            </option>
+          </select>
+        </div>
+
+        <div class="modal-buttons">
+          <button 
+            class="btn themeBtn common-btn" 
+            @click="sendBulkEmails" 
+            :disabled="isSendingBulkEmails || !selectedMembershipId"
+          >
+            <span v-if="isSendingBulkEmails">
+              <i class="ri-loader-4-line"></i> Sende...
+            </span>
+            <span v-else>
+              <i class="ri-mail-send-line"></i> Coupons versenden
+            </span>
+          </button>
+          <button class="btn-cancel common-btn" @click="closeBulkEmailModal" :disabled="isSendingBulkEmails">
+            Abbrechen
+          </button>
+        </div>
+
+        <!-- Results -->
+        <div v-if="bulkEmailResults.length > 0" class="bulk-results">
+          <h5>Ergebnisse:</h5>
+          <div class="results-summary">
+            <span class="badge badge-success">{{ bulkEmailResults.filter(r => r.success).length }} Erfolgreich</span>
+            <span class="badge badge-warning">{{ bulkEmailResults.filter(r => !r.success).length }} Fehlgeschlagen</span>
+          </div>
+          <div class="results-list">
+            <div v-for="result in bulkEmailResults" :key="result.email" :class="['result-item', { success: result.success, error: !result.success }]">
+              <i :class="result.success ? 'ri-check-line' : 'ri-close-line'"></i>
+              {{ result.email }}: {{ result.message }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- New Coupon Modal -->
+    <div class="modal-container" v-if="showNewCoupon">
+      <div class="modal-overlay" @click="closeNewCouponModal"></div>
+      <div class="modal-content">
+        <span class="close" @click="closeNewCouponModal">&times;</span>
+        <h4>Neuen Coupon erstellen</h4>
+        
+        <div class="form-group">
+          <label>E-Mail Adresse des Empfängers:</label>
+          <input 
+            v-model="newCouponEmail" 
+            type="email" 
+            class="form-control"
+            placeholder="empfaenger@example.com"
+            required
+          />
+          <small class="form-text text-muted">
+            Der Benutzer muss bereits registriert und verifiziert sein.
+          </small>
+        </div>
+
+        <div class="form-group">
+          <label>Mitgliedschaft auswählen:</label>
+          <select v-model="newCouponMembershipId" class="form-control" required>
+            <option value="">Bitte wählen...</option>
+            <option v-for="membership in memberships" :key="membership.id" :value="membership.id">
+              {{ membership.name }} ({{ membership.durationDays }} Tage)
+            </option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Coupon Name (optional):</label>
+          <input 
+            v-model="newCouponName" 
+            type="text" 
+            class="form-control"
+            placeholder="z.B. Willkommens-Coupon"
+          />
+        </div>
+
+        <div class="modal-buttons">
+          <button 
+            class="btn themeBtn common-btn" 
+            @click="createAndSendCoupon" 
+            :disabled="isCreatingCoupon || !newCouponEmail || !newCouponMembershipId"
+          >
+            <span v-if="isCreatingCoupon">
+              <i class="ri-loader-4-line"></i> Erstelle...
+            </span>
+            <span v-else>
+              <i class="ri-add-line"></i> Coupon erstellen & senden
+            </span>
+          </button>
+          <button class="btn-cancel common-btn" @click="closeNewCouponModal" :disabled="isCreatingCoupon">
+            Abbrechen
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -119,12 +327,26 @@ export default {
       coupons: [],
       userRole: GetUserRole(),
       userdata: null,
-      revealedCodes: []
+      revealedCodes: [],
+      showBulkEmail: false,
+      bulkEmailTab: 'upload',
+      manualEmails: '',
+      selectedMembershipId: '',
+      isSendingBulkEmails: false,
+      bulkEmailResults: [],
+      showNewCoupon: false,
+      newCouponEmail: '',
+      newCouponMembershipId: '',
+      newCouponName: '',
+      isCreatingCoupon: false,
+      memberships: [], // Added for new coupon modal
+
     };
   },
   mounted() {
     this.getdata();
     Securitybot();
+    this.getMemberships(); // Fetch memberships on mount
   },
   methods: {
     changePage(newPage) {
@@ -133,6 +355,8 @@ export default {
         this.getdata();
       }
     },
+
+
 
     formatDate(date) {
       return dayjs(date).format("MMMM D, YYYY h:mm A"); // Example: January 21, 2025 1:23 PM
@@ -145,10 +369,10 @@ export default {
   if (navigator.clipboard && navigator.clipboard.writeText) {
     navigator.clipboard.writeText(text)
       .then(() => {
-        toast.success("Coupon code copied to clipboard!");
+        toast.success("Coupon-Code in die Zwischenablage kopiert!");
       })
       .catch(err => {
-        toast.error("Failed to copy coupon code.");
+        toast.error("Fehler beim Kopieren des Coupon-Codes.");
         console.error("Error copying text: ", err);
       });
   } else {
@@ -181,6 +405,15 @@ export default {
     // Method to fetch data from the server
     async getdata() {
       try {
+        console.log('=== DEBUG: getdata called ===');
+        console.log('Request URL:', `coupon/get-all-coupon`);
+        console.log('Request params:', {
+          pageSize: this.pageSize,
+          pageNumber: this.currentPage
+        });
+        console.log('Axios baseURL:', axiosInstance.defaults.baseURL);
+        console.log('Full URL:', `${axiosInstance.defaults.baseURL}coupon/get-all-coupon`);
+        
         const res = await axiosInstance.get(`coupon/get-all-coupon`, {
           params: {
             pageSize: this.pageSize,
@@ -188,10 +421,24 @@ export default {
           }
         }
         );
-        this.coupons = res.data.items;
-        this.totalPages = Math.ceil(res.data.totalCount / this.pageSize);
+        
+        console.log('Response received:', res);
+        
+        // Handle empty response gracefully
+        if (res.data && res.data.items) {
+          this.coupons = res.data.items;
+          this.totalPages = Math.ceil((res.data.totalCount || 0) / this.pageSize);
+        } else {
+          this.coupons = [];
+          this.totalPages = 1;
+        }
       } catch (error) {
-        console.error('Fehler beim Abrufen der Coupons:', error);
+        console.error('=== DEBUG: getdata error ===', error);
+        console.error('Error config:', error.config);
+        console.error('Error response:', error.response);
+        // Set default values on error
+        this.coupons = [];
+        this.totalPages = 1;
         this.handleAxiosError(error);
       }
     },
@@ -209,8 +456,12 @@ export default {
               sessionStorage.clear();
               router.push('/');
             });
+        } else if (error.response.status === 404) {
+          console.error('Admin/Coupons 404 error:', error);
+          toast.error("API-Endpunkt nicht gefunden. Bitte kontaktieren Sie den Administrator.");
         } else {
-            console.error('Admin/Coupons error:', error);
+          console.error('Admin/Coupons error:', error);
+          toast.error(`Fehler beim Laden der Daten: ${error.response.status}`);
         }
       } else if (error.request) {
         toast.info("Ein Netzwerkfehler ist aufgetreten. Bitte überprüfen Sie Ihre Verbindung und versuchen Sie es erneut.")
@@ -220,6 +471,484 @@ export default {
       } else {
         //  toast.success("An error occurred");
           console.error('Admin/Coupons error:', error);
+      }
+    },
+
+    // Bulk Email Modal Methods
+    showBulkEmailModal() {
+      this.bulkEmailTab = 'upload';
+      this.manualEmails = '';
+      this.selectedMembershipId = '';
+      this.bulkEmailResults = [];
+      this.showBulkEmail = true;
+    },
+
+    closeBulkEmailModal() {
+      this.showBulkEmail = false;
+    },
+
+    handleFileUpload(event) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          this.manualEmails = e.target.result;
+        };
+        reader.readAsText(file);
+      }
+    },
+
+    async sendBulkEmails() {
+      if (!this.selectedMembershipId) {
+        toast.error("Bitte wählen Sie eine Mitgliedschaft aus.");
+        return;
+      }
+
+      const emails = this.manualEmails.split('\n')
+        .map(email => email.trim())
+        .filter(email => email && this.isValidEmail(email));
+
+      if (emails.length === 0) {
+        toast.error("Keine gültigen E-Mail-Adressen gefunden.");
+        return;
+      }
+
+      this.isSendingBulkEmails = true;
+      this.bulkEmailResults = [];
+
+      for (const email of emails) {
+        try {
+          // First create coupon for this user
+          const createResponse = await axiosInstance.post('coupon/create-and-send', {
+            email: email,
+            membershipId: parseInt(this.selectedMembershipId),
+            name: `Bulk Coupon - ${new Date().toLocaleDateString()}`
+          });
+
+          if (createResponse.data.isSuccess) {
+            this.bulkEmailResults.push({
+              email: email,
+              success: true,
+              message: 'Coupon erstellt und E-Mail gesendet'
+            });
+          } else {
+            this.bulkEmailResults.push({
+              email: email,
+              success: false,
+              message: createResponse.data.error || 'Unbekannter Fehler'
+            });
+          }
+        } catch (error) {
+          let errorMessage = 'Unbekannter Fehler';
+          if (error.response?.data?.error) {
+            errorMessage = error.response.data.error;
+          } else if (error.response?.status === 404) {
+            errorMessage = 'Benutzer nicht gefunden oder nicht verifiziert';
+          } else if (error.response?.status === 400) {
+            errorMessage = 'Ungültige Anfrage';
+          }
+          
+          this.bulkEmailResults.push({
+            email: email,
+            success: false,
+            message: errorMessage
+          });
+        }
+      }
+
+      this.isSendingBulkEmails = false;
+      
+      const successCount = this.bulkEmailResults.filter(r => r.success).length;
+      const errorCount = this.bulkEmailResults.filter(r => !r.success).length;
+      
+      toast.success(`Bulk-Versand abgeschlossen: ${successCount} erfolgreich, ${errorCount} fehlgeschlagen`);
+      
+      // Refresh coupon list to show new coupons
+      await this.getdata();
+    },
+
+    isValidEmail(email) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return emailRegex.test(email);
+    },
+
+    // New Coupon Modal Methods
+    showNewCouponModal() {
+      this.newCouponEmail = '';
+      this.newCouponMembershipId = '';
+      this.newCouponName = '';
+      this.showNewCoupon = true;
+    },
+
+    closeNewCouponModal() {
+      this.showNewCoupon = false;
+    },
+
+    async createAndSendCoupon() {
+      if (!this.newCouponEmail || !this.newCouponMembershipId) {
+        toast.error("Bitte füllen Sie alle Pflichtfelder aus.");
+        return;
+      }
+
+      if (!this.isValidEmail(this.newCouponEmail)) {
+        toast.error("Bitte geben Sie eine gültige E-Mail-Adresse ein.");
+        return;
+      }
+
+      this.isCreatingCoupon = true;
+      
+      try {
+        const response = await axiosInstance.post('coupon/create-and-send', {
+          email: this.newCouponEmail,
+          membershipId: parseInt(this.newCouponMembershipId),
+          name: this.newCouponName || `Coupon für ${this.newCouponEmail}`
+        });
+
+        if (response.data.isSuccess) {
+          toast.success("Coupon erstellt und E-Mail erfolgreich gesendet!");
+          this.closeNewCouponModal();
+          await this.getdata(); // Refresh list to show new coupon
+        } else {
+          toast.error(response.data.error || "Fehler beim Erstellen des Coupons");
+        }
+      } catch (error) {
+        let errorMessage = "Fehler beim Erstellen des Coupons";
+        if (error.response?.data?.error) {
+          errorMessage = error.response.data.error;
+        } else if (error.response?.status === 404) {
+          errorMessage = "Benutzer nicht gefunden oder nicht verifiziert";
+        }
+        toast.error(errorMessage);
+      } finally {
+        this.isCreatingCoupon = false;
+      }
+    },
+
+    // Individual Coupon Actions
+    async sendCouponEmail(coupon) {
+      try {
+        const response = await axiosInstance.post('coupon/send-existing', {
+          couponId: coupon.id
+        });
+
+        if (response.data.isSuccess) {
+          toast.success("E-Mail erfolgreich gesendet!");
+          await this.getdata(); // Refresh to show updated email status
+        } else {
+          toast.error(response.data.error || "Fehler beim Senden der E-Mail");
+        }
+      } catch (error) {
+        let errorMessage = "Fehler beim Senden der E-Mail";
+        if (error.response?.data?.error) {
+          errorMessage = error.response.data.error;
+        }
+        toast.error(errorMessage);
+      }
+    },
+
+    copyCouponCode(code) {
+      this.copyToClipboard(code);
+    },
+
+    async deleteCoupon(couponId) {
+      const result = await Swal.fire({
+        title: 'Bist du sicher?',
+        text: "Dieser Coupon wird unwiderruflich gelöscht!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Ja, lösche!',
+        cancelButtonText: 'Abbrechen'
+      });
+
+      if (result.isConfirmed) {
+        try {
+          await axiosInstance.delete(`coupon/delete-coupon/${couponId}`);
+          toast.success("Coupon erfolgreich gelöscht!");
+          await this.getdata(); // Refresh list
+        } catch (error) {
+          toast.error("Fehler beim Löschen des Coupons");
+        }
+      }
+    },
+
+    // Fetch memberships for dropdowns
+    async getMemberships() {
+      try {
+        const response = await axiosInstance.get('membership/get-all-memberships');
+        this.memberships = response.data || [];
+      } catch (error) {
+        console.error('Fehler beim Laden der Mitgliedschaften:', error);
+        this.memberships = [];
+      }
+    },
+
+    // Generate Coupon Code (moved from Admin.vue)
+    async generateCouponCode() {
+      console.log('=== DEBUG: SweetAlert2 called ===');
+      console.log('this.memberships:', this.memberships);
+      console.log('this.memberships.length:', this.memberships.length);
+      
+      const { value: membershipId } = await Swal.fire({
+        title: 'Mitgliedschaft auswählen',
+        input: 'select',
+        inputOptions: this.memberships.reduce((options, membership) => {
+          console.log('Membership:', membership);
+          console.log('membership.membershipID:', membership.membershipID);
+          console.log('membership.name:', membership.name);
+          console.log('membership.durationDays:', membership.durationDays);
+          
+          const key = membership.membershipID;
+          const value = `${membership.name} (${membership.durationDays} Tage)`;
+          options[key] = value;
+          console.log(`Added option: ${key} = ${value}`);
+          
+          return options;
+        }, {}),
+        inputPlaceholder: 'Mitgliedschaft auswählen',
+        showCancelButton: true,
+        confirmButtonText: 'Generieren',
+        cancelButtonText: 'Abbrechen',
+        inputValidator: (value) => {
+          if (!value) {
+            return 'Sie müssen eine Mitgliedschaft auswählen!';
+          }
+        }
+      });
+      
+      console.log('=== DEBUG: SweetAlert2 result ===');
+      console.log('membershipId from SweetAlert2:', membershipId);
+      console.log('membershipId type:', typeof membershipId);
+
+      if (membershipId) {
+        try {
+          console.log('=== DEBUG: generateCouponCode called ===');
+          console.log('membershipId:', membershipId);
+          console.log('membershipId type:', typeof membershipId);
+          console.log('membershipId value:', membershipId);
+          
+          // Ensure membershipId is a valid number
+          const membershipIdNum = parseInt(membershipId);
+          if (isNaN(membershipIdNum)) {
+            toast.error("Ungültige Mitgliedschaft-ID");
+            return;
+          }
+          
+          console.log('Request data:', { membershipId: membershipIdNum });
+          
+          const res = await axiosInstance.post(
+            `add-coupon`, 
+            { membershipId: membershipIdNum },
+            {
+              headers: {
+                'Content-Type': 'application/json'
+              }
+            }
+          );
+          
+          console.log('Response:', res);
+          
+          if (res.data.isSuccess) {
+            const couponCode = res.data.value;
+            
+            // Show the generated code in a nice modal
+            await Swal.fire({
+              title: 'Coupon-Code generiert!',
+              html: `
+                <div style="text-align: center;">
+                  <p><strong>Ihr Coupon-Code:</strong></p>
+                  <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 15px 0; font-family: monospace; font-size: 18px; font-weight: bold; color: #007bff;">
+                    ${couponCode}
+                  </div>
+                  <p style="font-size: 14px; color: #666;">Klicken Sie auf "Kopieren" um den Code in die Zwischenablage zu kopieren.</p>
+                </div>
+              `,
+              icon: 'success',
+              showCancelButton: true,
+              confirmButtonText: 'Kopieren',
+              cancelButtonText: 'Schließen',
+              reverseButtons: true
+            }).then((result) => {
+              if (result.isConfirmed) {
+                // Copy to clipboard
+                navigator.clipboard.writeText(couponCode).then(() => {
+                  toast.success("Coupon-Code in die Zwischenablage kopiert!");
+                }).catch(() => {
+                  toast.error("Kopieren fehlgeschlagen");
+                });
+              }
+            });
+            
+            // Refresh the coupon list to show the new coupon
+            await this.getdata();
+          } else {
+            toast.error("Fehler beim Generieren des Coupon-Codes");
+          }
+        } catch (error) {
+          console.error('=== DEBUG: generateCouponCode error ===', error);
+          console.error('Error config:', error.config);
+          console.error('Error response:', error.response);
+          toast.error("Fehler beim Generieren des Coupon-Codes");
+        }
+      }
+    },
+
+    // Bulk Email Modal Methods
+    showBulkEmailModal() {
+      this.bulkEmailTab = 'upload';
+      this.manualEmails = '';
+      this.selectedMembershipId = '';
+      this.bulkEmailResults = [];
+      this.showBulkEmail = true;
+    },
+    closeBulkEmailModal() {
+      this.showBulkEmail = false;
+    },
+    handleFileUpload(event) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          this.manualEmails = e.target.result;
+        };
+        reader.readAsText(file);
+      }
+    },
+    async sendBulkEmails() {
+      if (!this.selectedMembershipId) {
+        toast.error("Bitte wählen Sie eine Mitgliedschaft aus.");
+        return;
+      }
+      this.isSendingBulkEmails = true;
+      this.bulkEmailResults = [];
+      const emails = this.manualEmails.split('\n').map(email => email.trim()).filter(email => email);
+      const successCount = 0;
+      const errorCount = 0;
+
+      console.log('=== DEBUG: sendBulkEmails called ===');
+      console.log('Emails:', emails);
+      console.log('MembershipId:', this.selectedMembershipId);
+      
+      for (const email of emails) {
+        try {
+          console.log(`Processing email: ${email}`);
+          const res = await axiosInstance.post(`coupon/create-and-send`, {
+            email: email,
+            membershipId: this.selectedMembershipId,
+            name: 'Bulk Coupon'
+          });
+          console.log(`Success for ${email}:`, res);
+          this.bulkEmailResults.push({ email: email, success: true, message: 'Coupon erstellt und gesendet' });
+          successCount++;
+        } catch (error) {
+          console.error(`Error for ${email}:`, error);
+          this.bulkEmailResults.push({ email: email, success: false, message: error.response?.data || error.message || 'Unknown error' });
+          errorCount++;
+        }
+      }
+      this.isSendingBulkEmails = false;
+      toast.success(`Bulk E-Mail versendet. ${successCount} erfolgreich, ${errorCount} fehlgeschlagen.`);
+      this.closeBulkEmailModal();
+    },
+
+    // New Coupon Modal Methods
+    showNewCouponModal() {
+      this.newCouponEmail = '';
+      this.newCouponMembershipId = '';
+      this.newCouponName = '';
+      this.showNewCoupon = true;
+    },
+    closeNewCouponModal() {
+      this.showNewCoupon = false;
+    },
+    async createAndSendCoupon() {
+      if (!this.newCouponEmail || !this.newCouponMembershipId) {
+        toast.error("Bitte füllen Sie alle Felder aus.");
+        return;
+      }
+      this.isCreatingCoupon = true;
+      try {
+        console.log('=== DEBUG: createAndSendCoupon called ===');
+        console.log('Request data:', {
+          email: this.newCouponEmail,
+          membershipId: this.newCouponMembershipId,
+          name: this.newCouponName || undefined
+        });
+        
+        const res = await axiosInstance.post(`coupon/create-and-send`, {
+          email: this.newCouponEmail,
+          membershipId: this.newCouponMembershipId,
+          name: this.newCouponName || undefined
+        });
+        
+        console.log('Response:', res);
+        toast.success("Neuer Coupon erstellt und an Benutzer gesendet!");
+        this.closeNewCouponModal();
+        this.getdata(); // Refresh list to show new coupon
+      } catch (error) {
+        this.handleAxiosError(error);
+      } finally {
+        this.isCreatingCoupon = false;
+      }
+    },
+
+    // Individual Coupon Email Methods
+    async sendCouponEmail(coupon) {
+      if (!coupon.email) {
+        throw new Error("Email Adresse fehlt.");
+      }
+      try {
+        const res = await axiosInstance.post(`coupon/send-coupon-email`, {
+          email: coupon.email,
+          couponId: coupon.id
+        });
+        toast.success(`E-Mail an ${coupon.email} gesendet!`);
+        this.getdata(); // Refresh list to show updated email status
+      } catch (error) {
+        this.handleAxiosError(error);
+      }
+    },
+    copyCouponCode(code) {
+      this.copyToClipboard(code);
+    },
+    async deleteCoupon(couponId) {
+      Swal.fire({
+        title: 'Bist du sicher?',
+        text: "Dieser Coupon wird unwiderruflich gelöscht!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Ja, lösche!',
+        cancelButtonText: 'Abbrechen'
+      }).then(async (result) => {
+        if (result.isConfirmed) {
+          try {
+            console.log('=== DEBUG: deleteCoupon called ===');
+            console.log('couponId:', couponId);
+            
+            await axiosInstance.delete(`coupon/delete-coupon/${couponId}`);
+            console.log('Delete successful');
+            toast.success("Coupon erfolgreich gelöscht!");
+            this.getdata(); // Refresh list
+          } catch (error) {
+            console.error('=== DEBUG: deleteCoupon error ===', error);
+            console.error('Error config:', error.config);
+            console.error('Error response:', error.response);
+            this.handleAxiosError(error);
+          }
+        }
+      });
+    },
+
+    // Fetch memberships for new coupon modal
+    async getMemberships() {
+      try {
+        const res = await axiosInstance.get(`membership/get-all-memberships`);
+        this.memberships = res.data;
+      } catch (error) {
+        this.handleAxiosError(error);
       }
     }
   }
@@ -292,6 +1021,27 @@ h2 {
 .form-group label {
   display: block;
   margin-bottom: 5px;
+}
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 8px;
+}
+
+.empty-state {
+  padding: 2rem;
+  text-align: center;
+}
+
+.empty-state h4 {
+  color: #666;
+  margin-bottom: 0.5rem;
+}
+
+.empty-state p {
+  color: #999;
+  margin: 0;
 }
 
 .form-group input,
@@ -401,6 +1151,180 @@ h2 {
   background-color: #f8f9fa;
 }
 
+.action-buttons {
+  display: flex;
+  gap: 5px;
+}
+
+.bulk-email-tabs {
+  display: flex;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 10px;
+}
+
+.bulk-email-tabs .tab-btn {
+  padding: 8px 15px;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  font-weight: bold;
+  transition: border-bottom-color 0.3s ease;
+  background-color: #f0f0f0;
+  color: #333;
+  margin-right: 10px;
+}
+
+.bulk-email-tabs .tab-btn.active {
+  border-bottom-color: #007bff;
+  color: #007bff;
+}
+
+.bulk-email-tabs .tab-btn:hover {
+  background-color: #e0e0e0;
+}
+
+.tab-content {
+  margin-top: 20px;
+}
+
+.bulk-results {
+  margin-top: 20px;
+  padding: 15px;
+  background-color: #f9f9f9;
+  border: 1px solid #eee;
+  border-radius: 5px;
+}
+
+.bulk-results h5 {
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+
+.results-summary {
+  margin-bottom: 10px;
+}
+
+.results-list .result-item {
+  margin-bottom: 5px;
+  padding: 8px;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+
+.results-list .result-item.success {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+  border: 1px solid #a5d6a7;
+}
+
+.results-list .result-item.error {
+  background-color: #ffebee;
+  color: #c62828;
+  border: 1px solid #ef9a9a;
+}
+
+.modal-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: -1;
+}
+
+.modal-content {
+  background-color: #fff;
+  padding: 25px;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  position: relative;
+  width: 90%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+  z-index: 1001;
+}
+
+.modal-content h4 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.btn-cancel {
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.btn-cancel:hover {
+  background-color: #5a6268;
+}
+
+.btn-cancel:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.themeBtn {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.themeBtn:hover {
+  background-color: #0056b3;
+}
+
+.themeBtn:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.common-btn {
+  padding: 10px 20px;
+  font-size: 14px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.common-btn:hover {
+  opacity: 0.9;
+}
+
+.common-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 @media (max-width: 768px) {
 
   .theme_table th,
@@ -409,4 +1333,70 @@ h2 {
     /* Adjust font size for smaller screens */
   }
 }
+
+.admin-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  font-weight: 500;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border: none;
+  font-size: 14px;
+  text-transform: none;
+  letter-spacing: 0.5px;
+}
+
+.admin-action-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.admin-action-btn i {
+  font-size: 16px;
+}
+
+.admin-action-btn.btn-primary {
+  background: linear-gradient(135deg, #007bff, #0056b3);
+  color: white;
+}
+
+.admin-action-btn.btn-primary:hover {
+  background: linear-gradient(135deg, #0056b3, #004085);
+}
+
+.admin-action-btn.btn-success {
+  background: linear-gradient(135deg, #28a745, #1e7e34);
+  color: white;
+}
+
+.admin-action-btn.btn-success:hover {
+  background: linear-gradient(135deg, #1e7e34, #155724);
+}
+
+.admin-action-btn.btn-info {
+  background: linear-gradient(135deg, #17a2b8, #138496);
+  color: white;
+}
+
+.admin-action-btn.btn-info:hover {
+  background: linear-gradient(135deg, #138496, #0f6674);
+}
+
+/* Responsive Design für Admin Buttons */
+@media (max-width: 768px) {
+  .admin-actions {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .admin-action-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+
 </style>

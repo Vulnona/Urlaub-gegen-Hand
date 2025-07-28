@@ -355,24 +355,26 @@ INSERT INTO `addresses` VALUES
 
 -- Insert memberships
 INSERT INTO `memberships` VALUES 
-(1,'Perfect for individuals or small businesses just starting out. The Basic Package provides essential access to our services',30,1,'Basic',4.990000000000000000000000000000),
+(1,'Flexible Mitgliedschaft für 1 Monat - perfekt zum Ausprobieren',30,1,'1 Monat',9.990000000000000000000000000000),
 (2,'N/A',0,0,'Default',0.000000000000000000000000000000),
-(3,'Ideal for growing businesses that need more support and flexibility. The Standard Package offers enhanced features',60,1,'Standard',7.990000000000000000000000000000),
-(4,'Designed for established businesses looking for comprehensive support and maximum benefits. The Premium Package includes',120,1,'Deluxe',9.990000000000000000000000000000);
+(3,'3 Monate Mitgliedschaft mit attraktivem Rabatt',90,1,'3 Monate',24.990000000000000000000000000000),
+(4,'Jahresmitgliedschaft - unser beliebtestes Angebot',365,1,'1 Jahr',89.990000000000000000000000000000),
+(5,'3 Jahre Mitgliedschaft mit maximalem Rabatt',1095,1,'3 Jahre',239.990000000000000000000000000000),
+(6,'Lebenslange Mitgliedschaft - einmal zahlen, für immer dabei',9999,1,'Lebenslang',499.990000000000000000000000000000);
 
 -- Insert users (VerificationState: 0=IsNew, 1=VerificationPending, 2=VerificationFailed, 3=Verified)
 -- UserRole: 0=User, 1=Admin
 -- IsTwoFactorEnabled: 0=Disabled, 1=Enabled
 INSERT INTO `users` (`User_Id`, `FirstName`, `LastName`, `DateOfBirth`, `Gender`, `AddressId`, `Email_Address`, `Password`, `SaltKey`, `IsEmailVerified`, `MembershipId`, `VerificationState`, `UserRole`, `IsTwoFactorEnabled`, `TwoFactorSecret`, `BackupCodes`) VALUES
 ('08ddca8e-a8b9-48ef-8e0b-09db16414bfa', 'Test', 'User', '1990-01-01', 'Other', 1, 'test@example.com', '$2a$11$rQZ9N0NpqN0NpqN0NpqN0O', 'testsalt', 1, 1, 3, 0, 0, NULL, NULL),
-('08dcd23c-d4eb-456b-87e4-73837709fada', 'Admin', 'User', '1985-05-15', 'Male', 2, 'admin@example.com', '$2a$11$rQZ9N0NpqN0NpqN0NpqN0O', 'testsalt', 1, 3, 3, 1, 1, 'JBSWY3DPEHPK3PXP', '["12345678", "87654321", "11111111", "22222222", "33333333", "44444444", "55555555", "66666666", "77777777", "88888888"]'),
+('08dcd23c-d4eb-456b-87e4-73837709fada', 'Admin', 'User', '1985-05-15', 'Male', 2, 'admin@example.com', '$2a$11$rQZ9N0NpqN0NpqN0NpqN0O', 'testsalt', 1, 4, 3, 1, 1, 'JBSWY3DPEHPK3PXP', '["12345678", "87654321", "11111111", "22222222", "33333333", "44444444", "55555555", "66666666", "77777777", "88888888"]'),
 ('08dcd23c-d4eb-45db-87e4-73837709fada', 'John', 'Doe', '1992-03-20', 'Male', 3, 'john@example.com', '$2a$11$rQZ9N0NpqN0NpqN0NpqN0O', 'testsalt', 1, 1, 3, 0, 0, NULL, NULL),
 ('08dcd23c-d4eb-45db-88e4-73837709fada', 'Jane', 'Smith', '1988-07-12', 'Female', NULL, 'jane@example.com', '$2a$11$rQZ9N0NpqN0NpqN0NpqN0O', 'testsalt', 1, 1, 3, 0, 0, NULL, NULL);
 
 -- Insert usermembership
 INSERT INTO `usermembership` (`UserMembershipID`, `User_Id`, `MembershipID`, `StartDate`, `Expiration`, `CreatedAt`, `UpdatedAt`) VALUES
 (1, '08ddca8e-a8b9-48ef-8e0b-09db16414bfa', 1, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY), NOW(), NOW()),
-(2, '08dcd23c-d4eb-456b-87e4-73837709fada', 3, NOW(), DATE_ADD(NOW(), INTERVAL 60 DAY), NOW(), NOW()),
+(2, '08dcd23c-d4eb-456b-87e4-73837709fada', 4, NOW(), DATE_ADD(NOW(), INTERVAL 365 DAY), NOW(), NOW()),
 (3, '08dcd23c-d4eb-45db-87e4-73837709fada', 1, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY), NOW(), NOW()),
 (4, '08dcd23c-d4eb-45db-88e4-73837709fada', 1, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY), NOW(), NOW());
 
@@ -405,7 +407,7 @@ INSERT INTO `shopitems` (`Id`, `Name`, `Duration`, `Price_Amount`, `Price_Curren
 -- Insert sample coupons
 INSERT INTO `coupons` (`Id`, `Code`, `Name`, `Description`, `CreatedDate`, `CreatedBy`, `Duration`, `MembershipId`) VALUES
 (1, 'WELCOME2024', 'Welcome Coupon', 'Welcome discount for new users', NOW(), '18ddca8e-a8b9-48ef-8e0b-09db16414bfb', 365, 1),
-(2, 'PREMIUM50', 'Premium Discount', '50% off premium membership', NOW(), '18ddca8e-a8b9-48ef-8e0b-09db16414bfb', 365, 3);
+(2, 'PREMIUM50', 'Premium Discount', '50% off premium membership', NOW(), '18ddca8e-a8b9-48ef-8e0b-09db16414bfb', 365, 4);
 
 -- Insert sample redemptions
 INSERT INTO `redemptions` (`Id`, `CouponId`, `UserId`, `RedeemedDate`, `UserEmail`) VALUES

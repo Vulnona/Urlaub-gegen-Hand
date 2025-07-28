@@ -141,7 +141,9 @@ export default {
         });
 
         if (response.status === 200 && response.data.clientSecret) {
-          console.log('Payment intent created with client secret');
+          if (process.env.NODE_ENV === 'development') {
+          console.log('Payment intent created successfully');
+        }
           await this.initializeStripeElements(response.data.clientSecret);
           this.showStripeModal = true;
         } else {

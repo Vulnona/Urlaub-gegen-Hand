@@ -64,6 +64,43 @@ Der Admin-Account hat bereits 2FA aktiviert:
 
 Verwende eine Authenticator-App (Google Authenticator, Authy, etc.) mit dem Secret für den Login.
 
+### Sichere Admin-Ersteinrichtung (Produktion)
+Für neue Admin-Accounts in der Produktion:
+
+1. **Umgebungsvariablen konfigurieren:**
+   ```bash
+   # .env Datei erstellen (basierend auf env.production.example)
+   cp env.production.example .env
+   
+   # Sichere Werte setzen:
+   ADMIN_SETUP_TOKEN="ihr-super-sicherer-token-2024"
+   ADMIN_EMAIL="admin@ihredomain.com"
+   JWT_SECRET="ihr-super-sicherer-jwt-secret"
+   ```
+
+2. **Docker Compose mit Umgebungsvariablen starten:**
+   ```bash
+   docker-compose --env-file .env up -d
+   ```
+
+3. **Admin-Setup-Seite aufrufen:**
+   ```
+   https://ihredomain.com/admin-setup?token=ihr-super-sicherer-token-2024
+   ```
+
+4. **Schritt-für-Schritt-Anleitung:**
+   - Admin-Daten eingeben
+   - 2FA mit QR-Code einrichten
+   - Backup-Codes sicher speichern
+   - Setup abschließen
+
+**Sicherheitshinweise:**
+- Backup-Codes können nur einmal verwendet werden
+- Nach Backup-Code-Verwendung wird 2FA-Reset empfohlen
+- Setup-Token nur für die Ersteinrichtung verwenden
+- HTTPS in Produktion verwenden
+- Regelmäßige Sicherheitsaudits durchführen
+
 ## 🔧 Entwicklung
 
 ### Projekt-Struktur

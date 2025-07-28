@@ -49,7 +49,7 @@
                 <tr><a class="b">Angebotszeitraum:</a> {{offer.fromDate}} - {{offer.toDate}}</tr>
                </tbody>
               </table>
-            <Apply :offer=offer :isActiveMember=isActiveMember :logId=logId />
+            <Apply :offer=offer :isActiveMember=isActiveMember :logId=logId :userRole=userRole />
             <div class="offer_btn">
               <button @click="backtooffers()" class="action-link"><i class="ri-arrow-go-back-line"
                   aria-hidden="true"></i> Zurück </button>
@@ -110,7 +110,7 @@ import Navbar from '@/components/navbar/Navbar.vue';
 import PublicNav from '@/components/navbar/PublicNav.vue';
 import axiosInstance from '@/interceptor/interceptor';
 import router from '@/router';
-import {isActiveMembership} from '@/services/GetUserPrivileges';
+import {isActiveMembership, GetUserRole} from '@/services/GetUserPrivileges';
 import Apply from '@/components/Apply.vue';
 import getLoggedUserId from '@/services/LoggedInUserId';
 import UserLink from '@/components/offer/UserLink.vue';
@@ -187,6 +187,7 @@ export default {
         return{
             isActiveMember: isActiveMembership(),
             logId: getLoggedUserId(),
+            userRole: GetUserRole(),
         };
 }
 }

@@ -12,4 +12,5 @@ public class LoginResponse
     public bool RequiresTwoFactor { get; set; } = false;
     public string Message { get; set; }
     public string? TwoFactorToken { get; set; }
+    public bool Requires2FAReset { get; set; } = false;
 }

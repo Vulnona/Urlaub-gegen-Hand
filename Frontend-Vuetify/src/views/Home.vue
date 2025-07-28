@@ -417,7 +417,7 @@ body .custom-card .card-text strong {
             </div>
             <div v-else class="row">
               <div v-for="(offer, index) in offers" :key="offer.id" class="col-md-3 mb-4">
-                <OfferCard :offer=offer :logId=logId :isActiveMember=isActiveMember :showStatus=true />
+                <OfferCard :offer=offer :logId=logId :isActiveMember=isActiveMember :userRole=userRole :showStatus=true />
               </div>
             </div>
             <!-- Pagination Section -->

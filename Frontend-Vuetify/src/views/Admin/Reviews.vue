@@ -9,7 +9,7 @@
         <div class="row">
           <div class="col-sm-12">
             <div class="inner_banner">
-              <h2>Offer Reviews</h2>
+              <h2>Reviews der Angebote</h2>
             </div>
           </div>
         </div>
@@ -22,8 +22,7 @@
             <div class="sort-new-button justify-content-center">
               <div class="SearchBox">
                 <i class="ri-search-line"></i>
-                <input type="text" v-model="searchTerm" @input="debouncedSearch" placeholder="Search offers"
-                  class="form-control ">
+                <input type="text" v-model="searchTerm" @input="debouncedSearch" placeholder="Durchsuche Angebote" class="form-control">
               </div>
             </div>
             <div v-if="offers.length" class="offers_group">
@@ -71,6 +70,7 @@ import axiosInstance from "@/interceptor/interceptor"
 import Securitybot from '@/services/SecurityBot';
 import {GetUserRole} from "@/services/GetUserPrivileges";
 import Errorpage from "../Errorpage.vue";
+import toast from "@/components/toaster/toast";
 
 window.FontAwesomeConfig = {
   autoReplaceSvg: false
@@ -109,9 +109,35 @@ export default {
             pageNumber: this.currentPage
           }
         });
-        this.offers = response.data.items;
-        this.totalPages = Math.ceil(response.data.totalCount / this.pageSize);
+        
+        // Handle response gracefully
+        if (response.data && response.data.items) {
+          this.offers = response.data.items;
+          this.totalPages = Math.ceil((response.data.totalCount || 0) / this.pageSize);
+        } else {
+          this.offers = [];
+          this.totalPages = 1;
+        }
       } catch (error) {
+        console.error('Fehler beim Abrufen der Reviews:', error);
+        // Set default values on error
+        this.offers = [];
+        this.totalPages = 1;
+        
+        // Show user-friendly error message
+        if (error.response) {
+          if (error.response.status === 401) {
+            toast.error("Session abgelaufen. Bitte melden Sie sich erneut an.");
+          } else if (error.response.status === 404) {
+            toast.error("Reviews-Endpoint nicht gefunden.");
+          } else {
+            toast.error(`Serverfehler: ${error.response.status}`);
+          }
+        } else if (error.request) {
+          toast.error("Netzwerkfehler. Bitte überprüfen Sie Ihre Verbindung.");
+        } else {
+          toast.error("Unbekannter Fehler beim Laden der Reviews.");
+        }
       } finally {
         this.loading = false;
       }
