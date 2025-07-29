@@ -12,7 +12,9 @@ public static class MapsterConfig
         TypeAdapterConfig<User, UserDTO>
             .NewConfig()
             .Map(dest => dest.Hobbies, src => SplitAndTrim(src.Hobbies))
-            .Map(dest => dest.Skills, src => SplitAndTrim(src.Skills));
+            .Map(dest => dest.Skills, src => SplitAndTrim(src.Skills))
+            .Map(dest => dest.Link_RS, src => src.Link_RS) // Will be overridden in repository
+            .Map(dest => dest.Link_VS, src => src.Link_VS); // Will be overridden in repository
 
         TypeAdapterConfig<Coupon, CouponDto>
             .NewConfig()

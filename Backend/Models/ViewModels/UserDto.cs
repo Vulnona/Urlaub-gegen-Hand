@@ -13,7 +13,7 @@ public class UserDTO
     public string Gender { get; set; }
     
     // Geographic location data (NEW)
-    public Address? Address { get; set; }
+    public UGH.Domain.ViewModels.AddressDTO? Address { get; set; }
     
     public string Email_Address { get; set; }
     public bool IsEmailVerified { get; set; }

@@ -498,6 +498,49 @@ export default {
       }
     },
 
+
+
+    isValidEmail(email) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return emailRegex.test(email);
+    },
+
+    // New Coupon Modal Methods
+    showNewCouponModal() {
+      this.newCouponEmail = '';
+      this.newCouponMembershipId = '';
+      this.newCouponName = '';
+      this.showNewCoupon = true;
+    },
+
+    closeNewCouponModal() {
+      this.showNewCoupon = false;
+    },
+
+    // Bulk Email Modal Methods
+    showBulkEmailModal() {
+      this.bulkEmailTab = 'upload';
+      this.manualEmails = '';
+      this.selectedMembershipId = '';
+      this.bulkEmailResults = [];
+      this.showBulkEmail = true;
+    },
+
+    closeBulkEmailModal() {
+      this.showBulkEmail = false;
+    },
+
+    handleFileUpload(event) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          this.manualEmails = e.target.result;
+        };
+        reader.readAsText(file);
+      }
+    },
+
     async sendBulkEmails() {
       if (!this.selectedMembershipId) {
         toast.error("Bitte wählen Sie eine Mitgliedschaft aus.");
@@ -567,122 +610,9 @@ export default {
       await this.getdata();
     },
 
-    isValidEmail(email) {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      return emailRegex.test(email);
-    },
 
-    // New Coupon Modal Methods
-    showNewCouponModal() {
-      this.newCouponEmail = '';
-      this.newCouponMembershipId = '';
-      this.newCouponName = '';
-      this.showNewCoupon = true;
-    },
 
-    closeNewCouponModal() {
-      this.showNewCoupon = false;
-    },
 
-    async createAndSendCoupon() {
-      if (!this.newCouponEmail || !this.newCouponMembershipId) {
-        toast.error("Bitte füllen Sie alle Pflichtfelder aus.");
-        return;
-      }
-
-      if (!this.isValidEmail(this.newCouponEmail)) {
-        toast.error("Bitte geben Sie eine gültige E-Mail-Adresse ein.");
-        return;
-      }
-
-      this.isCreatingCoupon = true;
-      
-      try {
-        const response = await axiosInstance.post('coupon/create-and-send', {
-          email: this.newCouponEmail,
-          membershipId: parseInt(this.newCouponMembershipId),
-          name: this.newCouponName || `Coupon für ${this.newCouponEmail}`
-        });
-
-        if (response.data.isSuccess) {
-          toast.success("Coupon erstellt und E-Mail erfolgreich gesendet!");
-          this.closeNewCouponModal();
-          await this.getdata(); // Refresh list to show new coupon
-        } else {
-          toast.error(response.data.error || "Fehler beim Erstellen des Coupons");
-        }
-      } catch (error) {
-        let errorMessage = "Fehler beim Erstellen des Coupons";
-        if (error.response?.data?.error) {
-          errorMessage = error.response.data.error;
-        } else if (error.response?.status === 404) {
-          errorMessage = "Benutzer nicht gefunden oder nicht verifiziert";
-        }
-        toast.error(errorMessage);
-      } finally {
-        this.isCreatingCoupon = false;
-      }
-    },
-
-    // Individual Coupon Actions
-    async sendCouponEmail(coupon) {
-      try {
-        const response = await axiosInstance.post('coupon/send-existing', {
-          couponId: coupon.id
-        });
-
-        if (response.data.isSuccess) {
-          toast.success("E-Mail erfolgreich gesendet!");
-          await this.getdata(); // Refresh to show updated email status
-        } else {
-          toast.error(response.data.error || "Fehler beim Senden der E-Mail");
-        }
-      } catch (error) {
-        let errorMessage = "Fehler beim Senden der E-Mail";
-        if (error.response?.data?.error) {
-          errorMessage = error.response.data.error;
-        }
-        toast.error(errorMessage);
-      }
-    },
-
-    copyCouponCode(code) {
-      this.copyToClipboard(code);
-    },
-
-    async deleteCoupon(couponId) {
-      const result = await Swal.fire({
-        title: 'Bist du sicher?',
-        text: "Dieser Coupon wird unwiderruflich gelöscht!",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#3085d6',
-        confirmButtonText: 'Ja, lösche!',
-        cancelButtonText: 'Abbrechen'
-      });
-
-      if (result.isConfirmed) {
-        try {
-          await axiosInstance.delete(`coupon/delete-coupon/${couponId}`);
-          toast.success("Coupon erfolgreich gelöscht!");
-          await this.getdata(); // Refresh list
-        } catch (error) {
-          toast.error("Fehler beim Löschen des Coupons");
-        }
-      }
-    },
-
-    // Fetch memberships for dropdowns
-    async getMemberships() {
-      try {
-        const response = await axiosInstance.get('membership/get-all-memberships');
-        this.memberships = response.data || [];
-      } catch (error) {
-        console.error('Fehler beim Laden der Mitgliedschaften:', error);
-        this.memberships = [];
-      }
-    },
 
     // Generate Coupon Code (moved from Admin.vue)
     async generateCouponCode() {
@@ -794,74 +724,7 @@ export default {
       }
     },
 
-    // Bulk Email Modal Methods
-    showBulkEmailModal() {
-      this.bulkEmailTab = 'upload';
-      this.manualEmails = '';
-      this.selectedMembershipId = '';
-      this.bulkEmailResults = [];
-      this.showBulkEmail = true;
-    },
-    closeBulkEmailModal() {
-      this.showBulkEmail = false;
-    },
-    handleFileUpload(event) {
-      const file = event.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          this.manualEmails = e.target.result;
-        };
-        reader.readAsText(file);
-      }
-    },
-    async sendBulkEmails() {
-      if (!this.selectedMembershipId) {
-        toast.error("Bitte wählen Sie eine Mitgliedschaft aus.");
-        return;
-      }
-      this.isSendingBulkEmails = true;
-      this.bulkEmailResults = [];
-      const emails = this.manualEmails.split('\n').map(email => email.trim()).filter(email => email);
-      const successCount = 0;
-      const errorCount = 0;
 
-      console.log('=== DEBUG: sendBulkEmails called ===');
-      console.log('Emails:', emails);
-      console.log('MembershipId:', this.selectedMembershipId);
-      
-      for (const email of emails) {
-        try {
-          console.log(`Processing email: ${email}`);
-          const res = await axiosInstance.post(`coupon/create-and-send`, {
-            email: email,
-            membershipId: this.selectedMembershipId,
-            name: 'Bulk Coupon'
-          });
-          console.log(`Success for ${email}:`, res);
-          this.bulkEmailResults.push({ email: email, success: true, message: 'Coupon erstellt und gesendet' });
-          successCount++;
-        } catch (error) {
-          console.error(`Error for ${email}:`, error);
-          this.bulkEmailResults.push({ email: email, success: false, message: error.response?.data || error.message || 'Unknown error' });
-          errorCount++;
-        }
-      }
-      this.isSendingBulkEmails = false;
-      toast.success(`Bulk E-Mail versendet. ${successCount} erfolgreich, ${errorCount} fehlgeschlagen.`);
-      this.closeBulkEmailModal();
-    },
-
-    // New Coupon Modal Methods
-    showNewCouponModal() {
-      this.newCouponEmail = '';
-      this.newCouponMembershipId = '';
-      this.newCouponName = '';
-      this.showNewCoupon = true;
-    },
-    closeNewCouponModal() {
-      this.showNewCoupon = false;
-    },
     async createAndSendCoupon() {
       if (!this.newCouponEmail || !this.newCouponMembershipId) {
         toast.error("Bitte füllen Sie alle Felder aus.");
@@ -895,18 +758,37 @@ export default {
 
     // Individual Coupon Email Methods
     async sendCouponEmail(coupon) {
-      if (!coupon.email) {
-        throw new Error("Email Adresse fehlt.");
-      }
       try {
-        const res = await axiosInstance.post(`coupon/send-coupon-email`, {
-          email: coupon.email,
+        console.log('=== DEBUG: sendCouponEmail called ===');
+        console.log('Coupon object:', coupon);
+        console.log('Coupon ID:', coupon.id);
+        
+        const res = await axiosInstance.post(`coupon/send-existing`, {
           couponId: coupon.id
         });
-        toast.success(`E-Mail an ${coupon.email} gesendet!`);
-        this.getdata(); // Refresh list to show updated email status
+        
+        console.log('Response:', res);
+        
+        if (res.data.isSuccess) {
+          toast.success("E-Mail erfolgreich gesendet!");
+          await this.getdata(); // Refresh list to show updated email status
+        } else {
+          toast.error(res.data.error || "Fehler beim Senden der E-Mail");
+        }
       } catch (error) {
-        this.handleAxiosError(error);
+        console.error('=== DEBUG: sendCouponEmail error ===', error);
+        console.error('Error response:', error.response);
+        
+        let errorMessage = "Fehler beim Senden der E-Mail";
+        if (error.response?.data?.error) {
+          errorMessage = error.response.data.error;
+        } else if (error.response?.data?.message) {
+          errorMessage = error.response.data.message;
+        } else if (error.message) {
+          errorMessage = error.message;
+        }
+        
+        toast.error(errorMessage);
       }
     },
     copyCouponCode(code) {

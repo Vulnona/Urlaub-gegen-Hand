@@ -51,9 +51,6 @@ public class UserRepository : IUserRepository
         var user = await _context
             .users.Include(u => u.CurrentMembership)
             .Include(u => u.UserMemberships)
-            .Include(u => u.Offers)
-            .ThenInclude(o => o.Reviews)
-            .Include(u => u.Address)
             .FirstOrDefaultAsync(u => u.User_Id == userId);
 
         if (user == null)
@@ -62,10 +59,19 @@ public class UserRepository : IUserRepository
         }
 
         var userDto = user.Adapt<UserDTO>();
-
+        userDto.Link_RS = _urlBuilderService.BuildAWSFileUrl(user.Link_RS);
+        userDto.Link_VS = _urlBuilderService.BuildAWSFileUrl(user.Link_VS);
+        if (user.Address != null)
+            userDto.Address = new UGH.Domain.ViewModels.AddressDTO {
+                Id = user.Address.Id,
+                DisplayName = user.Address.DisplayName,
+                Latitude = user.Address.Latitude,
+                Longitude = user.Address.Longitude
+            };
         userDto.MembershipEndDate = user.UserMemberships
-        .OrderBy(m => m.CreatedAt)
-        .FirstOrDefault()?.Expiration;
+            .Where(m => m.IsMembershipActive)
+            .OrderBy(m => m.CreatedAt)
+            .FirstOrDefault()?.Expiration;
 
         return userDto;
     }
@@ -79,8 +85,6 @@ public class UserRepository : IUserRepository
     {
         return await _context
             .users.Include(u => u.UserMemberships)
-            .Include(u => u.Offers)
-            .ThenInclude(o => o.Reviews)
             .Include(u => u.Address)
             .FirstOrDefaultAsync(u => u.User_Id == userId);
     }
@@ -90,8 +94,7 @@ public class UserRepository : IUserRepository
         IQueryable<User> query = _context
             .users
             .Include(u => u.UserMemberships)
-            .Include(u => u.Offers)
-                .ThenInclude(o => o.Reviews)
+            .Include(u => u.Address)
             .Where(u => u.UserRole != UserRoles.Admin)
             .AsQueryable();
 
@@ -123,17 +126,20 @@ public class UserRepository : IUserRepository
         {
             return null;
         }
-        TypeAdapterConfig<User, UserDTO>
-            .NewConfig()
-            .Map(dest => dest.Hobbies, src => SplitAndTrim(src.Hobbies))
-            .Map(dest => dest.Skills, src => SplitAndTrim(src.Skills))
-            .Map(dest => dest.Link_RS, src => _urlBuilderService.BuildAWSFileUrl(src.Link_RS))
-            .Map(dest => dest.Link_VS, src => _urlBuilderService.BuildAWSFileUrl(src.Link_VS))
-            ; 
+ 
 
         var userDtoList = users.Select(user =>
         {
             var dto = user.Adapt<UserDTO>();
+            dto.Link_RS = _urlBuilderService.BuildAWSFileUrl(user.Link_RS);
+            dto.Link_VS = _urlBuilderService.BuildAWSFileUrl(user.Link_VS);
+            if (user.Address != null)
+                dto.Address = new UGH.Domain.ViewModels.AddressDTO {
+                    Id = user.Address.Id,
+                    DisplayName = user.Address.DisplayName,
+                    Latitude = user.Address.Latitude,
+                    Longitude = user.Address.Longitude
+                };
             dto.MembershipEndDate = user.UserMemberships
                 .Where(m => m.IsMembershipActive)
                 .OrderBy(m => m.CreatedAt)
