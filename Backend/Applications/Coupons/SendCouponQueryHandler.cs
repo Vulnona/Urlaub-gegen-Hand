@@ -39,20 +39,40 @@ public class SendCouponQueryHandler : IRequestHandler<SendCouponQuery, Result>
             return Result.Failure(new Error("CouponNotExist", "Coupon does not exists."));
         }
 
-        var user = await _userRepository.GetUserByIdAsync(request.UserId);
-        if (user == null)
-            return Result.Failure(Errors.General.NotFound("User", request.UserId));
+        string emailAddress;
+        string recipientName;
+
+        if (!string.IsNullOrEmpty(request.Email))
+        {
+            // Use provided email address
+            emailAddress = request.Email;
+            recipientName = "Benutzer"; // Generic name for email recipients
+        }
+        else if (request.UserId.HasValue)
+        {
+            // Use user ID to get user details
+            var user = await _userRepository.GetUserByIdAsync(request.UserId.Value);
+            if (user == null)
+                return Result.Failure(Errors.General.NotFound("User", request.UserId.Value));
+            
+            emailAddress = user.Email_Address;
+            recipientName = $"{user.FirstName} {user.LastName}".Trim();
+        }
+        else
+        {
+            return Result.Failure(new Error("InvalidRequest", "Either UserId or Email must be provided."));
+        }
 
         // Update coupon with email tracking before sending
         try
         {
             var htmlTemplate = _htmlTemplateService.GetCouponReceivedDetails(
                 requestCode,
-                $"{user.FirstName} {user.LastName}".Trim()
+                recipientName
             );
 
             var emailSent = await _emailService.SendEmailAsync(
-                user.Email_Address,
+                emailAddress,
                 htmlTemplate.Subject,
                 htmlTemplate.BodyHtml
             );
@@ -62,21 +82,21 @@ public class SendCouponQueryHandler : IRequestHandler<SendCouponQuery, Result>
                 // Update coupon with email tracking information
                 couponEntity.IsEmailSent = true;
                 couponEntity.EmailSentDate = DateTime.Now;
-                couponEntity.EmailSentTo = user.Email_Address;
+                couponEntity.EmailSentTo = emailAddress;
                 await _couponRepository.UpdateCouponAsync(couponEntity);
                 
-                _logger.LogInformation($"Coupon {requestCode} successfully sent to {user.Email_Address}");
+                _logger.LogInformation($"Coupon {requestCode} successfully sent to {emailAddress}");
                 return Result.Success("Coupon sent successfully.");
             }
             else
             {
-                _logger.LogError($"Failed to send coupon {requestCode} to {user.Email_Address}");
+                _logger.LogError($"Failed to send coupon {requestCode} to {emailAddress}");
                 return Result.Failure(new Error("EmailSendFailed", "Failed to send email."));
             }
         }
         catch (Exception ex)
         {
-            _logger.LogError($"Error sending email to {user.Email_Address}: {ex.Message}");
+            _logger.LogError($"Error sending email to {emailAddress}: {ex.Message}");
             return Result.Failure(new Error("EmailSendError", "An error occurred while sending email."));
         }
     }

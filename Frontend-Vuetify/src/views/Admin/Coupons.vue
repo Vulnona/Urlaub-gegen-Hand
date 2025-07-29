@@ -758,37 +758,61 @@ export default {
 
     // Individual Coupon Email Methods
     async sendCouponEmail(coupon) {
-      try {
-        console.log('=== DEBUG: sendCouponEmail called ===');
-        console.log('Coupon object:', coupon);
-        console.log('Coupon ID:', coupon.id);
-        
-        const res = await axiosInstance.post(`coupon/send-existing`, {
-          couponId: coupon.id
-        });
-        
-        console.log('Response:', res);
-        
-        if (res.data.isSuccess) {
-          toast.success("E-Mail erfolgreich gesendet!");
-          await this.getdata(); // Refresh list to show updated email status
-        } else {
-          toast.error(res.data.error || "Fehler beim Senden der E-Mail");
+      // Show modal to enter email address
+      const { value: email } = await Swal.fire({
+        title: 'E-Mail-Adresse eingeben',
+        input: 'email',
+        inputLabel: 'E-Mail-Adresse für den Coupon',
+        inputPlaceholder: 'benutzer@example.com',
+        showCancelButton: true,
+        confirmButtonText: 'Senden',
+        cancelButtonText: 'Abbrechen',
+        inputValidator: (value) => {
+          if (!value) {
+            return 'Bitte geben Sie eine E-Mail-Adresse ein!';
+          }
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          if (!emailRegex.test(value)) {
+            return 'Bitte geben Sie eine gültige E-Mail-Adresse ein!';
+          }
         }
-      } catch (error) {
-        console.error('=== DEBUG: sendCouponEmail error ===', error);
-        console.error('Error response:', error.response);
-        
-        let errorMessage = "Fehler beim Senden der E-Mail";
-        if (error.response?.data?.error) {
-          errorMessage = error.response.data.error;
-        } else if (error.response?.data?.message) {
-          errorMessage = error.response.data.message;
-        } else if (error.message) {
-          errorMessage = error.message;
+      });
+
+      if (email) {
+        try {
+          console.log('=== DEBUG: sendCouponEmail called ===');
+          console.log('Coupon object:', coupon);
+          console.log('Coupon ID:', coupon.id);
+          console.log('Email:', email);
+          
+          const res = await axiosInstance.post(`coupon/send-coupon`, {
+            couponCode: coupon.code,
+            email: email
+          });
+          
+          console.log('Response:', res);
+          
+          if (res.data.isSuccess) {
+            toast.success("E-Mail erfolgreich gesendet!");
+            await this.getdata(); // Refresh list to show updated email status
+          } else {
+            toast.error(res.data.error || "Fehler beim Senden der E-Mail");
+          }
+        } catch (error) {
+          console.error('=== DEBUG: sendCouponEmail error ===', error);
+          console.error('Error response:', error.response);
+          
+          let errorMessage = "Fehler beim Senden der E-Mail";
+          if (error.response?.data?.error) {
+            errorMessage = error.response.data.error;
+          } else if (error.response?.data?.message) {
+            errorMessage = error.response.data.message;
+          } else if (error.message) {
+            errorMessage = error.message;
+          }
+          
+          toast.error(errorMessage);
         }
-        
-        toast.error(errorMessage);
       }
     },
     copyCouponCode(code) {

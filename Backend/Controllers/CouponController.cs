@@ -63,13 +63,15 @@ namespace UGHApi.Controllers
 
         [HttpPost("coupon/send-coupon")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> SendCoupon([FromBody] SendCouponRequest reuest)
+        public async Task<IActionResult> SendCoupon([FromBody] SendCouponRequest request)
         {
             try
             {
-                var result = await _mediator.Send(
-                    new SendCouponQuery(reuest.UserId, reuest.CouponCode)
-                );
+                var query = !string.IsNullOrEmpty(request.Email) 
+                    ? new SendCouponQuery(request.Email, request.CouponCode)
+                    : new SendCouponQuery(request.UserId.Value, request.CouponCode);
+
+                var result = await _mediator.Send(query);
 
                 return Ok(result);
             }
