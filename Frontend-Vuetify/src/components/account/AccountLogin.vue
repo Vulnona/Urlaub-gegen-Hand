@@ -7,7 +7,7 @@
           <div class="login-left-content">
             <div class="login-main-text">
               <h2><span>Entdecke neue Möglichkeiten des Reisens</span></h2>
-              <p>Finde dein perfektes "Urlaub gegen Hand" Abenteuer auf unserer innovativen Plattform. Bei uns profitierst du von der direkten Verbindung zur größten deutschsprachigen Community mit über 200.000 aktiven Mitgliedern auf Facebook. Jedes Angebot und Gesuch wird automatisch in beiden Netzwerken geteilt - das maximiert deine Chancen auf den idealen Match.</p>
+              <p>Finde dein perfektes "Urlaub gegen Hand" Abenteuer auf unserer innovativen Plattform. Bei uns profitierst du von der direkten Verbindung zur größten deutschsprachigen Community mit über 200.000 aktiven Mitgliedern auf Facebook. Jedes Angebot und Gesuch kann in beiden Netzwerken geteilt werden - das maximiert deine Chancen auf den idealen Match.</p>
             </div>
           </div>
         </div>

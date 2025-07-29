@@ -151,18 +151,27 @@ public class HtmlTemplateService
                 </html>";
     }
 
-    public CouponRecievedTemplate GetCouponReceivedDetails(string couponCode, string userFullName)
+    public CouponRecievedTemplate GetCouponReceivedDetails(string couponCode, string userFullName, string membershipName, int durationMonths)
     {
-        string subject = $"Congratulations, {userFullName}! Your Membership Coupon is Here!";
+        string subject = $"Glückwunsch, {userFullName}! Dein Mitgliedschafts-Coupon ist da!";
         var htmlContent =
             $@"
     <!DOCTYPE html>
-    <html lang='en'>
+    <html lang='de'>
     <head>
         <meta charset='UTF-8'>
         <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-        <title>Membership Coupon Received</title>
+        <title>Mitgliedschafts-Coupon erhalten</title>
         <style>
+            :root {{
+                --primary-yellow: #ffc107;
+                --primary-blue: #001f3f;
+                --secondary-blue: #004080;
+                --text-dark: #333333;
+                --text-light: #666666;
+                --white: #ffffff;
+                --shadow: rgba(0, 0, 0, 0.3);
+            }}
             body {{
                 font-family: 'Arial', sans-serif;
                 background: linear-gradient(135deg, #ff9a9e, #fad0c4);
@@ -171,78 +180,108 @@ public class HtmlTemplateService
                 display: flex;
                 justify-content: center;
                 align-items: center;
-                height: 100vh;
-                color: #001f3f;
+                min-height: 100vh;
+                color: var(--primary-blue);
             }}
             .container {{
                 text-align: center;
-                background: rgba(255, 255, 255, 0.9);
-                padding: 25px 40px;
-                border-radius: 15px;
-                box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-            }}
-            .icon {{
-                font-size: 60px;
-                color: #ffc107;
-                margin-bottom: 15px;
+                background: rgba(255, 255, 255, 0.95);
+                padding: 30px 40px;
+                border-radius: 20px;
+                box-shadow: 0 10px 30px var(--shadow);
+                max-width: 500px;
+                margin: 20px;
             }}
             h1 {{
-                margin: 0;
-                font-size: 32px;
-                color: #ffc107;
+                margin: 0 0 15px 0;
+                font-size: 28px;
+                color: var(--primary-yellow);
+                text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
             }}
             p {{
                 font-size: 16px;
-                color: #333333;
-                margin: 10px 0 20px;
+                color: var(--text-dark);
+                margin: 10px 0 15px;
+                line-height: 1.5;
             }}
             .highlight {{
-                color: #001f3f;
+                color: var(--primary-blue);
                 font-weight: bold;
+                font-size: 18px;
+                margin: 20px 0 10px;
             }}
             .coupon {{
-                display: inline-block;
-                background: #ffc107;
-                color: #001f3f;
-                padding: 10px 25px;
-                border-radius: 5px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 8px;
+                margin: 20px 0;
+            }}
+            .coupon-label {{
                 font-weight: bold;
+                color: var(--primary-blue);
+                margin-bottom: 4px;
+            }}
+            .coupon-input {{
                 font-size: 20px;
-                text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-                margin: 15px 0;
+                font-weight: bold;
+                padding: 8px 16px;
+                border-radius: 8px;
+                border: 1px solid var(--primary-yellow);
+                background: var(--white);
+                color: var(--primary-blue);
+                text-align: center;
+                width: 90%;
+                max-width: 320px;
+                letter-spacing: 2px;
+            }}
+            .copy-hint {{
+                font-size: 13px;
+                color: var(--text-light);
             }}
             a {{
                 display: inline-block;
                 text-decoration: none;
-                color: #fff;
-                background-color: #001f3f;
-                padding: 10px 20px;
-                border-radius: 5px;
+                color: var(--white);
+                background-color: var(--primary-blue);
+                padding: 12px 25px;
+                border-radius: 8px;
                 font-size: 16px;
                 font-weight: bold;
-                box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2);
-                transition: background-color 0.3s;
+                box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+                transition: all 0.3s ease;
+                margin-top: 15px;
             }}
             a:hover {{
-                background-color: #004080;
+                background-color: var(--secondary-blue);
+                transform: translateY(-2px);
+                box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
             }}
             .footer {{
-                margin-top: 20px;
+                margin-top: 25px;
                 font-size: 12px;
-                color: #666;
+                color: var(--text-light);
+                border-top: 1px solid #eee;
+                padding-top: 15px;
             }}
         </style>
     </head>
     <body>
         <div class='container'>
-            <div class='icon'>??</div>
-            <h1>Congratulations, {userFullName}!</h1>
-            <p>You are now eligible for our exclusive membership benefits.</p>
-            <p>Your membership coupon code is:</p>
-            <div class='coupon'>{couponCode}</div>
-            <p class='highlight'>What's Next?</p>
-            <p>Use your coupon to unlock premium features, gain access to special offers, and enjoy exclusive perks designed just for our members.</p>
-            <a href='{_baseUrl}/home'>Redeem Your Coupon</a>
+            <h1>Glückwunsch, {userFullName}!</h1>
+            <p>Du bist jetzt berechtigt für unsere exklusiven Mitgliedschaftsvorteile.</p>
+            <p><b>Mitgliedschaft:</b> {membershipName} ({durationMonths} Monate)</p>
+            <div class='coupon'>
+                <span class='coupon-label'>Dein Coupon-Code:</span>
+                <input class='coupon-input' value='{couponCode}' readonly>
+                <span class='copy-hint'>Zum Kopieren markieren und STRG+C drücken.</span>
+            </div>
+            <p class='highlight'>Was kommt als nächstes?</p>
+            <p>Nutze deinen Coupon, um Premium-Features freizuschalten, Zugang zur Plattform und exklusive Vorteile zu genießen, die speziell für unsere Mitglieder entwickelt wurden.</p>
+            <a href='{_baseUrl}/home'>Coupon einlösen</a>
+            <div class='footer'>
+                <p>Vielen Dank für dein Vertrauen in unsere Urlaub gegen Hand Community!</p>
+            </div>
         </div>
     </body>
     </html>";
@@ -250,18 +289,27 @@ public class HtmlTemplateService
         return new CouponRecievedTemplate() { Subject = subject, BodyHtml = htmlContent };
     }
 
-    public CouponRecievedTemplate GetCouponPurchasedDetails(string couponCode, string userFullName)
+    public CouponRecievedTemplate GetCouponPurchasedDetails(string couponCode, string userFullName, string membershipName, int durationMonths)
     {
-        string subject = $"Thank You, {userFullName}! Your Membership Coupon Has Been Purchased!";
+        string subject = $"Vielen Dank, {userFullName}! Dein Mitgliedschafts-Coupon wurde gekauft!";
         var htmlContent =
             $@"
 <!DOCTYPE html>
-<html lang='en'>
+<html lang='de'>
 <head>
     <meta charset='UTF-8'>
     <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-    <title>Membership Coupon Purchased</title>
+    <title>Mitgliedschafts-Coupon gekauft</title>
     <style>
+        :root {{
+            --primary-yellow: #ffc107;
+            --primary-blue: #001f3f;
+            --secondary-blue: #004080;
+            --text-dark: #333333;
+            --text-light: #666666;
+            --white: #ffffff;
+            --shadow: rgba(0, 0, 0, 0.3);
+        }}
         body {{
             font-family: 'Arial', sans-serif;
             background: linear-gradient(135deg, #ff9a9e, #fad0c4);
@@ -270,78 +318,108 @@ public class HtmlTemplateService
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            color: #001f3f;
+            min-height: 100vh;
+            color: var(--primary-blue);
         }}
         .container {{
             text-align: center;
-            background: rgba(255, 255, 255, 0.9);
-            padding: 25px 40px;
-            border-radius: 15px;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-        }}
-        .icon {{
-            font-size: 60px;
-            color: #ffc107;
-            margin-bottom: 15px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px var(--shadow);
+            max-width: 500px;
+            margin: 20px;
         }}
         h1 {{
-            margin: 0;
-            font-size: 32px;
-            color: #ffc107;
+            margin: 0 0 15px 0;
+            font-size: 28px;
+            color: var(--primary-yellow);
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
         }}
         p {{
             font-size: 16px;
-            color: #333333;
-            margin: 10px 0 20px;
+            color: var(--text-dark);
+            margin: 10px 0 15px;
+            line-height: 1.5;
         }}
         .highlight {{
-            color: #001f3f;
+            color: var(--primary-blue);
             font-weight: bold;
+            font-size: 18px;
+            margin: 20px 0 10px;
         }}
         .coupon {{
-            display: inline-block;
-            background: #ffc107;
-            color: #001f3f;
-            padding: 10px 25px;
-            border-radius: 5px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            margin: 20px 0;
+        }}
+        .coupon-label {{
             font-weight: bold;
+            color: var(--primary-blue);
+            margin-bottom: 4px;
+        }}
+        .coupon-input {{
             font-size: 20px;
-            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-            margin: 15px 0;
+            font-weight: bold;
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: 1px solid var(--primary-yellow);
+            background: var(--white);
+            color: var(--primary-blue);
+            text-align: center;
+            width: 90%;
+            max-width: 320px;
+            letter-spacing: 2px;
+        }}
+        .copy-hint {{
+            font-size: 13px;
+            color: var(--text-light);
         }}
         a {{
             display: inline-block;
             text-decoration: none;
-            color: #fff;
-            background-color: #001f3f;
-            padding: 10px 20px;
-            border-radius: 5px;
+            color: var(--white);
+            background-color: var(--primary-blue);
+            padding: 12px 25px;
+            border-radius: 8px;
             font-size: 16px;
             font-weight: bold;
-            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2);
-            transition: background-color 0.3s;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            margin-top: 15px;
         }}
         a:hover {{
-            background-color: #004080;
+            background-color: var(--secondary-blue);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
         }}
         .footer {{
-            margin-top: 20px;
+            margin-top: 25px;
             font-size: 12px;
-            color: #666;
+            color: var(--text-light);
+            border-top: 1px solid #eee;
+            padding-top: 15px;
         }}
     </style>
 </head>
 <body>
     <div class='container'>
-        <div class='icon'>??</div>
-        <h1>Thank You, {userFullName}!</h1>
-        <p>Your purchase was successful! You are now eligible for our exclusive membership benefits.</p>
-        <p>Your membership coupon code is:</p>
-        <div class='coupon'>{couponCode}</div>
-        <p class='highlight'>How to Redeem?</p>
-        <p>Click the button below to redeem your coupon and unlock premium features, gain access to special offers, and enjoy exclusive perks tailored just for our members.</p>
-        <a href='{_baseUrl}/home'>Redeem Your Coupon</a>
+        <h1>Vielen Dank, {userFullName}!</h1>
+        <p>Dein Kauf war erfolgreich! Du bist jetzt berechtigt für unsere exklusiven Mitgliedschaftsvorteile.</p>
+        <p><b>Mitgliedschaft:</b> {membershipName} ({durationMonths} Monate)</p>
+        <div class='coupon'>
+            <span class='coupon-label'>Dein Coupon-Code:</span>
+            <input class='coupon-input' value='{couponCode}' readonly>
+            <span class='copy-hint'>Zum Kopieren markieren und STRG+C drücken.</span>
+        </div>
+        <p class='highlight'>Wie kannst du ihn einlösen?</p>
+        <p>Klicke auf den Button unten, um deinen Coupon einzulösen und Premium-Features freizuschalten, Zugang zu besonderen Angeboten zu erhalten und exklusive Vorteile zu genießen, die speziell für unsere Mitglieder entwickelt wurden.</p>
+        <a href='{_baseUrl}/home'>Coupon einlösen</a>
+        <div class='footer'>
+            <p>Vielen Dank für dein Vertrauen in unsere Community!</p>
+        </div>
     </div>
 </body>
 </html>";

@@ -68,7 +68,9 @@ public class SendCouponQueryHandler : IRequestHandler<SendCouponQuery, Result>
         {
             var htmlTemplate = _htmlTemplateService.GetCouponReceivedDetails(
                 requestCode,
-                recipientName
+                recipientName,
+                couponEntity.Membership?.Name ?? "Unbekannt",
+                (int)Math.Round((couponEntity.Membership?.DurationDays ?? 0) / 30.0)
             );
 
             var emailSent = await _emailService.SendEmailAsync(

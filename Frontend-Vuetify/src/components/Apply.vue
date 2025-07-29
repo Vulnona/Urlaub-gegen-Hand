@@ -1,13 +1,13 @@
 <template>
   <div v-if="offer != null && isActiveMember && offer.hostId != logId && offer.status == '0' && userRole !== 'Admin'">
     <button v-if="offer.appliedStatus === 'CanApply'" @click="sendRequest(offer.id)"
-            class="btn btn-success OfferButtons">Apply</button>
+            class="btn btn-success OfferButtons">Bewerben</button>
     <button v-else-if="offer.appliedStatus === 'Applied'" class="btn btn-info OfferButtons"
             disabled>Applied</button>
     <button v-else-if="offer.appliedStatus === 'Rejected'" class="btn btn-danger OfferButtons"
             disabled>Rejected</button>
     <button v-else-if="offer.appliedStatus === 'Approved'" @click="showUserDetails(offer.hostId)"
-            class="btn btn-primary OfferButtons">View Host Details</button>
+            class="btn-primary-ugh OfferButtons">Siehe Details der Gastgeber:in</button>
   </div>
 </template>
 
@@ -38,7 +38,7 @@ export default {
         text: 'Möchtest du diese Anfrage senden?',
         icon: 'question',
         showCancelButton: true,
-        confirmButtonText: 'Apply',
+        confirmButtonText: 'Bewerben',
         customClass: {
           popup: 'custom-apply-modal dialog_box',
           confirmButton: 'themeBtn',

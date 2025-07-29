@@ -223,10 +223,10 @@ public class ProfileController : ControllerBase
                 throw new Exception("User not found.");
             }
             // todo: move to more suitable location
-            double averageRating = 0;            
-            var reviews = await _context.reviews.AsQueryable().Where(r => r.Reviewed.User_Id == user.User_Id).ToListAsync();
-            if (reviews.Count() > 0)                
-                averageRating= Math.Round(reviews.Average(r => r.RatingValue), 1);
+            double averageRating = 0;
+            var reviews = await _context.reviews.AsQueryable().Where(r => r.ReviewedId == user.User_Id).ToListAsync();
+            if (reviews.Count() > 0)
+                averageRating = Math.Round(reviews.Average(r => r.RatingValue), 1);
             var profile = new VisibleProfile
             {
                 UserId = user.User_Id,

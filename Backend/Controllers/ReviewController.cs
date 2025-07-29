@@ -111,4 +111,21 @@ public class CreateReviewRequest
             return StatusCode(500, "Internal server error occurred while fetching user reviews.");
         }
     }
+
+    [Authorize(Roles = "Admin")]
+    [HttpGet("get-all-reviews-admin")]
+    public async Task<IActionResult> GetAllReviewsAdmin(int pageNumber = 1, int pageSize = 50)
+    {
+        try
+        {
+            var reviews = await _reviewRepository.GetAllReviewsAdminAsync(pageNumber, pageSize);
+            if (reviews == null)
+                return NotFound();
+            return Ok(reviews);
+        }
+        catch (Exception)
+        {
+            return StatusCode(500, "Internal server error occurred while fetching all reviews.");
+        }
+    }
 }

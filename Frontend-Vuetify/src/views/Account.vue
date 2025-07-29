@@ -22,7 +22,7 @@
                   alt="User Profile Picture">
               </span>
               <h5 class="fw-semibold mb-1">{{ user.firstName }} {{ user.lastName }}</h5>
-              <span @click="showModal = true" class="action-link fs-13 font-normal">View All Reviews</span>
+              <span @click="showModal = true" class="action-link fs-13 font-normal">Alle Bewertungen ansehen</span>
             </div>
           </div>
           <div v-if="user.userRating != 0"
@@ -50,7 +50,7 @@
                 </div>
               </li>
               <li class="list-group-item border-0">
-                <div><span class="fw-medium me-2">Gender:</span><span class="text-muted">{{ user.gender }}</span>
+                <div><span class="fw-medium me-2">Geschlecht:</span><span class="text-muted">{{ user.gender }}</span>
                 </div>
               </li>
             </ul>

@@ -118,7 +118,7 @@ CREATE TABLE `accomodations` (
 
 LOCK TABLES `accomodations` WRITE;
 /*!40000 ALTER TABLE `accomodations` DISABLE KEYS */;
-INSERT INTO `accomodations` VALUES (1,'H├â┬╝tte'),(4,'Zelt'),(5,'Wohnmobil'),(6,'Zimmer'),(7,'Bauwagen'),(8,'Tiny House'),(9,'Boot'),(10,'Baumhaus'),(11,'Scheune'),(12,'Wohnwagen'),(13,'Scheune'),(14,'Wohnwagen');
+INSERT INTO `accomodations` VALUES (1,'Hütte'),(4,'Zelt'),(5,'Wohnmobil'),(6,'Zimmer'),(7,'Bauwagen'),(8,'Tiny House'),(9,'Boot'),(10,'Baumhaus'),(11,'Scheune'),(12,'Wohnwagen'),(13,'Scheune'),(14,'Wohnwagen');
 /*!40000 ALTER TABLE `accomodations` ENABLE KEYS */;
 UNLOCK TABLES;
 

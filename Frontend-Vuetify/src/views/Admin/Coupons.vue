@@ -22,13 +22,13 @@
             <div class="d-flex flex-column align-items-center">
               <h1 class="main-title mb-3">Liste der Coupons</h1>
               <div class="admin-actions mb-3">
-                <button class="btn btn-primary me-2 admin-action-btn" @click="showBulkEmailModal">
+                <button class="btn-primary-ugh me-2 admin-action-btn" @click="showBulkEmailModal">
                   <i class="ri-mail-line"></i> Massen-E-Mail
                 </button>
-                <button class="btn btn-success me-2 admin-action-btn" @click="showNewCouponModal">
+                <button class="btn-primary-ugh me-2 admin-action-btn" @click="showNewCouponModal">
                   <i class="ri-add-line"></i> Neuer Coupon
                 </button>
-                <button class="btn btn-info admin-action-btn" @click="generateCouponCode">
+                <button class="btn-primary-ugh admin-action-btn" @click="generateCouponCode">
                   <i class="ri-coupon-line"></i> Code generieren
                 </button>
               </div>
@@ -405,15 +405,6 @@ export default {
     // Method to fetch data from the server
     async getdata() {
       try {
-        console.log('=== DEBUG: getdata called ===');
-        console.log('Request URL:', `coupon/get-all-coupon`);
-        console.log('Request params:', {
-          pageSize: this.pageSize,
-          pageNumber: this.currentPage
-        });
-        console.log('Axios baseURL:', axiosInstance.defaults.baseURL);
-        console.log('Full URL:', `${axiosInstance.defaults.baseURL}coupon/get-all-coupon`);
-        
         const res = await axiosInstance.get(`coupon/get-all-coupon`, {
           params: {
             pageSize: this.pageSize,
@@ -421,8 +412,6 @@ export default {
           }
         }
         );
-        
-        console.log('Response received:', res);
         
         // Handle empty response gracefully
         if (res.data && res.data.items) {
@@ -433,9 +422,7 @@ export default {
           this.totalPages = 1;
         }
       } catch (error) {
-        console.error('=== DEBUG: getdata error ===', error);
-        console.error('Error config:', error.config);
-        console.error('Error response:', error.response);
+        console.error('Error fetching coupons:', error);
         // Set default values on error
         this.coupons = [];
         this.totalPages = 1;
@@ -624,16 +611,9 @@ export default {
         title: 'Mitgliedschaft auswählen',
         input: 'select',
         inputOptions: this.memberships.reduce((options, membership) => {
-          console.log('Membership:', membership);
-          console.log('membership.membershipID:', membership.membershipID);
-          console.log('membership.name:', membership.name);
-          console.log('membership.durationDays:', membership.durationDays);
-          
           const key = membership.membershipID;
           const value = `${membership.name} (${membership.durationDays} Tage)`;
           options[key] = value;
-          console.log(`Added option: ${key} = ${value}`);
-          
           return options;
         }, {}),
         inputPlaceholder: 'Mitgliedschaft auswählen',
@@ -647,25 +627,14 @@ export default {
         }
       });
       
-      console.log('=== DEBUG: SweetAlert2 result ===');
-      console.log('membershipId from SweetAlert2:', membershipId);
-      console.log('membershipId type:', typeof membershipId);
-
       if (membershipId) {
         try {
-          console.log('=== DEBUG: generateCouponCode called ===');
-          console.log('membershipId:', membershipId);
-          console.log('membershipId type:', typeof membershipId);
-          console.log('membershipId value:', membershipId);
-          
           // Ensure membershipId is a valid number
           const membershipIdNum = parseInt(membershipId);
           if (isNaN(membershipIdNum)) {
             toast.error("Ungültige Mitgliedschaft-ID");
             return;
           }
-          
-          console.log('Request data:', { membershipId: membershipIdNum });
           
           const res = await axiosInstance.post(
             `add-coupon`, 
@@ -677,7 +646,7 @@ export default {
             }
           );
           
-          console.log('Response:', res);
+
           
           if (res.data.isSuccess) {
             const couponCode = res.data.value;
@@ -716,9 +685,7 @@ export default {
             toast.error("Fehler beim Generieren des Coupon-Codes");
           }
         } catch (error) {
-          console.error('=== DEBUG: generateCouponCode error ===', error);
-          console.error('Error config:', error.config);
-          console.error('Error response:', error.response);
+          console.error('Error generating coupon code:', error);
           toast.error("Fehler beim Generieren des Coupon-Codes");
         }
       }

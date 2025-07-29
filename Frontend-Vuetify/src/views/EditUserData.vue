@@ -82,7 +82,7 @@
               <div class="profile_btn">
                 <!-- Submit Button -->
                 <button type="button" @click="back()" class="btn btn-back rounded">Zurück</button>
-                <button type="submit" class="btn btn-primary  rounded">Profil speichern</button>
+                <button type="submit" class="btn-primary-ugh">Profil speichern</button>
               </div>
             </div>
           </div>

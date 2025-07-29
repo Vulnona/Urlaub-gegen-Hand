@@ -19,10 +19,10 @@
             <div class="offers_request_content">
                 <div class="card">
                     <div class="card-header">
-                        <h1 class="main-title">Users List</h1>
+                        <h1 class="main-title">Liste der User</h1>
                         <div class="header-actions">
                             <!-- Search Bar -->
-                            <input type="text" v-model="searchQuery" class="search-field" placeholder="Search email..." />
+                            <input type="text" v-model="searchQuery" class="search-field" placeholder="Suche E-Mail..." />
     
                             <!-- Sort Dropdown -->
                             <select v-model="sortKey" class="sort-dropdown">
@@ -52,11 +52,11 @@
                                     <tr>
                                         <th>Name</th>
                                         <th>E-Mail</th>
-                                        <th>Membership Expiry</th> 
-                                        <th>VS</th>
-                                        <th>RS</th>
+                                        <th>Ablauf der Mitgliedschaft</th> 
+                                        <th>Vorderseite</th>
+                                        <th>Rückseite</th>
                                         <th class="text-center">Status</th>
-                                        <th class="text-center">Action</th>
+                                        <th class="text-center">Aktion</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -67,13 +67,13 @@
                                         <td>{{ user.membershipEndDate ? new Date(user.membershipEndDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : 'N/A' }}</td> 
                                         <td v-if="user.link_VS" class="vs_link">
                                             <a class="" @click="showImageModal(user.link_VS, user)">
-                                        <i class="ri-eye-line"></i> View VS
+                                        <i class="ri-eye-line"></i> Vorderseite ansehen
                                       </a>
                                         </td>
                                         <td v-else>Keine VS-Daten verfügbar</td>
                                         <td v-if="user.link_RS" class="vs_link">
                                             <a class="" @click="showImageModal(user.link_RS, user)">
-                                        <i class="ri-eye-line"></i> View RS
+                                        <i class="ri-eye-line"></i> Rückseite ansehen
                                       </a>
                                         </td>
                                         <td v-else>Keine RS-Daten verfügbar</td>
@@ -173,7 +173,7 @@
                         <textarea id="body" rows="5" v-model="emailBody" required></textarea>
                     </div>
                     <div class="modal-buttons">
-                        <button class="btn themeBtn common-btn" type="submit" :disabled="isSending">
+                        <button class="btn-primary-ugh" type="submit" :disabled="isSending">
                               Senden
                             </button>
                         <button class="btn-cancel common-btn" type="button" @click="closeModal" :disabled="isSending">
@@ -243,8 +243,26 @@ export default {
         },
         // Method to show an image modal
         showImageModal(imageUrl, userdata) {
+            // Check if imageUrl is already a full URL or just a key
+            let key;
+            
+            if (imageUrl.startsWith('https://urlaub-gegen-hand.s3.eu-north-1.amazonaws.com/')) {
+                // It's a full S3 URL, extract the key
+                const s3BaseUrl = 'https://urlaub-gegen-hand.s3.eu-north-1.amazonaws.com/';
+                key = imageUrl.replace(s3BaseUrl, '');
+            } else if (imageUrl.includes('/api/FileManagement/file/')) {
+                // It's already a FileManagement URL, extract the key
+                key = imageUrl.split('/api/FileManagement/file/')[1];
+            } else {
+                // It's already just a key
+                key = imageUrl;
+            }
+            
+
+            
+            // Use axiosInstance with correct endpoint (baseURL is already '/api/')
             axiosInstance
-                .get(imageUrl, { responseType: 'arraybuffer' })
+                .get(`FileManagement/file/${key}`, { responseType: 'arraybuffer' })
                 .then(response => {
                     const blob = new Blob([response.data], { type: 'image/jpeg' });
                     this.imageUrlToShow = URL.createObjectURL(blob);
@@ -347,17 +365,17 @@ export default {
         // Method to delete a user and associated images from S3
         deleteUser(userid) {
             Swal.fire({
-                title: "Are you sure?",
-                text: "You want to delete This User!",
+                title: "Bist du sicher?",
+                text: "Du willst diesen Benutzer löschen?",
                 icon: "warning",
                 showCancelButton: true,
                 confirmButtonColor: "#3085d6",
                 cancelButtonColor: "#d33",
-                confirmButtonText: "Yes, delete it!",
+                confirmButtonText: "Ja, löschen",
             }).then((result) => {
                 if (result.isConfirmed) {
                     axiosInstance.delete(`admin/delete-admin-user/${userid}`).then(() => {
-                        toast.success("User deleted successfully!");
+                        toast.success("Benutzer erfolgreich gelöscht!");
                         this.getdata();
                     }).catch((error) => {
                         this.handleAxiosError(error);

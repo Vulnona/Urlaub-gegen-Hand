@@ -52,7 +52,9 @@ public class SendExistingCouponCommandHandler : IRequestHandler<SendExistingCoup
             // Send email
             var htmlTemplate = _htmlTemplateService.GetCouponReceivedDetails(
                 coupon.Code,
-                $"{coupon.CreatedByUser.FirstName} {coupon.CreatedByUser.LastName}".Trim()
+                $"{coupon.CreatedByUser.FirstName} {coupon.CreatedByUser.LastName}".Trim(),
+                coupon.Membership?.Name ?? "Unbekannt",
+                (int)Math.Round((coupon.Membership?.DurationDays ?? 0) / 30.0)
             );
 
             var emailSent = await _emailService.SendEmailAsync(

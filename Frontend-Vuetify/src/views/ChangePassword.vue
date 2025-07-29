@@ -36,10 +36,10 @@
         Passwortbestätigung ist erforderlich und muss mit dem Passwort übereinstimmen.
       </span>
       <div class="login-buttons">
-        <button type="button" class="btn btn-secondary me-2" @click="goBack">
+        <button type="button" class="btn-primary-ugh me-2" @click="goBack">
           <i class="ri-arrow-left-line"></i> Zurück
         </button>
-        <button type="submit" class="btn">Passwort ändern</button>
+        <button type="submit" class="btn-primary-ugh">Passwort ändern</button>
       </div>
     </div>    
   </div>

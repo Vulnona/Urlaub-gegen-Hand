@@ -125,7 +125,9 @@ public class PaymentSucceededWebhookCommandHandler
                 {
                     var htmlTemplate = _htmlTemplateService.GetCouponPurchasedDetails(
                         coupon.Code,
-                        $"{transaction.User.FirstName} {transaction.User.LastName}".Trim()
+                        $"{transaction.User.FirstName} {transaction.User.LastName}".Trim(),
+                        membership.Name,
+                        (int)Math.Round(membership.DurationDays / 30.0)
                     );
 
                     await _emailService.SendEmailAsync(

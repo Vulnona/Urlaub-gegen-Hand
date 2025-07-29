@@ -138,4 +138,22 @@ public class ReviewRepository
         return "Review added successfully.";
     }
 #nullable disable    
+
+    public async Task<PaginatedList<ReviewDto>> GetAllReviewsAdminAsync(int pageNumber, int pageSize)
+    {
+        IQueryable<Review> query = _context.reviews
+            .Include(r => r.Offer)
+            .Include(r => r.Reviewer)
+            .Include(r => r.Reviewed);
+
+        int totalCount = await query.CountAsync();
+        var reviews = await query
+            .OrderByDescending(r => r.CreatedAt)
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ProjectToType<ReviewDto>()
+            .ToListAsync();
+
+        return PaginatedList<ReviewDto>.Create(reviews, totalCount, pageNumber, pageSize);
+    }
 }

@@ -9,53 +9,67 @@
         <div class="row">
           <div class="col-sm-12">
             <div class="inner_banner">
-              <h2>Reviews der Angebote</h2>
+              <h2>Alle Bewertungen (Admin)</h2>
             </div>
           </div>
         </div>
       </div>
     </div>
-    <section class="section_space offers_list">
+    <section class="section_space reviews_list">
       <div class="container">
         <div class="row">
           <div class="col-sm-12">
             <div class="sort-new-button justify-content-center">
               <div class="SearchBox">
                 <i class="ri-search-line"></i>
-                <input type="text" v-model="searchTerm" @input="debouncedSearch" placeholder="Durchsuche Angebote" class="form-control">
+                <input type="text" v-model="searchTerm" @input="debouncedSearch" placeholder="Suche Nutzer, Angebot, Kommentar..." class="form-control">
               </div>
             </div>
-            <div v-if="offers.length" class="offers_group">
-              <div v-if="loading" class="spinner-container text-center">
-                <div class="spinner"></div>
-              </div>
-              <div v-else class="row">
-                <div v-for="offer in filteredOffers" :key="offer.id" class="col-md-3 mb-4">
-                  <div class="all_items card-offer">
-                    <div class="item_img">
-                      <img @click="redirectToOfferReviews(offer.id)" v-if="offer.imageData" loading="lazy"
-                        :src="'data:' + offer.imageMimeType + ';base64,' + offer.imageData" class="card-img-top"
-                        alt="Offer Image">
-                    </div>
-                    <div class="">
-                      <div @click="redirectToOfferReviews(offer.id)">
-                        <h4 class="card-title">{{ offer.title }}</h4>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <!-- Pagination Section -->
-              <div class="pagination">
-                <button class="action-link" @click="changePage(currentPage - 1)" :hidden="currentPage === 1"><i
-                    class="ri-arrow-left-s-line"></i>Vorherige</button>
-                <span>Seite {{ currentPage }} von {{ totalPages }}</span>
-                <button class="action-link" @click="changePage(currentPage + 1)"
-                  :hidden="currentPage === totalPages">Nächste<i class="ri-arrow-right-s-line"></i></button>
-              </div>
+            <div v-if="loading" class="spinner-container text-center">
+              <div class="spinner"></div>
             </div>
             <div v-else>
-              <h2 class="text-center">Keine Angebote gefunden!</h2>
+              <div v-if="reviews.length">
+                <table class="table table-striped table-bordered reviews-table">
+                  <thead>
+                    <tr>
+                      <th>Bewertender Nutzer</th>
+                      <th>Bewerteter Nutzer</th>
+                      <th>Angebot</th>
+                      <th>Bewertung</th>
+                      <th>Kommentar</th>
+                      <th>Datum</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="review in filteredReviews" :key="review.id">
+                      <td>{{ review.reviewer?.firstName }} {{ review.reviewer?.lastName }}</td>
+                      <td>{{ review.reviewed?.firstName }} {{ review.reviewed?.lastName }}</td>
+                      <td>
+                        <router-link :to="{ name: 'OfferDetail', params: { id: review.offerId } }">
+                          {{ review.offer?.title || 'Angebot #' + review.offerId }}
+                        </router-link>
+                      </td>
+                      <td>
+                        <span v-for="n in 5" :key="n">
+                          <i v-if="n <= review.ratingValue" class="ri-star-fill text-primary-yellow"></i>
+                          <i v-else class="ri-star-line text-primary-yellow"></i>
+                        </span>
+                      </td>
+                      <td>{{ review.reviewComment }}</td>
+                      <td>{{ formatDate(review.createdAt) }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+                <div class="pagination">
+                  <button class="action-link" @click="changePage(currentPage - 1)" :hidden="currentPage === 1"><i class="ri-arrow-left-s-line"></i>Vorherige</button>
+                  <span>Seite {{ currentPage }} von {{ totalPages }}</span>
+                  <button class="action-link" @click="changePage(currentPage + 1)" :hidden="currentPage === totalPages">Nächste<i class="ri-arrow-right-s-line"></i></button>
+                </div>
+              </div>
+              <div v-else>
+                <h2 class="text-center">Keine Bewertungen gefunden!</h2>
+              </div>
             </div>
           </div>
         </div>
@@ -72,10 +86,6 @@ import {GetUserRole} from "@/services/GetUserPrivileges";
 import Errorpage from "../Errorpage.vue";
 import toast from "@/components/toaster/toast";
 
-window.FontAwesomeConfig = {
-  autoReplaceSvg: false
-};
-
 export default {
   components: {
     Navbar,
@@ -85,46 +95,38 @@ export default {
     return {
       userRole: GetUserRole(),
       loading: true,
-      offers: [],
+      reviews: [],
       searchTerm: '',
       searchTimeout: null,
-      currentIndex: 0,
       currentPage: 1,
       totalPages: 1,
-      pageSize: 8,
+      pageSize: 50,
     };
   },
-
   mounted() {
-    this.fetchOffers();
+    this.fetchReviews();
     Securitybot();
   },
   methods: {
-    async fetchOffers() {
+    async fetchReviews() {
       try {
-        const response = await axiosInstance.get(`review/get-all-offers-for-reviews-admin`, {
+        const response = await axiosInstance.get(`review/get-all-reviews-admin`, {
           params: {
-            searchTerm: this.searchTerm,
             pageSize: this.pageSize,
             pageNumber: this.currentPage
           }
         });
-        
-        // Handle response gracefully
         if (response.data && response.data.items) {
-          this.offers = response.data.items;
+          this.reviews = response.data.items;
           this.totalPages = Math.ceil((response.data.totalCount || 0) / this.pageSize);
         } else {
-          this.offers = [];
+          this.reviews = [];
           this.totalPages = 1;
         }
       } catch (error) {
         console.error('Fehler beim Abrufen der Reviews:', error);
-        // Set default values on error
-        this.offers = [];
+        this.reviews = [];
         this.totalPages = 1;
-        
-        // Show user-friendly error message
         if (error.response) {
           if (error.response.status === 401) {
             toast.error("Session abgelaufen. Bitte melden Sie sich erneut an.");
@@ -145,94 +147,54 @@ export default {
     changePage(newPage) {
       if (newPage >= 1 && newPage <= this.totalPages) {
         this.currentPage = newPage;
-        this.fetchOffers(); 
+        this.fetchReviews();
       }
-    },
-    searchOffers() {
-      this.loading = true;
-      this.fetchOffers();
     },
     debouncedSearch() {
       clearTimeout(this.searchTimeout);
       this.searchTimeout = setTimeout(() => {
-        this.currentPage = 1,
-          this.searchOffers();
-      }, 1000);
+        this.currentPage = 1;
+        // Optional: Filter clientseitig, Backend-Search kann später ergänzt werden
+      }, 500);
     },
-    // Method to redirect to offer detail page
-    redirectToOfferReviews(offerId) {
-      this.$router.push({
-        name: 'OfferReviews',
-        params: {
-          id: offerId
-        }
-      });
-    },
+    formatDate(dateStr) {
+      const date = new Date(dateStr);
+      return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+    }
   },
   computed: {
-    filteredOffers() {
-      return this.offers.filter(offer => {
-        const title = offer.title ? offer.title.toLowerCase() : '';
-        const skills = offer.skills ? offer.skills.toLowerCase() : '';
-        const region = offer.region ? offer.region.toLowerCase() : '';
-        const isValidOffer = true;
-        return isValidOffer && (
-          title.includes(this.searchTerm.toLowerCase()) ||
-          region.includes(this.searchTerm.toLowerCase()) ||
-          skills.includes(this.searchTerm.toLowerCase())
-        );
-      });
+    filteredReviews() {
+      if (!this.searchTerm) return this.reviews;
+      const term = this.searchTerm.toLowerCase();
+      return this.reviews.filter(r =>
+        (r.reviewer?.firstName + ' ' + r.reviewer?.lastName).toLowerCase().includes(term) ||
+        (r.reviewed?.firstName + ' ' + r.reviewed?.lastName).toLowerCase().includes(term) ||
+        (r.offer?.title || '').toLowerCase().includes(term) ||
+        (r.reviewComment || '').toLowerCase().includes(term)
+      );
     }
   }
 };
 </script>
+
 <style scoped>
-.all_items {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  width: 300px; /* Fixed card width */
-  height: 400px; /* Fixed card height */
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  overflow: hidden;
+.reviews-table {
+  width: 100%;
   background: #fff;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.07);
+  margin-top: 30px;
 }
-
-.item_img {
-  flex-grow: 1; /* Allows the image container to grow and fill available space */
-  display: flex;
-  align-items: stretch; /* Ensure the image container stretches completely */
-  justify-content: center;
-  padding: 0; /* Remove any padding */
-  margin: 0; /* Remove any margin */
+.reviews-table th, .reviews-table td {
+  padding: 10px 8px;
+  text-align: left;
+  vertical-align: middle;
 }
-
-.item_img img {
-  width: 100%; /* Ensures the image fills the width of the container */
-  height: 100%; /* Ensures the image fills the height of the container */
-  object-fit: cover; /* Adjust the image to cover the container without distortion */
+.reviews-table th {
+  background: #f8f8f8;
+  font-weight: 600;
 }
-
-.card-title {
-  text-align: center;
-  font-size: 1rem;
-  padding: 10px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  background-color: #f8f8f8;
+.text-primary-yellow {
+  color: #ffc107;
 }
-
-.card-title:hover {
-  white-space: normal; /* Show full text on hover */
-  overflow: visible;
-}
-
-.all_items > div {
-  display: flex;
-  flex-direction: column;
-}
-
 </style>

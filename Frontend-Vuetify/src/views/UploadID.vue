@@ -19,8 +19,8 @@
               <h5 class="card-title">Vordere Seite des Ausweises</h5>
               <div class="custom-upload">
                 <input type="file" accept="image/x-png,image/gif,image/jpeg" @change="onFrontIdChange" />
-                <button type="button" class="btn themeBtn">
-                  <i class="ri-upload-2-line"></i> Choose File
+                <button type="button" class="btn-primary-ugh">
+                  <i class="ri-upload-2-line"></i> Datei auswählen
                 </button>
               </div>
               <div class="mt-3">
@@ -39,7 +39,7 @@
               <h5 class="card-title">Hintere Seite des Ausweises</h5>
               <div class="custom-upload">
                 <input type="file" accept="image/x-png,image/gif,image/jpeg" @change="onBackIdChange" />
-                <button type="button" class="btn themeBtn">
+                <button type="button" class="btn-primary-ugh">
                   <i class="ri-upload-2-line"></i> Datei auswählen
                 </button>
               </div>
@@ -59,10 +59,10 @@
 
     <div class="row mt-3">
       <div class="col-sm-12 bottom_btn text-center">
-        <button @click="back" class="btn btn-primary rounded grey_btn" :disabled="isLoading">Abbrechen</button>
+        <button @click="back" class="btn-primary-ugh" :disabled="isLoading">Abbrechen</button>
         &nbsp;&nbsp;
-        <button @click="uploadImages" class="btn btn-primary rounded" :disabled="isLoading">
-          Upload
+        <button @click="uploadImages" class="btn-primary-ugh" :disabled="isLoading">
+          Hochladen
         </button>
       </div>
     </div>
@@ -129,6 +129,7 @@ const uploadImages = async () => {
       const frontFileName = `${userId}VS`;
       const backFileName = `${userId}RS`;
 
+
       try {
         await updateUserLinks(userId, frontFileName, backFileName);
         toast.success("Upload erfolgreich! Deine Registrierung ist jetzt in Bearbeitung. Ein Admin prüft deine Angaben. Du erhältst eine E-Mail, sobald du freigeschaltet bist.");
@@ -150,18 +151,37 @@ const uploadImages = async () => {
 
 const updateUserLinks = async (userId: string, linkVS: string, linkRS: string) => {
   const userData = new FormData();
-  userData.append('fileNameVS', linkVS);
-  userData.append('fileNameRS', linkRS);
+  // Backend erwartet: fileVS = Vorderseite, fileRS = Rückseite
   userData.append('fileVS', frontIdFile.value!);
   userData.append('fileRS', backIdFile.value!);
 
-  await axiosInstance.post(
-    `authenticate/upload-id?userId=${userId}`,
-    userData,
-    {
-      headers: { 'Content-Type': 'multipart/form-data' },
+
+
+  try {
+    const response = await axiosInstance.post(
+      `authenticate/upload-id?userId=${userId}`,
+      userData,
+      {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      }
+    );
+
+  } catch (error: any) {
+    console.log('Upload-Error:', error);
+    if (error.response && error.response.data) {
+      const msg = error.response.data;
+      if (typeof msg === 'string' && (msg.includes('System.InvalidCastException') || msg.includes('Exception') || msg.length > 200)) {
+        toast.error('Beim Hochladen ist ein technischer Fehler aufgetreten. Bitte kontaktiere den Support.');
+      } else {
+        toast.error(msg);
+      }
+    } else if (error.message) {
+      toast.error(error.message);
+    } else {
+      toast.error('Unbekannter Fehler beim Upload.');
     }
-  );
+    throw error;
+  }
 };
 
 const back = () => {

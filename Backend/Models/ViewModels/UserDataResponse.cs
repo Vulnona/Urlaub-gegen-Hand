@@ -24,6 +24,6 @@ public class UserDataResponse
     public string Link_RS { get; set; }
     public string Link_VS { get; set; }
     public int VerificationState { get; set; }
-    public Membership CurrentMembership { get; set; }
+    public Membership? CurrentMembership { get; set; }
     public double AverageRating { get; set; }
 }

@@ -16,7 +16,7 @@
                 <div class="card-title"> <h5>Allgemeine Informationen</h5> </div>
                 <div class="card-body">
                   <Input n="Titel für Angebot" v-model="offer.title" p="" :req=true />
-                  <Input n="Beschreibung" v-model="offer.description" p="" :t="true" :req=true />
+                  <Input n="Beschreibung" v-model="offer.description" p="Infos zum Ort&#10;Infos zum Gastgeber&#10;Infos zu den Aufgaben&#10;Allgemeine Infos" :t="true" :req=true />
                 </div>
               </div>
             </div>
@@ -55,22 +55,16 @@
           <div class="col-sm-6">
             <div class="card general_info_box">
               <div class="general_infoContent">
-                <div class="card-title"> <h5>Additional Information</h5> </div>
+                <div class="card-title"> <h5>Zusätzliche Informationen</h5> </div>
                 <div class="card-body">
                   <div class="form-group">
-                    <label>Fertigkeiten <b style="color: red;">*</b></label>
-                    <multiselect v-model="offer.skills" :options="skillOptions" placeholder="Fertigkeiten auswählen"
-                                 label="name" track-by="id" :group-label="'name'" :group-values="'children'" multiple>
-  <template #group="groupProps: any">
-    <div @click.stop="expandState[groupProps.group.id] = !(expandState[groupProps.group.id])" style="font-weight:bold; cursor:pointer; padding:4px 8px; background:#f8f8f8;">
-      <span>{{ groupProps.group.name }}</span>
-      <span v-if="expandState[groupProps.group.id]">▼</span><span v-else>▶</span>
-    </div>
-    <div v-show="expandState[groupProps.group.id] ?? false">
-      <slot name="options" :options="groupProps.children" />
-    </div>
-  </template>
-</multiselect>
+                    <HierarchicalSkillSelect
+                      v-model="offer.skills"
+                      :skills="skillOptions"
+                      label="Fertigkeiten"
+                      placeholder="Fertigkeiten auswählen..."
+                      :required="true"
+                    />
                   </div>
                   <div class="amenities-wrapper">
                     <div class="form-group"> <label> Unterbringung </label> <div class="contact_infoBox">                        
@@ -145,8 +139,7 @@ import Navbar from '@/components/navbar/Navbar.vue';
 import { de } from 'date-fns/locale';
 import Datepicker from 'vue3-datepicker';
 import router from '@/router';
-import Multiselect from 'vue-multiselect';
-import 'vue-multiselect/dist/vue-multiselect.css';
+import HierarchicalSkillSelect from '@/components/form/HierarchicalSkillSelect.vue';
 import Securitybot from '@/services/SecurityBot';
 import axiosInstance from '@/interceptor/interceptor';
 import toast from '@/components/toaster/toast';
@@ -173,7 +166,6 @@ let skillOptions = [];
 let accommodations = [];
 let suitableAccommodations = [];
 let modify = false;
-let expandState = ref<Record<number, boolean>>({});
 let images = ref<(File|string)[]>([]); // Nur File oder string
 let removedImageIds = ref<number[]>([]); // IDs der zu löschenden Bilder
 
@@ -302,8 +294,14 @@ onMounted(async () => {
     loading.value = true;
     accommodations = (await axiosInstance.get(`accommodation/get-all-accommodations`)).data;
     suitableAccommodations = (await axiosInstance.get(`accommodation-suitability/get-all-suitable-accommodations`)).data;
-    // Lade hierarchische Skills
-    skillOptions = (await axiosInstance.get(`skills/hierarchical`)).data;
+    // Lade Skills für hierarchische Komponente
+    const skillsResponse = await axiosInstance.get('skills/get-all-skills');
+    skills = skillsResponse.data;
+    skillOptions = skills.map(skill => ({
+        id: skill.skill_ID,
+        name: skill.skillDescrition,
+        parentId: skill.parentSkill_ID
+    }));
     if (props.offer.id != -1){        
         offer.title = props.offer.title;
         offer.description = props.offer.description;
@@ -319,14 +317,10 @@ onMounted(async () => {
         offer.accommodation = Array.isArray(props.offer.accommodation) ? props.offer.accommodation : (typeof props.offer.accommodation === 'string' ? props.offer.accommodation.split(',').map(s => s.trim()) : []);
         offer.accommodationSuitable = Array.isArray(props.offer.accommodationSuitable) ? props.offer.accommodationSuitable : (typeof props.offer.accommodationSuitable === 'string' ? props.offer.accommodationSuitable.split(',').map(s => s.trim()) : []);
         // Skills: Mappe gespeicherte Skill-IDs/Strings auf die Objekte aus skillOptions
-        let flatSkills = [];
-        skillOptions.forEach(group => {
-          if (group.children && group.children.length) flatSkills.push(...group.children);
-        });
         if (Array.isArray(props.offer.skills)) {
-          offer.skills = props.offer.skills.map(s => typeof s === 'object' ? flatSkills.find(fs => fs.id === s.id || fs.name === s.name) : flatSkills.find(fs => fs.name === s || fs.id === s)).filter(Boolean);
+          offer.skills = props.offer.skills.map(s => typeof s === 'object' ? skillOptions.find(fs => fs.id === s.id || fs.name === s.name) : skillOptions.find(fs => fs.name === s || fs.id === s)).filter(Boolean);
         } else if (typeof props.offer.skills === 'string') {
-          offer.skills = props.offer.skills.split(',').map(s => flatSkills.find(fs => fs.name === s.trim())).filter(Boolean);
+          offer.skills = props.offer.skills.split(',').map(s => skillOptions.find(fs => fs.name === s.trim())).filter(Boolean);
         } else {
           offer.skills = [];
         }
@@ -357,20 +351,7 @@ onMounted(async () => {
 <style scoped>
 .desc-textarea {height: 90px;}
 
-/* Multiselect Parent (Group) fett, nicht ausgegraut */
-.multiselect__group {
-  font-weight: bold;
-  color: #222;
-  background: #f8f8f8;
-  cursor: default;
-  font-size: 1.05em;
-  opacity: 1 !important;
-}
-/* Child Skills normal, etwas kleiner */
-.multiselect__option {
-  font-size: 0.97em;
-  font-weight: normal;
-}
+
 .image-preview-list { gap: 8px; }
 .image-preview-box { position: relative; display: inline-block; }
 .remove-image-btn { right: 2px; top: 2px; }

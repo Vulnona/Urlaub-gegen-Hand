@@ -24,14 +24,14 @@
               </select>
             </div>
             <div class="SearchBox">
-              <i class="ri-search-line"></i>
+              <i class="ri-search-line text-primary-blue"></i>
               <input type="text" v-model="searchTerm" @input="debouncedSearch"
-                placeholder="Suche Angebote / Regionen / Skills" class="form-control ">
+                placeholder="Suche Angebote / Regionen / Skills" class="form-control">
             </div>
             <div class="add-new-offer">
-              <router-link class="btn themeBtn" to="/add-offer"><i class="ri-add-circle-line"></i> Neues Angebot hinzufügen
+              <router-link class="btn-primary-ugh" to="/add-offer"><i class="ri-add-circle-line"></i> Neues Angebot hinzufügen
               </router-link>
-              <button class="btn btn-outline-secondary ms-2" @click="deactivateAllOffers"><i class="ri-close-circle-line"></i> Alle Angebote deaktivieren</button>
+              <button class="btn-deactivate-all ms-2" @click="deactivateAllOffers"><i class="ri-close-circle-line"></i> Alle Angebote deaktivieren</button>
             </div>
           </div>
           
@@ -52,32 +52,36 @@
               <div v-for="offer in filteredOffers" :key="offer.id" class="col-md-3 mb-4">
                 <div class="all_items card-offer">
                   <div class="d-flex align-items-center mb-1">
-                    <span v-if="offer.isExpiringSoon" class="text-danger me-2" style="cursor:pointer;" :title="`Achtung: Der Angebotszeitraum endet am ${offer.toDate}. Das Angebot wird danach automatisch deaktiviert.`">
-                      <i class="ri-error-warning-fill"></i>
-                    </span>
                     <span class="fw-bold">{{ offer.title }}</span>
                   </div>
-                  <OfferCard :offer=offer :showStatus=true />
-                  <div v-if="offer.status === 1" class="mt-1 d-flex justify-content-center">
-                    <button
-                      class="btn btn-outline-success btn-sm"
-                      @click="reactivateOffer(offer.id)"
-                      :disabled="!offer.canReactivate"
-                      :title="!offer.canReactivate ? 'Angebotszeitraum abgelaufen. Reaktivierung nicht möglich.' : 'Angebot reaktivieren'"
-                    >
-                      <i class="ri-refresh-line"></i> Reaktivieren
-                    </button>
-                  </div>
+                  <OfferCard :offer="offer" :showStatus="true">
+                    <template #actions>
+                      <div class="d-flex flex-wrap gap-2 justify-content-center">
+                        <button class="btn-primary-ugh btn-sm" @click.stop="shareOnFacebook(offer)">
+                          <i class="ri-facebook-fill"></i> Auf Facebook teilen
+                        </button>
+                      </div>
+                      <div class="d-flex flex-wrap gap-2 justify-content-center mt-1">
+                        <button v-if="offer.status === 1"
+                          class="btn btn-outline-success btn-sm"
+                          @click.stop="reactivateOffer(offer.id)"
+                          :disabled="!offer.canReactivate"
+                          :title="!offer.canReactivate ? 'Angebotszeitraum abgelaufen. Reaktivierung nicht möglich.' : 'Angebot reaktivieren'"
+                        >
+                          <i class="ri-refresh-line"></i> Reaktivieren
+                        </button>
+                        <!-- Hier können weitere Buttons ergänzt werden -->
+                      </div>
+                    </template>
+                  </OfferCard>
                 </div>
               </div>
             </div>
              <!-- Pagination Section -->
              <div class="pagination">
-              <button class="action-link" @click="changePage(currentPage - 1)" :hidden="currentPage === 1"><i
-                  class="ri-arrow-left-s-line"></i>Zurück</button>
-              <span>Seite {{ currentPage }} von {{ totalPages }}</span>
-              <button class="action-link" @click="changePage(currentPage + 1)"
-                :hidden="currentPage === totalPages">Weiter<i class="ri-arrow-right-s-line"></i></button>
+              <button class="btn-arrow-ugh me-2" @click="changePage(currentPage - 1)" :disabled="currentPage === 1"><i class="ri-arrow-left-s-line"></i></button>
+              <span>Seite {{ Math.max(currentPage, 1) }} von {{ Math.max(totalPages, 1) }}</span>
+              <button class="btn-arrow-ugh ms-2" @click="changePage(currentPage + 1)" :disabled="currentPage === totalPages"><i class="ri-arrow-right-s-line"></i></button>
             </div>
           </div>
           <div v-else-if="!loading">
@@ -210,6 +214,12 @@ const deactivateAllOffers = async () => {
   }
 };
 
+const shareOnFacebook = (offer: any) => {
+  const url = encodeURIComponent(`${window.location.origin}/offer/${offer.id}`);
+  const fbUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}`;
+  window.open(fbUrl, '_blank', 'width=600,height=400');
+};
+
 onMounted(() => {
   fetchOffers();
   Securitybot();
@@ -219,5 +229,31 @@ onMounted(() => {
 <style>
 .offers_list_page {
   margin-top: 30px;
+}
+
+/* Deaktivieren-Button Styling */
+.btn-deactivate-all {
+  background-color: #9ca3af !important; /* Mittel/hellgrau */
+  color: #000000 !important; /* Schwarze Schrift */
+  border: none;
+  padding: 12px 25px;
+  border-radius: 8px;
+  font-weight: bold;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+}
+
+.btn-deactivate-all:hover {
+  background-color: #6b7280 !important; /* Dunkleres Grau beim Hover */
+  color: #000000 !important; /* Schwarze Schrift bleibt */
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+.btn-deactivate-all:focus {
+  background-color: #9ca3af !important;
+  color: #000000 !important;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(156, 163, 175, 0.3);
 }
 </style>

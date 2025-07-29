@@ -61,7 +61,7 @@ CREATE TABLE `accomodations` (
     `Id` int NOT NULL AUTO_INCREMENT,
     `NameAccommodationType` longtext NOT NULL,
     PRIMARY KEY (`Id`)
-) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Create addresses table
 CREATE TABLE `addresses` (
@@ -116,7 +116,7 @@ CREATE TABLE `users` (
     `LastFailedBackupCodeAttempt` datetime NULL,
     `IsBackupCodeLocked` tinyint(1) NOT NULL DEFAULT 0,
     `IsEmailVerified` tinyint(1) NOT NULL DEFAULT 0,
-    `MembershipId` int NULL,
+    `MembershipId` int NOT NULL DEFAULT 1,
     `Facebook_link` longtext NULL,
     `Link_RS` longtext NULL,
     `Link_VS` longtext NULL,
@@ -226,7 +226,7 @@ CREATE TABLE `shopitems` (
     `Price_Currency` varchar(3) DEFAULT NULL,
     `Description` longtext,
     PRIMARY KEY (`Id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Create coupons table
 CREATE TABLE `coupons` (
@@ -281,7 +281,7 @@ CREATE TABLE `skills` (
     `SkillDescrition` longtext,
     `ParentSkill_ID` int DEFAULT NULL,
     PRIMARY KEY (`Skill_ID`)
-) ENGINE=InnoDB AUTO_INCREMENT=45 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=141 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Create passwordresettokens table
 CREATE TABLE `passwordresettokens` (
@@ -346,8 +346,7 @@ INSERT INTO `accomodations` VALUES
 (10,'Baumhaus'),
 (11,'Scheune'),
 (12,'Wohnwagen'),
-(13,'Scheune'),
-(14,'Wohnwagen');
+(15,'Ferienwohnung');
 
 -- Insert addresses
 INSERT INTO `addresses` VALUES 
@@ -356,14 +355,13 @@ INSERT INTO `addresses` VALUES
 (3,50.110924,8.682127,'Römerberg, 60311 Frankfurt am Main, Deutschland',NULL,NULL,NULL,'Frankfurt',NULL,NULL,NULL,'Deutschland','DE',NULL,NULL,NULL,0,'2025-07-26 18:33:30',NULL),
 (32,50.9924496,9.7711081,'Hinter den Zäunen, Lispenhausen, 36199, Deutschland',NULL,NULL,NULL,'Lispenhausen',NULL,NULL,'36199','Deutschland',NULL,NULL,NULL,NULL,0,'2025-07-28 08:33:00',NULL);
 
--- Insert memberships
-INSERT INTO `memberships` VALUES 
-(1,'Flexible Mitgliedschaft für 1 Monat - perfekt zum Ausprobieren',30,1,'1 Monat',9.990000000000000000000000000000),
-(2,'N/A',0,0,'Default',0.000000000000000000000000000000),
-(3,'3 Monate Mitgliedschaft mit attraktivem Rabatt',90,1,'3 Monate',24.990000000000000000000000000000),
-(4,'Jahresmitgliedschaft - unser beliebtestes Angebot',365,1,'1 Jahr',89.990000000000000000000000000000),
-(5,'3 Jahre Mitgliedschaft mit maximalem Rabatt',1095,1,'3 Jahre',239.990000000000000000000000000000),
-(6,'Lebenslange Mitgliedschaft - einmal zahlen, für immer dabei',9999,1,'Lebenslang',499.990000000000000000000000000000);
+-- Entferne Default und Test-Mitgliedschaften aus memberships
+INSERT INTO `memberships` (`MembershipID`, `Description`, `DurationDays`, `IsActive`, `Name`, `Price`) VALUES
+(1,'Flexible Mitgliedschaft für 1 Monat - perfekt zum Ausprobieren',30,1,'1 Monat',9.99),
+(3,'3 Monate Mitgliedschaft mit attraktivem Rabatt',90,1,'3 Monate',24.99),
+(4,'Jahresmitgliedschaft - unser beliebtestes Angebot',365,1,'1 Jahr',89.99),
+(5,'3 Jahre Mitgliedschaft mit maximalem Rabatt',1095,1,'3 Jahre',239.99),
+(6,'Lebenslange Mitgliedschaft - einmal zahlen, für immer dabei',9999,1,'Lebenslang',499.99);
 
 -- Insert users (VerificationState: 0=IsNew, 1=VerificationPending, 2=VerificationFailed, 3=Verified)
 -- UserRole: 0=User, 1=Admin
@@ -397,15 +395,17 @@ INSERT INTO `pictures` (`Id`, `Hash`, `Width`, `ImageData`, `UserId`, `OfferId`)
 INSERT INTO `offerapplication` (`Id`, `OfferId`, `UserId`, `HostId`, `Status`, `CreatedAt`, `UpdatedAt`) VALUES
 (1, 1, '28ddca8e-a8b9-48ef-8e0b-09db16414bfc', '08ddca8e-a8b9-48ef-8e0b-09db16414bfa', 0, NOW(), NOW());
 
--- Insert sample reviews
-INSERT INTO `reviews` (`Id`, `OfferId`, `RatingValue`, `ReviewComment`, `CreatedAt`, `UpdatedAt`, `ReviewerId`, `ReviewedId`) VALUES
-(1, 1, 5, 'Sehr netter Gastgeber und schöne Unterkunft!', NOW(), NOW(), '28ddca8e-a8b9-48ef-8e0b-09db16414bfc', '08ddca8e-a8b9-48ef-8e0b-09db16414bfa'),
-(2, 3, 4, 'Gute Erfahrung, gerne wieder!', NOW(), NOW(), '08ddca8e-a8b9-48ef-8e0b-09db16414bfa', '28ddca8e-a8b9-48ef-8e0b-09db16414bfc');
+-- Insert sample reviews (aus Docker-DB Stand)
+INSERT INTO `reviews` VALUES (1,1,5,'Sehr netter Gastgeber und schöne Unterkunft!','2025-07-29 15:14:25.000000','2025-07-29 15:14:25.000000','28ddca8e-a8b9-48ef-8e0b-09db16414bfc','08ddca8e-a8b9-48ef-8e0b-09db16414bfa'),(2,3,4,'Gute Erfahrung, gerne wieder!','2025-07-29 15:14:25.000000','2025-07-29 15:14:25.000000','08ddca8e-a8b9-48ef-8e0b-09db16414bfa','28ddca8e-a8b9-48ef-8e0b-09db16414bfc');
 
--- Insert sample shop items
+-- Insert shop items (Membership Coupons)
 INSERT INTO `shopitems` (`Id`, `Name`, `Duration`, `Price_Amount`, `Price_Currency`, `Description`) VALUES
-(1, 'test', 30, 0.50, 'eur', 'testbeschreibung'),
-(2, 'Testangebot', 1, 0.50, 'eur', 'Dies ist ein Test des Shops. Der Coupon hat minimale Laufzeit und kostet den im Zahlungssystem kleinstmoeglichen Betrag.');
+(1, 'Testmitgliedschaft', 3, 0.50, 'EUR', 'Testmitgliedschaft für 3 Tage - nur während der Testphase verfügbar! Perfekt zum Ausprobieren der Plattform. Gilt nur für die Testphase und wird später entfernt.'),
+(2, '1 Monat Mitgliedschaft', 30, 9.99, 'EUR', 'Flexible Mitgliedschaft für 1 Monat - perfekt zum Ausprobieren. Erhalten Sie vollen Zugang zu allen Angeboten und können Ihre Mitgliedschaft jederzeit verlängern.'),
+(3, '3 Monate Mitgliedschaft', 90, 24.99, 'EUR', '3 Monate Mitgliedschaft mit attraktivem Rabatt. Sparen Sie 5€ im Vergleich zu 3x 1 Monat. Ideal für längere Aufenthalte und mehrere Reisen.'),
+(4, '1 Jahr Mitgliedschaft', 365, 89.99, 'EUR', 'Jahresmitgliedschaft - unser beliebtestes Angebot! Sparen Sie 30€ im Vergleich zu 12x 1 Monat. Perfekt für regelmäßige Reisende.'),
+(5, '3 Jahre Mitgliedschaft', 1095, 239.99, 'EUR', '3 Jahre Mitgliedschaft mit maximalem Rabatt. Sparen Sie 120€ im Vergleich zu 36x 1 Monat. Für langfristige Planer und Vielreisende.'),
+(6, 'Lebenslange Mitgliedschaft', 9999, 499.99, 'EUR', 'Lebenslange Mitgliedschaft - einmal zahlen, für immer dabei! Unbegrenzter Zugang zu allen Angeboten ohne weitere Kosten. Das ultimative Angebot für lebenslange Reisende.');
 
 -- Insert sample coupons
 INSERT INTO `coupons` (`Id`, `Code`, `Name`, `Description`, `CreatedDate`, `CreatedBy`, `Duration`, `MembershipId`) VALUES
@@ -423,4 +423,4 @@ INSERT INTO `transaction` (`Id`, `TransactionDate`, `Amount_Value`, `Amount_Curr
 
 -- Insert sample skills
 INSERT INTO `skills` (`Skill_ID`, `SkillDescrition`, `ParentSkill_ID`) VALUES
-(1,'Handwerk',NULL),(2,'Haushalt',NULL),(3,'Holz',1),(4,'Metall',1),(5,'Tapezieren',1),(6,'Wände streichen',1),(7,'Putzen',2),(8,'Aufräumen',2),(9,'Einkaufen',2),(10,'Kochen',2),(11,'zur Hand gehen - keine speziellen Kenntnisse notwendig',NULL),(12,'Tiersitting',NULL),(13,'Haussitting',11),(14,'Pferde',12),(15,'Kleintiere',12),(16,'Vögel oder Amphibien',12),(17,'Gartenarbeit',2),(18,'Trockenbau',1),(19,'Estrichleger',1),(20,'Fliesen verlegen',1),(21,'Installationsarbeiten Bad/Heizung/Sanitär',1),(22,'Installationsarbeiten Elektro',1),(23,'Zimmermann',1),(24,'Tischler',1),(25,'Dachdecker',1),(26,'Maurer',1),(27,'KFZ Reparatur',1),(28,'Informatiker',1),(29,'Backen',2),(30,'Kreativ',NULL),(31,'Marketing',30),(32,'Social Media',30),(33,'Texter',30),(34,'Grafiker',30),(35,'Fotografen',30),(36,'Journalisten',30),(37,'Webseite - Blog schreiben',30),(38,'Finanzen/Buchhaltung',NULL),(39,'Körpertherapie (wie Massage, Jin Shin Jyutsu, Fußreflex)',NULL),(40,'Führerschein',NULL),(41,'Führerschein PKW',40),(42,'Führerschein LKW',40),(43,'Kettensägenschein vorhanden',1),(44,'Brennholz hacken',1); 
+(1,'Handwerk',NULL),(2,'Haushalt',NULL),(3,'Holz',1),(4,'Metall',1),(5,'Tapezieren',1),(6,'Wände streichen',1),(7,'Putzen',2),(8,'Aufräumen',2),(9,'Einkaufen',2),(10,'Kochen',2),(11,'zur Hand gehen - keine speziellen Kenntnisse notwendig',NULL),(12,'Tiersitting',NULL),(13,'Haussitting',11),(14,'Pferde',12),(15,'Kleintiere',12),(16,'Vögel oder Amphibien',12),(17,'Gartenarbeit',2),(18,'Trockenbau',1),(19,'Estrichleger',1),(20,'Fliesen verlegen',1),(21,'Installationsarbeiten Bad/Heizung/Sanitär',1),(22,'Installationsarbeiten Elektro',1),(23,'Zimmermann',1),(24,'Tischler',1),(25,'Dachdecker',1),(26,'Maurer',1),(27,'KFZ Reparatur',1),(28,'Informatiker',1),(29,'Backen',2),(30,'Kreativ',NULL),(31,'Marketing',30),(32,'Social Media',30),(33,'Texter',30),(34,'Grafiker',30),(35,'Fotografen',30),(36,'Journalisten',30),(37,'Webseite - Blog schreiben',30),(38,'Finanzen/Buchhaltung',NULL),(39,'Körpertherapie',NULL),(40,'Führerschein',NULL),(41,'Führerschein PKW',40),(42,'Führerschein LKW',40),(43,'Kettensägenschein vorhanden',1),(44,'Brennholz hacken',1),(45,'Landwirtschaft',NULL),(46,'Obst- und Gemüseanbau',45),(47,'Weinbau',45),(48,'Imkerei',45),(49,'Tierhaltung',45),(50,'Pferdepflege',49),(51,'Kuh- und Schafhaltung',49),(52,'Geflügelhaltung',49),(53,'Tourismus & Gastronomie',NULL),(54,'Rezeption',53),(55,'Kellner',53),(56,'Koch',53),(57,'Reiseführer',53),(58,'Sprachunterricht',53),(59,'Deutsch',58),(60,'Englisch',58),(61,'Französisch',58),(62,'Spanisch',58),(63,'Italienisch',58),(64,'Sport & Outdoor',NULL),(65,'Wandern',64),(66,'Klettern',64),(67,'Schwimmen',64),(68,'Skifahren',64),(69,'Surfen',64),(70,'Segeln',64),(71,'Fahrradreparatur',64),(72,'Bildung & Unterricht',NULL),(73,'Nachhilfe',72),(74,'Mathematik',73),(75,'Sprachen',73),(76,'Musikunterricht',72),(77,'Gitarre',76),(78,'Klavier',76),(79,'Gesang',76),(80,'Kunst & Design',30),(81,'Malen',80),(82,'Zeichnen',80),(83,'Fotografie',80),(84,'Videografie',80),(85,'Webdesign',80),(86,'Handwerk Spezial',1),(87,'Schmuckherstellung',86),(88,'Töpfern',86),(89,'Holzschnitzerei',86),(90,'Lederarbeiten',86),(91,'Nähen & Schneidern',86),(92,'Stricken & Häkeln',86),(93,'Gesundheit & Wellness',NULL),(94,'Yoga',93),(95,'Pilates',93),(96,'Meditation',93),(97,'Erste Hilfe',93),(98,'Pflege',93),(99,'Seniorenbetreuung',98),(100,'Kinderbetreuung',98),(101,'Bau & Renovierung',1),(102,'Dachbodenausbau',101),(103,'Kellerausbau',101),(104,'Balkonbau',101),(105,'Terrassenbau',101),(106,'Zaunbau',101),(107,'Carportbau',101),(108,'Gartenhausbau',101),(109,'Technik & IT',NULL),(110,'Computerreparatur',109),(111,'Smartphone-Reparatur',109),(112,'Netzwerk-Installation',109),(113,'Smart Home',109),(114,'Solaranlagen',109),(115,'Transport & Logistik',NULL),(116,'Umzugshilfe',115),(117,'Lieferfahrten',115),(118,'Möbeltransport',115),(119,'Veranstaltungen',NULL),(120,'Eventplanung',119),(121,'Dekoration',119),(122,'Musik bei Events',119),(123,'Fotografie bei Events',119),(124,'Catering',119),(125,'Reinigung & Wartung',NULL),(126,'Poolreinigung',125),(127,'Saunawartung',125),(128,'Kaminreinigung',125),(129,'Dachrinnenreinigung',125),(130,'Winterdienst',125),(131,'Buchhaltung',38),(132,'Steuererklärung',38),(133,'Lohnbuchhaltung',38),(134,'Controlling',38),(135,'Massage',39),(136,'Jin Shin Jyutsu',39),(137,'Fußreflexzonenmassage',39),(138,'Shiatsu',39),(139,'Thai-Massage',39),(140,'Exoten',12); 

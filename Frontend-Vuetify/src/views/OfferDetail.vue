@@ -51,8 +51,8 @@
               </table>
             <Apply :offer=offer :isActiveMember=isActiveMember :logId=logId :userRole=userRole />
             <div class="offer_btn">
-              <button @click="backtooffers()" class="action-link"><i class="ri-arrow-go-back-line"
-                  aria-hidden="true"></i> Zurück </button>
+              <button @click="backtooffers()" class="btn-arrow-ugh"><i class="ri-arrow-go-back-line" aria-hidden="true"></i></button>
+              <span class="ms-2"><span class="text-primary-blue">Zurück</span></span>
             </div>
           </div>
         </div>
@@ -70,7 +70,7 @@
             Angebot schließen
           </button>
           <a v-if="!offer.applicationsExist">
-           <button class="btn btn-primary" @click="modifyOffer()">
+           <button class="btn-primary-ugh ms-2" @click="modifyOffer()">
             Angebot modifizieren
            </button>
           </a>
@@ -83,7 +83,7 @@
         <div v-else>
           <button class="btn btn-blocked">Angebot geschlossen</button>
           <button
-            class="btn btn-outline-success ms-2"
+            class="btn btn-success ms-2"
             @click="reactivateOffer(offer.id)"
             :disabled="!offer.canReactivate"
             :title="!offer.canReactivate ? 'Angebotszeitraum abgelaufen. Reaktivierung nicht möglich.' : 'Angebot reaktivieren'"

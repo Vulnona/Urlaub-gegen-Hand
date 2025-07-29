@@ -74,7 +74,9 @@ public class CreateAndSendCouponCommandHandler : IRequestHandler<CreateAndSendCo
             // Send email
             var htmlTemplate = _htmlTemplateService.GetCouponReceivedDetails(
                 coupon.Code,
-                $"{user.FirstName} {user.LastName}".Trim()
+                $"{user.FirstName} {user.LastName}".Trim(),
+                membership.Name,
+                (int)Math.Round(membership.DurationDays / 30.0)
             );
 
             var emailSent = await _emailService.SendEmailAsync(

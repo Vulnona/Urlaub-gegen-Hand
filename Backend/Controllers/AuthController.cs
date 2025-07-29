@@ -271,15 +271,55 @@ namespace UGHApi.Controllers
         {
             try
             {
+                _logger.LogInformation($"[DEBUG] AuthController: Upload-ID Request für UserId={userId}");
+                _logger.LogInformation($"[DEBUG] AuthController: FileRS={fileRS?.FileName}, Größe={fileRS?.Length}, ContentType={fileRS?.ContentType}");
+                _logger.LogInformation($"[DEBUG] AuthController: FileVS={fileVS?.FileName}, Größe={fileVS?.Length}, ContentType={fileVS?.ContentType}");
+
+                // Validate input parameters
+                if (userId == Guid.Empty)
+                {
+                    _logger.LogError("[DEBUG] AuthController: UserId ist leer");
+                    return BadRequest("Ungültige User-ID");
+                }
+
+                if (fileRS == null)
+                {
+                    _logger.LogError("[DEBUG] AuthController: FileRS ist null");
+                    return BadRequest("Rückseite des Ausweises ist erforderlich");
+                }
+
+                if (fileVS == null)
+                {
+                    _logger.LogError("[DEBUG] AuthController: FileVS ist null");
+                    return BadRequest("Vorderseite des Ausweises ist erforderlich");
+                }
+
                 var command = new UploadFilesCommand(fileRS, fileVS, userId);
                 var result = await _mediator.Send(command);
 
+                _logger.LogInformation($"[DEBUG] AuthController: Upload erfolgreich abgeschlossen für UserId={userId}");
                 return Ok(new { result.LinkRS, result.LinkVS });
+            }
+            catch (ArgumentException ex)
+            {
+                _logger.LogWarning($"[DEBUG] AuthController: Validierungsfehler beim Upload-ID: {ex.Message}");
+                return BadRequest(new { errorMessage = ex.Message });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Ein Fehler ist beim Hochladen der Dateien aufgetreten. Fehler: {ex}");
+                _logger.LogError($"[DEBUG] AuthController: Fehler beim Upload-ID: {ex.Message} | StackTrace: {ex.StackTrace}");
+                return StatusCode(500, new { errorMessage = "Beim Hochladen ist ein technischer Fehler aufgetreten. Bitte kontaktiere den Support." });
             }
+        }
+
+        [HttpGet("test-upload")]
+        public IActionResult TestUpload()
+        {
+            return Ok(new { 
+                message = "Upload-Endpoint ist verfügbar",
+                timestamp = DateTime.UtcNow,
+                status = "ready"
+            });
         }
 
         #endregion

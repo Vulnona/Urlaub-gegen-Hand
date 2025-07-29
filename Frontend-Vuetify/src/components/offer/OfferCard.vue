@@ -1,39 +1,42 @@
 <template>
-<div @click="redirectToOfferDetail(offer.id)">
-  <div class="all_items card-offer" :class="{ 'inactive-offer': !isActive }">
-    <!-- Status Badge -->
-    <div class="status-badge" v-if="showStatus">
-      <span v-if="offer.status === 0" class="badge badge-success">Aktiv</span>
-      <span v-else-if="offer.status === 1" class="badge badge-warning">Geschlossen</span>
-      <span v-else-if="offer.status === 2" class="badge badge-danger">Versteckt</span>
-    </div>
-    <span v-if="offer.isExpiringSoon" class="expiring-soon-badge" :title="`Achtung: Der Angebotszeitraum endet am ${offer.toDate}. Das Angebot wird danach automatisch deaktiviert.`">
-      <i class="ri-error-warning-fill"></i>
-    </span>
-    
-    <div class="item_img">
-      <img loading="lazy" :src="offer.images && offer.images.length > 0 ? offer.images[0].src : '/defaultprofile.jpg'"
-           class="card-img-top" alt="Offer Image">
-      <div v-if="offer.images && offer.images.length > 1" class="gallery-indicator">
-        +{{ offer.images.length }}
+<div>
+  <div @click="redirectToOfferDetail(offer.id)" style="cursor:pointer;">
+    <div class="all_items card-offer" :class="{ 'inactive-offer': !isActive }">
+      <!-- Status Badge -->
+      <div class="status-badge" v-if="showStatus">
+        <span v-if="offer.status === 0" class="badge badge-success">Aktiv</span>
+        <span v-else-if="offer.status === 1" class="badge badge-warning">Geschlossen</span>
+        <span v-else-if="offer.status === 2" class="badge badge-danger">Versteckt</span>
       </div>
-      <div class="rating"
-           v-if="isActiveMember && offer.hostId != logId && offer.appliedStatus == 'Approved'">
-           <i class="ri-star-line"></i>
+      <span v-if="offer.isExpiringSoon" class="expiring-soon-badge" :title="`Achtung: Der Angebotszeitraum endet am ${offer.toDate}. Das Angebot wird danach automatisch deaktiviert.`">
+        <i class="ri-error-warning-fill"></i>
+      </span>
+      <div class="item_img">
+        <img loading="lazy" :src="offer.images && offer.images.length > 0 ? offer.images[0].src : '/defaultprofile.jpg'"
+             class="card-img-top" alt="Offer Image">
+        <div v-if="offer.images && offer.images.length > 1" class="gallery-indicator">
+          +{{ offer.images.length }}
+        </div>
+        <div class="rating"
+             v-if="isActiveMember && offer.hostId != logId && offer.appliedStatus == 'Approved'">
+             <i class="ri-star-line"></i>
+        </div>
       </div>
-    </div>
-    <div class="item_text">
-      
-      <h3 class="card-title">{{ offer.title }}</h3>
-      <div class="item_description">
-        <p class="card-text">{{ offer.fromDate }} - {{ offer.toDate }}</p>
-        <p class="card-text"><strong>Fähigkeiten:</strong> {{ offer.skills }}</p>
-        <p class="card-text"><strong>Unterbringung:</strong> {{ offer.accomodation || 'Nicht angegeben' }}</p>
-        <p class="card-text"><strong>Geeignet für:</strong> {{ offer.accomodationsuitable || 'Nicht angegeben' }}</p>
-        <p class="card-text"><strong>Region/Ort:</strong> {{ offer.location || 'Nicht angegeben' }}</p>
+      <div class="item_text">
+        <h3 class="card-title">{{ offer.title }}</h3>
+        <div class="item_description">
+          <p class="card-text">{{ offer.fromDate }} - {{ offer.toDate }}</p>
+          <p class="card-text"><strong>Fähigkeiten:</strong> {{ offer.skills }}</p>
+          <p class="card-text"><strong>Unterbringung:</strong> {{ offer.accomodation || 'Nicht angegeben' }}</p>
+          <p class="card-text"><strong>Geeignet für:</strong> {{ offer.accomodationsuitable || 'Nicht angegeben' }}</p>
+          <p class="card-text"><strong>Region/Ort:</strong> {{ offer.location || 'Nicht angegeben' }}</p>
+        </div>
       </div>
+      <Apply :offer=offer :isActiveMember=isActiveMember :logId=logId :userRole=userRole />
     </div>
-    <Apply :offer=offer :isActiveMember=isActiveMember :logId=logId :userRole=userRole />                    
+  </div>
+  <div class="offer-actions d-flex flex-wrap gap-2 justify-content-center mt-2">
+    <slot name="actions"></slot>
   </div>
 </div>
 </template>

@@ -23,7 +23,7 @@
         <div class="modal-body">
           <div id="payment-element"></div>
           <div id="payment-message" class="hidden"></div>
-          <button id="submit" class="btn btn-primary w-100 mt-4" :disabled="isPaymentProcessing">
+          <button id="submit" class="btn-primary-ugh w-100 mt-4" :disabled="isPaymentProcessing">
             <span v-if="isPaymentProcessing">
               Wird verarbeitet...
             </span>
@@ -61,7 +61,7 @@
                       <strong>Preis:</strong> {{ item.price.amount }}
                       {{ item.price.currency }}
                     </p>
-                    <button class="btn btn-success btn-block" @click="confirmBuy(item)">
+                    <button class="btn-primary-ugh w-100 mt-4" @click="confirmBuy(item)">
                       Kaufen
                     </button>
                   </div>
@@ -135,9 +135,7 @@ export default {
     async buy(ShopitemId) {
       try {
         const response = await axiosInstance.post(`create-payment-intent`, {
-          ShopitemId,
-          automatic_payment_methods: { enabled: true },
-          payment_method_types: ['card', 'paypal']
+          ShopItemId: ShopitemId
         });
 
         if (response.status === 200 && response.data.clientSecret) {

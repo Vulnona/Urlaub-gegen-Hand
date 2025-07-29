@@ -19,9 +19,12 @@
             <div class="col-sm-12">
               <div class="form-group">
                 <label>Fertigkeiten </label>
-                <multiselect v-model="profile.skills" :options="skillOptions" placeholder="Fertigkeiten auswählen"
-                  class="skills-multiselect" :multiple="true" label="name" track-by="id" :group-label="'name'" :group-values="'children'" group-select>
-                </multiselect>
+                <HierarchicalSkillSelect
+                  v-model="profile.skills"
+                  :skills="skillOptions"
+                  label="Fertigkeiten"
+                  placeholder="Fertigkeiten auswählen..."
+                />
                 <small v-if="errors.skills" style="color: red;">{{ errors.skills }}</small>
               </div>
             </div>
@@ -55,7 +58,7 @@
               <div class="profile_btn">
                 <!-- Submit Button -->
                 <button type="button" @click="back()" class="btn btn-back rounded">Zurück</button>
-                <button type="submit" class="btn btn-primary  rounded">Profil speichern</button>
+                <button type="submit" class="btn-primary-ugh">Profil speichern</button>
               </div>
             </div>
           </div>
@@ -69,13 +72,12 @@
 import Navbar from '@/components/navbar/Navbar.vue';
 import Securitybot from '@/services/SecurityBot';
 import axiosInstance from '@/interceptor/interceptor';
-import Multiselect from 'vue-multiselect';
-import 'vue-multiselect/dist/vue-multiselect.css';
+import HierarchicalSkillSelect from '@/components/form/HierarchicalSkillSelect.vue';
 import toast from '@/components/toaster/toast';
 export default {
   components: {
     Navbar,
-    Multiselect,
+    HierarchicalSkillSelect,
   },
   data() {
     return {
@@ -114,8 +116,13 @@ export default {
     },
     async fetchSkills() {
       try {
-        const response = await axiosInstance.get(`skills/hierarchical`);
-        this.skillOptions = response.data;
+        const response = await axiosInstance.get(`skills/get-all-skills`);
+        this.skills = response.data;
+        this.skillOptions = this.skills.map(skill => ({
+            id: skill.skill_ID,
+            name: skill.skillDescrition,
+            parentId: skill.parentSkill_ID
+        }));
       } catch (error) {
         console.error('Fehler beim Laden der Skills:', error);
       }

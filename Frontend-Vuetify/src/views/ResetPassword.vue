@@ -17,7 +17,7 @@
                   <div>
                     <div class="login-buttons">
                       <!-- Disable button when loading -->
-                      <button type="submit" class="btn" :disabled="loading">
+                      <button type="submit" class="btn-primary-ugh" :disabled="loading">
                         <!-- Show loader or text based on loading status -->
                         <span v-if="loading">Wird gesendet...</span>
                         <span v-else>Passwort-Link anfordern</span>

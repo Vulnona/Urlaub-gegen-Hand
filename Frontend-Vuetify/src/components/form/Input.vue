@@ -14,4 +14,23 @@
 
 <style scoped>
 .desc-textarea {height: 90px;}
+
+/* Placeholder Styling für hellgraue Schrift */
+.desc-textarea::placeholder {
+  color: #9ca3af !important; /* Hellgrau */
+  opacity: 1; /* Firefox */
+}
+
+.desc-textarea::-webkit-input-placeholder {
+  color: #9ca3af !important; /* Hellgrau für Webkit-Browser */
+}
+
+.desc-textarea::-moz-placeholder {
+  color: #9ca3af !important; /* Hellgrau für Firefox */
+  opacity: 1;
+}
+
+.desc-textarea:-ms-input-placeholder {
+  color: #9ca3af !important; /* Hellgrau für IE */
+}
 </style>

@@ -325,7 +325,7 @@ body .custom-card .card-text strong {
                   @keyup.enter="debouncedSearch">
               </div>
               <div class="btn_outer">
-                <button type="button"  @click="debouncedSearch" class="btn themeBtn">Suchen</button>
+                <button type="button"  @click="debouncedSearch" class="btn-primary-ugh">Suchen</button>
               </div>
             </div>
             
@@ -422,11 +422,11 @@ body .custom-card .card-text strong {
             </div>
             <!-- Pagination Section -->
             <div class="pagination">
-              <button class="action-link" @click="changePage(currentPage - 1)" :hidden="currentPage === 1"><i
-                  class="ri-arrow-left-s-line"></i>Zurück</button>
+              <button class="btn-arrow-ugh me-2" @click="changePage(currentPage - 1)" :disabled="currentPage === 1"><i
+                  class="ri-arrow-left-s-line"></i></button>
               <span>Seite {{ currentPage }} von {{ totalPages }}</span>
-              <button class="action-link" @click="changePage(currentPage + 1)"
-                :hidden="currentPage === totalPages">Weiter<i class="ri-arrow-right-s-line"></i></button>
+              <button class="btn-arrow-ugh ms-2" @click="changePage(currentPage + 1)"
+                :disabled="currentPage === totalPages"><i class="ri-arrow-right-s-line"></i></button>
             </div>
           </div>
           <div v-else-if="!loading">
@@ -468,8 +468,8 @@ body .custom-card .card-text strong {
     </div>
     <div class="modal-footer">
       <div class="rating-buttons">
-        <button @click="submitRating" class="btn common-btn themeBtn">Bewertung abschicken</button>
-        <button @click="cancelRating" class="btn common-btn btn-cancel">Abbrechen</button>
+        <button @click="submitRating" class="btn-primary-ugh">Bewertung abschicken</button>
+        <button @click="cancelRating" class="btn-primary-ugh btn-cancel">Abbrechen</button>
       </div>
     </div>
   </div>
@@ -722,7 +722,7 @@ export default {
         text: 'Möchtest du diese Anfrage senden?',
         icon: 'question',
         showCancelButton: true,
-        confirmButtonText: 'Apply',
+        confirmButtonText: 'Bewerben',
         customClass: {
           popup: 'custom-apply-modal dialog_box',
           confirmButton: 'themeBtn',

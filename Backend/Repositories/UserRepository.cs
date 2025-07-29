@@ -29,7 +29,9 @@ public class UserRepository : IUserRepository
 
     public async Task<User> GetUserByIdAsync(Guid userId)
     {
-        return await _context.users.FindAsync(userId);
+        return await _context.users
+            .Include(u => u.Address)
+            .FirstOrDefaultAsync(u => u.User_Id == userId);
     }
 
     public async Task<User> GetUserForMembershipByIdAsync(Guid userId)
@@ -165,12 +167,15 @@ public class UserRepository : IUserRepository
     {
         try
         {
+            _logger.LogInformation($"[DEBUG] AddUserAsync: User={user.FirstName} {user.LastName}, Email={user.Email_Address}, AddressId={user.Address?.Id}");
             await _context.users.AddAsync(user);
             await _context.SaveChangesAsync();
+            _logger.LogInformation($"[DEBUG] AddUserAsync: Nach SaveChanges, UserId={user.User_Id}, AddressId={user.Address?.Id}");
             return user;
         }
         catch (Exception ex)
         {
+            _logger.LogError($"[DEBUG] AddUserAsync: Exception: {ex.Message} | StackTrace: {ex.StackTrace}");
             throw new InvalidOperationException("An error occurred while adding the user.", ex);
         }
     }

@@ -25,7 +25,11 @@
             </span>
             <h5 class="fw-semibold mb-1">{{ user.firstName }} {{ user.lastName }}</h5>
             <span @click="openReviewsModal()" class="action-link fs-13 font-normal">Alle Bewertungen anzeigen</span><br/>
-            <span class="fs-13 font-normal" v-if="isActiveMember">Mitgliedschaft gültig bis: {{ formatMembershipDate(user.membershipEndDate) }}</span>
+            <span class="fs-13 font-normal" v-if="isActiveMember">
+              Mitgliedschaft gültig bis: {{ formatMembershipDate(user.membershipEndDate) }}
+              <i v-if="isMembershipExpiringSoon" class="ri-error-warning-fill text-danger ms-1" 
+                 title="Ihre Mitgliedschaft läuft in weniger als 7 Tagen ab!"></i>
+            </span>
           </div>
         </div>
 
@@ -68,13 +72,12 @@
             </li>
           </ul>
           <div class="upload-btn text-center" v-if="user.verificationState != 'Verified'">
-            <a class="btn btn-primary" @click="upload_id">
-              Upload
-              ID
+            <a class="btn-primary-ugh" @click="upload_id">
+              Personalausweis hochladen
             </a>
           </div>
           <div class="upload-btn text-center" v-if="user.verificationState == 'Verified' && !isActiveMember">
-            <button class="btn btn-primary" @click="redeemCoupon()">Coupon einlösen</button>
+            <button class="btn-primary-ugh" @click="redeemCoupon()">Coupon einlösen</button>
           </div>
         </div>
       </div>
@@ -154,14 +157,21 @@
           </div>
           <div class="profile_btn">
             <div class="profile_group_btn" v-if="user.verificationState === 'Verified'">
-              <button class="btn  btn-primary rounded" @click="editProfile">Profil bearbeiten</button>
+              <button class="btn-primary-ugh" @click="editProfile">Profil bearbeiten</button>
             </div>
+            <!-- TODO: Future feature - User data editing functionality -->
             <div class="profile_group_btn" v-if="user.verificationState === 'Verified'">
-              <button class="btn  btn-primary rounded" @click="editUserData">
-                Editiere Userdaten              </button>
+              <button 
+                class="btn-disabled-ugh" 
+                disabled
+                style="background-color: #9ca3af !important; color: #6b7280 !important; cursor: not-allowed !important; opacity: 0.6 !important; pointer-events: none !important;"
+                title="Diese Funktion ist aktuell noch nicht freigeschaltet"
+              >
+                Bearbeite Userdaten
+              </button>
             </div>
             <div class="profile_group_btn">
-              <button class="btn  btn-primary rounded" @click="changePassword">
+              <button class="btn-primary-ugh" @click="changePassword">
                 Passwort ändern</button>
             </div>
             <button class="btn btn-danger" @click="confirmDeleteAccount">
@@ -293,7 +303,7 @@
         </div>
       </div>
       <div class="modal-footer justify-content-end">
-        <button type="button" class="btn themeBtn btn-sm" @click="submitProfilePic">Speichern</button>
+        <button type="button" class="btn-primary-ugh btn-sm" @click="submitProfilePic">Speichern</button>
       </div>
     </div>
   </div>
@@ -347,6 +357,10 @@
       Securitybot();
       this.fetchUserData();
     },
+    activated() {
+      // Reload user data when component is activated (e.g., when returning from edit-profile)
+      this.fetchUserData();
+    },
     watch: {
       profileImgSrc(newVal) {
         if (!newVal) {
@@ -390,6 +404,11 @@
         const day = date.getDate();
         const year = date.getFullYear();
         return `${month} ${day}, ${year}`;
+      },
+      formatDate(dateString) {
+        if (!dateString) return '';
+        const options = { year: 'numeric', month: 'long', day: '2-digit' };
+        return new Date(dateString).toLocaleDateString(undefined, options);
       },
       async redeemCoupon() {
         try {
@@ -618,8 +637,10 @@
       editProfile() {
         router.push('/edit-profile');
       },
+      // TODO: Future feature - User data editing functionality
       editUserData() {
-        router.push('/edit-user-data');
+        // This functionality is currently disabled
+        toast.info("Diese Funktion ist aktuell noch nicht freigeschaltet");
       },
       changePassword() {
         router.push('/change-password');
@@ -641,6 +662,17 @@
       imageSrc() {
         return this.profileImgSrc || this.defaultProfileImgSrc;
       },
+      isMembershipExpiringSoon() {
+        if (!this.user.membershipEndDate || !this.isActiveMember) {
+          return false;
+        }
+        
+        const endDate = new Date(this.user.membershipEndDate);
+        const today = new Date();
+        const daysUntilExpiry = Math.ceil((endDate - today) / (1000 * 60 * 60 * 24));
+        
+        return daysUntilExpiry <= 7 && daysUntilExpiry >= 0;
+      }
     }
   };
 </script>
@@ -921,4 +953,60 @@
       height: 100%;
       background: rgba(0, 0, 0, 0.65);
     }
+
+  /* Disabled button styling for future features */
+  .btn-disabled-ugh {
+    background-color: #9ca3af !important; /* Medium/light gray */
+    color: #6b7280 !important; /* Darker gray text */
+    border: 1px solid #d1d5db !important;
+    padding: 12px 25px !important;
+    border-radius: 8px !important;
+    font-weight: bold !important;
+    cursor: not-allowed !important;
+    opacity: 0.6 !important;
+    transition: all 0.3s ease !important;
+    pointer-events: none !important;
+  }
+
+  .btn-disabled-ugh:hover {
+    background-color: #9ca3af !important; /* Same color on hover */
+    color: #6b7280 !important;
+    transform: none !important;
+    box-shadow: none !important;
+    opacity: 0.6 !important;
+  }
+
+  .btn-disabled-ugh:focus {
+    background-color: #9ca3af !important;
+    color: #6b7280 !important;
+    outline: none !important;
+    box-shadow: none !important;
+    opacity: 0.6 !important;
+  }
+
+  .btn-disabled-ugh:active {
+    background-color: #9ca3af !important;
+    color: #6b7280 !important;
+    transform: none !important;
+    box-shadow: none !important;
+    opacity: 0.6 !important;
+  }
+
+  /* Membership warning icon styling */
+  .ri-error-warning-fill.text-danger {
+    font-size: 16px;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.5;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
 </style>

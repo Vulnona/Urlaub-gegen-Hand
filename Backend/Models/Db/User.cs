@@ -42,7 +42,7 @@ namespace UGH.Domain.Entities
         public string? BackupCodes { get; set; } // JSON array of backup codes
         
         // Brute Force Protection
-        public int FailedBackupCodeAttempts { get; set; } = 0;
+        public int? FailedBackupCodeAttempts { get; set; } = 0;
         public DateTime? LastFailedBackupCodeAttempt { get; set; }
         public bool IsBackupCodeLocked { get; set; } = false;
 
@@ -60,14 +60,14 @@ namespace UGH.Domain.Entities
         public UGH_Enums.VerificationState VerificationState { get; set; }
 
         [ForeignKey("MembershipId")]
-        public Membership CurrentMembership { get; set; }
+        public Membership? CurrentMembership { get; set; }
         public UserRoles UserRole { get; set; }
         public ICollection<Offer> Offers { get; set; } = new List<Offer>();
         public ICollection<Coupon> Coupons { get; set; } = new List<Coupon>();
         public ICollection<Transaction> Transactions { get; set; } = new List<Transaction>();
         public ICollection<UserMembership> UserMemberships { get; set; } = new List<UserMembership>();
 
-        public UserProfile UserProfile { get; set; }
+        public UserProfile? UserProfile { get; set; }
         // Reviews written by this user
         public ICollection<Review> Reviews { get; set; } = new List<Review>();
         // Reviews received by this user

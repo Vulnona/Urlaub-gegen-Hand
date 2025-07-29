@@ -42,6 +42,7 @@ public class RegisterUserCommandHandler
     {
         try
         {
+            _logger.LogInformation($"[DEBUG] RegisterUserCommandHandler.Handle aufgerufen für Email={request.Email_Address}");
             if (await _userRepository.GetUserByEmailAsync(request.Email_Address) is not null)
             {
                 return Result.Failure<RegisterUserResponse>(
@@ -78,8 +79,8 @@ public class RegisterUserCommandHandler
             {
                 Latitude = request.Latitude,
                 Longitude = request.Longitude,
-                DisplayName = request.DisplayName
-                // Id wird von der DB vergeben, außer bei Update
+                DisplayName = request.DisplayName,
+                Type = AddressType.Residential // explizit setzen, um NULL zu verhindern
             };
 
             var newUser = new User
@@ -97,10 +98,13 @@ public class RegisterUserCommandHandler
                 Link_RS = request.Link_RS,
                 Link_VS = request.Link_VS,
                 VerificationState = UGH_Enums.VerificationState.IsNew,
-                UserRole = UserRoles.User
+                UserRole = UserRoles.User,
+                MembershipId = 1, // Standard-Membership für neue User
+                FailedBackupCodeAttempts = 0 // Explizit setzen, um NULL zu verhindern
             };
 
             var savedUser = await _userRepository.AddUserAsync(newUser);
+            _logger.LogInformation($"[DEBUG] User gespeichert: Id={savedUser.User_Id}, Email={savedUser.Email_Address}, AddressId={savedUser.Address?.Id}");
 
             var verificationToken = _tokenService.GenerateNewEmailVerificator(savedUser.User_Id);
             await _emailService.SendVerificationEmailAsync(
