@@ -40,6 +40,11 @@ namespace UGH.Domain.Entities
         public bool IsTwoFactorEnabled { get; set; } = false;
         public string? TwoFactorSecret { get; set; }
         public string? BackupCodes { get; set; } // JSON array of backup codes
+        
+        // Brute Force Protection
+        public int FailedBackupCodeAttempts { get; set; } = 0;
+        public DateTime? LastFailedBackupCodeAttempt { get; set; }
+        public bool IsBackupCodeLocked { get; set; } = false;
 
         public bool IsEmailVerified { get; set; }
         public int? MembershipId { get; set; }

@@ -311,7 +311,7 @@ export default {
     //   return CryptoJS.AES.encrypt(item, process.env.SECRET_KEY).toString();
     // },
     encryptItem(item) {
-      return AES.encrypt(item, process.env.SECRET_KEY).toString();
+      return AES.encrypt(item, import.meta.env.VITE_SECRET_KEY || 'thisismytestsecretkey').toString();
     }
   },
   mounted() {

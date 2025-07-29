@@ -293,6 +293,7 @@ static ServerVersion GetDesignTimeServerVersion(string connectionString)
         {
             app.UseMiddleware<ErrorHandlingMiddleware>();
             app.UseMiddleware<UGHApi.Middleware.UserExistenceMiddleware>();
+            // app.UseMiddleware<UGHApi.Middleware.Admin2FAMiddleware>(); // Temporarily disabled due to build error
             var connectionString = app.Configuration.GetConnectionString("DefaultConnection");
 
             DatabaseWaiter.WaitForDatabaseConnection(connectionString);

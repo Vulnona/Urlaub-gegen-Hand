@@ -57,9 +57,21 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, Result<LoginRes
             // Check if user is Admin - Admin MUST use 2FA
             if (user.UserRole == UserRoles.Admin && !user.IsTwoFactorEnabled)
             {
-                return Result.Failure<LoginResponse>(
-                    Errors.General.InvalidOperation("Admin accounts must have 2FA enabled")
-                );
+                _logger.LogWarning($"Admin account {user.Email_Address} attempting login without 2FA - redirecting to 2FA setup");
+                
+                // Generate a special token for 2FA setup
+                var setupToken = _tokenService.GenerateTwoFactorSetupToken(user.User_Id, user.Email_Address);
+                
+                return Result.Success(new LoginResponse
+                {
+                    RequiresTwoFactorSetup = true,
+                    Email = request.Email,
+                    UserId = user.User_Id,
+                    FirstName = user.FirstName,
+                    UserRole = user.UserRole.ToString(),
+                    Message = "Admin accounts must have 2FA enabled. Please complete 2FA setup.",
+                    TwoFactorToken = setupToken
+                });
             }
 
             // Check if user has 2FA enabled - redirect to 2FA login
@@ -72,6 +84,7 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, Result<LoginRes
                     Email = request.Email,
                     UserId = user.User_Id,
                     FirstName = user.FirstName,
+                    UserRole = user.UserRole.ToString(),
                     Message = "Two-factor authentication required",
                     TwoFactorToken = twoFactorToken
                 });
@@ -115,6 +128,7 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, Result<LoginRes
                     Email = request.Email,
                     UserId = user.User_Id,
                     FirstName = user.FirstName,
+                    UserRole = user.UserRole.ToString(),
                 }
             );
         }

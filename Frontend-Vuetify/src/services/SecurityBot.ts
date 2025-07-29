@@ -5,7 +5,7 @@ import CryptoJS from 'crypto-js';
 // Function to decrypt token using CryptoJS.
 const decryptToken = (encryptedToken: string): string | null => {
   try {
-    const bytes = CryptoJS.AES.decrypt(encryptedToken, process.env.SECRET_KEY || '');
+    const bytes = CryptoJS.AES.decrypt(encryptedToken, import.meta.env.VITE_SECRET_KEY || 'thisismytestsecretkey');
     return bytes.toString(CryptoJS.enc.Utf8);
   } catch (e) {
     return null;

@@ -207,26 +207,56 @@ namespace UGHApi.Controllers
 
         public class Password{
             public String NewPassword{get; set;}
-            public String Token{get; set;}
+            public String? Token{get; set;}
         }
 
         [HttpPut("change-password")]
         public async Task<IActionResult> ChangePassword([FromBody] Password pw)
         {            
+            User user = null;
+            bool isBackupCodePasswordChange = false;
+            
+            // First try to get user from current context (for backup code cases)
             var userId = _userProvider.UserId;
-            User user = await _context.users.FindAsync(userId);
+            if (userId != Guid.Empty)
+            {
+                user = await _context.users.FindAsync(userId);
+                // If user found via context and no token provided, this is a backup code password change
+                if (user != null && string.IsNullOrEmpty(pw.Token))
+                {
+                    isBackupCodePasswordChange = true;
+                    _logger.LogInformation($"Backup code password change detected for user: {user.Email_Address}");
+                }
+            }
+            
+            // If no user found and token provided, try token-based reset
+            if (user == null && !string.IsNullOrEmpty(pw.Token))
+            {
+                user = await _userService.GetUserByPasswordResetTokenAsync(pw.Token);
+            }
+            
             if (user == null)
-                user = await _userService.GetUserByPasswordResetTokenAsync(pw.Token);            
-            if (user == null)
-                return BadRequest();                           
+                return BadRequest("User not found or invalid token");                           
+            
             try {                
                 var salt = _passwordService.GenerateSalt();
                 user.Password =  _passwordService.HashPassword(pw.NewPassword, salt);
                 user.SaltKey = salt;
+                
+                // If this is a backup code password change, reset 2FA
+                if (isBackupCodePasswordChange)
+                {
+                    _logger.LogInformation($"Resetting 2FA for backup code password change: {user.Email_Address}");
+                    user.IsTwoFactorEnabled = false;
+                    user.TwoFactorSecret = null;
+                    user.BackupCodes = null;
+                }
+                
                 await _userRepository.UpdateUserAsync(user);
                 return Ok("Passwort erfolgreich geändert");
-            } catch {
-                return StatusCode(500, new { Message = "Fehler"});
+            } catch (Exception ex) {
+                _logger.LogError($"Error changing password: {ex.Message}");
+                return StatusCode(500, new { Message = "Fehler beim Ändern des Passworts"});
             }            
         }
 
@@ -261,20 +291,28 @@ namespace UGHApi.Controllers
         {
             try
             {
+                _logger.LogInformation($"2FA setup request received for email: {request?.Email}");
+                
                 if (!ModelState.IsValid)
+                {
+                    _logger.LogWarning($"ModelState is invalid: {string.Join(", ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage))}");
                     return BadRequest(ModelState);
+                }
 
                 var user = await _userRepository.GetUserByEmailAsync(request.Email);
                 if (user == null)
                     return NotFound("User not found");
 
                 if (user.IsTwoFactorEnabled)
+                {
+                    _logger.LogWarning($"2FA setup attempted for user with already enabled 2FA: {request.Email}");
                     return BadRequest("2FA is already enabled for this user");
+                }
 
-                // Admin users must enable 2FA
+                // For Admin accounts, allow 2FA setup without authentication (recovery scenario)
                 if (user.UserRole == UserRoles.Admin)
                 {
-                    _logger.LogInformation($"Setting up mandatory 2FA for admin user: {request.Email}");
+                    _logger.LogInformation($"Mandatory 2FA setup for admin user: {request.Email} (recovery mode)");
                 }
 
                 var secret = _twoFactorAuthService.GenerateSecret();
@@ -299,6 +337,60 @@ namespace UGHApi.Controllers
             }
         }
 
+        [HttpPost("2fa/reset")]
+        public async Task<IActionResult> Reset2FA([FromBody] Setup2FARequest request)
+        {
+            try
+            {
+                _logger.LogInformation($"2FA reset request received for email: {request?.Email}");
+                
+                if (!ModelState.IsValid)
+                {
+                    _logger.LogWarning($"ModelState is invalid: {string.Join(", ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage))}");
+                    return BadRequest(ModelState);
+                }
+
+                var user = await _userRepository.GetUserByEmailAsync(request.Email);
+                if (user == null)
+                    return NotFound("User not found");
+
+                // Store current 2FA settings for potential rollback
+                var oldTwoFactorEnabled = user.IsTwoFactorEnabled;
+                var oldTwoFactorSecret = user.TwoFactorSecret;
+                var oldBackupCodes = user.BackupCodes;
+
+                // Generate new 2FA settings but DON'T save them yet
+                var newSecret = _twoFactorAuthService.GenerateSecret();
+                var newBackupCodes = _twoFactorAuthService.GenerateBackupCodes();
+                
+                // Store new settings temporarily in session or cache
+                // For now, we'll store them in the response and handle them in verify-setup
+                var qrCodeUri = _twoFactorAuthService.GenerateQrCodeUri(user.Email_Address, newSecret);
+                var qrCodeImage = _twoFactorAuthService.GenerateQrCode(qrCodeUri);
+
+                var response = new Setup2FAResponse
+                {
+                    Secret = newSecret,
+                    QrCodeUri = qrCodeUri,
+                    QrCodeImage = qrCodeImage,
+                    BackupCodes = newBackupCodes,
+                    // Include old settings for rollback
+                    OldTwoFactorEnabled = oldTwoFactorEnabled,
+                    OldTwoFactorSecret = oldTwoFactorSecret,
+                    OldBackupCodes = oldBackupCodes
+                };
+
+                _logger.LogInformation($"2FA reset setup completed for user: {request.Email} - old settings preserved");
+
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Exception occurred during 2FA reset: {ex.Message} | StackTrace: {ex.StackTrace}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
         [HttpPost("2fa/verify-setup")]
         public async Task<IActionResult> Verify2FASetup([FromBody] Verify2FASetupRequest request)
         {
@@ -311,21 +403,26 @@ namespace UGHApi.Controllers
                 if (user == null)
                     return NotFound("Benutzer nicht gefunden");
 
-                if (user.IsTwoFactorEnabled)
+                // Check if this is a reset scenario (old settings provided)
+                bool isResetScenario = !string.IsNullOrEmpty(request.OldTwoFactorSecret);
+                
+                if (user.IsTwoFactorEnabled && !isResetScenario)
                     return BadRequest("2FA ist für diesen Benutzer bereits aktiviert");
 
                 if (!_twoFactorAuthService.ValidateCode(request.Secret, request.Code))
                     return BadRequest("Ungültiger Verifizierungscode");
 
-                // Save 2FA settings to user
+                // Save new 2FA settings to user
                 user.IsTwoFactorEnabled = true;
                 user.TwoFactorSecret = request.Secret;
                 
-                // Generate and save backup codes
+                // Generate and save new backup codes
                 var backupCodes = _twoFactorAuthService.GenerateBackupCodes();
                 user.BackupCodes = JsonSerializer.Serialize(backupCodes);
 
                 await _userRepository.UpdateUserAsync(user);
+
+                _logger.LogInformation($"2FA setup completed successfully for user: {request.Email}");
 
                 return Ok(new { Message = "2FA enabled successfully", BackupCodes = backupCodes });
             }
@@ -399,11 +496,40 @@ namespace UGHApi.Controllers
                 bool isValid = false;
                 bool isBackupCodeUsed = false;
                 
+                _logger.LogInformation($"2FA verification - IsBackupCode: {request.IsBackupCode}, Code: {request.TwoFactorCode}, UserBackupCodes: {user.BackupCodes}");
+                
                 if (request.IsBackupCode)
                 {
-                    isValid = _twoFactorAuthService.ValidateBackupCode(user.BackupCodes, request.TwoFactorCode);
+                    // Check if backup code attempts are locked
+                    if (user.IsBackupCodeLocked)
+                    {
+                        var lockoutDuration = TimeSpan.FromMinutes(30); // 30 minutes lockout
+                        if (user.LastFailedBackupCodeAttempt.HasValue && 
+                            DateTime.UtcNow - user.LastFailedBackupCodeAttempt.Value < lockoutDuration)
+                        {
+                            var remainingTime = lockoutDuration - (DateTime.UtcNow - user.LastFailedBackupCodeAttempt.Value);
+                            return BadRequest($"Zu viele fehlgeschlagene Backup-Code-Versuche. Account für {remainingTime.Minutes} Minuten und {remainingTime.Seconds} Sekunden gesperrt.");
+                        }
+                        else
+                        {
+                            // Reset lockout after duration
+                            user.IsBackupCodeLocked = false;
+                            user.FailedBackupCodeAttempts = 0;
+                            user.LastFailedBackupCodeAttempt = null;
+                        }
+                    }
+
+                    var backupCodeMessage = _twoFactorAuthService.ValidateBackupCodeWithMessage(user.BackupCodes, request.TwoFactorCode);
+                    isValid = backupCodeMessage == "OK";
+                    _logger.LogInformation($"Backup code validation result: {isValid}, Message: {backupCodeMessage}");
+                    
                     if (isValid)
                     {
+                        // Reset failed attempts on successful login
+                        user.FailedBackupCodeAttempts = 0;
+                        user.LastFailedBackupCodeAttempt = null;
+                        user.IsBackupCodeLocked = false;
+                        
                         user.BackupCodes = _twoFactorAuthService.RemoveUsedBackupCode(user.BackupCodes, request.TwoFactorCode);
                         await _userRepository.UpdateUserAsync(user);
                         isBackupCodeUsed = true;
@@ -411,10 +537,40 @@ namespace UGHApi.Controllers
                         // Log backup code usage for security monitoring
                         _logger.LogWarning($"Backup code used for user: {user.Email_Address}. Remaining codes: {user.BackupCodes?.Split(',').Length ?? 0}");
                     }
+                    else
+                    {
+                        // Increment failed attempts for ANY invalid backup code (including "already used")
+                        user.FailedBackupCodeAttempts++;
+                        user.LastFailedBackupCodeAttempt = DateTime.UtcNow;
+                        
+                        // Lock account after 10 failed attempts
+                        if (user.FailedBackupCodeAttempts >= 10)
+                        {
+                            user.IsBackupCodeLocked = true;
+                            _logger.LogWarning($"Backup code brute force detected for user: {user.Email_Address}. Account locked for 30 minutes.");
+                        }
+                        
+                        await _userRepository.UpdateUserAsync(user);
+                        
+                        // Return specific error message for backup code issues
+                        if (user.IsBackupCodeLocked)
+                        {
+                            return BadRequest("Zu viele fehlgeschlagene Backup-Code-Versuche. Account für 30 Minuten gesperrt. Versuchen Sie es später erneut.");
+                        }
+                        else
+                        {
+                            var remainingAttempts = 10 - user.FailedBackupCodeAttempts;
+                            return BadRequest(new { 
+                                message = $"Ungültiger Backup-Code. Noch {remainingAttempts} Versuche verfügbar.",
+                                remainingAttempts = remainingAttempts
+                            });
+                        }
+                    }
                 }
                 else
                 {
                     isValid = _twoFactorAuthService.ValidateCode(user.TwoFactorSecret, request.TwoFactorCode);
+                    _logger.LogInformation($"TOTP code validation result: {isValid}");
                 }
 
                 if (!isValid)
@@ -429,7 +585,8 @@ namespace UGHApi.Controllers
                     UserId = user.User_Id,
                     Email = user.Email_Address,
                     AccessToken = token,
-                    FirstName = user.FirstName
+                    FirstName = user.FirstName,
+                    UserRole = user.UserRole.ToString()
                 };
 
                 // Add warning if backup code was used
@@ -437,8 +594,12 @@ namespace UGHApi.Controllers
                 {
                     response.Message = "Backup-Code verwendet. Bitte richten Sie 2FA neu ein für maximale Sicherheit.";
                     response.Requires2FAReset = true;
+                    
+                    // DO NOT reset 2FA automatically - let user choose whether to reset or continue
+                    _logger.LogInformation($"Backup code used for user {user.Email_Address} - 2FA remains active until user chooses to reset");
                 }
 
+                _logger.LogInformation($"2FA login successful for user: {user.Email_Address}. Response: {System.Text.Json.JsonSerializer.Serialize(response)}");
                 return Ok(response);
             }
             catch (Exception ex)
@@ -465,7 +626,10 @@ namespace UGHApi.Controllers
 
                 // Admin users cannot disable 2FA
                 if (user.UserRole == UserRoles.Admin)
-                    return BadRequest("Admin accounts must keep 2FA enabled");
+                {
+                    _logger.LogWarning($"Admin user {user.Email_Address} attempted to disable 2FA");
+                    return BadRequest("Admin accounts must keep 2FA enabled for security reasons");
+                }
 
                 // Verify password
                 if (!_passwordService.VerifyPassword(request.Password, user.Password, user.SaltKey))

@@ -8,7 +8,7 @@ const userRole = ref('');
 // Function to decrypt token using AES encryption
 const decryptToken = (encryptedToken: string): string | null => {
   try {
-    const bytes = CryptoJS.AES.decrypt(encryptedToken, process.env.SECRET_KEY!);
+    const bytes = CryptoJS.AES.decrypt(encryptedToken, import.meta.env.VITE_SECRET_KEY || 'thisismytestsecretkey');
     return bytes.toString(CryptoJS.enc.Utf8);
   } catch (e) {
     // Handle error if necessary

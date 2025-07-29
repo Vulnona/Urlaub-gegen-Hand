@@ -37,10 +37,7 @@
                       <i :class="sortOrder === 'asc' ? 'ri-arrow-up-line' : 'ri-arrow-down-line'"></i>
                     </button>
     
-                            <!-- Admin Password Reset Button -->
-                            <button class="btn btn-warning" @click="showAdminPasswordResetModal()" title="Admin-Passwort zurücksetzen">
-                      <i class="ri-lock-password-line"></i> Admin-Passwort zurücksetzen
-                    </button>
+
 
 
                         </div>
@@ -429,63 +426,7 @@ export default {
             }
         },
         
-        // Method to show admin password reset modal
-        async showAdminPasswordResetModal() {
-            const { value: email } = await Swal.fire({
-                title: "Admin-Passwort zurücksetzen",
-                text: "Geben Sie Ihre Admin-E-Mail-Adresse ein, um einen Passwort-Reset-Link zu erhalten",
-                input: "email",
-                inputPlaceholder: "Geben Sie Ihre Admin-E-Mail ein",
-                showCancelButton: true,
-                confirmButtonText: "Reset-Link senden",
-                cancelButtonText: "Abbrechen",
-                inputValidator: (value) => {
-                    if (!value) {
-                        return 'E-Mail-Adresse ist erforderlich!';
-                    }
-                    if (!/\S+@\S+\.\S+/.test(value)) {
-                        return 'Please enter a valid email address!';
-                    }
-                }
-            });
 
-            if (email) {
-                await this.sendAdminPasswordReset(email);
-            }
-        },
-
-        // Method to send admin password reset request
-        async sendAdminPasswordReset(email) {
-            try {
-                const response = await axiosInstance.post(`authenticate/reset-password`, {
-                    email: email
-                });
-                
-                toast.success("Passwort-Reset-Link erfolgreich gesendet! Überprüfen Sie Ihre E-Mail.");
-                
-                Swal.fire({
-                    title: "Reset-Link gesendet",
-                    text: "Ein Passwort-Reset-Link wurde an Ihre E-Mail-Adresse gesendet. Bitte überprüfen Sie Ihren Posteingang und folgen Sie den Anweisungen zum Zurücksetzen Ihres Passworts.",
-                    icon: "success",
-                    confirmButtonText: "OK"
-                });
-                
-            } catch (error) {
-                if (error.response && error.response.data) {
-                    console.error('Fehler beim Senden der Passwort-Reset-E-Mail:', error);
-                    toast.error("Fehler beim Senden der Passwort-Reset-E-Mail. Bitte versuchen Sie es erneut.");
-                } else {
-                    toast.error("Fehler beim Senden der Passwort-Reset-E-Mail. Bitte versuchen Sie es erneut.");
-                }
-                
-                Swal.fire({
-                    title: "Fehler",
-                    text: "Fehler beim Senden der Passwort-Reset-E-Mail. Bitte überprüfen Sie die E-Mail-Adresse und versuchen Sie es erneut.",
-                    icon: "error",
-                    confirmButtonText: "OK"
-                });
-            }
-        },
     },
 }
 </script>

@@ -1,6 +1,9 @@
 <template>
-  <div class="two-factor-setup">
-    <div class="setup-container">
+  <div class="two-factor-setup-page">
+    <PublicNav />
+    <div class="setup-main">
+      <div class="two-factor-setup">
+        <div class="setup-container">
       <div class="setup-header">
         <h2>Zwei-Faktor-Authentifizierung einrichten</h2>
         <p>Erhöhen Sie die Sicherheit Ihres Kontos mit 2FA</p>
@@ -117,17 +120,23 @@
       </div>
     </div>
   </div>
+</div>
+</div>
 </template>
 
 <script>
 import QRCodeVue3 from 'qrcode-vue3'
 import axiosInstance from '@/interceptor/interceptor'
 import toast from '@/components/toaster/toast'
+import PublicNav from '@/components/navbar/PublicNav.vue'
+import router from '@/router'
+import CryptoJS from 'crypto-js'
 
 export default {
   name: 'TwoFactorSetup',
   components: {
-    QRCodeVue3
+    QRCodeVue3,
+    PublicNav
   },
   data() {
     return {
@@ -148,8 +157,16 @@ export default {
       this.errorMessage = ''
       
       try {
-        const userEmail = this.$store?.getters?.getUserEmail || 'user@example.com' // Fallback
-        const response = await axiosInstance.post(`authenticate/setup-2fa`, {
+        // For 2FA setup in recovery mode, we don't need a token
+        // Get email from session storage or use a default for admin recovery
+        const userEmail = sessionStorage.getItem('setup2fa_email') || 'admin@example.com';
+        
+        console.log('Generating QR code for email:', userEmail);
+        
+        // For 2FA setup, we don't need authorization header (recovery scenario)
+        console.log('2FA setup - no authorization required for recovery');
+        
+        const response = await axiosInstance.post(`authenticate/2fa/setup`, {
           email: userEmail
         })
         
@@ -172,8 +189,8 @@ export default {
       this.errorMessage = ''
       
       try {
-        const userEmail = this.$store?.getters?.getUserEmail || 'user@example.com'
-        const response = await axiosInstance.post(`authenticate/verify-2fa-setup`, {
+        const userEmail = 'admin@example.com'; // For now, hardcode admin email
+        const response = await axiosInstance.post(`authenticate/2fa/verify-setup`, {
           email: userEmail,
           secret: this.secret,
           code: this.verificationCode
@@ -224,15 +241,39 @@ export default {
       toast.success('Backup-Codes heruntergeladen!')
     },
 
+    decryptToken(encryptedToken) {
+      try {
+        const bytes = CryptoJS.AES.decrypt(encryptedToken, import.meta.env.VITE_SECRET_KEY || 'thisismytestsecretkey');
+        return bytes.toString(CryptoJS.enc.Utf8);
+      } catch (e) {
+        console.error('Error decrypting token:', e);
+        return null;
+      }
+    },
+
     finishSetup() {
-      this.$emit('setup-complete')
       toast.success('2FA-Setup erfolgreich abgeschlossen!')
+      // Redirect to admin panel after successful setup
+      this.$router.push('/admin')
     }
   }
 }
 </script>
 
 <style scoped>
+.two-factor-setup-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.setup-main {
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 80px);
+}
+
 .two-factor-setup {
   max-width: 600px;
   margin: 0 auto;

@@ -13,6 +13,7 @@ namespace UGHApi.Services
         bool ValidateCode(string secret, string code);
         List<string> GenerateBackupCodes(int count = 10);
         bool ValidateBackupCode(string userBackupCodes, string providedCode);
+        string ValidateBackupCodeWithMessage(string userBackupCodes, string providedCode);
         string RemoveUsedBackupCode(string userBackupCodes, string usedCode);
     }
 
@@ -91,11 +92,56 @@ namespace UGHApi.Services
                 var codes = JsonSerializer.Deserialize<List<string>>(userBackupCodes);
                 // Clean the provided code (remove any formatting) and make case-insensitive
                 var cleanProvidedCode = providedCode.Replace("-", "").Replace(" ", "").ToLowerInvariant();
-                return codes?.Any(code => code.ToLowerInvariant() == cleanProvidedCode) == true;
+                
+                // Debug logging
+                Console.WriteLine($"ValidateBackupCode - UserBackupCodes: {userBackupCodes}");
+                Console.WriteLine($"ValidateBackupCode - ProvidedCode: {providedCode}");
+                Console.WriteLine($"ValidateBackupCode - CleanProvidedCode: {cleanProvidedCode}");
+                Console.WriteLine($"ValidateBackupCode - Codes count: {codes?.Count ?? 0}");
+                if (codes != null)
+                {
+                    foreach (var code in codes)
+                    {
+                        Console.WriteLine($"ValidateBackupCode - Available code: {code}");
+                    }
+                }
+                
+                var result = codes?.Any(code => code.ToLowerInvariant() == cleanProvidedCode) == true;
+                Console.WriteLine($"ValidateBackupCode - Result: {result}");
+                return result;
             }
-            catch
+            catch (Exception ex)
             {
+                Console.WriteLine($"ValidateBackupCode - Exception: {ex.Message}");
                 return false;
+            }
+        }
+
+        public string ValidateBackupCodeWithMessage(string userBackupCodes, string providedCode)
+        {
+            if (string.IsNullOrEmpty(userBackupCodes) || string.IsNullOrEmpty(providedCode))
+                return "Backup-Code ist erforderlich.";
+
+            try
+            {
+                var codes = JsonSerializer.Deserialize<List<string>>(userBackupCodes);
+                if (codes == null || codes.Count == 0)
+                    return "Keine Backup-Codes verfügbar.";
+
+                // Clean the provided code (remove any formatting) and make case-insensitive
+                var cleanProvidedCode = providedCode.Replace("-", "").Replace(" ", "").ToLowerInvariant();
+                
+                var isValid = codes.Any(code => code.ToLowerInvariant() == cleanProvidedCode);
+                
+                if (isValid)
+                    return "OK";
+                else
+                    return "Backup-Code wurde bereits verwendet oder ist ungültig.";
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"ValidateBackupCodeWithMessage - Exception: {ex.Message}");
+                return "Fehler bei der Backup-Code-Validierung.";
             }
         }
 

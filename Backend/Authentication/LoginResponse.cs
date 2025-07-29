@@ -9,8 +9,11 @@ public class LoginResponse
     public string Email { get; set; }
     public Guid UserId { get; set; }
     public string FirstName { get; set; }
+    public string UserRole { get; set; }
     public bool RequiresTwoFactor { get; set; } = false;
     public string Message { get; set; }
     public string? TwoFactorToken { get; set; }
     public bool Requires2FAReset { get; set; } = false;
+    public bool RequiresTwoFactorSetup { get; set; } = false;
+    public int? RemainingBackupCodeAttempts { get; set; } = null;
 }

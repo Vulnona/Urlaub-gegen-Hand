@@ -61,6 +61,18 @@
                       <i class="ri-time-line"></i> 2FA-Code erkannt
                     </small>
                   </div>
+                  <!-- Brute Force Protection Warning -->
+                  <div v-if="remainingBackupCodeAttempts !== null && remainingBackupCodeAttempts <= 5" class="brute-force-warning" style="margin-top: 10px; padding: 8px; border-radius: 4px; background-color: #fff3cd; border: 1px solid #ffeaa7;">
+                    <small style="color: #dc3545; font-weight: bold;">
+                      <i class="ri-error-warning-line"></i> 
+                      <span v-if="remainingBackupCodeAttempts === 0">
+                        Account gesperrt! Zu viele fehlgeschlagene Backup-Code-Versuche. Versuchen Sie es später erneut.
+                      </span>
+                      <span v-else>
+                        Warnung: Noch {{ remainingBackupCodeAttempts }} Backup-Code-Versuch{{ remainingBackupCodeAttempts === 1 ? '' : 'e' }} verfügbar!
+                      </span>
+                    </small>
+                  </div>
                   <button class="btn" @click="submit2FA">2FA bestätigen</button>
                   <!-- Show current TOTP code for admin in dev/test -->
                   <div v-if="email.toLowerCase() === 'adminuser@example.com' && process.env.NODE_ENV !== 'production'" class="totp-dev-code" style="margin-top:10px;">
@@ -83,18 +95,20 @@
         </div>
       </div>
     </div>
-    <TwoFactorSetupDialog v-if="show2FASetup" :email="email" @setup-success="on2FASetupSuccess" />
+
+    <TwoFactorSetupDialog v-if="show2FASetup" :email="email" :isReset="true" @setup-success="on2FASetupSuccess" @setup-timeout="on2FASetupTimeout" />
   </div>
 </template>
 <script>
 import PublicNav from '@/components/navbar/PublicNav.vue';
 import jsSHA from 'jssha';
 import router from '@/router';
-import AES from 'crypto-js/aes';
+import { encryptItem, decryptItem } from '@/utils/encryption';
 import {GetUserRole} from "@/services/GetUserPrivileges";
 import axiosInstance from '@/interceptor/interceptor';
 import toast from '../toaster/toast';
 import TwoFactorSetupDialog from '@/components/TwoFactor/TwoFactorSetupDialog.vue';
+import Swal from 'sweetalert2';
 // Minimalistische TOTP-Berechnung für den Browser (SHA-1, 6 digits)
 function base32ToHex(base32) {
   const base32chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
@@ -137,6 +151,14 @@ export default {
     PublicNav,
     TwoFactorSetupDialog
   },
+  mounted() {
+    // Clear any existing tokens to prevent decryption errors
+    console.log('Session storage cleared on mount');
+    sessionStorage.clear();
+    
+    // Log current environment variables for debugging
+    console.log('VITE_SECRET_KEY available:', !!import.meta.env.VITE_SECRET_KEY);
+  },
   data() {
     return {
       email: '',
@@ -151,6 +173,7 @@ export default {
       totpTimer: null,
       twoFactorToken: '', // temporäres 2FA-Token
       show2FASetup: false,
+      remainingBackupCodeAttempts: null,
     };
   },
   methods: {
@@ -208,6 +231,15 @@ export default {
           toast.info('Bitte richten Sie jetzt die Zwei-Faktor-Authentifizierung ein.');
         } else if (error.response && error.response.status === 401) {
           toast.info("Ungültige E-Mail oder Passwort oder bestätigen Sie zuerst Ihre E-Mail");
+        } else if (error.response && error.response.status === 400 && error.response.data && typeof error.response.data === 'string') {
+          // Check for brute force protection messages
+          if (error.response.data.includes('Zu viele fehlgeschlagene Backup-Code-Versuche')) {
+            toast.error(error.response.data);
+          } else if (error.response.data.includes('Noch') && error.response.data.includes('Versuche verfügbar')) {
+            toast.warning(error.response.data);
+          } else {
+            toast.info(error.response.data);
+          }
         } else {
           toast.info("Login nicht möglich. Bitte versuchen Sie es erneut.");
         }
@@ -240,24 +272,78 @@ export default {
         });
         // Check if backup code was used
         if (response.data.requires2FAReset) {
-          await this.showBackupCodeWarning();
+          const shouldContinue = await this.showBackupCodeWarning();
+          if (!shouldContinue) {
+            // Don't proceed with login if user wants to reset 2FA
+            return;
+          }
         }
         
         await this.handleLoginSuccess(response.data);
         this.show2FA = false;
         this.twoFactorCode = '';
         this.twoFactorToken = '';
+        // Reset brute force counter on successful login
+        this.remainingBackupCodeAttempts = null;
               } catch (error) {
           console.error('Fehler beim 2FA-Login:', error);
-          if (error.response && error.response.data && (error.response.data.includes('2FA token') || error.response.data.includes('Invalid 2FA token'))) {
-            toast.info("Ihr 2FA-Token ist abgelaufen oder ungültig. Bitte loggen Sie sich erneut ein.");
-            this.show2FA = false;
-            this.twoFactorToken = '';
-            this.twoFactorCode = '';
-          } else if (error.response && error.response.data && error.response.data.includes('Invalid 2FA code')) {
-            toast.info("2FA-Code ungültig. Bitte überprüfen Sie den Code und versuchen Sie es erneut.");
-            this.twoFactorCode = '';
+          console.log('Error response data:', error.response?.data);
+          console.log('Error response data type:', typeof error.response?.data);
+          
+          // Handle brute force protection messages
+          if (error.response && error.response.status === 400 && error.response.data) {
+            console.log('Processing 400 error with data:', error.response.data);
+            
+            if (typeof error.response.data === 'string') {
+              console.log('Processing string error response');
+              if (error.response.data.includes('Zu viele fehlgeschlagene Backup-Code-Versuche')) {
+                toast.error(error.response.data);
+                this.remainingBackupCodeAttempts = 0;
+              } else if (error.response.data.includes('2FA token') || error.response.data.includes('Invalid 2FA token')) {
+                toast.info("Ihr 2FA-Token ist abgelaufen oder ungültig. Bitte loggen Sie sich erneut ein.");
+                this.show2FA = false;
+                this.twoFactorToken = '';
+                this.twoFactorCode = '';
+              } else if (error.response.data.includes('Invalid 2FA code')) {
+                toast.info("2FA-Code ungültig. Bitte überprüfen Sie den Code und versuchen Sie es erneut.");
+                this.twoFactorCode = '';
+              } else if (error.response.data.includes('Noch') && error.response.data.includes('Versuche verfügbar')) {
+                // Extract remaining attempts from string message
+                const match = error.response.data.match(/Noch (\d+) Versuche verfügbar/);
+                if (match) {
+                  const remainingAttempts = parseInt(match[1]);
+                  toast.warning(error.response.data);
+                  this.remainingBackupCodeAttempts = remainingAttempts;
+                  console.log('Set remaining attempts to:', remainingAttempts);
+                } else {
+                  toast.info(error.response.data);
+                  this.twoFactorCode = '';
+                }
+              } else {
+                toast.info(error.response.data);
+                this.twoFactorCode = '';
+              }
+            } else if (typeof error.response.data === 'object' && error.response.data.message) {
+              console.log('Processing object error response with message:', error.response.data.message);
+              // Handle structured error response with remaining attempts
+              if (error.response.data.message.includes('Zu viele fehlgeschlagene Backup-Code-Versuche')) {
+                toast.error(error.response.data.message);
+                this.remainingBackupCodeAttempts = 0;
+              } else if (error.response.data.message.includes('Noch') && error.response.data.message.includes('Versuche verfügbar')) {
+                toast.warning(error.response.data.message);
+                this.remainingBackupCodeAttempts = error.response.data.remainingAttempts || null;
+                console.log('Set remaining attempts to:', this.remainingBackupCodeAttempts);
+              } else {
+                toast.info(error.response.data.message);
+                this.twoFactorCode = '';
+              }
+            } else {
+              console.log('Unknown error response format:', error.response.data);
+              toast.info("2FA-Code ungültig oder Serverfehler. Bitte versuchen Sie es erneut.");
+              this.twoFactorCode = '';
+            }
           } else {
+            console.log('No error response data or wrong status code');
             toast.info("2FA-Code ungültig oder Serverfehler. Bitte versuchen Sie es erneut.");
             this.twoFactorCode = '';
           }
@@ -268,22 +354,50 @@ export default {
       const logId = data.userId;
       const firstName = data.firstName;
       const userRoleFromLogin = data.userRole || data.role;
+      
+      console.log('Starting token encryption and storage...');
       const encryptedToken = this.encryptItem(token);
       const encryptedLogId = this.encryptItem(logId);
+      
+      // Store tokens in session storage
       sessionStorage.setItem('token', encryptedToken);
       sessionStorage.setItem('logId', encryptedLogId);
       sessionStorage.setItem('firstName', firstName);
-      let userRole = userRoleFromLogin;
-      // get role from login response 
-      sessionStorage.setItem('userRole', userRole);
-      if (userRole && userRole.toLowerCase() === 'admin') {
+      sessionStorage.setItem('userRole', userRoleFromLogin);
+      
+      console.log('Tokens stored successfully');
+      
+      // Verify that tokens were stored correctly
+      const storedToken = sessionStorage.getItem('token');
+      if (!storedToken) {
+        console.error('Token was not stored properly!');
+        toast.error('Fehler beim Speichern der Anmeldedaten. Bitte versuchen Sie es erneut.');
+        return;
+      }
+      
+      // Test decryption to ensure everything works
+      try {
+        const testDecryption = this.decryptItem(storedToken);
+        console.log('Token decryption verified successfully');
+      } catch (error) {
+        console.error('Token decryption failed:', error);
+        toast.error('Fehler bei der Token-Verschlüsselung. Bitte versuchen Sie es erneut.');
+        return;
+      }
+      
+      console.log('Redirecting to appropriate page...');
+      if (userRoleFromLogin && userRoleFromLogin.toLowerCase() === 'admin') {
         router.push('/admin');
       } else {
         router.push('/home');
       }
     },
     encryptItem(item) {
-      return AES.encrypt(item, process.env.SECRET_KEY).toString();
+      return encryptItem(item);
+    },
+    
+    decryptItem(encryptedItem) {
+      return decryptItem(encryptedItem);
     },
     async fetchTotpCode() {
       if (this.email.toLowerCase() !== 'adminuser@example.com') return;
@@ -367,15 +481,35 @@ export default {
 
       if (result.dismiss === Swal.DismissReason.cancel) {
         // User clicked "2FA neu einrichten"
+        console.log('User clicked "2FA neu einrichten", setting show2FASetup to true');
         this.show2FASetup = true;
+        console.log('show2FASetup is now:', this.show2FASetup);
+        return false; // Don't continue with login
       }
+      
+      return true; // Continue with login
     },
 
     on2FASetupSuccess() {
       this.show2FASetup = false;
       toast.success('2FA erfolgreich eingerichtet! Bitte loggen Sie sich jetzt mit 2FA ein.');
-      // Optional: Automatisch 2FA-Login anzeigen
-      this.show2FA = true;
+      // Reset form fields for fresh login
+      this.email = '';
+      this.password = '';
+      this.twoFactorCode = '';
+      this.twoFactorToken = '';
+      this.show2FA = false;
+    },
+    
+    on2FASetupTimeout() {
+      this.show2FASetup = false;
+      toast.error('2FA-Setup-Timeout. Bitte versuchen Sie es erneut.');
+      // Reset form fields for fresh login
+      this.email = '';
+      this.password = '';
+      this.twoFactorCode = '';
+      this.twoFactorToken = '';
+      this.show2FA = false;
     },
     watch: {
       show2FA(newVal) {

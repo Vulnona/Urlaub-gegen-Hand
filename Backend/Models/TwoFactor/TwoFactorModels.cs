@@ -11,6 +11,10 @@ namespace UGHApi.Models.TwoFactor
         public string QrCodeUri { get; set; } = string.Empty;
         public byte[] QrCodeImage { get; set; } = Array.Empty<byte>();
         public List<string> BackupCodes { get; set; } = new List<string>();
+        // Rollback properties for safe 2FA reset
+        public bool OldTwoFactorEnabled { get; set; } = false;
+        public string? OldTwoFactorSecret { get; set; }
+        public string? OldBackupCodes { get; set; }
     }
 
     public class Verify2FASetupRequest
@@ -18,6 +22,10 @@ namespace UGHApi.Models.TwoFactor
         public string Email { get; set; } = string.Empty;
         public string Secret { get; set; } = string.Empty;
         public string Code { get; set; } = string.Empty;
+        // Rollback properties for safe 2FA reset
+        public bool OldTwoFactorEnabled { get; set; } = false;
+        public string? OldTwoFactorSecret { get; set; }
+        public string? OldBackupCodes { get; set; }
     }
 
     public class Verify2FARequest

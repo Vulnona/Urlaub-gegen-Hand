@@ -171,7 +171,7 @@ const back = () => {
 const decryptlogID = (encryptedItem: string | null) => {
   if (!encryptedItem) return null;
   try {
-    const bytes = CryptoJS.AES.decrypt(encryptedItem, process.env.SECRET_KEY);
+    const bytes = CryptoJS.AES.decrypt(encryptedItem, import.meta.env.VITE_SECRET_KEY || 'thisismytestsecretkey');
     return bytes.toString(CryptoJS.enc.Utf8);
   } catch (e) {
     console.error('Error decrypting item:', e);

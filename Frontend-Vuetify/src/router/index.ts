@@ -124,6 +124,11 @@ const routes: RouteRecordRaw[] = [
     path: '/change-password',
     name: 'ChangePassword',
     component: () => import('@/views/ChangePassword.vue'),
+  },
+  {
+    path: '/setup-2fa',
+    name: 'Setup2FA',
+    component: () => import('@/components/TwoFactor/TwoFactorSetup.vue'),
   },  
   {
     path: '/upload-id',
