@@ -44,14 +44,18 @@ public static class MapsterConfig
                 User_Id = src.Reviewer.User_Id,
                 FirstName = src.Reviewer.FirstName,
                 LastName = src.Reviewer.LastName,
-                ProfilePicture = src.Reviewer.ProfilePicture
+                ProfilePicture = src.Reviewer.ProfilePicture,
+                IsDeleted = false,
+                DeletedUserName = null
             } : null)
             .Map(dest => dest.Reviewed, src => src.Reviewed != null ? new UGHApi.ViewModels.UserComponent.UserC
             {
                 User_Id = src.Reviewed.User_Id,
                 FirstName = src.Reviewed.FirstName,
                 LastName = src.Reviewed.LastName,
-                ProfilePicture = src.Reviewed.ProfilePicture
+                ProfilePicture = src.Reviewed.ProfilePicture,
+                IsDeleted = false,
+                DeletedUserName = null
             } : null)
             .Map(dest => dest.Offer, src => src.Offer != null ? new UGH.Domain.Entities.Offer
             {

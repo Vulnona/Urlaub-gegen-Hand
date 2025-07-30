@@ -20,42 +20,17 @@ public class ReviewRepository
     public async Task<PaginatedList<ReviewDto>> GetAllReviewsByUserIdAsync(Guid userId, int pageNumber, int pageSize)
     {
         try {
-            // Query with includes
+            Console.WriteLine($"[DEBUG] GetAllReviewsByUserIdAsync called for userId: {userId}");
+            
+            // Query without includes first to get all reviews
             var allReviews = await _context.reviews
-                .Include(r => r.Offer)
-                .Include(r => r.Reviewer)
-                .Include(r => r.Reviewed)
                 .Where(r => r.ReviewedId == userId)
                 .ToListAsync();
             
-            // Filter reviews based on mutual review logic
-            var visibleReviews = new List<Review>();
+            Console.WriteLine($"[DEBUG] Found {allReviews.Count} reviews in database");
             
-            foreach (var review in allReviews)
-            {
-                if (review.OfferId.HasValue)
-                {
-                    // Check if the other party has also reviewed this user for the same offer
-                    var otherPartyReview = await _context.reviews
-                        .FirstOrDefaultAsync(r => r.OfferId == review.OfferId && 
-                                               r.ReviewerId == review.ReviewedId && 
-                                               r.ReviewedId == review.ReviewerId);
-                    
-                    // Include review if both parties have reviewed each other OR if 14 days have passed
-                    bool shouldInclude = otherPartyReview != null || 
-                                        (DateTime.UtcNow - review.CreatedAt).TotalDays >= 14;
-                    
-                    if (shouldInclude)
-                    {
-                        visibleReviews.Add(review);
-                    }
-                }
-                else
-                {
-                    // If no offer associated, include the review (fallback)
-                    visibleReviews.Add(review);
-                }
-            }
+            // Temporarily show all reviews for debugging
+            var visibleReviews = allReviews;
             
             // Apply pagination to visible reviews
             int totalCount = visibleReviews.Count;
@@ -64,8 +39,17 @@ public class ReviewRepository
                 .Take(pageSize)
                 .ToList();
             
+            Console.WriteLine($"[DEBUG] Converting {paginatedReviews.Count} reviews to DTOs");
+            
             // Convert to DTOs using Mapster (now properly configured)
             var reviewDtos = paginatedReviews.Select(r => r.Adapt<ReviewDto>()).ToList();
+            
+            Console.WriteLine($"[DEBUG] Successfully converted to DTOs, now handling deleted users");
+            
+            // Handle deleted users in reviews
+            await HandleDeletedUsersInReviews(reviewDtos);
+            
+            Console.WriteLine($"[DEBUG] Returning {reviewDtos.Count} reviews");
             
             return PaginatedList<ReviewDto>.Create(reviewDtos, totalCount, pageNumber, pageSize);
         }
@@ -74,6 +58,104 @@ public class ReviewRepository
             Console.WriteLine($"[ERROR] Exception in GetAllReviewsByUserIdAsync: {ex.Message}");
             Console.WriteLine($"[ERROR] Stack trace: {ex.StackTrace}");
             throw;
+        }
+    }
+
+    private async Task HandleDeletedUsersInReviews(List<ReviewDto> reviews)
+    {
+        try
+        {
+            foreach (var review in reviews)
+            {
+                // If reviewer is null, it means the user was deleted
+                if (review.Reviewer == null)
+                {
+                    review.Reviewer = new UGHApi.ViewModels.UserComponent.UserC
+                    {
+                        User_Id = Guid.Empty, // We don't have the original ID
+                        FirstName = "Gelöschter",
+                        LastName = "Nutzer",
+                        IsDeleted = true
+                    };
+                }
+                else
+                {
+                    // Check if reviewer still exists
+                    try
+                    {
+                        var reviewerExists = await _context.users.AnyAsync(u => u.User_Id == review.Reviewer.User_Id);
+                        if (!reviewerExists)
+                        {
+                            // Mark as deleted user
+                            review.Reviewer.FirstName = "Gelöschter";
+                            review.Reviewer.LastName = "Nutzer";
+                            review.Reviewer.IsDeleted = true;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"[ERROR] Error checking reviewer {review.Reviewer.User_Id}: {ex.Message}");
+                        // Mark as deleted user as fallback
+                        review.Reviewer.FirstName = "Gelöschter";
+                        review.Reviewer.LastName = "Nutzer";
+                        review.Reviewer.IsDeleted = true;
+                    }
+                }
+
+                // If reviewed is null, it means the user was deleted
+                if (review.Reviewed == null)
+                {
+                    review.Reviewed = new UGHApi.ViewModels.UserComponent.UserC
+                    {
+                        User_Id = Guid.Empty, // We don't have the original ID
+                        FirstName = "Gelöschter",
+                        LastName = "Nutzer",
+                        IsDeleted = true
+                    };
+                }
+                else
+                {
+                    // Check if reviewed user still exists
+                    try
+                    {
+                        var reviewedExists = await _context.users.AnyAsync(u => u.User_Id == review.Reviewed.User_Id);
+                        if (!reviewedExists)
+                        {
+                            // Mark as deleted user
+                            review.Reviewed.FirstName = "Gelöschter";
+                            review.Reviewed.LastName = "Nutzer";
+                            review.Reviewed.IsDeleted = true;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"[ERROR] Error checking reviewed {review.Reviewed.User_Id}: {ex.Message}");
+                        // Mark as deleted user as fallback
+                        review.Reviewed.FirstName = "Gelöschter";
+                        review.Reviewed.LastName = "Nutzer";
+                        review.Reviewed.IsDeleted = true;
+                    }
+                }
+
+                // Check if offer is deleted
+                if (review.Offer == null && review.OfferId.HasValue)
+                {
+                    review.Offer = new UGH.Domain.Entities.Offer
+                    {
+                        Id = review.OfferId.Value,
+                        Title = "Gelöschtes Angebot",
+                        Description = "Dieses Angebot wurde gelöscht",
+                        UserId = Guid.Empty,
+                        IsDeleted = true
+                    };
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[ERROR] Exception in HandleDeletedUsersInReviews: {ex.Message}");
+            Console.WriteLine($"[ERROR] Stack trace: {ex.StackTrace}");
+            // Don't throw, just log the error
         }
     }
 
