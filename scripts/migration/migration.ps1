@@ -164,8 +164,14 @@ function Clean-Orphans {
         return
     }
     
-    $backupDir = "migration-backup-" + (Get-Date -Format "yyyyMMdd-HHmmss")
-    New-Item -ItemType Directory -Path $backupDir -Force | Out-Null
+    $backupDir = Join-Path $PSScriptRoot "..\..\backups"
+    if (-not (Test-Path $backupDir)) {
+        New-Item -ItemType Directory -Path $backupDir -Force | Out-Null
+    }
+    
+    $timestamp = Get-Date -Format "yyyyMMdd-HHmmss"
+    $migrationBackupDir = Join-Path $backupDir "migration-backup-$timestamp"
+    New-Item -ItemType Directory -Path $migrationBackupDir -Force | Out-Null
     
     $orphanedFiles = Get-ChildItem -Path $migrationsPath -Filter "*.cs" | Where-Object { 
         $_.Name -notlike "*.Designer.cs" -and $_.Name -notlike "*ModelSnapshot.cs" 
@@ -175,14 +181,14 @@ function Clean-Orphans {
         $designerFile = Join-Path $migrationsPath "$($file.BaseName).Designer.cs"
         if (Test-Path $designerFile) {
             Write-Host "Backing up: $($file.Name)" -ForegroundColor Yellow
-            Copy-Item $file.FullName (Join-Path $backupDir $file.Name)
-            Copy-Item $designerFile (Join-Path $backupDir "$($file.BaseName).Designer.cs")
+            Copy-Item $file.FullName (Join-Path $migrationBackupDir $file.Name)
+            Copy-Item $designerFile (Join-Path $migrationBackupDir "$($file.BaseName).Designer.cs")
             Remove-Item $file.FullName -Force
             Remove-Item $designerFile -Force
         }
     }
     
-    Write-Host "[SUCCESS] Orphaned files backed up to: $backupDir" -ForegroundColor Green
+    Write-Host "[SUCCESS] Orphaned files backed up to: $migrationBackupDir" -ForegroundColor Green
 }
 
 function Force-Rebuild {
@@ -201,6 +207,42 @@ function Force-Rebuild {
     
     Write-Host "Starting nuclear rebuild..." -ForegroundColor Red
     
+    # Create backup before destructive operation
+    Write-Host "Creating backup before force rebuild..." -ForegroundColor Yellow
+    $backupDir = Join-Path $PSScriptRoot "..\..\backups"
+    if (-not (Test-Path $backupDir)) {
+        New-Item -ItemType Directory -Path $backupDir -Force | Out-Null
+    }
+    
+    $timestamp = Get-Date -Format "yyyyMMdd-HHmmss"
+    $dbBackupFile = Join-Path $backupDir "backup-before-force-rebuild-$timestamp.sql"
+    $migrationBackupDir = Join-Path $backupDir "migration-backup-$timestamp"
+    
+    # Database backup
+    Write-Host "Creating database backup..." -ForegroundColor Yellow
+    $oldErrorAction = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    docker exec ugh-db mysqldump -uuser -ppassword db --no-tablespaces > $dbBackupFile 2>&1
+    $ErrorActionPreference = $oldErrorAction
+    
+    if ($LASTEXITCODE -eq 0) {
+        Write-Host "Database backup created: $dbBackupFile" -ForegroundColor Green
+    } else {
+        Write-Host "[WARNING] Database backup failed" -ForegroundColor Yellow
+    }
+    
+    # Migration files backup
+    Write-Host "Creating migration files backup..." -ForegroundColor Yellow
+    $migrationsPath = Join-Path $PSScriptRoot "..\..\Backend\Migrations"
+    if (Test-Path $migrationsPath) {
+        New-Item -ItemType Directory -Path $migrationBackupDir -Force | Out-Null
+        $migrationFiles = Get-ChildItem -Path $migrationsPath -Filter "*.cs"
+        foreach ($file in $migrationFiles) {
+            Copy-Item $file.FullName $migrationBackupDir -Force
+        }
+        Write-Host "Migration files backed up to: $migrationBackupDir" -ForegroundColor Green
+    }
+    
     # Drop migrations from database
     Write-Host "Dropping migrations from database..." -ForegroundColor Yellow
     $oldErrorAction = $ErrorActionPreference
@@ -210,14 +252,12 @@ function Force-Rebuild {
     
     # Remove migration files
     Write-Host "Removing migration files..." -ForegroundColor Yellow
-    $migrationsPath = Join-Path $PSScriptRoot "..\..\Backend\Migrations"
     if (Test-Path $migrationsPath) {
         Get-ChildItem -Path $migrationsPath -Filter "*.cs" | Remove-Item -Force
     }
     
     # Create new initial migration
     Write-Host "Creating new initial migration..." -ForegroundColor Yellow
-    $timestamp = Get-Date -Format "yyyyMMdd-HHmmss"
     $result = docker exec ugh-backend dotnet ef migrations add InitialCreate_$timestamp --project /app/Backend
     if ($LASTEXITCODE -eq 0) {
         Write-Host "[SUCCESS] Nuclear rebuild completed" -ForegroundColor Green
@@ -248,10 +288,16 @@ function Schema-Check {
 function Restore-Database {
     Write-Host "Restoring database from backup..." -ForegroundColor Yellow
     
-    # Find the most recent backup file
-    $backupFiles = Get-ChildItem -Path "." -Filter "backup-before-force-rebuild-*.sql" | Sort-Object LastWriteTime -Descending
+    # Find the most recent backup file in backups directory
+    $backupDir = Join-Path $PSScriptRoot "..\..\backups"
+    if (-not (Test-Path $backupDir)) {
+        Write-Host "[ERROR] Backups directory not found" -ForegroundColor Red
+        return
+    }
+    
+    $backupFiles = Get-ChildItem -Path $backupDir -Filter "backup-before-force-rebuild-*.sql" | Sort-Object LastWriteTime -Descending
     if ($backupFiles.Count -eq 0) {
-        Write-Host "[ERROR] No backup files found" -ForegroundColor Red
+        Write-Host "[ERROR] No backup files found in $backupDir" -ForegroundColor Red
         return
     }
     
@@ -261,7 +307,13 @@ function Restore-Database {
     # Restore database
     $oldErrorAction = $ErrorActionPreference
     $ErrorActionPreference = "Continue"
-    $result = Get-Content $latestBackup.FullName | docker exec -i ugh-db mysql -uuser -ppassword db 2>&1
+    
+    # Copy backup file to container and restore
+    $backupFileName = Split-Path $latestBackup.FullName -Leaf
+    docker cp $latestBackup.FullName ugh-db:/tmp/$backupFileName
+    $result = docker exec ugh-db bash -c "mysql -uuser -ppassword db < /tmp/$backupFileName" 2>&1
+    docker exec ugh-db rm -f /tmp/$backupFileName
+    
     $ErrorActionPreference = $oldErrorAction
     if ($LASTEXITCODE -eq 0) {
         Write-Host "[SUCCESS] Database restored successfully" -ForegroundColor Green
@@ -273,10 +325,16 @@ function Restore-Database {
 function Restore-Migrations {
     Write-Host "Restoring migration files..." -ForegroundColor Yellow
     
-    # Find the most recent migration backup directory
-    $backupDirs = Get-ChildItem -Path "." -Filter "migration-backup-*" | Sort-Object LastWriteTime -Descending
+    # Find the most recent migration backup directory in backups directory
+    $backupDir = Join-Path $PSScriptRoot "..\..\backups"
+    if (-not (Test-Path $backupDir)) {
+        Write-Host "[ERROR] Backups directory not found" -ForegroundColor Red
+        return
+    }
+    
+    $backupDirs = Get-ChildItem -Path $backupDir -Filter "migration-backup-*" | Sort-Object LastWriteTime -Descending
     if ($backupDirs.Count -eq 0) {
-        Write-Host "[ERROR] No migration backup directories found" -ForegroundColor Red
+        Write-Host "[ERROR] No migration backup directories found in $backupDir" -ForegroundColor Red
         return
     }
     
