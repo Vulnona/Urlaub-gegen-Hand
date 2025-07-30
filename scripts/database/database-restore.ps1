@@ -41,13 +41,13 @@ if (-not (Test-Path $passwordFile)) {
     $password = Get-Content $passwordFile -Raw | ForEach-Object { $_.Trim() }
 }
 
-# OS-Erkennung
-$IsWindows = $PSVersionTable.PSPlatform -eq 'Win32NT'
+# OS-Erkennung (using custom variable to avoid conflicts with PowerShell's $IsWindows)
+$ScriptIsWindows = $PSVersionTable.PSPlatform -eq 'Win32NT'
 
 # Hilfsfunktion für plattformübergreifende Shell-Kommandos
 function Invoke-ShellCommand {
     param([string]$cmd)
-    if ($IsWindows) {
+    if ($ScriptIsWindows) {
         & cmd.exe /c $cmd
     } else {
         Invoke-Expression $cmd

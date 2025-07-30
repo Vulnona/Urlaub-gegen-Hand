@@ -29,6 +29,14 @@ This document outlines the changes made to ensure the UGH project works correctl
 - Included platform-specific usage examples in help text
 - Used cross-platform compatible file paths and commands
 
+### 4. PowerShell Variable Conflicts
+**Problem**: PowerShell Core has built-in variables `$IsWindows`, `$IsLinux`, `$IsMacOS` that should not be overwritten.
+
+**Solution**: 
+- Use custom variable names like `$ScriptIsWindows`, `$ScriptIsLinux` to avoid conflicts
+- Preserve the original PowerShell variables for other scripts and modules
+- This prevents unexpected behavior and maintains compatibility
+
 ## Files Modified
 
 ### Core Files

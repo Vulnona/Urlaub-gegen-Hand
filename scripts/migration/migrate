@@ -1,0 +1,124 @@
+#!/bin/bash
+
+# Modern Cross-Platform Migration Management System
+# Automatically detects environment and uses the best available method
+
+set -e
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+CYAN='\033[0;36m'
+GRAY='\033[0;37m'
+NC='\033[0m' # No Color
+
+# Function to print colored output
+print_status() {
+    local color=$1
+    local message=$2
+    echo -e "${color}${message}${NC}"
+}
+
+# Function to detect PowerShell availability
+detect_powershell() {
+    if command -v pwsh >/dev/null 2>&1; then
+        echo "pwsh"
+    elif command -v powershell >/dev/null 2>&1; then
+        echo "powershell"
+    else
+        echo ""
+    fi
+}
+
+# Function to show help
+show_help() {
+    print_status $CYAN "Modern Cross-Platform Migration Management System"
+    print_status $CYAN "=================================================="
+    echo ""
+    print_status $YELLOW "Usage:"
+    echo "  ./migrate status                    # Check migration status"
+    echo "  ./migrate fix-inconsistencies       # Fix migration issues"
+    echo "  ./migrate add-migration <name>      # Add new migration"
+    echo "  ./migrate schema-check              # Check schema consistency"
+    echo "  ./migrate clean-orphans             # Remove orphaned files"
+    echo "  ./migrate force-rebuild             # Nuclear option (use with caution)"
+    echo ""
+    print_status $YELLOW "Examples:"
+    echo "  ./migrate status"
+    echo "  ./migrate add-migration AddUserProfile"
+    echo "  ./migrate fix-inconsistencies --force"
+    echo ""
+    print_status $GRAY "This script automatically detects your environment and uses the best available method."
+}
+
+# Main execution
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+MIGRATION_SCRIPT="$SCRIPT_DIR/migration.ps1"
+
+# Check if PowerShell script exists
+if [[ ! -f "$MIGRATION_SCRIPT" ]]; then
+    print_status $RED "Error: migration.ps1 not found at $MIGRATION_SCRIPT"
+    exit 1
+fi
+
+# Detect PowerShell
+POWERSHELL_CMD=$(detect_powershell)
+
+if [[ -z "$POWERSHELL_CMD" ]]; then
+    print_status $RED "Error: PowerShell not found on this system"
+    echo ""
+    print_status $YELLOW "Installation instructions:"
+    echo ""
+    echo "Ubuntu/Debian:"
+    echo "  wget -q https://packages.microsoft.com/config/ubuntu/$(lsb_release -rs)/packages-microsoft-prod.deb -O packages-microsoft-prod.deb"
+    echo "  sudo dpkg -i packages-microsoft-prod.deb"
+    echo "  sudo apt-get update"
+    echo "  sudo apt-get install -y powershell"
+    echo ""
+    echo "CentOS/RHEL/Fedora:"
+    echo "  sudo yum install powershell"
+    echo ""
+    echo "macOS:"
+    echo "  brew install --cask powershell"
+    echo ""
+    print_status $GRAY "After installation, run this script again."
+    exit 1
+fi
+
+# Show PowerShell version for debugging
+print_status $GRAY "Using PowerShell: $POWERSHELL_CMD"
+$POWERSHELL_CMD --version 2>/dev/null || print_status $YELLOW "PowerShell version check failed (this is usually OK)"
+
+# Check if containers are running
+print_status $YELLOW "Checking Docker containers..."
+if ! docker ps --filter "name=ugh-db" --format "{{.Status}}" | grep -q .; then
+    print_status $RED "Error: ugh-db container is not running"
+    print_status $YELLOW "Start the application with: docker compose up -d"
+    exit 1
+fi
+
+if ! docker ps --filter "name=ugh-backend" --format "{{.Status}}" | grep -q .; then
+    print_status $RED "Error: ugh-backend container is not running"
+    print_status $YELLOW "Start the application with: docker compose up -d"
+    exit 1
+fi
+
+print_status $GREEN "✓ All required containers are running"
+
+# Execute the PowerShell script with all arguments
+print_status $CYAN "Executing migration management system..."
+echo ""
+
+# Pass all arguments to PowerShell script
+$POWERSHELL_CMD -File "$MIGRATION_SCRIPT" "$@"
+
+# Check exit code
+EXIT_CODE=$?
+if [[ $EXIT_CODE -eq 0 ]]; then
+    print_status $GREEN "Migration operation completed successfully"
+else
+    print_status $RED "Migration operation failed with exit code $EXIT_CODE"
+fi
+
+exit $EXIT_CODE 

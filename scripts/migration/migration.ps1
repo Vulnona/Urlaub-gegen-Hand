@@ -1,4 +1,5 @@
 # Professional Migration Management System
+# Cross-platform script for Windows and Linux
 # Handles any migration inconsistencies automatically
 
 param(
@@ -15,20 +16,129 @@ param(
 
 $ErrorActionPreference = "Stop"
 
+# Modern OS detection using PowerShell's built-in platform detection
+# This is more reliable than environment variables and works across all PowerShell versions
+$ScriptIsWindows = $PSVersionTable.PSPlatform -eq 'Win32NT'
+$ScriptIsLinux = $PSVersionTable.PSPlatform -eq 'Unix'
+$ScriptIsMacOS = $PSVersionTable.PSPlatform -eq 'Unix' -and $env:OSTYPE -like "*darwin*"
+
+# Cross-platform path separator
+$PathSeparator = if ($ScriptIsWindows) { "\" } else { "/" }
+
+# Cross-platform file operations
+function Remove-ItemCrossPlatform {
+    param([string]$Path)
+    if ($ScriptIsWindows) {
+        Remove-Item $Path -Force -ErrorAction SilentlyContinue
+    } else {
+        rm -f $Path 2>$null
+    }
+}
+
+function Test-PathCrossPlatform {
+    param([string]$Path)
+    if ($ScriptIsWindows) {
+        Test-Path $Path
+    } else {
+        Test-Path $Path
+    }
+}
+
+function Get-ChildItemCrossPlatform {
+    param([string]$Path, [string]$Filter)
+    if ($ScriptIsWindows) {
+        Get-ChildItem $Path -Filter $Filter
+    } else {
+        Get-ChildItem $Path -Filter $Filter
+    }
+}
+
+function New-ItemCrossPlatform {
+    param([string]$Path, [string]$ItemType)
+    if ($ScriptIsWindows) {
+        New-Item -ItemType Directory -Path $Path -Force | Out-Null
+    } else {
+        mkdir -p $Path 2>$null
+    }
+}
+
+function Copy-ItemCrossPlatform {
+    param([string]$Source, [string]$Destination)
+    if ($ScriptIsWindows) {
+        Copy-Item $Source $Destination -Force
+    } else {
+        cp -r $Source $Destination 2>$null
+    }
+}
+
+function Join-PathCrossPlatform {
+    param([string]$Path1, [string]$Path2)
+    if ($ScriptIsWindows) {
+        Join-Path $Path1 $Path2
+    } else {
+        "$Path1$PathSeparator$Path2" -replace "\\+", "/"
+    }
+}
+
+function Test-ContainersRunning {
+    Write-Host "Checking container availability..." -ForegroundColor Yellow
+    
+    $requiredContainers = @("ugh-db", "ugh-backend")
+    $missingContainers = @()
+    
+    foreach ($container in $requiredContainers) {
+        $status = docker ps --filter "name=$container" --format "{{.Status}}" 2>&1
+        if ($LASTEXITCODE -ne 0 -or -not $status) {
+            $missingContainers += $container
+        } else {
+            Write-Host "  ✓ $container is running" -ForegroundColor Green
+        }
+    }
+    
+    if ($missingContainers.Count -gt 0) {
+        Write-Host "[ERROR] Missing containers: $($missingContainers -join ', ')" -ForegroundColor Red
+        Write-Host "Please start the application with: docker compose up -d" -ForegroundColor Yellow
+        return $false
+    }
+    
+    return $true
+}
+
 function Get-AppliedMigrations {
     $result = docker exec ugh-db mysql -uuser -ppassword db --skip-column-names -e "SELECT MigrationId FROM __EFMigrationsHistory ORDER BY MigrationId"
     return $result | Where-Object { $_ -and $_ -match '^\d{14}_' }
 }
 
 function Get-CodeMigrations {
+    # First check if EF tools are available in container
+    $efCheck = docker exec ugh-backend dotnet ef --version 2>&1
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "[WARNING] EF tools not available in container. Installing..." -ForegroundColor Yellow
+        # Try to install EF tools in container
+        docker exec ugh-backend dotnet tool install --global dotnet-ef 2>&1 | Out-Null
+        if ($LASTEXITCODE -ne 0) {
+            Write-Host "[WARNING] Failed to install EF tools in container. Trying alternative approach..." -ForegroundColor Yellow
+            # Alternative: Try to restore tools first
+            docker exec ugh-backend dotnet tool restore 2>&1 | Out-Null
+            if ($LASTEXITCODE -ne 0) {
+                throw "Failed to install/restore EF tools in container. Please ensure dotnet-ef is available."
+            }
+        }
+    }
+    
     $result = docker exec ugh-backend dotnet ef migrations list 2>&1
-    if ($LASTEXITCODE -ne 0) { throw "EF command failed: $result" }
+    if ($LASTEXITCODE -ne 0) { 
+        Write-Host "[ERROR] EF command failed: $result" -ForegroundColor Red
+        Write-Host "[INFO] This might be due to missing EF tools in the container." -ForegroundColor Yellow
+        Write-Host "[INFO] Try running: docker exec ugh-backend dotnet tool install --global dotnet-ef" -ForegroundColor Gray
+        return @()
+    }
     return ($result -split "`n" | Where-Object { $_ -match '^\d{14}_' } | ForEach-Object { $_.Trim() })
 }
 
 function Get-FilesystemMigrations {
-    $migrationPath = Join-Path $PSScriptRoot "..\..\Backend\Migrations"
-    $files = Get-ChildItem $migrationPath -Filter "*.cs" | Where-Object {
+    $migrationPath = Join-PathCrossPlatform $PSScriptRoot "..$PathSeparator..$PathSeparator Backend$PathSeparator Migrations"
+    $files = Get-ChildItemCrossPlatform $migrationPath "*.cs" | Where-Object {
         $_.Name -match '^\d{14}_.*\.cs$' -and $_.Name -notlike "*ModelSnapshot*" -and $_.Name -notlike "*.Designer.cs"
     }
     return $files | ForEach-Object { $_.Name -replace '\.cs$', '' }
@@ -130,9 +240,9 @@ function Schema-Check {
             }
         }
         # Remove snapshot
-        $snapshotPath = Join-Path $PSScriptRoot "..\..\Backend\Migrations\UghContextModelSnapshot.cs"
-        if (Test-Path $snapshotPath) {
-            Remove-Item $snapshotPath -Force
+        $snapshotPath = Join-PathCrossPlatform $PSScriptRoot "..$PathSeparator..$PathSeparator Backend$PathSeparator Migrations$PathSeparator UghContextModelSnapshot.cs"
+        if (Test-PathCrossPlatform $snapshotPath) {
+            Remove-ItemCrossPlatform $snapshotPath
             Write-Host "[OK] Removed model snapshot: $snapshotPath" -ForegroundColor Green
         } else {
             Write-Host "[INFO] Model snapshot already removed or missing." -ForegroundColor Yellow
@@ -199,12 +309,12 @@ switch ($Action) {
                 Write-Host "  Removing orphaned files..." -ForegroundColor Yellow
                 if (-not $DryRun) {
                     $files = @(
-                        (Join-Path $PSScriptRoot "..\..\Backend\Migrations\$($issue.Migration).cs"),
-                        (Join-Path $PSScriptRoot "..\..\Backend\Migrations\$($issue.Migration).Designer.cs")
+                        (Join-PathCrossPlatform $PSScriptRoot "..$PathSeparator..$PathSeparator Backend$PathSeparator Migrations\$($issue.Migration).cs"),
+                        (Join-PathCrossPlatform $PSScriptRoot "..$PathSeparator..$PathSeparator Backend$PathSeparator Migrations\$($issue.Migration).Designer.cs")
                     )
                     foreach ($file in $files) {
-                        if (Test-Path $file) {
-                            Remove-Item $file -Force
+                        if (Test-PathCrossPlatform $file) {
+                            Remove-ItemCrossPlatform $file
                             Write-Host "  [OK] Removed $file" -ForegroundColor Green
                         }
                     }
@@ -222,12 +332,12 @@ switch ($Action) {
                     Write-Host "  Auto-removing test migration..." -ForegroundColor Yellow
                     if (-not $DryRun) {
                         $files = @(
-                            (Join-Path $PSScriptRoot "..\..\Backend\Migrations\$($issue.Migration).cs"),
-                            (Join-Path $PSScriptRoot "..\..\Backend\Migrations\$($issue.Migration).Designer.cs")
+                            (Join-PathCrossPlatform $PSScriptRoot "..$PathSeparator..$PathSeparator Backend$PathSeparator Migrations\$($issue.Migration).cs"),
+                            (Join-PathCrossPlatform $PSScriptRoot "..$PathSeparator..$PathSeparator Backend$PathSeparator Migrations\$($issue.Migration).Designer.cs")
                         )
                         foreach ($file in $files) {
-                            if (Test-Path $file) {
-                                Remove-Item $file -Force
+                            if (Test-PathCrossPlatform $file) {
+                                Remove-ItemCrossPlatform $file
                                 Write-Host "  [OK] Removed $file" -ForegroundColor Green
                             }
                         }
@@ -285,12 +395,12 @@ function Clean-Orphans {
     foreach ($orphan in $orphans) {
         if (-not $DryRun) {
             $files = @(
-                (Join-Path $PSScriptRoot "..\..\Backend\Migrations\$orphan.cs"),
-                (Join-Path $PSScriptRoot "..\..\Backend\Migrations\$orphan.Designer.cs")
+                (Join-PathCrossPlatform $PSScriptRoot "..$PathSeparator..$PathSeparator Backend$PathSeparator Migrations\$orphan.cs"),
+                (Join-PathCrossPlatform $PSScriptRoot "..$PathSeparator..$PathSeparator Backend$PathSeparator Migrations\$orphan.Designer.cs")
             )
             foreach ($file in $files) {
-                if (Test-Path $file) {
-                    Remove-Item $file -Force
+                if (Test-PathCrossPlatform $file) {
+                    Remove-ItemCrossPlatform $file
                     Write-Host "[OK] Removed $file" -ForegroundColor Green
                 }
             }
@@ -373,7 +483,7 @@ function Add-Migration {
             Write-Host ""
             Write-Host "Syncing files to local filesystem..." -ForegroundColor Yellow
             foreach ($file in $containerFiles) {
-                docker exec ugh-backend cat "Migrations/$file" | Out-File (Join-Path $PSScriptRoot "..\..\Backend\Migrations\$file") -Encoding UTF8
+                docker exec ugh-backend cat "Migrations/$file" | Out-File (Join-PathCrossPlatform $PSScriptRoot "..$PathSeparator..$PathSeparator Backend$PathSeparator Migrations\$file") -Encoding UTF8
                 Write-Host "  • Synced: $file" -ForegroundColor Gray
             }
             
@@ -421,8 +531,8 @@ function Force-Rebuild {
     # 1. Backup current state
     Write-Host "1. Creating backup..." -ForegroundColor Yellow
     $backupDir = "migration-backup-$(Get-Date -Format 'yyyyMMdd-HHmmss')"
-    New-Item -ItemType Directory -Path $backupDir -Force | Out-Null
-    Copy-Item (Join-Path $PSScriptRoot "..\..\Backend\Migrations\*") $backupDir -Force
+    New-ItemCrossPlatform $backupDir "Directory"
+    Copy-ItemCrossPlatform (Join-PathCrossPlatform $PSScriptRoot "..$PathSeparator..$PathSeparator Backend$PathSeparator Migrations\*") $backupDir -Force
     Write-Host "   Backup created in: $backupDir" -ForegroundColor Green
     
     # 2. Clear migration history
@@ -434,15 +544,15 @@ function Force-Rebuild {
     # 3. Remove all migration files except model snapshot
     Write-Host "3. Removing migration files..." -ForegroundColor Yellow
     if (-not $DryRun) {
-        Get-ChildItem (Join-Path $PSScriptRoot "..\..\Backend\Migrations") -Filter "*.cs" | Where-Object { 
+        Get-ChildItemCrossPlatform (Join-PathCrossPlatform $PSScriptRoot "..$PathSeparator..$PathSeparator Backend$PathSeparator Migrations") -Filter "*.cs" | Where-Object { 
             $_.Name -notlike "*ModelSnapshot*" 
-        } | Remove-Item -Force
+        } | Remove-ItemCrossPlatform -Force
     }
     
     # 4. Create initial migration
     Write-Host "4. Creating fresh initial migration..." -ForegroundColor Yellow
     if (-not $DryRun) {
-        $backendPath = Join-Path $PSScriptRoot "..\..\Backend"
+        $backendPath = Join-PathCrossPlatform $PSScriptRoot "..$PathSeparator..$PathSeparator Backend"
         Push-Location $backendPath
         try {
             $result = dotnet ef migrations add InitialMigration --force 2>&1
@@ -466,8 +576,8 @@ function Force-Rebuild {
 
 function Update-MigrationDocumentation {
     Write-Host "Updating MIGRATION-SYSTEM.md documentation..." -ForegroundColor Yellow
-    $docPath = Join-Path $PSScriptRoot "..\..\docs\MIGRATION-SYSTEM.md"
-    if (-not (Test-Path $docPath)) {
+    $docPath = Join-PathCrossPlatform $PSScriptRoot "..$PathSeparator..$PathSeparator docs$PathSeparator MIGRATION-SYSTEM.md"
+    if (-not (Test-PathCrossPlatform $docPath)) {
         Write-Host "Warning: MIGRATION-SYSTEM.md not found at $docPath" -ForegroundColor Yellow
         return
     }
@@ -509,12 +619,19 @@ function Update-MigrationDocumentation {
 
 # Main execution
 try {
+    # Check if containers are running first
+    if (-not (Test-ContainersRunning)) {
+        exit 1
+    }
+    
     switch ($Action.ToLower()) {
         "status" { Show-Status }
         "fix-inconsistencies" { Fix-Inconsistencies }
         "clean-orphans" { Clean-Orphans }
         "add-migration" { Add-Migration }
         "force-rebuild" { Force-Rebuild }
+        "schema-check" { Schema-Check }
+        default { Write-Host "Unknown action: $Action" -ForegroundColor Red }
     }
 } catch {
     Write-Host "[ERROR] $($_.Exception.Message)" -ForegroundColor Red

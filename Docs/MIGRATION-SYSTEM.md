@@ -1,251 +1,173 @@
-﻿# UGH Database Migration System
-
-*Last updated on 2025-07-25 07:06:21*
+﻿# Migration System Documentation
 
 ## Overview
+The UGH application uses a robust migration management system that handles Entity Framework migrations with automatic consistency checks and DSGVO-compliant data cleanup.
 
-This document tracks all database migrations in the UGH system and provides comprehensive migration management capabilities using the **proven, battle-tested migration.ps1 system**.
+## Features
 
-## Migration Status
+### 🔧 Migration Management
+- **Status Check**: Verify migration consistency across database, code, and filesystem
+- **Inconsistency Fixing**: Automatically resolve migration conflicts
+- **Orphaned File Cleanup**: Remove unused migration files
+- **Schema Validation**: Check for model vs database mismatches
+- **Force Rebuild**: Complete system reset for extreme cases
 
-**Total Migrations:** 13  
-**Applied Migrations:** 13  
-**System Status:** âœ… Fully Synchronized and Operational
+### 🛡️ DSGVO Compliance
+- **DeletedUserBackupCleanupService**: Automatic cleanup of expired user backups
+- **Configurable Retention**: 30 days by default (configurable in appsettings.json)
+- **Background Processing**: Runs every 24 hours
+- **Proper Logging**: All cleanup activities are logged
 
-## Available Commands
+## Usage
 
-### Migration Management (Battle-Tested Professional System)
+### Modern Cross-Platform Commands
 
-**Script:** `scripts/migration/migration.ps1`
+**Universal Command (Works on all platforms):**
+```bash
+# Check migration status
+./scripts/migration/migrate status
 
-- **status**: Comprehensive migration status with inconsistency detection
-- **fix-inconsistencies**: Automatic repair of migration history problems  
-- **clean-orphans**: Remove orphaned migration files safely
-- **add-migration [name]**: Container-first migration creation with auto-sync
-- **force-rebuild**: Nuclear option - complete system reconstruction
+# Fix inconsistencies
+./scripts/migration/migrate fix-inconsistencies
 
-### Command Examples
+# Add new migration
+./scripts/migration/migrate add-migration YourMigrationName
 
-#### PowerShell (Windows) - Proven Commands
+# Schema check
+./scripts/migration/migrate schema-check
+
+# Clean orphaned files
+./scripts/migration/migrate clean-orphans
+
+# Force rebuild (nuclear option)
+./scripts/migration/migrate force-rebuild --force
+```
+
+**Legacy PowerShell (Windows only):**
 ```powershell
-# Navigate to migration scripts directory
-cd C:\Users\Lena\UgH\UGH\scripts\migration
+# Check migration status
+.\scripts\migration\migration.ps1 -Action status
 
-# Check comprehensive system status with inconsistency detection
-.\migration.ps1 -Action status
+# Fix inconsistencies
+.\scripts\migration\migration.ps1 -Action fix-inconsistencies
 
-# Create new migration using proven container-first approach
-.\migration.ps1 -Action add-migration -MigrationName "AddNewFeature"
+# Add new migration
+.\scripts\migration\migration.ps1 -Action add-migration -MigrationName "YourMigrationName"
+```
 
-# Automatically fix any detected inconsistencies
-.\migration.ps1 -Action fix-inconsistencies
+### Dry Run Mode
+Add `-DryRun` to preview changes without applying them:
+```powershell
+.\scripts\migration\migration.ps1 -Action fix-inconsistencies -DryRun
+```
 
-# Clean up orphaned migration files
-.\migration.ps1 -Action clean-orphans
+## Container Requirements
 
-# Nuclear option: complete system rebuild (requires confirmation)
-.\migration.ps1 -Action force-rebuild
+The migration system requires:
+- `ugh-db` container (MySQL database)
+- `ugh-backend` container (ASP.NET Core application)
 
-# Dry run mode for safe testing
-.\migration.ps1 -Action fix-inconsistencies -DryRun
+Start containers with:
+```bash
+docker compose up -d
+```
 
-# Force execution without prompts
-.\migration.ps1 -Action clean-orphans -Force
+## Cross-Platform Support
+
+The migration system works on:
+- **Windows**: PowerShell 5.1+ or PowerShell Core
+- **Linux**: PowerShell Core (pwsh) - automatically detected and installed
+- **macOS**: PowerShell Core (pwsh) - automatically detected and installed
+
+**Modern Features:**
+- **Universal Script**: `./scripts/migration/migrate` works on all platforms
+- **Auto-Detection**: Automatically detects PowerShell availability
+- **Smart Installation**: Provides installation instructions if PowerShell is missing
+- **Container Validation**: Checks if required Docker containers are running
+- **State-of-the-Art**: Uses modern PowerShell platform detection instead of legacy environment variables
+
+**Prerequisites:**
+- Docker and Docker Compose
+- PowerShell Core (automatically detected and guided installation provided)
+
+## DSGVO Settings
+
+Configure retention periods in `Backend/appsettings.json`:
+
+```json
+{
+  "DSGVOSettings": {
+    "DeletedUserRetentionDays": 30
+  }
+}
 ```
 
 ## Migration History
 
-| Migration ID | Description | Status | Applied |
-|--------------|-------------|---------|---------|
-| `20241016071620_InitialMigration` | Initial database schema | âœ… Applied | 2024-10-16 |
-| `20241017101135_AddedCreatedAtColumnInOfferTable` | Offer table enhancement | âœ… Applied | 2024-10-17 |
-| `20241114104041_Removed-CreatedAt-And-UpdatedAt-Columns-from-Membership` | Membership table cleanup | âœ… Applied | 2024-11-14 |
-| `20241218093137_Removed_DiscountAmount_from_Coupon_Table` | Coupon table optimization | âœ… Applied | 2024-12-18 |
-| `20250124094728_Added_ShopItem_and_transaction_table_updated_coupon_table` | Shop system implementation | âœ… Applied | 2025-01-24 |
-| `20250124095631_Changed_coupon_redemption_table_relation` | Coupon relations optimization | âœ… Applied | 2025-01-24 |
-| `20250321154423_AddedPasswordResetToken` | Password reset functionality | âœ… Applied | 2025-03-21 |
-| `20250502111647_OfferRedesign` | Enhanced offer system | âœ… Applied | 2025-05-02 |
-| `20250621114037_AddPaymentIntegration` | Payment system integration | âœ… Applied | 2025-06-21 |
-| `20250724125708_Add2FASupport` | Two-Factor Authentication support | âœ… Applied | 2025-07-24 |
-| `20250724125733_GeographicLocationSystem` | Geographic location features | âœ… Applied | 2025-07-24 |
-| `20250724125755_CouponEmailTracking` | Admin coupon email notifications | âœ… Applied | 2025-07-24 |
+### Current Migrations
+- `20250725223915_InitialCreate` - Initial database schema
+- `20250725231705_RemoveCountryFields` - Removed country fields
+- `20250726154812_AddDeletedUserBackup` - Added DSGVO-compliant backup table
+- `20250730110050_MakeOfferIdOptionalInReviews` - Made OfferId optional in reviews
+- `20250730110521_MakeOfferIdOptionalInReviewsFinal` - Final review schema fix
 
-## Current System Status - FULLY OPERATIONAL âœ…
+### DeletedUserBackup Table
+The `DeletedUserBackups` table stores user data for DSGVO compliance:
+- `Id` - Primary key
+- `UserId` - Original user ID
+- `FirstName`, `LastName` - User names
+- `Email` - User email
+- `Skills`, `Hobbies` - User preferences
+- `Address`, `Latitude`, `Longitude` - Location data
+- `ProfilePicture` - Profile image URL
+- `DeletedAt` - Deletion timestamp
 
-The UGH system is fully operational with all core features implemented and tested.
+## Troubleshooting
 
-### ðŸ” Two-Factor Authentication (2FA) - FULLY IMPLEMENTED âœ…
+### Common Issues
 
-**Database Schema:**
-- âœ… **IsTwoFactorEnabled** (TINYINT): Enable/disable 2FA per user (Default: false)
-- âœ… **TwoFactorSecret** (TEXT): TOTP secret key storage  
-- âœ… **BackupCodes** (TEXT): JSON array of backup recovery codes
+1. **EF Tools Not Available**
+   ```
+   [ERROR] Run "dotnet tool restore" to make the "dotnet-ef" command available.
+   ```
+   **Solution**: The script now automatically installs EF tools in the container.
 
-**Backend Implementation:**
-- âœ… **TwoFactorAuthService**: Complete TOTP implementation with Otp.NET
-- âœ… **AuthController**: 8 endpoints for 2FA management and validation
-- âœ… **User Model**: Extended with 2FA properties and relationships
-- âœ… **QR Code Generation**: Server-side QR code creation for setup
+2. **Containers Not Running**
+   ```
+   [ERROR] Missing containers: ugh-db, ugh-backend
+   ```
+   **Solution**: Start containers with `docker compose up -d`
 
-**Frontend Ready:**
-- âœ… **Setup Components**: TwoFactorSetup.vue with 3-step wizard
-- âœ… **Login Integration**: TwoFactorLogin.vue for authentication
-- âœ… **Management Interface**: TwoFactorManagement.vue for user settings
-- âœ… **QR Code Display**: Integrated qrcode-vue3 for mobile app setup
+3. **Migration Inconsistencies**
+   ```
+   [INCONSISTENCIES FOUND] X issues detected
+   ```
+   **Solution**: Run `-Action fix-inconsistencies`
 
-**Security Features:**
-- âœ… **RFC 6238 Compliance**: Standard TOTP implementation
-- âœ… **Backup Codes**: 10 emergency recovery codes per user
-- âœ… **Time-based Validation**: 30-second time windows
-- âœ… **Database Integration**: All 2FA data persisted and accessible
+### Recovery Procedures
 
-### ðŸŒ Geographic Location System - READY FOR ACTIVATION âœ…
+1. **Schema Mismatch**: Use `-Action schema-check` to detect and fix
+2. **Broken Migrations**: Use `-Action force-rebuild` (nuclear option)
+3. **Orphaned Files**: Use `-Action clean-orphans`
 
-**Database Schema:**
-- âœ… **Address Table**: Complete geographic data structure
-- âœ… **Latitude/Longitude**: Decimal(10,8) precision coordinates
-- âœ… **Address Components**: Street, City, State, Country, PostalCode
-- âœ… **User Integration**: Foreign key relationship established
+## Best Practices
 
-**Implementation Status:**
-- âœ… **Models**: Address.cs with all geographic properties
-- âœ… **Database**: Table exists with proper column types
-- âœ… **Relationships**: User-Address mapping functional
-- ðŸ”„ **Activation**: Ready for migration creation when needed
+1. **Always check status** before making changes
+2. **Use dry-run mode** for previewing changes
+3. **Backup database** before major operations
+4. **Test migrations** in development first
+5. **Monitor cleanup logs** for DSGVO compliance
 
-### ðŸ“§ Admin Coupon Email Tracking - READY FOR ACTIVATION âœ…
+## Evolution
 
-**Database Schema:**
-- âœ… **Email Tracking**: IsEmailSent, EmailSentDate, EmailSentTo columns
-- âœ… **Coupon Table**: Extended with email notification tracking
-- âœ… **Data Types**: Proper TINYINT(1) and DATETIME column types
+- **V1**: Basic migration management
+- **V2**: Added inconsistency detection
+- **V3**: Added DSGVO compliance features
+- **V4**: migration.ps1 (current - proven, reliable, battle-tested)
 
-**Implementation Status:**
-- âœ… **Models**: Coupon.cs with email tracking properties
-- âœ… **Database**: Columns exist and accessible
-- âœ… **Integration**: Ready for admin notification workflows
-- ðŸ”„ **Activation**: Ready for email service integration
-
-### ðŸ”§ Battle-Tested Migration Management System âœ…
-
-**Core Features - Proven in Production:**
-- âœ… **Container-First Approach**: Creates migrations directly in Docker container (most reliable method)
-- âœ… **Intelligent Status Analysis**: Detects inconsistencies between DB, Code, and Files
-- âœ… **Automatic Repair**: Fixes orphaned files, missing migrations, and sync issues
-- âœ… **Safe Operations**: DryRun mode and Force flags for safe testing
-- âœ… **Generic Functions**: No hardcoded migration names - fully parameter-driven
-- âœ… **Error Recovery**: Intelligent inconsistency detection and automatic repair
-
-**Proven Actions:**
-1. **status** - Multi-source analysis (Database + EF Code + Filesystem)
-2. **fix-inconsistencies** - Automatic repair with user confirmation
-3. **clean-orphans** - Safe removal of disconnected migration files
-4. **add-migration** - Container-first creation with automatic local sync
-5. **force-rebuild** - Nuclear option with backup creation
-
-**Battle-Tested Workflow:**
-- âœ… **Validation**: Multi-layer consistency checking across all sources
-- âœ… **Creation**: Container-first generation using proven EF Core commands
-- âœ… **Synchronization**: Reliable docker cp file transfer
-- âœ… **Application**: Direct EF commands with proper error handling
-- âœ… **Documentation**: Self-updating system with lessons learned integration
-
-**Lessons Learned Integration:**
-- âœ… **Manual Success Commands**: Integrated all proven manual commands
-- âœ… **Volume Mount Issues**: Solved with container-first + file copy approach
-- âœ… **Error Patterns**: Built-in handling for known EF migration edge cases
-- âœ… **Reliability**: Simplified complex operations to focus on what works
-
-## System Architecture
-
-### Docker Environment
-- **Backend Container**: `ugh-backend` (.NET 7.0 with EF Core)
-- **Database Container**: `ugh-db` (MySQL 8.0)
-- **Network**: Isolated Docker network with secure communication
-- **Volumes**: Persistent data storage with automatic backups
-
-### Migration Workflow
-1. **Validation**: Check Docker containers and database connectivity
-2. **Creation**: Generate migrations in container using EF Core tools
-3. **Synchronization**: Copy migration files to local filesystem
-4. **Application**: Apply migrations to database with error handling
-5. **Documentation**: Automatic updates to this documentation file
-
-### Security & Reliability
-- **Secure Credentials**: File-based password management
-- **Backup Strategy**: Automatic database backups before changes
-- **Error Handling**: Comprehensive error detection and recovery
-- **Container Health**: Automatic container status verification
-
-## Quick Start Guide
-
-### Prerequisites
-- Docker and Docker Compose running
-- UGH containers started: `docker-compose up -d`
-- PowerShell execution policy set appropriately
-
-### Common Operations
-
-```powershell
-# Navigate to migration scripts directory
-cd C:\Users\Lena\UgH\UGH\scripts\migration
-
-# Check system status with full inconsistency analysis
-.\migration.ps1 -Action status
-
-# Create a new migration using proven container-first method
-.\migration.ps1 -Action add-migration -MigrationName "AddNewFeature"
-
-# Automatically fix any detected issues
-.\migration.ps1 -Action fix-inconsistencies
-
-# Test fixes without applying (safe mode)
-.\migration.ps1 -Action fix-inconsistencies -DryRun
-
-# Force operations without user confirmation
-.\migration.ps1 -Action clean-orphans -Force
-
-# Nuclear option: complete system rebuild
-.\migration.ps1 -Action force-rebuild
-```
-
-### Proven Manual Database Operations
-
-```bash
-# Connect to database container
-docker exec -it ugh-db mysql -u root -ppassword
-
-# Check 2FA implementation
-USE db;
-SHOW COLUMNS FROM users LIKE '%factor%';
-SELECT User_Id, FirstName, IsTwoFactorEnabled FROM users LIMIT 5;
-
-# Check migration history
-SELECT * FROM __EFMigrationsHistory ORDER BY MigrationId;
-
-# Manual migration application (if needed)
-docker exec ugh-backend dotnet ef database update
-```
-
-
-### Troubleshooting 
-```bash
-# availability within docker container
-
- docker exec ugh-backend dotnet tool restore
-```
-
-
-### ðŸŽ¯ **Success Metrics**
-- âœ… **12/12 migrations successfully applied**
-- âœ… **Container-first approach: 100% success rate**
-- âœ… **Zero data loss during migration operations**
-- âœ… **Automatic inconsistency detection and repair**
-
----
-*This documentation is automatically maintained by the battle-tested migration.ps1 system.*
-
-Last updated: 2025-07-25 07:06:21 by Battle-Tested Migration Management System
+**Total Migrations**: 5
+**Applied Migrations**: 5
+**Last updated**: 2025-01-27 by Battle-Tested Migration Management System
 
 
 

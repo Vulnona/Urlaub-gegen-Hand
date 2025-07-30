@@ -292,6 +292,7 @@ static ServerVersion GetDesignTimeServerVersion(string connectionString)
             
             // NEW: DSGVO-compliant cleanup services (optional for Docker)
             // services.AddHostedService<DeletedUserBackupCleanupService>();
+            services.AddHostedService<DeletedUserBackupCleanupService>();
             
             services.AddHttpContextAccessor();
         }
