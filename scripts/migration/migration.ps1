@@ -30,16 +30,20 @@ function Test-ContainersRunning {
 function Test-EfTools {
     Write-Host "Checking EF Tools in container..." -ForegroundColor Yellow
     $result = docker exec ugh-backend dotnet ef --version 2>$null
-    if ($LASTEXITCODE -ne 0) {
-        Write-Host "Installing EF Tools in container..." -ForegroundColor Yellow
-        docker exec ugh-backend dotnet tool install --global dotnet-ef
-        if ($LASTEXITCODE -ne 0) {
-            Write-Host "[ERROR] Failed to install EF Tools" -ForegroundColor Red
-            return $false
-        }
+    if ($LASTEXITCODE -eq 0) {
+        Write-Host "  [OK] EF Tools available" -ForegroundColor Green
+        return $true
     }
-    Write-Host "  [OK] EF Tools available" -ForegroundColor Green
-    return $true
+    
+    Write-Host "Installing EF Tools in container..." -ForegroundColor Yellow
+    $installResult = docker exec ugh-backend dotnet tool install --global dotnet-ef 2>&1
+    if ($LASTEXITCODE -eq 0 -or $installResult -like "*already installed*") {
+        Write-Host "  [OK] EF Tools available" -ForegroundColor Green
+        return $true
+    } else {
+        Write-Host "[ERROR] Failed to install EF Tools: $installResult" -ForegroundColor Red
+        return $false
+    }
 }
 
 function Show-Status {
