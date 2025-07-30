@@ -65,12 +65,18 @@ public class CreateReviewRequest
     {
         try {
             var reviews = await _reviewRepository.GetAllReviewsByUserIdAsync(userId, pageNumber, pageSize);
+            
             if (reviews == null)
+            {
                 return NotFound();
+            }
+            
             return Ok(reviews);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            Console.WriteLine($"[ERROR] Exception in ReviewController.GetAllReviewsByUserId: {ex.Message}");
+            Console.WriteLine($"[ERROR] Stack trace: {ex.StackTrace}");
             return StatusCode(500, "Internal server error occurred while fetching user reviews.");
         }
     }

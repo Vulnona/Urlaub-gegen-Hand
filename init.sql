@@ -204,7 +204,7 @@ CREATE TABLE `pictures` (
 -- Create reviews table
 CREATE TABLE `reviews` (
     `Id` int NOT NULL AUTO_INCREMENT,
-    `OfferId` int NOT NULL,
+    `OfferId` int NULL,
     `RatingValue` int NOT NULL,
     `ReviewComment` longtext NULL,
     `CreatedAt` datetime(6) NOT NULL,
@@ -322,7 +322,8 @@ INSERT INTO `__EFMigrationsHistory` VALUES
 ('20250725223915_InitialCreate','7.0.20'),
 ('20250725231705_RemoveCountryFields','7.0.20'),
 ('20250726154812_AddDeletedUserBackup','7.0.20'),
-('20250727164854_AddOfferIdToPictures','7.0.20');
+('20250727164854_AddOfferIdToPictures','7.0.20'),
+('20250730150000_MakeOfferIdOptionalInReviews','7.0.20');
 
 -- Insert accommodationsuitables
 INSERT INTO `accommodationsuitables` VALUES 

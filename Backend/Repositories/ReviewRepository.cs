@@ -20,25 +20,64 @@ public class ReviewRepository
     public async Task<PaginatedList<ReviewDto>> GetAllReviewsByUserIdAsync(Guid userId, int pageNumber, int pageSize)
     {
         try {
-            IQueryable<Review> query = _context
-                .reviews.Include(r => r.Offer)
-                .Where(r => r.ReviewedId == userId);
-
-            int totalCount = await query.CountAsync();
-            
-            var reviews = await query
-                .Skip((pageNumber - 1) * pageSize)
-                .Take(pageSize)
-                .ProjectToType<ReviewDto>()
+            // Query with includes
+            var allReviews = await _context.reviews
+                .Include(r => r.Offer)
+                .Include(r => r.Reviewer)
+                .Include(r => r.Reviewed)
+                .Where(r => r.ReviewedId == userId)
                 .ToListAsync();
             
-            return PaginatedList<ReviewDto>.Create(reviews, totalCount, pageNumber, pageSize);
+            // Filter reviews based on mutual review logic
+            var visibleReviews = new List<Review>();
+            
+            foreach (var review in allReviews)
+            {
+                if (review.OfferId.HasValue)
+                {
+                    // Check if the other party has also reviewed this user for the same offer
+                    var otherPartyReview = await _context.reviews
+                        .FirstOrDefaultAsync(r => r.OfferId == review.OfferId && 
+                                               r.ReviewerId == review.ReviewedId && 
+                                               r.ReviewedId == review.ReviewerId);
+                    
+                    // Include review if both parties have reviewed each other OR if 14 days have passed
+                    bool shouldInclude = otherPartyReview != null || 
+                                        (DateTime.UtcNow - review.CreatedAt).TotalDays >= 14;
+                    
+                    if (shouldInclude)
+                    {
+                        visibleReviews.Add(review);
+                    }
+                }
+                else
+                {
+                    // If no offer associated, include the review (fallback)
+                    visibleReviews.Add(review);
+                }
+            }
+            
+            // Apply pagination to visible reviews
+            int totalCount = visibleReviews.Count;
+            var paginatedReviews = visibleReviews
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+            
+            // Convert to DTOs using Mapster (now properly configured)
+            var reviewDtos = paginatedReviews.Select(r => r.Adapt<ReviewDto>()).ToList();
+            
+            return PaginatedList<ReviewDto>.Create(reviewDtos, totalCount, pageNumber, pageSize);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            Console.WriteLine($"[ERROR] Exception in GetAllReviewsByUserIdAsync: {ex.Message}");
+            Console.WriteLine($"[ERROR] Stack trace: {ex.StackTrace}");
             throw;
         }
     }
+
+
 
     public async Task<Offer> GetOfferByIdAsync(int offerId)
     {

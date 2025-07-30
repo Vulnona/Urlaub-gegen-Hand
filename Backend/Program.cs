@@ -290,6 +290,9 @@ static ServerVersion GetDesignTimeServerVersion(string connectionString)
             services.AddScoped<IGeocodingService, NominatimGeocodingService>();
             services.AddScoped<IAddressService, AddressService>();
             
+            // NEW: DSGVO-compliant cleanup services (optional for Docker)
+            // services.AddHostedService<DeletedUserBackupCleanupService>();
+            
             services.AddHttpContextAccessor();
         }
 

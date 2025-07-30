@@ -35,6 +35,31 @@ public static class MapsterConfig
                     : "Redeemed"
             )
             .Map(dest => dest.Status, src => src.Status);
+
+        // Review to ReviewDto mapping
+        TypeAdapterConfig<Review, ReviewDto>
+            .NewConfig()
+            .Map(dest => dest.Reviewer, src => src.Reviewer != null ? new UGHApi.ViewModels.UserComponent.UserC
+            {
+                User_Id = src.Reviewer.User_Id,
+                FirstName = src.Reviewer.FirstName,
+                LastName = src.Reviewer.LastName,
+                ProfilePicture = src.Reviewer.ProfilePicture
+            } : null)
+            .Map(dest => dest.Reviewed, src => src.Reviewed != null ? new UGHApi.ViewModels.UserComponent.UserC
+            {
+                User_Id = src.Reviewed.User_Id,
+                FirstName = src.Reviewed.FirstName,
+                LastName = src.Reviewed.LastName,
+                ProfilePicture = src.Reviewed.ProfilePicture
+            } : null)
+            .Map(dest => dest.Offer, src => src.Offer != null ? new UGH.Domain.Entities.Offer
+            {
+                Id = src.Offer.Id,
+                Title = src.Offer.Title,
+                Description = src.Offer.Description,
+                UserId = src.Offer.UserId
+            } : null);
     }
 
     private static List<string?> SplitAndTrim(string? input)

@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using UGHApi.DATA;
 
@@ -10,9 +11,11 @@ using UGHApi.DATA;
 namespace UGHApi.Migrations
 {
     [DbContext(typeof(Ugh_Context))]
-    partial class UghContextModelSnapshot : ModelSnapshot
+    [Migration("20250730110050_MakeOfferIdOptionalInReviews")]
+    partial class MakeOfferIdOptionalInReviews
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -441,6 +444,9 @@ namespace UGHApi.Migrations
                     b.Property<int?>("OfferId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("OfferId1")
+                        .HasColumnType("int");
+
                     b.Property<int>("RatingValue")
                         .HasColumnType("int");
 
@@ -459,6 +465,8 @@ namespace UGHApi.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("OfferId");
+
+                    b.HasIndex("OfferId1");
 
                     b.HasIndex("ReviewedId");
 
@@ -838,8 +846,13 @@ namespace UGHApi.Migrations
             modelBuilder.Entity("UGH.Domain.Entities.Review", b =>
                 {
                     b.HasOne("UGH.Domain.Entities.Offer", "Offer")
+                        .WithMany()
+                        .HasForeignKey("OfferId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("UGH.Domain.Entities.Offer", null)
                         .WithMany("Reviews")
-                        .HasForeignKey("OfferId");
+                        .HasForeignKey("OfferId1");
 
                     b.HasOne("UGH.Domain.Entities.User", "Reviewed")
                         .WithMany("ReceivedReviews")

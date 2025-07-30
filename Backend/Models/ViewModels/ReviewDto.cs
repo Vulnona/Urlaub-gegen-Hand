@@ -6,12 +6,12 @@ public class ReviewDto
 {
 #pragma warning disable CS8632
     public int Id { get; set; }
-    public int OfferId { get; set; }
+    public int? OfferId { get; set; }  // Optional: Kann null sein wenn Offer gelöscht wurde
     public int RatingValue { get; set; }
     public string? ReviewComment { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
     public UserC Reviewer { get; set; }
     public UserC Reviewed { get; set; }
-    public Offer Offer { get; set; }
+    public Offer? Offer { get; set; } // Optional: Kann null sein wenn Offer gelöscht wurde
 }

@@ -222,11 +222,47 @@ public class ProfileController : ControllerBase
             if (user == null) {
                 throw new Exception("User not found.");
             }
-            // todo: move to more suitable location
-            double averageRating = 0;
-            var reviews = await _context.reviews.AsQueryable().Where(r => r.ReviewedId == user.User_Id).ToListAsync();
-            if (reviews.Count() > 0)
-                averageRating = Math.Round(reviews.Average(r => r.RatingValue), 1);
+            
+            // Use the same rating calculation logic as GetUserProfileQueryHandler - only mutual reviews
+            double userRating = 0;
+            var allReviews = await _context.reviews.AsQueryable().Where(r => r.ReviewedId == user.User_Id).ToListAsync();
+            
+            // Filter to only include reviews where both parties have reviewed each other OR after 14 days
+            var visibleReviews = new List<UGH.Domain.Entities.Review>();
+            
+            if (allReviews.Any())
+            {
+                // Get all reviews for the same offers to check for mutual reviews
+                var offerIds = allReviews.Where(r => r.OfferId.HasValue).Select(r => r.OfferId.Value).Distinct().ToList();
+                var allReviewsForOffers = await _context.reviews
+                    .Where(r => offerIds.Contains(r.OfferId.Value))
+                    .ToListAsync();
+
+                foreach (var review in allReviews)
+                {
+                    if (review.OfferId.HasValue)
+                    {
+                        // Check if the other party has also reviewed this user for the same offer
+                        var otherPartyReview = allReviewsForOffers
+                            .FirstOrDefault(r => r.OfferId == review.OfferId && 
+                                               r.ReviewerId == review.ReviewedId && 
+                                               r.ReviewedId == review.ReviewerId);
+                        
+                        // Include review if both parties have reviewed each other OR if 14 days have passed
+                        bool shouldInclude = otherPartyReview != null || 
+                                            (DateTime.UtcNow - review.CreatedAt).TotalDays >= 14;
+                        
+                        if (shouldInclude)
+                        {
+                            visibleReviews.Add(review);
+                        }
+                    }
+                }
+            }
+            
+            if (visibleReviews.Count() > 0)
+                userRating = Math.Round(visibleReviews.Average(r => r.RatingValue), 1);
+                
             var profile = new VisibleProfile
             {
                 UserId = user.User_Id,
@@ -236,7 +272,7 @@ public class ProfileController : ControllerBase
                 Age = (int.Parse(DateTime.Today.ToString("yyyyMMdd")) - int.Parse(user.DateOfBirth.ToString("yyyyMMdd"))) / 10000,
                 Gender = user.Gender,
                 FacebookLink = user.Facebook_link,
-                AverageRating = averageRating,
+                AverageRating = userRating, // Use the same calculation
                 MembershipEndDate = user.UserMemberships
                     .Where(m => m.IsMembershipActive)
                     .OrderBy(m => m.CreatedAt)

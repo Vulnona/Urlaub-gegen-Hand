@@ -49,6 +49,10 @@ public class Offer {
     public ICollection<Review> Reviews { get; set; } = new List<Review>();
     [InverseProperty("Offer")]
     public ICollection<Picture> Pictures { get; set; } = new List<Picture>();
+    
+    // Virtual property for deleted offers (not stored in database)
+    [NotMapped]
+    public bool IsDeleted { get; set; } = false;
 }
 
 public class OfferTypeLodging : Offer

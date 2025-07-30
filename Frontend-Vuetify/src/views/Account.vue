@@ -28,7 +28,7 @@
           <div v-if="user.userRating != 0"
             class="rating_block d-flex mb-0 flex-wrap gap-3 p-3 justify-content-center border-bottom border-block-end-dashed">
             <div class="">
-              <p class="card-text text-center mb-0">Bewertungen:<span class="average-rating">{{ user.averageRating
+              <p class="card-text text-center mb-0">Bewertungen:<span class="average-rating">{{ user.userRating
                   }}</span>
                 {{ " " }} <span class="star ri-star-fill gold"></span>
               </p>
@@ -120,7 +120,7 @@
             <div class="col-sm-4">
               <div class="review_rating">
                 <div class="rating-score mb-2">
-                  <i class="ri-star-fill" aria-hidden="true"></i>{{ user.averageRating }}<span>/5</span>
+                  <i class="ri-star-fill" aria-hidden="true"></i>{{ user.userRating }}<span>/5</span>
                 </div>
               </div>
             </div>
@@ -135,15 +135,16 @@
                       <li v-for="userReviews in reviews" :key="userReviews" class="comment">
                         <div>
                           <div class="comment_head">
-                            <h6 @click="redirectToOffer(userReviews.offer.id)" class="clickable-item">{{
+                            <h6 v-if="userReviews.offer" @click="redirectToOffer(userReviews.offer.id)" class="clickable-item">{{
                               userReviews.offer.title }}</h6>
-                            <div class="img-thumb clickable-item" v-if="userReviews.offer.imageData != null"><img
-                                @click="redirectToOffer(userReviews.offer.id)"
+                            <h6 v-else class="deleted-offer">Gelöschtes Angebot</h6>
+                            <div v-if="userReviews.offer && userReviews.offer.imageData != null" @click="redirectToOffer(userReviews.offer.id)" class="img-thumb clickable-item"><img
                                 :src="'data:' + userReviews.offer.imageMimeType + ';base64,' + userReviews.offer.imageData">
                             </div>
-                            <div class="img-thumb" v-if="userReviews.offer.imageData == null"><img
+                            <div v-if="userReviews.offer && userReviews.offer.imageData == null" class="img-thumb"><img
                                 :src="defaultProfileImgSrc">
                             </div>
+                            <div v-else class="img-thumb"><img :src="defaultProfileImgSrc"></div>
                           </div>
                           <div class="comment-body">
                             <div class="comment-author vcard" v-if="userReviews.reviewer.profilePicture != null">
@@ -284,7 +285,11 @@ export default {
     async showReviews(userId) {
       try {
         const response = await axiosInstance.get(`review/get-user-reviews?userId=${userId}&page=${this.currentPage}`);
-        this.reviews.push(...response.data.items); // Append new reviews
+        if (this.currentPage === 1) {
+          this.reviews = response.data.items; // Reset reviews for first page
+        } else {
+          this.reviews.push(...response.data.items); // Append new reviews for subsequent pages
+        }
         this.totalPages = response.data.totalPages; // Update total pages
       } catch (error) {
         console.error('Fehler beim Laden der Reviews:', error);
@@ -323,6 +328,12 @@ export default {
 };
 </script>
 <style scoped>
+.deleted-offer {
+  color: #666;
+  font-style: italic;
+  text-decoration: line-through;
+}
+
 .v-container {
   display: flex;
   justify-content: center;

@@ -1,6 +1,7 @@
 using UGH.Infrastructure.Services;
 using UGH.Domain.ViewModels;
 using UGH.Domain.Interfaces;
+using UGH.Domain.Entities;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using UGHApi.DATA;
@@ -58,6 +59,46 @@ public class GetUserProfileQueryHandler : IRequestHandler<GetUserProfileQuery, U
             
             var membershipEndDate = user.UserMemberships?.Where(m => m.IsMembershipActive).OrderBy(m => m.CreatedAt).FirstOrDefault()?.Expiration;
             
+            // Calculate user rating from mutual reviews only
+            double userRating = 0;
+            var allReviews = await _context.reviews.AsQueryable().Where(r => r.ReviewedId == user.User_Id).ToListAsync();
+            
+            // Filter to only include reviews where both parties have reviewed each other OR after 14 days
+            var visibleReviews = new List<Review>();
+            
+            if (allReviews.Any())
+            {
+                // Get all reviews for the same offers to check for mutual reviews
+                var offerIds = allReviews.Where(r => r.OfferId.HasValue).Select(r => r.OfferId.Value).Distinct().ToList();
+                var allReviewsForOffers = await _context.reviews
+                    .Where(r => offerIds.Contains(r.OfferId.Value))
+                    .ToListAsync();
+
+                foreach (var review in allReviews)
+                {
+                    if (review.OfferId.HasValue)
+                    {
+                        // Check if the other party has also reviewed this user for the same offer
+                        var otherPartyReview = allReviewsForOffers
+                            .FirstOrDefault(r => r.OfferId == review.OfferId && 
+                                               r.ReviewerId == review.ReviewedId && 
+                                               r.ReviewedId == review.ReviewerId);
+                        
+                        // Include review if both parties have reviewed each other OR if 14 days have passed
+                        bool shouldInclude = otherPartyReview != null || 
+                                            (DateTime.UtcNow - review.CreatedAt).TotalDays >= 14;
+                        
+                        if (shouldInclude)
+                        {
+                            visibleReviews.Add(review);
+                        }
+                    }
+                }
+            }
+            
+            if (visibleReviews.Count() > 0)
+                userRating = Math.Round(visibleReviews.Average(r => r.RatingValue), 1);
+            
             // Load skills from skills table if user has skills
             List<object> userSkills = new List<object>();
             if (!string.IsNullOrEmpty(user.Skills))
@@ -107,6 +148,7 @@ public class GetUserProfileQueryHandler : IRequestHandler<GetUserProfileQuery, U
                 FacebookLink = user.Facebook_link,
                 Link_RS = user.Link_RS,
                 Link_VS = user.Link_VS,
+                UserRating = userRating,
                 MembershipEndDate = membershipEndDate,
                 Hobbies = user?.Hobbies?.Split(',').Where(s => !string.IsNullOrWhiteSpace(s)).Select(s => s.Trim()).ToList(),
                 Skills = userSkills,
