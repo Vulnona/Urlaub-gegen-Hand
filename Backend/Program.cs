@@ -149,6 +149,7 @@ static ServerVersion GetDesignTimeServerVersion(string connectionString)
             //CreateAutoAdminUser(builder.Services.BuildServiceProvider().GetService<UserService>());
 
             builder.Services.Configure<StripeWebhookPolicyOptions>(config.GetSection("StripeWebhookPolicy"));
+            builder.Services.Configure<BackupSettings>(config.GetSection("BackupSettings"));
 
             builder.Services.AddRateLimiter(options =>
             {
@@ -166,6 +167,9 @@ static ServerVersion GetDesignTimeServerVersion(string connectionString)
                         }));
             });
             builder.Services.AddHostedService<UGHApi.Services.BackgroundTasks.OfferExpirationService>();
+            builder.Services.AddHostedService<UGHApi.Services.BackgroundTasks.OfferCleanupService>();
+            builder.Services.AddSingleton<UGHApi.Services.BackgroundTasks.DatabaseBackupService>();
+            builder.Services.AddHostedService<UGHApi.Services.BackgroundTasks.DatabaseBackupService>();
         }
 
         private static void ConfigureAuthentication(WebApplicationBuilder builder)

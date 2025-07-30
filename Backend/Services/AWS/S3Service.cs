@@ -149,4 +149,78 @@ public class S3Service
     {
         return _awsUrl;
     }
+
+    public async Task<string> UploadFileAsync(Stream fileStream, string keyName, string contentType)
+    {
+        try
+        {
+            _logger.LogInformation($"Starting upload for key: {keyName}, content type: {contentType}");
+
+            // Validate input
+            if (fileStream == null)
+            {
+                throw new ArgumentException("File stream cannot be null");
+            }
+
+            if (string.IsNullOrEmpty(keyName))
+            {
+                throw new ArgumentException("Key name cannot be null or empty");
+            }
+
+            var fileTransferUtility = new TransferUtility(_s3Client);
+
+            var uploadRequest = new TransferUtilityUploadRequest
+            {
+                InputStream = fileStream,
+                Key = keyName,
+                BucketName = _bucketName,
+                ContentType = contentType,
+            };
+
+            await fileTransferUtility.UploadAsync(uploadRequest);
+            string fileLink = $"{_awsUrl}{keyName}";
+            
+            _logger.LogInformation($"File uploaded successfully. Key: {keyName}, Link: {fileLink}");
+            return fileLink;
+        }
+        catch (AmazonS3Exception e)
+        {
+            _logger.LogError($"Amazon S3 error during upload: {e.Message}. Error code: {e.ErrorCode}, Request ID: {e.RequestId}");
+            throw new Exception($"S3 upload failed: {e.Message}", e);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError($"Unexpected error during upload: {e.Message}. Stack trace: {e.StackTrace}");
+            throw new Exception($"File upload failed: {e.Message}", e);
+        }
+    }
+
+    public async Task<List<S3Object>> ListFilesAsync(string prefix)
+    {
+        try
+        {
+            _logger.LogInformation($"Listing files with prefix: {prefix}");
+            
+            var listRequest = new ListObjectsV2Request
+            {
+                BucketName = _bucketName,
+                Prefix = prefix
+            };
+
+            var response = await _s3Client.ListObjectsV2Async(listRequest);
+            
+            _logger.LogInformation($"Found {response.S3Objects.Count} files with prefix: {prefix}");
+            return response.S3Objects;
+        }
+        catch (AmazonS3Exception e)
+        {
+            _logger.LogError($"Amazon S3 error during file listing: {e.Message}. Error code: {e.ErrorCode}");
+            throw;
+        }
+        catch (Exception e)
+        {
+            _logger.LogError($"Unexpected error during file listing: {e.Message}");
+            throw;
+        }
+    }
 }
