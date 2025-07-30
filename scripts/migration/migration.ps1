@@ -1,6 +1,6 @@
 param(
     [Parameter(Mandatory = $true)]
-    [ValidateSet("status", "add", "fix", "clean", "force-rebuild", "schema-check")]
+    [ValidateSet("status", "add", "fix", "clean", "force-rebuild", "schema-check", "restore-db", "restore-migrations", "restore-all")]
     [string]$Action,
     [string]$MigrationName = ""
 )
@@ -199,7 +199,10 @@ function Force-Rebuild {
     
     # Drop migrations from database
     Write-Host "Dropping migrations from database..." -ForegroundColor Yellow
+    $oldErrorAction = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
     docker exec ugh-db mysql -uuser -ppassword db --silent -e "DROP TABLE IF EXISTS __EFMigrationsHistory" 2>$null
+    $ErrorActionPreference = $oldErrorAction
     
     # Remove migration files
     Write-Host "Removing migration files..." -ForegroundColor Yellow
@@ -238,6 +241,67 @@ function Schema-Check {
     }
 }
 
+function Restore-Database {
+    Write-Host "Restoring database from backup..." -ForegroundColor Yellow
+    
+    # Find the most recent backup file
+    $backupFiles = Get-ChildItem -Path "." -Filter "backup-before-force-rebuild-*.sql" | Sort-Object LastWriteTime -Descending
+    if ($backupFiles.Count -eq 0) {
+        Write-Host "[ERROR] No backup files found" -ForegroundColor Red
+        return
+    }
+    
+    $latestBackup = $backupFiles[0]
+    Write-Host "Using backup: $($latestBackup.Name)" -ForegroundColor Cyan
+    
+    # Restore database
+    $oldErrorAction = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    $result = Get-Content $latestBackup.FullName | docker exec -i ugh-db mysql -uuser -ppassword db 2>&1
+    $ErrorActionPreference = $oldErrorAction
+    if ($LASTEXITCODE -eq 0) {
+        Write-Host "[SUCCESS] Database restored successfully" -ForegroundColor Green
+    } else {
+        Write-Host "[ERROR] Failed to restore database: $result" -ForegroundColor Red
+    }
+}
+
+function Restore-Migrations {
+    Write-Host "Restoring migration files..." -ForegroundColor Yellow
+    
+    # Find the most recent migration backup directory
+    $backupDirs = Get-ChildItem -Path "." -Filter "migration-backup-*" | Sort-Object LastWriteTime -Descending
+    if ($backupDirs.Count -eq 0) {
+        Write-Host "[ERROR] No migration backup directories found" -ForegroundColor Red
+        return
+    }
+    
+    $latestBackup = $backupDirs[0]
+    Write-Host "Using backup: $($latestBackup.Name)" -ForegroundColor Cyan
+    
+    # Ensure migrations directory exists
+    $migrationsPath = Join-Path $PSScriptRoot "..\..\Backend\Migrations"
+    if (-not (Test-Path $migrationsPath)) {
+        New-Item -ItemType Directory -Path $migrationsPath -Force | Out-Null
+    }
+    
+    # Copy migration files back
+    $migrationFiles = Get-ChildItem -Path $latestBackup.FullName -Filter "*.cs"
+    foreach ($file in $migrationFiles) {
+        Copy-Item $file.FullName $migrationsPath -Force
+        Write-Host "Restored: $($file.Name)" -ForegroundColor Green
+    }
+    
+    Write-Host "[SUCCESS] Migration files restored successfully" -ForegroundColor Green
+}
+
+function Restore-All {
+    Write-Host "=== RESTORING ALL FROM BACKUP ===" -ForegroundColor Cyan
+    Restore-Database
+    Restore-Migrations
+    Write-Host "[SUCCESS] Complete restoration finished" -ForegroundColor Green
+}
+
 try {
     if (-not (Test-ContainersRunning)) { exit 1 }
     if (-not (Test-EfTools)) { exit 1 }
@@ -249,6 +313,9 @@ try {
         "clean" { Clean-Orphans }
         "force-rebuild" { Force-Rebuild }
         "schema-check" { Schema-Check }
+        "restore-db" { Restore-Database }
+        "restore-migrations" { Restore-Migrations }
+        "restore-all" { Restore-All }
         default { Write-Host "Unknown action: $Action" -ForegroundColor Red }
     }
 } catch {

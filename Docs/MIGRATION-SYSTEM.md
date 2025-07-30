@@ -1,173 +1,215 @@
 ﻿# Migration System Documentation
 
 ## Overview
-The UGH application uses a robust migration management system that handles Entity Framework migrations with automatic consistency checks and DSGVO-compliant data cleanup.
+
+The UGH Migration System provides a comprehensive, cross-platform solution for managing Entity Framework Core migrations in Docker environments. It supports both Windows and Linux systems through a unified PowerShell-based approach.
 
 ## Features
 
-### 🔧 Migration Management
-- **Status Check**: Verify migration consistency across database, code, and filesystem
-- **Inconsistency Fixing**: Automatically resolve migration conflicts
-- **Orphaned File Cleanup**: Remove unused migration files
-- **Schema Validation**: Check for model vs database mismatches
-- **Force Rebuild**: Complete system reset for extreme cases
+- **Cross-Platform**: Works on Windows, Linux, and macOS
+- **Docker Integration**: Fully integrated with Docker containers
+- **Backup & Restore**: Automatic backup creation and restoration capabilities
+- **Error Handling**: Robust error handling with MySQL warning suppression
+- **Status Monitoring**: Real-time migration status and consistency checking
 
-### 🛡️ DSGVO Compliance
-- **DeletedUserBackupCleanupService**: Automatic cleanup of expired user backups
-- **Configurable Retention**: 30 days by default (configurable in appsettings.json)
-- **Background Processing**: Runs every 24 hours
-- **Proper Logging**: All cleanup activities are logged
+## Prerequisites
+
+### Windows
+- PowerShell 5.1 or higher
+- Docker Desktop
+
+### Linux/macOS
+- PowerShell Core (pwsh)
+- Docker
+
+### Installation on Linux
+
+```bash
+# Ubuntu/Debian
+sudo apt-get update
+sudo apt-get install -y wget apt-transport-https software-properties-common
+wget -q "https://packages.microsoft.com/config/ubuntu/$(lsb_release -rs)/packages-microsoft-prod.deb"
+sudo dpkg -i packages-microsoft-prod.deb
+sudo apt-get update
+sudo apt-get install -y powershell
+
+# CentOS/RHEL
+sudo yum install -y powershell
+
+# Or download from GitHub
+# https://github.com/PowerShell/PowerShell/releases
+```
 
 ## Usage
 
-### Modern Cross-Platform Commands
+### Windows (PowerShell)
 
-**Universal Command (Works on all platforms):**
-```bash
-# Check migration status
-./scripts/migration/migrate status
-
-# Fix inconsistencies
-./scripts/migration/migrate fix-inconsistencies
-
-# Add new migration
-./scripts/migration/migrate add-migration YourMigrationName
-
-# Schema check
-./scripts/migration/migrate schema-check
-
-# Clean orphaned files
-./scripts/migration/migrate clean-orphans
-
-# Force rebuild (nuclear option)
-./scripts/migration/migrate force-rebuild --force
-```
-
-**Legacy PowerShell (Windows only):**
 ```powershell
-# Check migration status
+# Show migration status
 .\scripts\migration\migration.ps1 -Action status
 
-# Fix inconsistencies
-.\scripts\migration\migration.ps1 -Action fix-inconsistencies
+# Add new migration
+.\scripts\migration\migration.ps1 -Action add -MigrationName "AddNewFeature"
+
+# Check for inconsistencies
+.\scripts\migration\migration.ps1 -Action fix
+
+# Clean orphaned files
+.\scripts\migration\migration.ps1 -Action clean
+
+# Schema consistency check
+.\scripts\migration\migration.ps1 -Action schema-check
+
+# Force rebuild (destructive!)
+.\scripts\migration\migration.ps1 -Action force-rebuild
+
+# Restore from backup
+.\scripts\migration\migration.ps1 -Action restore-all
+```
+
+### Linux/macOS (Bash)
+
+```bash
+# Show migration status
+./.docker/migration/migrate.sh status
 
 # Add new migration
-.\scripts\migration\migration.ps1 -Action add-migration -MigrationName "YourMigrationName"
+./.docker/migration/migrate.sh add AddNewFeature
+
+# Check for inconsistencies
+./.docker/migration/migrate.sh fix
+
+# Clean orphaned files
+./.docker/migration/migrate.sh clean
+
+# Schema consistency check
+./.docker/migration/migrate.sh schema-check
+
+# Force rebuild (destructive!)
+./.docker/migration/migrate.sh force-rebuild
+
+# Restore from backup
+./.docker/migration/migrate.sh restore-all
+
+# Run full migration process
+./.docker/migration/migrate.sh full
 ```
 
-### Dry Run Mode
-Add `-DryRun` to preview changes without applying them:
-```powershell
-.\scripts\migration\migration.ps1 -Action fix-inconsistencies -DryRun
-```
+## Available Actions
 
-## Container Requirements
+| Action | Description | Parameters |
+|--------|-------------|------------|
+| `status` | Show current migration status | None |
+| `add` | Create new migration | `-MigrationName "Name"` |
+| `fix` | Check for migration inconsistencies | None |
+| `clean` | Remove orphaned migration files | None |
+| `force-rebuild` | Nuclear rebuild (destructive!) | None |
+| `schema-check` | Check schema consistency | None |
+| `restore-db` | Restore database from backup | None |
+| `restore-migrations` | Restore migration files | None |
+| `restore-all` | Restore everything from backup | None |
 
-The migration system requires:
-- `ugh-db` container (MySQL database)
-- `ugh-backend` container (ASP.NET Core application)
+## Backup System
 
-Start containers with:
+### Automatic Backups
+- Database backups: `backup-before-force-rebuild-YYYYMMDD-HHMMSS.sql`
+- Migration backups: `migration-backup-YYYYMMDD-HHMMSS/`
+
+### Manual Backup Creation
 ```bash
-docker compose up -d
+# Database backup
+docker exec ugh-db mysqldump -uuser -ppassword db --no-tablespaces > backup-manual-$(date +%Y%m%d-%H%M%S).sql
 ```
 
-## Cross-Platform Support
+## Error Handling
 
-The migration system works on:
-- **Windows**: PowerShell 5.1+ or PowerShell Core
-- **Linux**: PowerShell Core (pwsh) - automatically detected and installed
-- **macOS**: PowerShell Core (pwsh) - automatically detected and installed
+### MySQL Warnings
+The system automatically suppresses MySQL password warnings and handles them gracefully.
 
-**Modern Features:**
-- **Universal Script**: `./scripts/migration/migrate` works on all platforms
-- **Auto-Detection**: Automatically detects PowerShell availability
-- **Smart Installation**: Provides installation instructions if PowerShell is missing
-- **Container Validation**: Checks if required Docker containers are running
-- **State-of-the-Art**: Uses modern PowerShell platform detection instead of legacy environment variables
+### Container Checks
+- Verifies `ugh-db` and `ugh-backend` containers are running
+- Checks EF Tools availability in containers
+- Provides clear error messages for missing dependencies
 
-**Prerequisites:**
-- Docker and Docker Compose
-- PowerShell Core (automatically detected and guided installation provided)
+### PowerShell Core Detection
+On Linux/macOS, the system checks for PowerShell Core installation and provides installation instructions if missing.
 
-## DSGVO Settings
+## Security Considerations
 
-Configure retention periods in `Backend/appsettings.json`:
+### Force Rebuild
+- **DESTRUCTIVE OPERATION**: Removes all migrations and data
+- Requires explicit confirmation by typing "NUCLEAR"
+- Always create backups before use
+- Only use on test systems
 
-```json
-{
-  "DSGVOSettings": {
-    "DeletedUserRetentionDays": 30
-  }
-}
-```
-
-## Migration History
-
-### Current Migrations
-- `20250725223915_InitialCreate` - Initial database schema
-- `20250725231705_RemoveCountryFields` - Removed country fields
-- `20250726154812_AddDeletedUserBackup` - Added DSGVO-compliant backup table
-- `20250730110050_MakeOfferIdOptionalInReviews` - Made OfferId optional in reviews
-- `20250730110521_MakeOfferIdOptionalInReviewsFinal` - Final review schema fix
-
-### DeletedUserBackup Table
-The `DeletedUserBackups` table stores user data for DSGVO compliance:
-- `Id` - Primary key
-- `UserId` - Original user ID
-- `FirstName`, `LastName` - User names
-- `Email` - User email
-- `Skills`, `Hobbies` - User preferences
-- `Address`, `Latitude`, `Longitude` - Location data
-- `ProfilePicture` - Profile image URL
-- `DeletedAt` - Deletion timestamp
+### Backup Management
+- Backups are stored locally in the project directory
+- Consider moving backups to secure storage for production
+- Regular backup rotation recommended
 
 ## Troubleshooting
 
 ### Common Issues
 
-1. **EF Tools Not Available**
+1. **PowerShell Core not found on Linux**
+   ```bash
+   # Install PowerShell Core
+   sudo apt-get install powershell  # Ubuntu/Debian
+   sudo yum install powershell      # CentOS/RHEL
    ```
-   [ERROR] Run "dotnet tool restore" to make the "dotnet-ef" command available.
-   ```
-   **Solution**: The script now automatically installs EF tools in the container.
 
-2. **Containers Not Running**
+2. **Containers not running**
+   ```bash
+   # Start the application
+   docker compose up -d
    ```
-   [ERROR] Missing containers: ugh-db, ugh-backend
-   ```
-   **Solution**: Start containers with `docker compose up -d`
 
-3. **Migration Inconsistencies**
+3. **EF Tools not available**
+   ```bash
+   # The system automatically installs EF Tools
+   # If manual installation needed:
+   docker exec ugh-backend dotnet tool install --global dotnet-ef
    ```
-   [INCONSISTENCIES FOUND] X issues detected
+
+4. **Permission denied on migrate.sh**
+   ```bash
+   # Make executable
+   chmod +x .docker/migration/migrate.sh
    ```
-   **Solution**: Run `-Action fix-inconsistencies`
 
-### Recovery Procedures
-
-1. **Schema Mismatch**: Use `-Action schema-check` to detect and fix
-2. **Broken Migrations**: Use `-Action force-rebuild` (nuclear option)
-3. **Orphaned Files**: Use `-Action clean-orphans`
+### Debug Mode
+For troubleshooting, you can run PowerShell commands directly:
+```bash
+pwsh -Command "& './scripts/migration/migration.ps1' -Action status"
+```
 
 ## Best Practices
 
-1. **Always check status** before making changes
-2. **Use dry-run mode** for previewing changes
-3. **Backup database** before major operations
-4. **Test migrations** in development first
-5. **Monitor cleanup logs** for DSGVO compliance
+1. **Always check status before operations**
+2. **Create backups before destructive operations**
+3. **Test migrations on development environment first**
+4. **Use descriptive migration names**
+5. **Regular consistency checks with `fix` action**
+6. **Monitor schema changes with `schema-check`**
 
-## Evolution
+## File Structure
 
-- **V1**: Basic migration management
-- **V2**: Added inconsistency detection
-- **V3**: Added DSGVO compliance features
-- **V4**: migration.ps1 (current - proven, reliable, battle-tested)
+```
+scripts/migration/
+├── migration.ps1          # Main PowerShell migration script
+└── README.md             # This documentation
 
-**Total Migrations**: 5
-**Applied Migrations**: 5
-**Last updated**: 2025-01-27 by Battle-Tested Migration Management System
+.docker/migration/
+└── migrate.sh            # Linux/macOS wrapper script
+
+backup-*.sql              # Database backups
+migration-backup-*/       # Migration file backups
+```
+
+## Version History
+
+- **v2.0**: Cross-platform support, backup/restore functionality
+- **v1.0**: Initial Windows-only implementation
 
 
 
