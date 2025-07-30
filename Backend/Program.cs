@@ -23,6 +23,7 @@ using UGHApi.Services.Stripe;
 using UGHApi.Services.UserProvider;
 using UGHApi.Services;
 using UGHApi.Shared;
+using UGHApi.Services.BackgroundTasks;
 
 namespace UGHApi
 {
