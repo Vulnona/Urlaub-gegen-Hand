@@ -166,7 +166,7 @@ let skillOptions = [];
 let accommodations = [];
 let suitableAccommodations = [];
 let modify = false;
-let images = ref<(File|string)[]>([]); // Nur File oder string
+let images = ref<(File|string|{src: string})[]>([]); // File, string oder Objekt mit src
 let removedImageIds = ref<number[]>([]); // IDs der zu löschenden Bilder
 
 const onAddressSelected = (address) => {
@@ -227,8 +227,10 @@ const createOffer = async() => {
           offerData.append('existingImages', img);
         } else if (img instanceof File) {
           offerData.append('images', img);
+        } else if (img && typeof img === 'object' && 'src' in img) {
+          // Für Objekte mit src-Property, verwende die src als existingImage
+          offerData.append('existingImages', img.src);
         }
-        // Objekte mit id/src (z.B. {id: number, src: string}) werden ignoriert, da sie nicht direkt hochgeladen werden sollen
       });
       try {
         const response = await axiosInstance.put(
@@ -284,8 +286,9 @@ const goBack = () => {
     router.go(-1);
     }
 
-const getImageUrl = (img: File | string) => {
+const getImageUrl = (img: File | string | { src: string }) => {
   if (typeof img === 'string') return img;
+  if (img && typeof img === 'object' && 'src' in img) return img.src;
   return window.URL.createObjectURL(img as File);
 };
 
