@@ -197,11 +197,6 @@ public class UserRepository : IUserRepository
             _context.transaction.RemoveRange(transactions);
             _context.coupons.RemoveRange(coupons);
 
-            // Note: Reviews and Offers are NOT deleted anymore - they are preserved with DeletedUserBackup support
-            // This ensures that reviews and offers remain visible even after user deletion
-            // Reviews will show "Gelöschter Nutzer" for deleted users
-            // Offers will show "Gelöschtes Angebot" for deleted offer owners
-
             _context.users.Remove(user);
             await _context.SaveChangesAsync();
         }

@@ -284,6 +284,9 @@ namespace UGHApi.Migrations
                     b.Property<int>("OfferType")
                         .HasColumnType("int");
 
+                    b.Property<int?>("PictureId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Requirements")
                         .HasColumnType("longtext");
 
@@ -307,6 +310,8 @@ namespace UGHApi.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("AddressId");
+
+                    b.HasIndex("PictureId");
 
                     b.HasIndex("UserId");
 
@@ -385,9 +390,6 @@ namespace UGHApi.Migrations
                         .IsRequired()
                         .HasColumnType("longblob");
 
-                    b.Property<int?>("OfferId")
-                        .HasColumnType("int");
-
                     b.Property<Guid>("UserId")
                         .HasColumnType("char(36)");
 
@@ -395,8 +397,6 @@ namespace UGHApi.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("OfferId");
 
                     b.HasIndex("UserId");
 
@@ -438,7 +438,7 @@ namespace UGHApi.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<int?>("OfferId")
+                    b.Property<int>("OfferId")
                         .HasColumnType("int");
 
                     b.Property<int>("RatingValue")
@@ -508,7 +508,7 @@ namespace UGHApi.Migrations
                     b.Property<string>("About")
                         .HasColumnType("longtext");
 
-                    b.Property<int?>("AddressId")
+                    b.Property<int>("AddressId")
                         .HasColumnType("int");
 
                     b.Property<string>("BackupCodes")
@@ -524,9 +524,6 @@ namespace UGHApi.Migrations
                     b.Property<string>("Facebook_link")
                         .HasColumnType("longtext");
 
-                    b.Property<int?>("FailedBackupCodeAttempts")
-                        .HasColumnType("int");
-
                     b.Property<string>("FirstName")
                         .IsRequired()
                         .HasColumnType("longtext");
@@ -538,17 +535,11 @@ namespace UGHApi.Migrations
                     b.Property<string>("Hobbies")
                         .HasColumnType("longtext");
 
-                    b.Property<bool>("IsBackupCodeLocked")
-                        .HasColumnType("tinyint(1)");
-
                     b.Property<bool>("IsEmailVerified")
                         .HasColumnType("tinyint(1)");
 
                     b.Property<bool>("IsTwoFactorEnabled")
                         .HasColumnType("tinyint(1)");
-
-                    b.Property<DateTime?>("LastFailedBackupCodeAttempt")
-                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("LastName")
                         .IsRequired()
@@ -769,6 +760,10 @@ namespace UGHApi.Migrations
                         .WithMany("Offers")
                         .HasForeignKey("AddressId");
 
+                    b.HasOne("UGH.Domain.Entities.Picture", "Picture")
+                        .WithMany()
+                        .HasForeignKey("PictureId");
+
                     b.HasOne("UGH.Domain.Entities.User", "User")
                         .WithMany("Offers")
                         .HasForeignKey("UserId")
@@ -776,6 +771,8 @@ namespace UGHApi.Migrations
                         .IsRequired();
 
                     b.Navigation("Address");
+
+                    b.Navigation("Picture");
 
                     b.Navigation("User");
                 });
@@ -809,17 +806,11 @@ namespace UGHApi.Migrations
 
             modelBuilder.Entity("UGH.Domain.Entities.Picture", b =>
                 {
-                    b.HasOne("UGH.Domain.Entities.Offer", "Offer")
-                        .WithMany("Pictures")
-                        .HasForeignKey("OfferId");
-
                     b.HasOne("UGH.Domain.Entities.User", "Owner")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Offer");
 
                     b.Navigation("Owner");
                 });
@@ -839,7 +830,9 @@ namespace UGHApi.Migrations
                 {
                     b.HasOne("UGH.Domain.Entities.Offer", "Offer")
                         .WithMany("Reviews")
-                        .HasForeignKey("OfferId");
+                        .HasForeignKey("OfferId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("UGH.Domain.Entities.User", "Reviewed")
                         .WithMany("ReceivedReviews")
@@ -864,7 +857,9 @@ namespace UGHApi.Migrations
                 {
                     b.HasOne("UGH.Domain.Entities.Address", "Address")
                         .WithMany("Users")
-                        .HasForeignKey("AddressId");
+                        .HasForeignKey("AddressId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("UGH.Domain.Entities.Membership", "CurrentMembership")
                         .WithMany()
@@ -1000,8 +995,6 @@ namespace UGHApi.Migrations
             modelBuilder.Entity("UGH.Domain.Entities.Offer", b =>
                 {
                     b.Navigation("OfferApplications");
-
-                    b.Navigation("Pictures");
 
                     b.Navigation("Reviews");
                 });

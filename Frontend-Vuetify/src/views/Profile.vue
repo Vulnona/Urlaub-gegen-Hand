@@ -212,22 +212,16 @@
                       <li v-for="userReviews in reviews" :key="userReviews" class="comment">
                         <div>
                           <div class="comment_head">
-                            <h6 v-if="userReviews.offer" @click="redirectToOffer(userReviews.offer.id)" class="clickable-item">
-                              <span v-if="userReviews.offer.isDeleted" class="deleted-offer">
-                                {{ userReviews.offer.deletedOfferTitle || 'Gelöschtes Angebot' }}
-                              </span>
-                              <span v-else>
-                                {{ userReviews.offer.title }}
-                              </span>
+                            <h6 @click="redirectToOffer(userReviews.offer.id)" class="clickable-item">
+                              {{
+                              userReviews.offer.title
+                              }}
                             </h6>
-                            <h6 v-else class="direct-review">
-                              Direkte Bewertung
-                            </h6>
-                            <div v-if="userReviews.offer" @click="redirectToOffer(userReviews.offer.id)" class="img-thumb clickable-item"
+                            <div @click="redirectToOffer(userReviews.offer.id)" class="img-thumb clickable-item"
                                  v-if="userReviews.offer.imageData != null">
                               <img :src="'data:' + userReviews.offer.imageMimeType + ';base64,' + userReviews.offer.imageData">
                             </div>
-                            <div v-if="userReviews.offer" class="img-thumb" v-if="userReviews.offer.imageData == null">
+                            <div class="img-thumb" v-if="userReviews.offer.imageData == null">
                               <img :src="defaultProfileImgSrc">
                             </div>
                           </div>
@@ -247,14 +241,9 @@
                                 <div class="comment-user">
                                   <div @click="redirectToProfile(userReviews.reviewer.user_Id)"
                                        class="user clickable-item">
-                                    <span v-if="userReviews.reviewer.isDeleted" class="deleted-user">
-                                      {{ userReviews.reviewer.deletedUserName || 'Gelöschter Nutzer' }}
-                                    </span>
-                                    <span v-else>
-                                      {{ userReviews.reviewer.firstName }} {{
-                                        userReviews.reviewer.lastName
-                                      }}
-                                    </span>
+                                    {{ userReviews.reviewer.firstName }} {{
+                                      userReviews.reviewer.lastName
+                                    }}
                                   </div>
                                   <div class="comment-date">
                                     <time :datetime="userReviews.createdAt">
@@ -1020,30 +1009,4 @@
       opacity: 1;
     }
   }
-
-.deleted-user {
-  color: #999;
-  font-style: italic;
-  text-decoration: line-through;
-}
-
-.deleted-offer {
-  color: #999;
-  font-style: italic;
-  text-decoration: line-through;
-}
-
-.direct-review {
-  color: #666;
-  font-style: italic;
-  font-size: 0.9em;
-}
-
-.clickable-item {
-  cursor: pointer;
-}
-
-.clickable-item:hover {
-  text-decoration: underline;
-}
 </style>

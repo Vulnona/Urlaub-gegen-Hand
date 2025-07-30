@@ -30,7 +30,9 @@ public class ReviewController : ControllerBase
 public class CreateReviewRequest
 {
 #pragma warning disable CS8632
-    public int? offerId { get; set; }  // Optional: Referenz auf das Angebot
+    [Required(ErrorMessage = "OfferId is required.")]
+    [Range(1, int.MaxValue, ErrorMessage = "OfferId cannot be zero or negative.")]
+    public int offerId { get; set; }
 
     [Required(ErrorMessage = "RatingValue is required.")]
     [Range(1, 5, ErrorMessage = "RatingValue must be between 1 and 5.")]
@@ -124,22 +126,6 @@ public class CreateReviewRequest
         catch (Exception)
         {
             return StatusCode(500, "Internal server error occurred while fetching all reviews.");
-        }
-    }
-
-    [Authorize]
-    [HttpGet("get-reviews-between-users")]
-    public async Task<IActionResult> GetReviewsBetweenUsers(Guid user1Id, Guid user2Id, int pageNumber = 1, int pageSize = 10)
-    {
-        try {
-            var reviews = await _reviewRepository.GetReviewsBetweenUsersAsync(user1Id, user2Id, pageNumber, pageSize);
-            if (reviews == null)
-                return NotFound();
-            return Ok(reviews);
-        }
-        catch (Exception)
-        {
-            return StatusCode(500, "Internal server error occurred while fetching reviews between users.");
         }
     }
 }

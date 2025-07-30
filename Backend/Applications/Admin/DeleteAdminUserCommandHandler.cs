@@ -1,9 +1,6 @@
 using MediatR;
 using UGH.Domain.Core;
 using UGH.Domain.Interfaces;
-using UGHApi.DATA;
-using Backend.Models;
-using UGH.Domain.Entities;
 
 namespace UGHApi.Applications.Admin;
 
@@ -12,19 +9,16 @@ public class DeleteAdminUserCommandHandler : IRequestHandler<DeleteAdminUserComm
     private readonly IUserRepository _userRepository;
     private readonly ILogger<DeleteAdminUserCommandHandler> _logger;
     private readonly S3Service _s3Service;
-    private readonly Ugh_Context _context;
 
     public DeleteAdminUserCommandHandler(
         IUserRepository userRepository,
         ILogger<DeleteAdminUserCommandHandler> logger,
-        S3Service s3Service,
-        Ugh_Context context
+        S3Service s3Service
     )
     {
         _userRepository = userRepository;
         _logger = logger;
         _s3Service = s3Service;
-        _context = context;
     }
 
     public async Task<Result> Handle(
@@ -40,9 +34,6 @@ public class DeleteAdminUserCommandHandler : IRequestHandler<DeleteAdminUserComm
             {
                 return Result.Failure(Errors.General.InvalidOperation("User not found."));
             }
-
-            // Create backup of user data before deletion
-            await CreateUserBackup(user);
 
             var deleteTasks = new List<Task>();
 
@@ -68,47 +59,11 @@ public class DeleteAdminUserCommandHandler : IRequestHandler<DeleteAdminUserComm
         }
     }
 
-    private async Task CreateUserBackup(User user)
-    {
-        try
-        {
-            var backup = new DeletedUserBackup
-            {
-                UserId = user.User_Id.ToString(),
-                FirstName = user.FirstName,
-                LastName = user.LastName,
-                Gender = user.Gender,
-                DateOfBirth = user.DateOfBirth.ToDateTime(TimeOnly.MinValue),
-                Email = user.Email_Address,
-                Skills = user.Skills,
-                Hobbies = user.Hobbies,
-                ProfilePicture = user.ProfilePicture != null ? Convert.ToBase64String(user.ProfilePicture) : null,
-                DeletedAt = DateTime.UtcNow
-            };
-
-            // Add address information if available
-            if (user.Address != null)
-            {
-                backup.Address = $"{user.Address.Street} {user.Address.HouseNumber}, {user.Address.Postcode} {user.Address.City}";
-                backup.Latitude = user.Address.Latitude;
-                backup.Longitude = user.Address.Longitude;
-            }
-
-            _context.DeletedUserBackups.Add(backup);
-            await _context.SaveChangesAsync();
-
-            _logger.LogInformation($"User backup created for user {user.User_Id}");
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError($"Failed to create user backup: {ex.Message}");
-            // Don't throw here, as we still want to delete the user even if backup fails
-        }
-    }
-
     private string ExtractKeyFromUrl(string url)
     {
-        var uri = new Uri(url);
-        return uri.LocalPath.TrimStart('/');
+        if (string.IsNullOrWhiteSpace(url))
+            return string.Empty;
+
+        return new Uri(url).LocalPath.TrimStart('/');
     }
 }

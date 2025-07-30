@@ -135,17 +135,8 @@
                       <li v-for="userReviews in reviews" :key="userReviews" class="comment">
                         <div>
                           <div class="comment_head">
-                            <h6 v-if="userReviews.offer" @click="redirectToOffer(userReviews.offer.id)" class="clickable-item">
-                              <span v-if="userReviews.offer.isDeleted" class="deleted-offer">
-                                {{ userReviews.offer.deletedOfferTitle || 'Gelöschtes Angebot' }}
-                              </span>
-                              <span v-else>
-                                {{ userReviews.offer.title }}
-                              </span>
-                            </h6>
-                            <h6 v-else class="direct-review">
-                              Direkte Bewertung
-                            </h6>
+                            <h6 @click="redirectToOffer(userReviews.offer.id)" class="clickable-item">{{
+                              userReviews.offer.title }}</h6>
                             <div class="img-thumb clickable-item" v-if="userReviews.offer.imageData != null"><img
                                 @click="redirectToOffer(userReviews.offer.id)"
                                 :src="'data:' + userReviews.offer.imageMimeType + ';base64,' + userReviews.offer.imageData">
@@ -169,16 +160,8 @@
                               <div class="comment-head">
                                 <div class="comment-user">
                                   <div @click="redirectToProfile(userReviews.reviewer.user_Id)"
-                                    class="user clickable-item">
-                                    <span v-if="userReviews.reviewer.isDeleted" class="deleted-user">
-                                      {{ userReviews.reviewer.deletedUserName || 'Gelöschter Nutzer' }}
-                                    </span>
-                                    <span v-else>
-                                      {{ userReviews.reviewer.firstName }} {{
-                                        userReviews.reviewer.lastName
-                                      }}
-                                    </span>
-                                  </div>
+                                    class="user clickable-item">{{ userReviews.reviewer.firstName }} {{
+                                      userReviews.reviewer.lastName }}</div>
                                   <div class="comment-date">
                                     <time datetime="2024-08-02T09:54:50+00:00"> <time
                                         :datetime="userReviews.createdAt">{{
@@ -615,31 +598,5 @@ body .account-page {
   width: 100%;
   height: 100%;
   background: rgba(0, 0, 0, 0.65);
-}
-
-.deleted-user {
-  color: #999;
-  font-style: italic;
-  text-decoration: line-through;
-}
-
-.deleted-offer {
-  color: #999;
-  font-style: italic;
-  text-decoration: line-through;
-}
-
-.direct-review {
-  color: #666;
-  font-style: italic;
-  font-size: 0.9em;
-}
-
-.clickable-item {
-  cursor: pointer;
-}
-
-.clickable-item:hover {
-  text-decoration: underline;
 }
 </style>

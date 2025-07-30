@@ -36,15 +36,8 @@
                     <div class="comment-content">
                       <div class="comment-head">
                         <div class="comment-user">
-                          <div @click="redirectToProfile(offerReviews.reviewer.user_Id)" class="user clickable-item">
-                            <span v-if="offerReviews.reviewer.isDeleted" class="deleted-user">
-                              {{ offerReviews.reviewer.deletedUserName || 'Gelöschter Nutzer' }}
-                            </span>
-                            <span v-else>
-                              {{
-                                offerReviews.reviewer.firstName }} {{ offerReviews.reviewer.lastName
-                              }}
-                            </span>
+                          <div @click="redirectToProfile(offerReviews.reviewer.user_Id)" class="user clickable-item">{{
+                            offerReviews.reviewer.firstName }} {{ offerReviews.reviewer.lastName }}
                           </div>
                           <div class="comment-date"> <time :datetime="offerReviews.createdAt">{{
                             formatDate(offerReviews.createdAt) }}</time>
@@ -167,26 +160,5 @@ const redirectToProfile = (userId: string | number) => {
   sessionStorage.setItem("UserId", userId.toString());
   router.push("/account");
 }
-
-const backtooffers = () => {
-  router.push("/admin/offers");
-}
-
 onMounted(fetchOfferDetail);
 </script>
-
-<style scoped>
-.deleted-user {
-  color: #999;
-  font-style: italic;
-  text-decoration: line-through;
-}
-
-.clickable-item {
-  cursor: pointer;
-}
-
-.clickable-item:hover {
-  text-decoration: underline;
-}
-</style>
