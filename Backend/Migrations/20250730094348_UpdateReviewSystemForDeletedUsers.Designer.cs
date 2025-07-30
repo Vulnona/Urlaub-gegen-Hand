@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using UGHApi.DATA;
 
@@ -10,9 +11,11 @@ using UGHApi.DATA;
 namespace UGHApi.Migrations
 {
     [DbContext(typeof(Ugh_Context))]
-    partial class UghContextModelSnapshot : ModelSnapshot
+    [Migration("20250730094348_UpdateReviewSystemForDeletedUsers")]
+    partial class UpdateReviewSystemForDeletedUsers
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -438,7 +441,7 @@ namespace UGHApi.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<int?>("OfferId")
+                    b.Property<int>("OfferId")
                         .HasColumnType("int");
 
                     b.Property<int>("RatingValue")
@@ -839,7 +842,9 @@ namespace UGHApi.Migrations
                 {
                     b.HasOne("UGH.Domain.Entities.Offer", "Offer")
                         .WithMany("Reviews")
-                        .HasForeignKey("OfferId");
+                        .HasForeignKey("OfferId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("UGH.Domain.Entities.User", "Reviewed")
                         .WithMany("ReceivedReviews")

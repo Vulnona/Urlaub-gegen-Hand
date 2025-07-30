@@ -43,8 +43,22 @@
                   </thead>
                   <tbody>
                     <tr v-for="review in filteredReviews" :key="review.id">
-                      <td>{{ review.reviewer?.firstName }} {{ review.reviewer?.lastName }}</td>
-                      <td>{{ review.reviewed?.firstName }} {{ review.reviewed?.lastName }}</td>
+                      <td>
+                        <span v-if="review.reviewer?.isDeleted" class="deleted-user">
+                          {{ review.reviewer?.deletedUserName || 'Gelöschter Nutzer' }}
+                        </span>
+                        <span v-else>
+                          {{ review.reviewer?.firstName }} {{ review.reviewer?.lastName }}
+                        </span>
+                      </td>
+                      <td>
+                        <span v-if="review.reviewed?.isDeleted" class="deleted-user">
+                          {{ review.reviewed?.deletedUserName || 'Gelöschter Nutzer' }}
+                        </span>
+                        <span v-else>
+                          {{ review.reviewed?.firstName }} {{ review.reviewed?.lastName }}
+                        </span>
+                      </td>
                       <td>
                         <router-link :to="{ name: 'OfferDetail', params: { id: review.offerId } }">
                           {{ review.offer?.title || 'Angebot #' + review.offerId }}
@@ -178,6 +192,12 @@ export default {
 </script>
 
 <style scoped>
+.deleted-user {
+  color: #999;
+  font-style: italic;
+  text-decoration: line-through;
+}
+
 .reviews-table {
   width: 100%;
   background: #fff;

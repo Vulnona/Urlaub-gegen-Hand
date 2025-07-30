@@ -6,7 +6,7 @@ public class Review
 {
 #pragma warning disable CS8632
     public int Id { get; set; }
-    public int OfferId { get; set; }
+    public int? OfferId { get; set; }  // Optional: Referenz auf das Angebot
     public int RatingValue { get; set; }
     public string? ReviewComment { get; set; }
     public DateTime CreatedAt { get; set; }
@@ -15,7 +15,7 @@ public class Review
     public Guid ReviewedId { get; set; }
 
     [ForeignKey("OfferId")]
-    public Offer Offer { get; set; }
+    public Offer? Offer { get; set; }  // Optional: Kann null sein
 
     [ForeignKey("ReviewerId")]
     public User Reviewer { get; set; }

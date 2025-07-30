@@ -1,0 +1,49 @@
+### Test Review System API Endpoints
+
+### 1. Test: Create Review with Offer
+POST {{baseUrl}}/api/review/add-review
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "offerId": 1,
+  "ratingValue": 5,
+  "reviewComment": "Amazing experience!",
+  "reviewedUserId": null
+}
+
+### 2. Test: Create Direct User-to-User Review
+POST {{baseUrl}}/api/review/add-review
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "offerId": null,
+  "ratingValue": 4,
+  "reviewComment": "Great person to work with!",
+  "reviewedUserId": "{{user2Id}}"
+}
+
+### 3. Test: Get Reviews by User ID
+GET {{baseUrl}}/api/review/get-user-reviews?userId={{userId}}&pageNumber=1&pageSize=10
+Authorization: Bearer {{token}}
+
+### 4. Test: Get Reviews by Offer ID
+GET {{baseUrl}}/api/review/get-offer-reviews?offerId=1&pageNumber=1&pageSize=10
+Authorization: Bearer {{token}}
+
+### 5. Test: Get Reviews Between Users
+GET {{baseUrl}}/api/review/get-reviews-between-users?user1Id={{user1Id}}&user2Id={{user2Id}}&pageNumber=1&pageSize=10
+Authorization: Bearer {{token}}
+
+### 6. Test: Get All Reviews (Admin)
+GET {{baseUrl}}/api/review/get-all-reviews-admin?pageNumber=1&pageSize=50
+Authorization: Bearer {{adminToken}}
+
+### Variables for testing:
+# @baseUrl = https://localhost:7001
+# @token = your_jwt_token_here
+# @adminToken = your_admin_jwt_token_here
+# @userId = user_guid_here
+# @user1Id = user1_guid_here
+# @user2Id = user2_guid_here 

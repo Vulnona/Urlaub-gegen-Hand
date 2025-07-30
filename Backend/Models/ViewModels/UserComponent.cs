@@ -7,4 +7,6 @@ public class UserC
     public string FirstName { get; set; }
     public string LastName { get; set; }
     public byte[]? ProfilePicture { get; set; }
+    public bool IsDeleted { get; set; } = false;
+    public string? DeletedUserName { get; set; } // "Gelöschter Nutzer" oder ähnliches
 }

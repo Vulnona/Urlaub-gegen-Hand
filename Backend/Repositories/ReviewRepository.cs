@@ -32,6 +32,9 @@ public class ReviewRepository
                 .ProjectToType<ReviewDto>()
                 .ToListAsync();
             
+            // Handle deleted users for reviews
+            await HandleDeletedUsersInReviews(reviews);
+            
             return PaginatedList<ReviewDto>.Create(reviews, totalCount, pageNumber, pageSize);
         }
         catch (Exception)
@@ -54,7 +57,7 @@ public class ReviewRepository
         try {
             IQueryable<Review> query = _context
                 .reviews.Include(r => r.Offer)
-                .Where(r => r.OfferId == offerId && r.Offer.UserId == r.ReviewedId);
+                .Where(r => r.OfferId == offerId);
 
             int totalCount = await query.CountAsync();
 
@@ -63,6 +66,39 @@ public class ReviewRepository
                 .Take(pageSize)
                 .ProjectToType<ReviewDto>()
                 .ToListAsync();
+
+            // Handle deleted users for reviews
+            await HandleDeletedUsersInReviews(reviews);
+
+            return PaginatedList<ReviewDto>.Create(reviews, totalCount, pageNumber, pageSize);
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Get all reviews between two specific users (direct user-to-user reviews)
+    /// </summary>
+    public async Task<PaginatedList<ReviewDto>> GetReviewsBetweenUsersAsync(Guid user1Id, Guid user2Id, int pageNumber, int pageSize)
+    {
+        try {
+            IQueryable<Review> query = _context
+                .reviews.Include(r => r.Offer)
+                .Where(r => (r.ReviewerId == user1Id && r.ReviewedId == user2Id) ||
+                           (r.ReviewerId == user2Id && r.ReviewedId == user1Id));
+
+            int totalCount = await query.CountAsync();
+
+            var reviews = await query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ProjectToType<ReviewDto>()
+                .ToListAsync();
+
+            // Handle deleted users for reviews
+            await HandleDeletedUsersInReviews(reviews);
 
             return PaginatedList<ReviewDto>.Create(reviews, totalCount, pageNumber, pageSize);
         }
@@ -84,45 +120,76 @@ public class ReviewRepository
     }
 
 #nullable enable
-    public async Task<String> AddReview(int OfferId, int RatingValue, string? ReviewComment, Guid UserId, Guid? ReviewedUserId = null)
+    public async Task<String> AddReview(int? OfferId, int RatingValue, string? ReviewComment, Guid UserId, Guid? ReviewedUserId = null)
     {   
         var reviewer = await _context.users.FindAsync(UserId);
         if (reviewer == null)
-            return "Reviewed user not found.";
-        var offer = await GetOfferByIdAsync(OfferId);
-        if (offer == null)
-            return "Offer not found";
-        
-        bool isReviewerHost = reviewer.User_Id == offer.UserId;
+            return "Reviewer user not found.";
+
         Guid reviewedId;
-        Guid guestId;
         
-        Review? existingReview = null;
-        if (isReviewerHost) {
-            if (!ReviewedUserId.HasValue)
-                return "Reviewed User {ReviewedUserId} not found";
-            reviewedId = ReviewedUserId.Value;
-            guestId = ReviewedUserId.Value;
+        // If OfferId is provided, validate the offer and determine reviewed user
+        if (OfferId.HasValue)
+        {
+            var offer = await GetOfferByIdAsync(OfferId.Value);
+            if (offer == null)
+                return "Offer not found";
+            
+            bool isReviewerHost = reviewer.User_Id == offer.UserId;
+            
+            if (isReviewerHost) {
+                if (!ReviewedUserId.HasValue)
+                    return "Reviewed User ID is required when reviewer is the host";
+                reviewedId = ReviewedUserId.Value;
+            }
+            else
+            {
+                reviewedId = offer.UserId;
+            }
         }
         else
         {
-            reviewedId = offer.UserId;
-            guestId = UserId;
+            // Direct user-to-user review without offer
+            if (!ReviewedUserId.HasValue)
+                return "Reviewed User ID is required for direct user-to-user reviews";
+            reviewedId = ReviewedUserId.Value;
         }
-        existingReview =  await _context.reviews.FirstOrDefaultAsync(r => r.OfferId == OfferId && r.ReviewerId == UserId && r.ReviewedId == reviewedId);
-        if (existingReview != null)
-            return "Review already exists.";        
-        
-        var approvedApplication = await _context.offerapplication.FirstOrDefaultAsync(app => app.OfferId == OfferId && app.UserId == guestId  && app.Status == OfferApplicationStatus.Approved);
-        if (approvedApplication == null)
-            return "Application not approved.";
 
-        
+        // Check if review already exists
+        Review? existingReview;
+        if (OfferId.HasValue)
+        {
+            existingReview = await _context.reviews.FirstOrDefaultAsync(r => 
+                r.OfferId == OfferId.Value && 
+                r.ReviewerId == UserId && 
+                r.ReviewedId == reviewedId);
+        }
+        else
+        {
+            existingReview = await _context.reviews.FirstOrDefaultAsync(r => 
+                r.OfferId == null && 
+                r.ReviewerId == UserId && 
+                r.ReviewedId == reviewedId);
+        }
+
         if (existingReview != null)
-            return "Review already exists";
+            return "Review already exists.";
+
+        // If offer is involved, validate application approval
+        if (OfferId.HasValue)
+        {
+            var approvedApplication = await _context.offerapplication.FirstOrDefaultAsync(app => 
+                app.OfferId == OfferId.Value && 
+                app.UserId == (reviewer.User_Id == reviewedId ? UserId : reviewedId) && 
+                app.Status == OfferApplicationStatus.Approved);
+            
+            if (approvedApplication == null)
+                return "Application not approved.";
+        }
+
         var review = new Review
         {
-            OfferId = OfferId,
+            OfferId = OfferId,  // Can be null for direct user-to-user reviews
             RatingValue = RatingValue,
             ReviewComment = ReviewComment,
             CreatedAt = DateTime.UtcNow,
@@ -133,7 +200,6 @@ public class ReviewRepository
 
         await _context.reviews.AddAsync(review);
         await _context.SaveChangesAsync();
-
 
         return "Review added successfully.";
     }
@@ -155,5 +221,59 @@ public class ReviewRepository
             .ToListAsync();
 
         return PaginatedList<ReviewDto>.Create(reviews, totalCount, pageNumber, pageSize);
+    }
+
+    /// <summary>
+    /// Handles deleted users in reviews by checking DeletedUserBackups table
+    /// </summary>
+    private async Task HandleDeletedUsersInReviews(List<ReviewDto> reviews)
+    {
+        var reviewerIds = reviews.Select(r => r.Reviewer.User_Id).Distinct().ToList();
+        var reviewedIds = reviews.Select(r => r.Reviewed.User_Id).Distinct().ToList();
+        var allUserIds = reviewerIds.Concat(reviewedIds).Distinct().ToList();
+
+        // Get deleted user backups
+        var deletedUserBackups = await _context.DeletedUserBackups
+            .Where(b => allUserIds.Contains(Guid.Parse(b.UserId)))
+            .ToListAsync();
+
+        foreach (var review in reviews)
+        {
+            // Check if reviewer is deleted
+            var deletedReviewer = deletedUserBackups.FirstOrDefault(b => b.UserId == review.Reviewer.User_Id.ToString());
+            if (deletedReviewer != null)
+            {
+                review.Reviewer.IsDeleted = true;
+                review.Reviewer.DeletedUserName = "Gelöschter Nutzer";
+                review.Reviewer.FirstName = deletedReviewer.FirstName ?? "Gelöschter";
+                review.Reviewer.LastName = deletedReviewer.LastName ?? "Nutzer";
+            }
+
+            // Check if reviewed user is deleted
+            var deletedReviewed = deletedUserBackups.FirstOrDefault(b => b.UserId == review.Reviewed.User_Id.ToString());
+            if (deletedReviewed != null)
+            {
+                review.Reviewed.IsDeleted = true;
+                review.Reviewed.DeletedUserName = "Gelöschter Nutzer";
+                review.Reviewed.FirstName = deletedReviewed.FirstName ?? "Gelöschter";
+                review.Reviewed.LastName = deletedReviewed.LastName ?? "Nutzer";
+            }
+
+            // Check if offer is deleted (offer owner was deleted) - only if offer exists
+            if (review.Offer != null)
+            {
+                var deletedOfferOwner = deletedUserBackups.FirstOrDefault(b => b.UserId == review.Offer.User.User_Id.ToString());
+                if (deletedOfferOwner != null)
+                {
+                    review.Offer.IsDeleted = true;
+                    review.Offer.DeletedOfferTitle = "Gelöschtes Angebot";
+                    review.Offer.Title = review.Offer.Title ?? "Gelöschtes Angebot";
+                    review.Offer.User.IsDeleted = true;
+                    review.Offer.User.DeletedUserName = "Gelöschter Nutzer";
+                    review.Offer.User.FirstName = deletedOfferOwner.FirstName ?? "Gelöschter";
+                    review.Offer.User.LastName = deletedOfferOwner.LastName ?? "Nutzer";
+                }
+            }
+        }
     }
 }
