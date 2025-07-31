@@ -10,6 +10,17 @@ Backend/appsettings.json
 Backend/bin
 Backend/obj
 
+# Environment files
+.env
+.env.local
+.env.*.local
+Backend/.env
+Backend/.env.local
+Backend/.env.*.local
+Frontend-Vuetify/.env
+Frontend-Vuetify/.env.local
+Frontend-Vuetify/.env.*.local
+
 #Frontend
 Frontend-Vuetify/package-lock.json
 Frontend-Vuetify/package.json
