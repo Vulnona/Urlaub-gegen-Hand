@@ -112,13 +112,14 @@ sudo yum install -y powershell
 ## Backup System
 
 ### Automatic Backups
-- Database backups: `backup-before-force-rebuild-YYYYMMDD-HHMMSS.sql`
-- Migration backups: `migration-backup-YYYYMMDD-HHMMSS/`
+All backups are stored in the `backups/` directory:
+- Database backups: `backups/backup-before-force-rebuild-YYYYMMDD-HHMMSS.sql`
+- Migration backups: `backups/migration-backup-YYYYMMDD-HHMMSS/`
 
 ### Manual Backup Creation
 ```bash
 # Database backup
-docker exec ugh-db mysqldump -uuser -ppassword db --no-tablespaces > backup-manual-$(date +%Y%m%d-%H%M%S).sql
+docker exec ugh-db mysqldump -uuser -ppassword db --no-tablespaces > backups/backup-manual-$(date +%Y%m%d-%H%M%S).sql
 ```
 
 ## Error Handling
@@ -202,8 +203,9 @@ scripts/migration/
 .docker/migration/
 └── migrate.sh            # Linux/macOS wrapper script
 
-backup-*.sql              # Database backups
-migration-backup-*/       # Migration file backups
+backups/                  # All backup files
+├── backup-*.sql          # Database backups
+└── migration-backup-*/   # Migration file backups
 ```
 
 ## Version History
