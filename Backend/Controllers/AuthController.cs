@@ -526,7 +526,15 @@ namespace UGHApi.Controllers
                 if (user == null)
                     return BadRequest("Invalid credentials");
 
-                // Passwortprüfung entfällt, da sie bereits im ersten Schritt geprüft wurde
+                // Passwortprüfung ist erforderlich für Sicherheit
+                if (string.IsNullOrEmpty(request.Password))
+                    return BadRequest("Password is required for 2FA verification");
+                
+                var userValid = await _userService.ValidateUser(request.Email, request.Password);
+                if (!userValid.IsValid)
+                {
+                    return BadRequest("Invalid credentials");
+                }
 
                 // Check if 2FA is enabled
                 if (!user.IsTwoFactorEnabled)

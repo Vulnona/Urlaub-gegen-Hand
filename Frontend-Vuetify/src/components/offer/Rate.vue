@@ -58,10 +58,17 @@ watch (() => props.active, async () => {
     loadingImage.value = true;
     try {
         const response = await axiosInstance.get(`offer/get-offer-by-id/${props.offer.offerId}`);
-        image.value = response.data.imageData;
-        loadingImage.value=false;
+        // Check if imageData exists and is not undefined
+        if (response.data && response.data.imageData) {
+            image.value = response.data.imageData;
+        } else {
+            image.value = null; // Set to null if no image data
+        }
+        loadingImage.value = false;
   } catch (error) {
-      console.error("failed to load image");
+      console.error("failed to load image:", error);
+      image.value = null; // Set to null on error
+      loadingImage.value = false;
   } 
 });
 const cancelRating = () => {reviewText = ''; selectedRating=ref(0); emit('update:active', false);}

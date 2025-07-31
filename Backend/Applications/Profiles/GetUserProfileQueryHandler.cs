@@ -59,42 +59,12 @@ public class GetUserProfileQueryHandler : IRequestHandler<GetUserProfileQuery, U
             
             var membershipEndDate = user.UserMemberships?.Where(m => m.IsMembershipActive).OrderBy(m => m.CreatedAt).FirstOrDefault()?.Expiration;
             
-            // Calculate user rating from mutual reviews only
+            // Calculate user rating using the new visibility logic
             double userRating = 0;
             var allReviews = await _context.reviews.AsQueryable().Where(r => r.ReviewedId == user.User_Id).ToListAsync();
             
-            // Filter to only include reviews where both parties have reviewed each other OR after 14 days
-            var visibleReviews = new List<Review>();
-            
-            if (allReviews.Any())
-            {
-                // Get all reviews for the same offers to check for mutual reviews
-                var offerIds = allReviews.Where(r => r.OfferId.HasValue).Select(r => r.OfferId.Value).Distinct().ToList();
-                var allReviewsForOffers = await _context.reviews
-                    .Where(r => offerIds.Contains(r.OfferId.Value))
-                    .ToListAsync();
-
-                foreach (var review in allReviews)
-                {
-                    if (review.OfferId.HasValue)
-                    {
-                        // Check if the other party has also reviewed this user for the same offer
-                        var otherPartyReview = allReviewsForOffers
-                            .FirstOrDefault(r => r.OfferId == review.OfferId && 
-                                               r.ReviewerId == review.ReviewedId && 
-                                               r.ReviewedId == review.ReviewerId);
-                        
-                        // Include review if both parties have reviewed each other OR if 14 days have passed
-                        bool shouldInclude = otherPartyReview != null || 
-                                            (DateTime.UtcNow - review.CreatedAt).TotalDays >= 14;
-                        
-                        if (shouldInclude)
-                        {
-                            visibleReviews.Add(review);
-                        }
-                    }
-                }
-            }
+            // Filter to only include visible reviews using the new logic
+            var visibleReviews = allReviews.Where(r => IsReviewVisible(r)).ToList();
             
             if (visibleReviews.Count() > 0)
                 userRating = Math.Round(visibleReviews.Average(r => r.RatingValue), 1);
@@ -158,12 +128,22 @@ public class GetUserProfileQueryHandler : IRequestHandler<GetUserProfileQuery, U
         }
         catch (Exception ex)
         {
-            _logger.LogError(
-                ex,
-                $"Error occurred while handling GetUserProfileQuery for UserId: {request.UserId}"
-            );
+            _logger.LogError($"Exception in GetUserProfileQueryHandler: {ex.Message}");
             throw;
         }
+    }
+
+    private bool IsReviewVisible(Review review)
+    {
+        // Check if review is explicitly marked as visible
+        if (review.IsVisible)
+            return true;
+        
+        // Check if 14 days have passed since creation
+        if (review.VisibilityDate.HasValue && DateTime.UtcNow >= review.VisibilityDate.Value)
+            return true;
+        
+        return false;
     }
 }
 

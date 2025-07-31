@@ -27,8 +27,14 @@ namespace UGH.Infrastructure.Services
         // Verify the password against stored hash and salt
         public bool VerifyPassword(string password, string storedHash, string salt)
         {
-            if (string.IsNullOrEmpty(password) || string.IsNullOrEmpty(storedHash) || string.IsNullOrEmpty(salt))
+            if (string.IsNullOrEmpty(password) || string.IsNullOrEmpty(storedHash))
                 return false;
+
+            // If no salt is provided, compare plain text password (for backward compatibility)
+            if (string.IsNullOrEmpty(salt))
+            {
+                return password == storedHash;
+            }
 
             try
             {

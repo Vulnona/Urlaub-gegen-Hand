@@ -36,33 +36,35 @@ namespace UGH.Infrastructure.Services
 
         public async Task<(bool IsValid, string ErrorMessage)> ValidateUser(string Email, string Password)
         {
-            // DEBUG: Print connection string from context
-            string connStr = "(null)";
-            try {
-                connStr = _context?.Database?.GetDbConnection()?.ConnectionString ?? "(null)";
-                Console.WriteLine($"[DEBUG] UserService using connection string: {connStr}");
-                System.IO.File.AppendAllText("/app/connectionstring.log", $"[UserService DEBUG] {connStr}\n");
-                // Try to open a connection to MySQL and catch any errors
-                var conn = _context?.Database?.GetDbConnection();
-                if (conn != null)
+            try
+            {
+                if (string.IsNullOrWhiteSpace(Email) || string.IsNullOrWhiteSpace(Password))
                 {
-                    try {
-                        conn.Open();
-                        Console.WriteLine("[DEBUG] MySQL connection opened successfully.");
-                        conn.Close();
-                    } catch (Exception ex) {
-                        Console.WriteLine($"[DEBUG] MySQL connection error: {ex.Message}");
-                        System.IO.File.AppendAllText("/app/connectionstring.log", $"[MySQL ERROR] {ex.Message}\n");
-                        return (false, $"MySQL error: {ex.Message}");
-                    }
+                    return (false, "Email and password are required");
                 }
-            } catch (Exception ex) {
-                Console.WriteLine($"[DEBUG] Exception in ValidateUser: {ex.Message}");
-                System.IO.File.AppendAllText("/app/connectionstring.log", $"[ValidateUser ERROR] {ex.Message}\n");
-                return (false, $"ValidateUser error: {ex.Message}");
+
+                // Get user from database
+                var user = await _context.users
+                    .FirstOrDefaultAsync(u => u.Email_Address == Email);
+
+                if (user == null)
+                {
+                    return (false, "Invalid email or password");
+                }
+
+                // Verify password
+                if (!_passwordService.VerifyPassword(Password, user.Password, user.SaltKey))
+                {
+                    return (false, "Invalid email or password");
+                }
+
+                return (true, "User is valid");
             }
-            // ...actual validation logic here...
-            return (true, "User is valid"); // stub for debug
+            catch (Exception ex)
+            {
+                _logger.LogError($"Exception in ValidateUser: {ex.Message} | StackTrace: {ex.StackTrace}");
+                return (false, "An error occurred during validation");
+            }
         }
 
         public async Task<User> GetUserByPasswordResetTokenAsync(string tokenString)

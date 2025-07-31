@@ -13,6 +13,15 @@ public class Review
     public DateTime UpdatedAt { get; set; }
     public Guid ReviewerId { get; set; }
     public Guid ReviewedId { get; set; }
+    
+    // Reviewer-Informationen (gespeichert für den Fall, dass der User sich löscht)
+    public string? ReviewerFirstName { get; set; }
+    public string? ReviewerLastName { get; set; }
+    public string? ReviewerEmail { get; set; }
+    
+    // Sichtbarkeitslogik
+    public bool IsVisible { get; set; } = false; // Standard: nicht sichtbar
+    public DateTime? VisibilityDate { get; set; } // Datum, ab wann sichtbar (14 Tage nach Erstellung)
 
     [ForeignKey("OfferId")]
     public Offer? Offer { get; set; } // Optional: Kann null sein

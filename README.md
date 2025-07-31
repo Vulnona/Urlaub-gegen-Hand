@@ -54,7 +54,7 @@ Nach dem Start sind folgende Services verfügbar:
 ### Test-Accounts
 - **Admin**: `admin@example.com` / `password` (2FA aktiviert - Secret: JBSWY3DPEHPK3PXP)
 - **User 1**: `test@example.com` / `password`
-- **User 2**: `john@example.com` / `password`
+- **User 2**: `john@example.com` / `password` 
 - **User 3**: `jane@example.com` / `password`
 
 ### Admin 2FA Setup

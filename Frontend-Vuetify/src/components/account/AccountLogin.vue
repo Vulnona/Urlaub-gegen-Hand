@@ -36,13 +36,16 @@
                   </div>
                   <div v-if="errorMessage" class="error-message">{{ errorMessage }}</div>
                   <div class="back-login flexBox_btn">
-                    <a href="/home"><i class="ri-arrow-left-double-fill"></i> Back to home</a>
+                    <a href="/home"><i class="ri-arrow-left-double-fill"></i> Zurück zur Startseite</a>
                     <a href="/reset-password" previewlistener="true"><i class="ri-shield-check-fill"></i>Passwort zurücksetzen</a>
                     <a href="/verify-email" previewlistener="true"><i class="ri-shield-check-fill"></i> E-Mail bestätigen</a>
                   </div>
                 </form>
                 <!-- 2FA input and backup codes for test environment -->
                 <div v-if="show2FA" class="twofa-section">
+                  <div class="password-validation-success" style="margin-bottom: 15px; padding: 10px; background-color: #d4edda; border: 1px solid #c3e6cb; border-radius: 4px; color: #155724;">
+                    <i class="ri-check-line"></i> Passwort erfolgreich validiert
+                  </div>
                   <label for="twoFactorCode">2FA Code eingeben:</label>
                   <input 
                     type="text" 
@@ -214,7 +217,7 @@ export default {
         if (response.data.requiresTwoFactor) {
           this.show2FA = true;
           this.twoFactorToken = response.data.twoFactorToken || '';
-          toast.info("Bitte geben Sie Ihren 2FA-Code ein.");
+          toast.success("Passwort korrekt! Bitte geben Sie Ihren 2FA-Code ein.");
           this.$nextTick(() => {
             if (this.email.toLowerCase() === 'adminuser@example.com' && process.env.NODE_ENV !== 'production') {
               this.startTotpUpdater();
@@ -230,7 +233,7 @@ export default {
           this.show2FASetup = true;
           toast.info('Bitte richten Sie jetzt die Zwei-Faktor-Authentifizierung ein.');
         } else if (error.response && error.response.status === 401) {
-          toast.info("Ungültige E-Mail oder Passwort oder bestätigen Sie zuerst Ihre E-Mail");
+          toast.error("Falsches Passwort! Bitte überprüfen Sie Ihre Anmeldedaten.");
         } else if (error.response && error.response.status === 400 && error.response.data && typeof error.response.data === 'string') {
           // Check for brute force protection messages
           if (error.response.data.includes('Zu viele fehlgeschlagene Backup-Code-Versuche')) {
@@ -266,6 +269,7 @@ export default {
       try {
         const response = await axiosInstance.post('authenticate/login-2fa', {
           email: this.email,
+          password: this.password,
           twoFactorCode: this.twoFactorCode,
           isBackupCode: isBackup,
           twoFactorToken: this.twoFactorToken
@@ -386,9 +390,16 @@ export default {
       }
       
       console.log('Redirecting to appropriate page...');
+      console.log('UserRole from login:', userRoleFromLogin);
+      console.log('UserRole type:', typeof userRoleFromLogin);
+      console.log('UserRole toLowerCase():', userRoleFromLogin?.toLowerCase());
+      console.log('Comparison result:', userRoleFromLogin?.toLowerCase() === 'admin');
+      
       if (userRoleFromLogin && userRoleFromLogin.toLowerCase() === 'admin') {
+        console.log('Redirecting to /admin');
         router.push('/admin');
       } else {
+        console.log('Redirecting to /home');
         router.push('/home');
       }
     },

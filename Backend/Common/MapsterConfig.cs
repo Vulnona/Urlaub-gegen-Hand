@@ -63,7 +63,14 @@ public static class MapsterConfig
                 Title = src.Offer.Title,
                 Description = src.Offer.Description,
                 UserId = src.Offer.UserId
-            } : null);
+            } : null)
+            .Map(dest => dest.ReviewerId, src => src.ReviewerId)
+            .Map(dest => dest.ReviewedId, src => src.ReviewedId)
+            .Map(dest => dest.ReviewerFirstName, src => src.ReviewerFirstName)
+            .Map(dest => dest.ReviewerLastName, src => src.ReviewerLastName)
+            .Map(dest => dest.ReviewerEmail, src => src.ReviewerEmail)
+            .Map(dest => dest.IsVisible, src => src.IsVisible)
+            .Map(dest => dest.VisibilityDate, src => src.VisibilityDate);
     }
 
     private static List<string?> SplitAndTrim(string? input)

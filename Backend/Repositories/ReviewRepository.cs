@@ -22,15 +22,19 @@ public class ReviewRepository
         try {
             Console.WriteLine($"[DEBUG] GetAllReviewsByUserIdAsync called for userId: {userId}");
             
-            // Query without includes first to get all reviews
+            // Query reviews where user is the reviewed person (recipient)
+            // Don't use Include for Reviewer/Reviewed as they might be deleted
             var allReviews = await _context.reviews
+                .Include(r => r.Offer)
                 .Where(r => r.ReviewedId == userId)
                 .ToListAsync();
             
             Console.WriteLine($"[DEBUG] Found {allReviews.Count} reviews in database");
             
-            // Temporarily show all reviews for debugging
-            var visibleReviews = allReviews;
+            // Apply visibility logic: only show reviews that are visible
+            var visibleReviews = allReviews.Where(r => IsReviewVisible(r)).ToList();
+            
+            Console.WriteLine($"[DEBUG] {visibleReviews.Count} reviews are visible");
             
             // Apply pagination to visible reviews
             int totalCount = visibleReviews.Count;
@@ -41,7 +45,7 @@ public class ReviewRepository
             
             Console.WriteLine($"[DEBUG] Converting {paginatedReviews.Count} reviews to DTOs");
             
-            // Convert to DTOs using Mapster (now properly configured)
+            // Convert to DTOs using Mapster
             var reviewDtos = paginatedReviews.Select(r => r.Adapt<ReviewDto>()).ToList();
             
             Console.WriteLine($"[DEBUG] Successfully converted to DTOs, now handling deleted users");
@@ -61,18 +65,42 @@ public class ReviewRepository
         }
     }
 
+    private bool IsReviewVisible(Review review)
+    {
+        // Check if review is explicitly marked as visible
+        if (review.IsVisible)
+            return true;
+        
+        // Check if 14 days have passed since creation
+        if (review.VisibilityDate.HasValue && DateTime.UtcNow >= review.VisibilityDate.Value)
+            return true;
+        
+        // Check if both parties have reviewed each other (mutual review)
+        if (review.OfferId.HasValue)
+        {
+            // This would need to be implemented based on your business logic
+            // For now, we'll use the 14-day rule as default
+            return false;
+        }
+        
+        return false;
+    }
+
     private async Task HandleDeletedUsersInReviews(List<ReviewDto> reviews)
     {
         try
         {
             foreach (var review in reviews)
             {
-                // If reviewer is null, it means the user was deleted
-                if (review.Reviewer == null)
+                // Handle Reviewer - check if user still exists in database
+                bool reviewerExists = await UserExists(review.ReviewerId);
+                
+                if (!reviewerExists)
                 {
+                    // User was deleted, show "Gelöschter Nutzer"
                     review.Reviewer = new UGHApi.ViewModels.UserComponent.UserC
                     {
-                        User_Id = Guid.Empty, // We don't have the original ID
+                        User_Id = review.ReviewerId,
                         FirstName = "Gelöschter",
                         LastName = "Nutzer",
                         IsDeleted = true
@@ -80,62 +108,39 @@ public class ReviewRepository
                 }
                 else
                 {
-                    // Check if reviewer still exists
-                    try
+                    // User still exists, use stored information or fetch from database
+                    if (!string.IsNullOrEmpty(review.ReviewerFirstName) && !string.IsNullOrEmpty(review.ReviewerLastName))
                     {
-                        var reviewerExists = await _context.users.AnyAsync(u => u.User_Id == review.Reviewer.User_Id);
-                        if (!reviewerExists)
+                        // Use stored reviewer information
+                        review.Reviewer = new UGHApi.ViewModels.UserComponent.UserC
                         {
-                            // Mark as deleted user
-                            review.Reviewer.FirstName = "Gelöschter";
-                            review.Reviewer.LastName = "Nutzer";
-                            review.Reviewer.IsDeleted = true;
-                        }
+                            User_Id = review.ReviewerId,
+                            FirstName = review.ReviewerFirstName,
+                            LastName = review.ReviewerLastName,
+                            IsDeleted = false
+                        };
                     }
-                    catch (Exception ex)
+                    else
                     {
-                        Console.WriteLine($"[ERROR] Error checking reviewer {review.Reviewer.User_Id}: {ex.Message}");
-                        // Mark as deleted user as fallback
-                        review.Reviewer.FirstName = "Gelöschter";
-                        review.Reviewer.LastName = "Nutzer";
-                        review.Reviewer.IsDeleted = true;
+                        // Fallback: mark as deleted if no stored info
+                        review.Reviewer = new UGHApi.ViewModels.UserComponent.UserC
+                        {
+                            User_Id = review.ReviewerId,
+                            FirstName = "Gelöschter",
+                            LastName = "Nutzer",
+                            IsDeleted = true
+                        };
                     }
                 }
 
-                // If reviewed is null, it means the user was deleted
-                if (review.Reviewed == null)
+                // Handle Reviewed user - should always be the current user
+                review.Reviewed = new UGHApi.ViewModels.UserComponent.UserC
                 {
-                    review.Reviewed = new UGHApi.ViewModels.UserComponent.UserC
-                    {
-                        User_Id = Guid.Empty, // We don't have the original ID
-                        FirstName = "Gelöschter",
-                        LastName = "Nutzer",
-                        IsDeleted = true
-                    };
-                }
-                else
-                {
-                    // Check if reviewed user still exists
-                    try
-                    {
-                        var reviewedExists = await _context.users.AnyAsync(u => u.User_Id == review.Reviewed.User_Id);
-                        if (!reviewedExists)
-                        {
-                            // Mark as deleted user
-                            review.Reviewed.FirstName = "Gelöschter";
-                            review.Reviewed.LastName = "Nutzer";
-                            review.Reviewed.IsDeleted = true;
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"[ERROR] Error checking reviewed {review.Reviewed.User_Id}: {ex.Message}");
-                        // Mark as deleted user as fallback
-                        review.Reviewed.FirstName = "Gelöschter";
-                        review.Reviewed.LastName = "Nutzer";
-                        review.Reviewed.IsDeleted = true;
-                    }
-                }
+                    User_Id = review.ReviewedId,
+                    FirstName = "Current", // This will be replaced by the actual user data
+                    LastName = "User",
+                    IsDeleted = false
+                };
 
                 // Check if offer is deleted
                 if (review.Offer == null && review.OfferId.HasValue)
@@ -145,8 +150,7 @@ public class ReviewRepository
                         Id = review.OfferId.Value,
                         Title = "Gelöschtes Angebot",
                         Description = "Dieses Angebot wurde gelöscht",
-                        UserId = Guid.Empty,
-                        IsDeleted = true
+                        UserId = Guid.Empty
                     };
                 }
             }
@@ -159,7 +163,17 @@ public class ReviewRepository
         }
     }
 
-
+    private async Task<bool> UserExists(Guid userId)
+    {
+        try
+        {
+            return await _context.users.AnyAsync(u => u.User_Id == userId);
+        }
+        catch
+        {
+            return false;
+        }
+    }
 
     public async Task<Offer> GetOfferByIdAsync(int offerId)
     {
@@ -207,56 +221,121 @@ public class ReviewRepository
 #nullable enable
     public async Task<String> AddReview(int OfferId, int RatingValue, string? ReviewComment, Guid UserId, Guid? ReviewedUserId = null)
     {   
-        var reviewer = await _context.users.FindAsync(UserId);
-        if (reviewer == null)
-            return "Reviewed user not found.";
-        var offer = await GetOfferByIdAsync(OfferId);
-        if (offer == null)
-            return "Offer not found";
-        
-        bool isReviewerHost = reviewer.User_Id == offer.UserId;
-        Guid reviewedId;
-        Guid guestId;
-        
-        Review? existingReview = null;
-        if (isReviewerHost) {
-            if (!ReviewedUserId.HasValue)
-                return "Reviewed User {ReviewedUserId} not found";
-            reviewedId = ReviewedUserId.Value;
-            guestId = ReviewedUserId.Value;
-        }
-        else
+        try
         {
-            reviewedId = offer.UserId;
-            guestId = UserId;
+            Console.WriteLine($"[DEBUG] AddReview called with OfferId: {OfferId}, RatingValue: {RatingValue}, UserId: {UserId}, ReviewedUserId: {ReviewedUserId}");
+            
+            var reviewer = await _context.users.FindAsync(UserId);
+            if (reviewer == null)
+            {
+                Console.WriteLine($"[DEBUG] Reviewer not found for UserId: {UserId}");
+                return "Reviewer user not found.";
+            }
+            Console.WriteLine($"[DEBUG] Found reviewer: {reviewer.FirstName} {reviewer.LastName}");
+            
+            var offer = await GetOfferByIdAsync(OfferId);
+            if (offer == null)
+            {
+                Console.WriteLine($"[DEBUG] Offer not found for OfferId: {OfferId}");
+                return "Offer not found";
+            }
+            Console.WriteLine($"[DEBUG] Found offer: {offer.Title}");
+            
+            bool isReviewerHost = reviewer.User_Id == offer.UserId;
+            Guid reviewedId;
+            Guid guestId;
+            
+            Console.WriteLine($"[DEBUG] IsReviewerHost: {isReviewerHost}, ReviewerId: {reviewer.User_Id}, OfferUserId: {offer.UserId}");
+            
+            if (isReviewerHost) {
+                if (!ReviewedUserId.HasValue)
+                {
+                    Console.WriteLine($"[DEBUG] ReviewedUserId is null for host review");
+                    return "Reviewed User ID is required for host reviews";
+                }
+                reviewedId = ReviewedUserId.Value;
+                guestId = ReviewedUserId.Value;
+            }
+            else
+            {
+                reviewedId = offer.UserId;
+                guestId = UserId;
+            }
+            
+            Console.WriteLine($"[DEBUG] ReviewedId: {reviewedId}, GuestId: {guestId}");
+            
+            var existingReview = await _context.reviews.FirstOrDefaultAsync(r => r.OfferId == OfferId && r.ReviewerId == UserId && r.ReviewedId == reviewedId);
+            if (existingReview != null)
+            {
+                Console.WriteLine($"[DEBUG] Review already exists");
+                return "Review already exists.";
+            }
+            
+            Console.WriteLine($"[DEBUG] Checking for approved application: OfferId={OfferId}, UserId={guestId}");
+            var approvedApplication = await _context.offerapplication.FirstOrDefaultAsync(app => app.OfferId == OfferId && app.UserId == guestId && app.Status == OfferApplicationStatus.Approved);
+            if (approvedApplication == null)
+            {
+                Console.WriteLine($"[DEBUG] No approved application found");
+                return "Application not approved.";
+            }
+            Console.WriteLine($"[DEBUG] Found approved application: {approvedApplication.Id}");
+
+            // Check if there's already a review from the other party
+            var existingOppositeReview = await _context.reviews.FirstOrDefaultAsync(r => 
+                r.OfferId == OfferId && 
+                r.ReviewerId == reviewedId && 
+                r.ReviewedId == reviewer.User_Id);
+            
+            bool isVisible = false;
+            DateTime? visibilityDate = null;
+            
+            if (existingOppositeReview != null)
+            {
+                // Both parties have reviewed each other - make both reviews visible immediately
+                isVisible = true;
+                existingOppositeReview.IsVisible = true;
+                _context.reviews.Update(existingOppositeReview);
+                Console.WriteLine($"[DEBUG] Both parties have reviewed each other - making reviews visible immediately");
+            }
+            else
+            {
+                // Only one party has reviewed - use 14-day rule
+                isVisible = false;
+                visibilityDate = DateTime.UtcNow.AddDays(14);
+                Console.WriteLine($"[DEBUG] Only one party has reviewed - using 14-day rule");
+            }
+
+            var review = new Review
+            {
+                OfferId = OfferId,
+                RatingValue = RatingValue,
+                ReviewComment = ReviewComment,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow,
+                ReviewerId = reviewer.User_Id,
+                ReviewedId = reviewedId,
+                // Store reviewer information
+                ReviewerFirstName = reviewer.FirstName,
+                ReviewerLastName = reviewer.LastName,
+                ReviewerEmail = reviewer.Email_Address,
+                // Set visibility logic
+                IsVisible = isVisible,
+                VisibilityDate = visibilityDate
+            };
+
+            Console.WriteLine($"[DEBUG] Creating review with ReviewerId: {review.ReviewerId}, ReviewedId: {review.ReviewedId}");
+            await _context.reviews.AddAsync(review);
+            await _context.SaveChangesAsync();
+
+            Console.WriteLine($"[DEBUG] Review added successfully with ID: {review.Id}");
+            return "Review added successfully.";
         }
-        existingReview =  await _context.reviews.FirstOrDefaultAsync(r => r.OfferId == OfferId && r.ReviewerId == UserId && r.ReviewedId == reviewedId);
-        if (existingReview != null)
-            return "Review already exists.";        
-        
-        var approvedApplication = await _context.offerapplication.FirstOrDefaultAsync(app => app.OfferId == OfferId && app.UserId == guestId  && app.Status == OfferApplicationStatus.Approved);
-        if (approvedApplication == null)
-            return "Application not approved.";
-
-        
-        if (existingReview != null)
-            return "Review already exists";
-        var review = new Review
+        catch (Exception ex)
         {
-            OfferId = OfferId,
-            RatingValue = RatingValue,
-            ReviewComment = ReviewComment,
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow,
-            ReviewerId = reviewer.User_Id,
-            ReviewedId = reviewedId,
-        };
-
-        await _context.reviews.AddAsync(review);
-        await _context.SaveChangesAsync();
-
-
-        return "Review added successfully.";
+            Console.WriteLine($"[ERROR] Exception in AddReview: {ex.Message}");
+            Console.WriteLine($"[ERROR] Stack trace: {ex.StackTrace}");
+            return $"Error adding review: {ex.Message}";
+        }
     }
 #nullable disable    
 

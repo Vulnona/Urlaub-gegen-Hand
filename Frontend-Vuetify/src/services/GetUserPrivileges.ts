@@ -57,7 +57,7 @@ export const GetUserPrivileges = (): {userRole: string, membershipStatus: string
       return null;
     }
     
-    const userRole = decodedToken[process.env.claims_Url || ''] || '';
+    const userRole = decodedToken['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] || '';
     const membershipStatus = decodedToken.MembershipStatus || 'Inactive';
     const verification = decodedToken.VerificationStatus || 'not';
     
