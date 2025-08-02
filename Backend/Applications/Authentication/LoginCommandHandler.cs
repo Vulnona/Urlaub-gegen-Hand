@@ -107,7 +107,7 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, Result<LoginRes
             {
                 if (user.CurrentMembership != null)
                 {
-                    user.SetMembershipId(null);
+                    user.SetMembershipId(user.CurrentMembership.MembershipID);
                     await _userRepository.UpdateUserAsync(user);
                 }
             }
