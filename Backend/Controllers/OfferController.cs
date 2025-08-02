@@ -232,6 +232,8 @@ public class OfferController : ControllerBase
     [HttpPut("put-offer")]
     public async Task<IActionResult> PutOffer([FromForm] OfferViewModel offerViewModel)
     {
+        using var transaction = await _context.Database.BeginTransactionAsync();
+        
         try
         {
             var userId = _userProvider.UserId;
@@ -239,6 +241,19 @@ public class OfferController : ControllerBase
             var activeCount = await _context.offers.CountAsync(o => o.UserId == userId && o.Status == OfferStatus.Active);
             if (offerViewModel.OfferId == -1 && activeCount >= 12) {
                 return BadRequest("Du hast bereits die maximale Anzahl (12) aktiver Angebote. Bitte deaktiviere ein Angebot, bevor du ein neues erstellst.");
+            }
+            
+            if (offerViewModel.OfferId == -1) {
+                var recentDuplicate = await _context.offers
+                    .Where(o => o.UserId == userId && 
+                                o.Title == offerViewModel.Title &&
+                                o.Description == offerViewModel.Description &&
+                                o.CreatedAt >= DateOnly.FromDateTime(DateTime.UtcNow.AddMinutes(-5)))
+                    .FirstOrDefaultAsync();
+
+                if (recentDuplicate != null) {
+                    return BadRequest("Ein identisches Angebot wurde bereits vor kurzem erstellt. Bitte warte einen Moment oder ändere Titel/Beschreibung.");
+                }
             }
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -259,20 +274,20 @@ public class OfferController : ControllerBase
                 var firstApplication = offer.OfferApplications.FirstOrDefault();
                 if (firstApplication != null)
                     return StatusCode(412, "Can't modify an offer if applications exists.");
-                // test if applications exist missing
             } else {                                    
-            offer = new OfferTypeLodging {
-                CreatedAt = DateOnly.FromDateTime(DateTime.UtcNow),
-                UserId = userId
-            };
+                offer = new OfferTypeLodging {
+                    CreatedAt = DateOnly.FromDateTime(DateTime.UtcNow),
+                    UserId = userId
+                };
             }
+            
             offer.Title = offerViewModel.Title;
             offer.Description = offerViewModel.Description;
             offer.Skills = offerViewModel.Skills;
             offer.Requirements = offerViewModel.AccommodationSuitable;
             offer.AdditionalLodgingProperties = offerViewModel.Accommodation;
             
-            // NEW: Create Address entity from geographic location data
+            // Create Address entity from geographic location data
             _logger.LogInformation("Creating address with DisplayName: '{DisplayName}', Lat: {Lat}, Lon: {Lon}", 
                 offerViewModel.DisplayName, offerViewModel.Latitude, offerViewModel.Longitude);
             
@@ -283,10 +298,8 @@ public class OfferController : ControllerBase
                 DisplayName = offerViewModel.DisplayName
             };
             
-            // Add address to context first
+            // Add address to context 
             await _context.addresses.AddAsync(address);
-            await _context.SaveChangesAsync(); // Save to get the ID
-            
             offer.Address = address;
             
             offer.Status = OfferStatus.Active;
@@ -294,34 +307,53 @@ public class OfferController : ControllerBase
             offer.FromDate = DateOnly.FromDateTime(DateTime.Parse(offerViewModel.FromDate));
             offer.ToDate = DateOnly.FromDateTime(DateTime.Parse(offerViewModel.ToDate));
 
-            // Multi-Bild-Unterstützung
+            // Multi-Picture - Process images before saving the offer
             if (offerViewModel.Images != null && offerViewModel.Images.Length > 0) {
                 offer.Pictures = new List<Picture>();
+                bool hasValidImages = false;
+                
                 for (int i = 0; i < offerViewModel.Images.Length && i < 8; i++) {
                     var imageFile = offerViewModel.Images[i];
                     if (imageFile != null && imageFile.Length > 0) {
-                        using var memoryStream = new MemoryStream();
-                        await imageFile.CopyToAsync(memoryStream);
-                        var picture = await _offerRepository.AddPicture(memoryStream.ToArray(), user);
-                        picture.Offer = offer;
-                        offer.Pictures.Add(picture);
+                        try {
+                            using var memoryStream = new MemoryStream();
+                            await imageFile.CopyToAsync(memoryStream);
+                            var picture = await _offerRepository.AddPicture(memoryStream.ToArray(), user);
+                            picture.Offer = offer;
+                            offer.Pictures.Add(picture);
+                            hasValidImages = true;
+                        } catch (Exception ex) {
+                            _logger.LogError($"Failed to process image {i}: {ex.Message}");
+                            // Continue with other images instead of failing completely
+                        }
                     }
                 }
+                
+                // Validate that at least one valid image was processed
+                if (!hasValidImages && offerId == -1) {
+                    await transaction.RollbackAsync();
+                    return BadRequest("Mindestens ein gültiges Bild ist erforderlich");
+                }
             } else if (offerId == -1) {
+                await transaction.RollbackAsync();
                 return BadRequest("Mindestens ein Bild ist erforderlich");
             }
             
-            // a new offer is only created if there is no old one to modify
+            // Save the offer after processing images
             if(offerId == -1)
                 await _context.offers.AddAsync(offer);
             
+            // Save all in a transaction
             await _context.SaveChangesAsync();
+            await transaction.CommitAsync();
+            
             _logger.LogInformation("New Offer Added Successfully!");                        
 
             return Ok("New Offer Added Successfully!");
         }
         catch (Exception ex)
         {
+            await transaction.RollbackAsync();
             _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
             return StatusCode(500, $"Internal server error.");
         }

@@ -254,26 +254,34 @@ public class OfferRepository
 
     // todo: generalize for different formats and other pictures (like profile pic)
     public async Task<Picture>AddPicture(byte[] data, User user){
-        using (MagickImage image = new MagickImage(data)) {
-            image.Thumbnail(new MagickGeometry(400));
-            var format = MagickFormat.Jpg;
-            var stream = new MemoryStream();
-            image.Write(stream, format);
-            stream.Position = 0;
-            byte[] hashBytes = MD5.Create().ComputeHash(stream);
-            String hash = BitConverter.ToString(hashBytes).Replace("-", "");
-            Picture alreadyExisting = await _context.pictures.FirstOrDefaultAsync(p => p.Owner == user && p.Hash == hash);
-            if (alreadyExisting != null)
-                return alreadyExisting;
-            Picture p = new Picture{
-                ImageData = stream.ToArray(),
-                Width = 100,
-                Hash = hash,
-                Owner = user
-            };
-            await _context.pictures.AddAsync(p);
-            await _context.SaveChangesAsync();
-            return p;
+        try {
+            using (MagickImage image = new MagickImage(data)) {
+                image.Thumbnail(new MagickGeometry(400));
+                var format = MagickFormat.Jpg;
+                var stream = new MemoryStream();
+                image.Write(stream, format);
+                stream.Position = 0;
+                byte[] hashBytes = MD5.Create().ComputeHash(stream);
+                String hash = BitConverter.ToString(hashBytes).Replace("-", "");
+                Picture alreadyExisting = await _context.pictures.FirstOrDefaultAsync(p => p.Owner == user && p.Hash == hash);
+                if (alreadyExisting != null)
+                    return alreadyExisting;
+                Picture p = new Picture{
+                    ImageData = stream.ToArray(),
+                    Width = 100,
+                    Hash = hash,
+                    Owner = user
+                };
+                await _context.pictures.AddAsync(p);
+                await _context.SaveChangesAsync();
+                return p;
+            }
+        } catch (MagickException ex) {
+            _logger.LogError($"MagickImage processing failed: {ex.Message}");
+            throw new Exception("Bildverarbeitung fehlgeschlagen", ex);
+        } catch (Exception ex) {
+            _logger.LogError($"Image processing failed: {ex.Message}");
+            throw new Exception("Bildverarbeitung fehlgeschlagen", ex);
         }
     }
 }

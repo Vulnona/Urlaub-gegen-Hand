@@ -102,28 +102,31 @@ namespace UGHApi
 
         private static void ConfigureServices(WebApplicationBuilder builder)
         {
+            // Warmup MagickImage library to prevent first-call issues
+            WarmupMagickImage();
+            
             // Timezone is already configured in ConfigureLogging
             var config = builder.Configuration;
             MapsterConfig.RegisterMappings();
             var connectionString = config.GetConnectionString("DefaultConnection");
             Console.WriteLine($"[EF DEBUG] Registering DbContext with connection string: {connectionString}");
 
-static ServerVersion GetDesignTimeServerVersion(string connectionString)
-{
-    try 
-    {
-        // Fix connection string for design-time (localhost instead of docker container)
-        if (connectionString.Contains("Server=db;")) {
-            connectionString = connectionString.Replace("Server=db;", "Server=localhost;");
-        }
-        return ServerVersion.AutoDetect(connectionString);
-    }
-    catch 
-    {
-        // Fallback for design-time when database is not available
-        return ServerVersion.Create(Version.Parse("8.0.0"), Pomelo.EntityFrameworkCore.MySql.Infrastructure.ServerType.MySql);
-    }
-}
+            static ServerVersion GetDesignTimeServerVersion(string connectionString)
+            {
+                try 
+                {
+                    // Fix connection string for design-time (localhost instead of docker container)
+                    if (connectionString.Contains("Server=db;")) {
+                        connectionString = connectionString.Replace("Server=db;", "Server=localhost;");
+                    }
+                    return ServerVersion.AutoDetect(connectionString);
+                }
+                catch 
+                {
+                    // Fallback for design-time when database is not available
+                    return ServerVersion.Create(Version.Parse("8.0.0"), Pomelo.EntityFrameworkCore.MySql.Infrastructure.ServerType.MySql);
+                }
+            }
             builder.Services.AddHttpClient();
             
             // For design-time tools, use localhost and fixed MySQL version to avoid connection issues
@@ -347,6 +350,25 @@ static ServerVersion GetDesignTimeServerVersion(string connectionString)
         public static DateTime GetGermanTime()
         {
             return TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, AppTimeZone);
+        }
+
+        private static void WarmupMagickImage()
+        {
+            try
+            {
+                // Create a minimal test image to initialize the MagickImage library
+                var testImageData = new byte[] { 0xFF, 0xD8, 0xFF, 0xE0, 0x00, 0x10, 0x4A, 0x46, 0x49, 0x46, 0x00, 0x01 };
+                using (var testImage = new ImageMagick.MagickImage(testImageData))
+                {
+                    // Library is now initialized
+                    Console.WriteLine("MagickImage library warmed up successfully");
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log but don't fail startup
+                Console.WriteLine($"Warning: MagickImage warmup failed: {ex.Message}");
+            }
         }
     }
 }

@@ -120,7 +120,7 @@
             </div>
             <div class="text-right">
               <button type="button" class="btn btn-secondary me-2" @click="goBack">Zurück</button>
-              <button type="submit" class="btn themeBtn"><a v-if="!modify">Erstelle Angebot</a><a v-else>Modifiziere Angebot</a>&nbsp;<i class="ri-add-circle-line"></i></button>
+              <button type="submit" class="btn themeBtn" :disabled="loading"><span v-if="!modify">Erstelle Angebot</span><span v-else>Modifiziere Angebot</span>&nbsp;<i class="ri-add-circle-line"></i></button>
               </div>
             </div>
           </div>
@@ -148,6 +148,7 @@ import draggable from 'vuedraggable';
 const props = defineProps({banner: String, offer:{type: Object, default: {id: -1}, required: false} })
 
 let loading = ref(true);
+let currentRequest = null; // For Request-Abort-Controller
 let offer = reactive ({
     title: '',
     description: '',
@@ -182,81 +183,104 @@ const validateDateRange = () => {
 };
 
 const createOffer = async() => {
-        loading.value = true;
-      if (images.value.length > 8) {
-          toast.warning("Maximal 8 Bilder erlaubt.");
-          loading.value = false;
-          return;
-      }
-      if (!offer.title || !offer.skills.length || (!images.value.length && !modify) || !offer.description || !offer.address || !offer.UntilDate || !offer.FromDate) {
-          toast.info("Bitte alle mit * markierten Felder ausfüllen.");
-          loading.value = false;
-          return;
-      }
-      
-      // Validate date range
-      if (offer.FromDate && offer.UntilDate && offer.FromDate > offer.UntilDate) {
-          toast.warning("Das 'Möglich ab' Datum darf nicht nach dem 'Möglich bis' Datum liegen.");
-          loading.value = false;
-          return;
-      }
+    // Prevent multiple submissions
+    if (loading.value) {
+        return;
+    }
     
+    // Abort previous request if exists
+    if (currentRequest) {
+        currentRequest.abort();
+    }
+    
+    loading.value = true;
+    
+    if (images.value.length > 8) {
+        toast.warning("Maximal 8 Bilder erlaubt.");
+        loading.value = false;
+        return;
+    }
+    if (!offer.title || !offer.skills.length || (!images.value.length && !modify) || !offer.description || !offer.address || !offer.UntilDate || !offer.FromDate) {
+        toast.info("Bitte alle mit * markierten Felder ausfüllen.");
+        loading.value = false;
+        return;
+    }
+    
+    // Validate date range
+    if (offer.FromDate && offer.UntilDate && offer.FromDate > offer.UntilDate) {
+        toast.warning("Das 'Möglich ab' Datum darf nicht nach dem 'Möglich bis' Datum liegen.");
+        loading.value = false;
+        return;
+    }
+
     const offerData = new FormData();
     offer.description = offer.description.replaceAll("\n","\ \ \n");
     offerData.append('title', offer.title);
-        offerData.append('description', offer.description);
-        offerData.append('location', offer.address ? offer.address.displayName : '');
-        // Add address data
-        if (offer.address) {
-            offerData.append('latitude', offer.address.latitude?.toString() || '');
-            offerData.append('longitude', offer.address.longitude?.toString() || '');
-            const displayName = offer.address.displayName || offer.address.DisplayName || offer.address.display_name || '';
-            offerData.append('DisplayName', displayName);
-            offerData.append('id', offer.address.id?.toString() || '');
-        }
-        
-        offerData.append('accommodation', offer.accommodation.join(', '));
-        offerData.append('accommodationSuitable', offer.accommodationSuitable.join(', '));
-        offerData.append('ToDate', offer.UntilDate.toISOString().split('+')[0]);
-        offerData.append('FromDate', offer.FromDate.toISOString().split('+')[0]);
-        offerData.append('skills', offer.skills.map(skill => skill.name).join(', '));
-        offerData.append('OfferId', offer.id.toString());
-      // Bilder anhängen
-      images.value.forEach((img, idx) => {
+    offerData.append('description', offer.description);
+    offerData.append('location', offer.address ? offer.address.displayName : '');
+    // Add address data
+    if (offer.address) {
+        offerData.append('latitude', offer.address.latitude?.toString() || '');
+        offerData.append('longitude', offer.address.longitude?.toString() || '');
+        const displayName = offer.address.displayName || offer.address.DisplayName || offer.address.display_name || '';
+        offerData.append('DisplayName', displayName);
+        offerData.append('id', offer.address.id?.toString() || '');
+    }
+    
+    offerData.append('accommodation', offer.accommodation.join(', '));
+    offerData.append('accommodationSuitable', offer.accommodationSuitable.join(', '));
+    offerData.append('ToDate', offer.UntilDate.toISOString().split('+')[0]);
+    offerData.append('FromDate', offer.FromDate.toISOString().split('+')[0]);
+    offerData.append('skills', offer.skills.map(skill => skill.name).join(', '));
+    offerData.append('OfferId', offer.id.toString());
+    
+    // Bilder anhängen
+    images.value.forEach((img, idx) => {
         if (typeof img === 'string') {
-          offerData.append('existingImages', img);
+            offerData.append('existingImages', img);
         } else if (img instanceof File) {
-          offerData.append('images', img);
+            offerData.append('images', img);
         } else if (img && typeof img === 'object' && 'src' in img) {
-          // Für Objekte mit src-Property, verwende die src als existingImage
-          offerData.append('existingImages', img.src);
+            // Für Objekte mit src-Property, verwende die src als existingImage
+            offerData.append('existingImages', img.src);
         }
-      });
-      try {
+    });
+    
+    // Create new abort controller
+    const abortController = new AbortController();
+    currentRequest = abortController;
+    
+    try {
         const response = await axiosInstance.put(
-          `offer/put-offer`,
-          offerData, {
-          headers: {
-            'Content-Type': 'multipart/form-data'
-          }
-        }
+            `offer/put-offer`,
+            offerData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                },
+                signal: abortController.signal
+            }
         );
         
-            if(modify)
-                toast.success("Das Angebot wurde bearbeitet.");
-            else
-                toast.success("Das Angebot wurde erstellt.");
-          router.push('/my-offers');
+        if(modify)
+            toast.success("Das Angebot wurde bearbeitet.");
+        else
+            toast.success("Das Angebot wurde erstellt.");
+        router.push('/my-offers');
         
-      } catch (error: any) {
-          if (error.request?.status == 412)
-              toast.info("Es existieren bereits Bewerbungen, das Angebot ist schreibgeschützt.");
-          else if (error.request?.status == 403)
-              toast.info("Du hast nicht die Autorisierung das Angebot zu erstellen/bearbeiten.");
-          else
-              toast.info("Das Angebot kann nicht bearbeitet/erstellt werden");
-      }
-       loading.value = false;
+    } catch (error: any) {
+        if (error.name === 'AbortError') {
+            return; // Request was aborted
+        }
+        if (error.request?.status == 412)
+            toast.info("Es existieren bereits Bewerbungen, das Angebot ist schreibgeschützt.");
+        else if (error.request?.status == 403)
+            toast.info("Du hast nicht die Autorisierung das Angebot zu erstellen/bearbeiten.");
+        else
+            toast.info("Das Angebot kann nicht bearbeitet/erstellt werden");
+    } finally {
+        loading.value = false;
+        currentRequest = null;
+    }
 }
 const onFileChange = (event) => {
   const files = Array.from(event.target.files).filter(f => f instanceof File);
