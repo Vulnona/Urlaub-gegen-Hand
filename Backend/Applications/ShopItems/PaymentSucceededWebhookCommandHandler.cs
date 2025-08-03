@@ -131,7 +131,7 @@ public class PaymentSucceededWebhookCommandHandler
                     );
 
                     await _emailService.SendEmailAsync(
-                        coupon.CreatedByUser.Email_Address,
+                        transaction.User.Email_Address,
                         htmlTemplate.Subject,
                         htmlTemplate.BodyHtml
                     );
@@ -139,7 +139,7 @@ public class PaymentSucceededWebhookCommandHandler
                 catch (Exception ex)
                 {
                     _logger.LogError(
-                        $"Error sending email to {coupon.CreatedByUser.Email_Address}: {ex.Message}"
+                        $"Error sending email to {transaction.User.Email_Address}: {ex.Message}"
                     );
                 }
             });
