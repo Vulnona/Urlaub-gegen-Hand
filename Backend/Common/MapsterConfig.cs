@@ -1,7 +1,6 @@
 using Mapster;
 using UGH.Domain.Entities;
 using UGHApi.Entities;
-using UGHApi.Extensions;
 using UGHApi.ViewModels;
 
 public static class MapsterConfig
@@ -18,7 +17,6 @@ public static class MapsterConfig
 
         TypeAdapterConfig<Coupon, CouponDto>
             .NewConfig()
-            .Map(dest => dest.Duration, src => src.Duration.ToDays())
             .Map(dest => dest.CreatedBy, src => src.CreatedByUser.Email_Address);
 
         TypeAdapterConfig<Transaction, TransactionDto>

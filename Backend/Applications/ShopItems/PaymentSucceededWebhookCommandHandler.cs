@@ -4,7 +4,6 @@ using Stripe;
 using UGH.Domain.Core;
 using UGH.Domain.Interfaces;
 using UGH.Infrastructure.Services;
-using UGHApi.Extensions;
 using UGHApi.Services.HtmlTemplate;
 using static UGH.Domain.Core.UGH_Enums;
 
@@ -90,13 +89,13 @@ public class PaymentSucceededWebhookCommandHandler
             }
 
             var membership = await _membershipRepository.GetMembershipByDurationDaysAsync(
-                transaction.ShopItem.Duration.ToDays()
+                transaction.ShopItem.Duration
             );
 
             if (membership == null)
             {
                 _logger.LogInformation(
-                    $"Membership with duration of {transaction.ShopItem.Duration.ToDays()} days not found."
+                    $"Membership with duration of {transaction.ShopItem.Duration} days not found."
                 );
                 return Result.Failure(Errors.General.InvalidOperation("Shop Item does not belong to any membership"));
             }
@@ -108,7 +107,7 @@ public class PaymentSucceededWebhookCommandHandler
                 Description = string.Empty,
                 CreatedBy = transaction.UserId,
                 MembershipId = membership.MembershipID,
-                Duration = membership.DurationDays.ToCouponDuration(),
+                Duration = membership.DurationDays,
             };
 
             var coupon = await _couponRepository.AddCoupon(newCoupon);

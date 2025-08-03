@@ -1,6 +1,5 @@
 using MediatR;
 using UGHApi.Entities;
-using UGHApi.Extensions;
 using UGH.Domain.Interfaces;
 
 namespace UGHApi.Applications.ShopItems;
@@ -23,7 +22,7 @@ public class CreateShopItemCommandHandler : IRequestHandler<CreateShopItemComman
         {
             Name = request.Name,
             Price = request.Price,
-            Duration = request.Duration.ToCouponDuration(),
+            Duration = request.Duration,
             Description = request.Description,
         };
 

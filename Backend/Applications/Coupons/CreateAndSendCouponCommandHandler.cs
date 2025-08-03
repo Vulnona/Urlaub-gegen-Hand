@@ -2,7 +2,6 @@ using MediatR;
 using UGH.Domain.Core;
 using UGH.Domain.Entities;
 using UGH.Domain.Interfaces;
-using UGHApi.Extensions;
 using UGHApi.Services.HtmlTemplate;
 using UGH.Infrastructure.Services;
 
@@ -66,7 +65,7 @@ public class CreateAndSendCouponCommandHandler : IRequestHandler<CreateAndSendCo
                 Description = string.Empty,
                 CreatedBy = user.User_Id, // Admin creates it for the user
                 MembershipId = membership.MembershipID,
-                Duration = membership.DurationDays.ToCouponDuration(),
+                Duration = membership.DurationDays,
             };
 
             var coupon = await _couponRepository.AddCoupon(newCoupon);

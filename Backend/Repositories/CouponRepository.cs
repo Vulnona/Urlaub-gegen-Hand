@@ -1,7 +1,6 @@
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 using UGH.Domain.Entities;
-using UGHApi.Extensions;
 using UGH.Domain.Interfaces;
 using UGHApi.Shared;
 using UGHApi.ViewModels;
@@ -64,7 +63,7 @@ namespace UGHApi.Repositories
                 {
                     var couponDto = coupon.Adapt<CouponDto>();
                     couponDto.IsRedeemed = coupon.Redemption != null;
-                    couponDto.Duration = coupon.Duration.ToDays();
+                    couponDto.Duration = coupon.Duration;
                     if (couponDto.IsRedeemed)
                     {
                         couponDto.RedeemedBy = coupon.Redemption?.UserEmail ?? null;

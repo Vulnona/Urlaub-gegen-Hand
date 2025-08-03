@@ -1,6 +1,5 @@
 using UGH.Domain.Entities;
 using UGH.Domain.Core;
-using UGHApi.Extensions;
 using UGH.Domain.Interfaces;
 #nullable enable
 using Microsoft.Extensions.Logging;
@@ -16,7 +15,7 @@ public interface ICouponService
     /// <summary>
     /// Generates a new coupon code
     /// </summary>
-    Task<Result<Coupon>> GenerateCouponAsync(int membershipId, CouponDuration duration, Guid createdBy, string? customCode = null);
+    Task<Result<Coupon>> GenerateCouponAsync(int membershipId, int duration, Guid createdBy, string? customCode = null);
     
     /// <summary>
     /// Redeems a coupon for a user
@@ -58,7 +57,7 @@ public class CouponService : ICouponService
         _logger = logger;
     }
 
-    public async Task<Result<Coupon>> GenerateCouponAsync(int membershipId, CouponDuration duration, Guid createdBy, string? customCode = null)
+    public async Task<Result<Coupon>> GenerateCouponAsync(int membershipId, int duration, Guid createdBy, string? customCode = null)
     {
         try
         {
@@ -133,7 +132,7 @@ public class CouponService : ICouponService
             await _couponRepository.RedeemCoupon(coupon, user);
 
             // Create user membership
-            var durationDays = coupon.Duration.ToDays();
+            var durationDays = coupon.Duration;
             var userMembership = new UserMembership
             {
                 User_Id = userId,

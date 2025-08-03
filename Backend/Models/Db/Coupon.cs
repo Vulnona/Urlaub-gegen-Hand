@@ -15,7 +15,7 @@ public class Coupon
     public string Name { get; set; }
     public string Description { get; set; }
     public DateTime CreatedDate { get; set; } = DateTime.Now;
-    public CouponDuration Duration { get; set; }
+    public int Duration { get; set; }
     public Guid CreatedBy { get; set; }
 
     // Email tracking fields
