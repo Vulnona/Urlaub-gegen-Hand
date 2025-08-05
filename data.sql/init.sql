@@ -171,7 +171,7 @@ CREATE TABLE `offers` (
     `AddressId` int DEFAULT NULL,
     PRIMARY KEY (`Id`),
     INDEX `IX_offers_UserId` (`UserId`)
-) ENGINE=InnoDB AUTO_INCREMENT=130 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Create offerapplication table
 CREATE TABLE `offerapplication` (
@@ -186,7 +186,7 @@ CREATE TABLE `offerapplication` (
     INDEX `IX_offerapplication_OfferId` (`OfferId`),
     INDEX `IX_offerapplication_UserId` (`UserId`),
     INDEX `IX_offerapplication_HostId` (`HostId`)
-) ENGINE=InnoDB AUTO_INCREMENT=131 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Create pictures table
 CREATE TABLE `pictures` (
@@ -199,7 +199,7 @@ CREATE TABLE `pictures` (
     PRIMARY KEY (`Id`),
     INDEX `IX_pictures_UserId` (`UserId`),
     INDEX `IX_pictures_OfferId` (`OfferId`)
-) ENGINE=InnoDB AUTO_INCREMENT=28 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Create reviews table
 CREATE TABLE `reviews` (
