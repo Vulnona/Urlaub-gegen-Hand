@@ -253,27 +253,43 @@ public class OfferRepository
     }
 
     // todo: generalize for different formats and other pictures (like profile pic)
-    public async Task<Picture>AddPicture(byte[] data, User user){
+    public async Task<Picture>AddPicture(byte[] data, User user, int? offerId = null){
         try {
+            // Calculate hash from the original image, not from the processed image
+            byte[] originalHashBytes = MD5.Create().ComputeHash(data);
+            String originalHash = BitConverter.ToString(originalHashBytes).Replace("-", "");
+            
+            // Check for already existing picture ONLY within the same offer
+            Picture alreadyExisting = null;
+            if (offerId.HasValue) {
+                alreadyExisting = await _context.pictures.FirstOrDefaultAsync(p => 
+                    p.Owner == user && 
+                    p.Hash == originalHash && 
+                    p.OfferId == offerId.Value);
+            }
+            
+            if (alreadyExisting != null) {
+                _logger.LogInformation($"Reusing existing picture with ID {alreadyExisting.Id} for offer {offerId}");
+                return alreadyExisting;
+            }
+            
+            // Process the image for display
             using (MagickImage image = new MagickImage(data)) {
                 image.Thumbnail(new MagickGeometry(400));
                 var format = MagickFormat.Jpg;
                 var stream = new MemoryStream();
                 image.Write(stream, format);
                 stream.Position = 0;
-                byte[] hashBytes = MD5.Create().ComputeHash(stream);
-                String hash = BitConverter.ToString(hashBytes).Replace("-", "");
-                Picture alreadyExisting = await _context.pictures.FirstOrDefaultAsync(p => p.Owner == user && p.Hash == hash);
-                if (alreadyExisting != null)
-                    return alreadyExisting;
+                
                 Picture p = new Picture{
                     ImageData = stream.ToArray(),
-                    Width = 100,
-                    Hash = hash,
+                    Width = 400, // Correct width
+                    Hash = originalHash, // Use hash from original
                     Owner = user
+                    // OfferId is set via Navigation Property
                 };
+                
                 await _context.pictures.AddAsync(p);
-                await _context.SaveChangesAsync();
                 return p;
             }
         } catch (MagickException ex) {
@@ -282,6 +298,55 @@ public class OfferRepository
         } catch (Exception ex) {
             _logger.LogError($"Image processing failed: {ex.Message}");
             throw new Exception("Bildverarbeitung fehlgeschlagen", ex);
+        }
+    }
+    
+    /// <summary>
+    /// Cleans up orphaned pictures that are not assigned to any offer anymore
+    /// </summary>
+    public async Task CleanupOrphanedPicturesAsync()
+    {
+        try {
+            // Find all pictures that don't have an OfferId or whose offer no longer exists
+            var orphanedPictures = await _context.pictures
+                .Where(p => p.OfferId == null || !_context.offers.Any(o => o.Id == p.OfferId))
+                .ToListAsync();
+            
+            if (orphanedPictures.Any()) {
+                _logger.LogInformation($"Found {orphanedPictures.Count} orphaned pictures to cleanup");
+                _context.pictures.RemoveRange(orphanedPictures);
+                await _context.SaveChangesAsync();
+                _logger.LogInformation($"Successfully removed {orphanedPictures.Count} orphaned pictures");
+            }
+        } catch (Exception ex) {
+            _logger.LogError($"Failed to cleanup orphaned pictures: {ex.Message}");
+            throw;
+        }
+    }
+    
+    /// <summary>
+    /// Ensures that all pictures of an offer are correctly assigned
+    /// </summary>
+    public async Task EnsureOfferPicturesConsistencyAsync(int offerId)
+    {
+        try {
+            var pictures = await _context.pictures
+                .Where(p => p.OfferId == offerId)
+                .ToListAsync();
+            
+            foreach (var picture in pictures) {
+                if (picture.OfferId != offerId) {
+                    picture.OfferId = offerId;
+                    _logger.LogInformation($"Fixed picture {picture.Id} OfferId to {offerId}");
+                }
+            }
+            
+            if (pictures.Any(p => p.OfferId != offerId)) {
+                await _context.SaveChangesAsync();
+            }
+        } catch (Exception ex) {
+            _logger.LogError($"Failed to ensure offer pictures consistency for offer {offerId}: {ex.Message}");
+            throw;
         }
     }
 }

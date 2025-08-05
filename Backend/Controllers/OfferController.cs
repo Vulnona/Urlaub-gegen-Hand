@@ -266,7 +266,10 @@ public class OfferController : ControllerBase
             int offerId = offerViewModel.OfferId ?? -1;
             OfferTypeLodging offer;
             if (offerId != -1) {
-                offer = await _context.offertypelodgings.Include(o => o.OfferApplications).FirstOrDefaultAsync(o => o.Id == offerId);
+                offer = await _context.offertypelodgings
+                    .Include(o => o.OfferApplications)
+                    .Include(o => o.Pictures) 
+                    .FirstOrDefaultAsync(o => o.Id == offerId);
                 if (offer == null)
                     return BadRequest("OfferNotFound");
                 if (offer.UserId != userId)
@@ -309,8 +312,13 @@ public class OfferController : ControllerBase
 
             // Multi-Picture - Process images before saving the offer
             if (offerViewModel.Images != null && offerViewModel.Images.Length > 0) {
-                offer.Pictures = new List<Picture>();
-                bool hasValidImages = false;
+                // For existing offers: Add new images to the existing list
+                if (offer.Pictures == null) {
+                    offer.Pictures = new List<Picture>();
+                }
+                
+                bool hasValidImages = offer.Pictures.Count > 0; // Already existing images are valid
+                List<Exception> imageErrors = new List<Exception>();
                 
                 for (int i = 0; i < offerViewModel.Images.Length && i < 8; i++) {
                     var imageFile = offerViewModel.Images[i];
@@ -318,15 +326,27 @@ public class OfferController : ControllerBase
                         try {
                             using var memoryStream = new MemoryStream();
                             await imageFile.CopyToAsync(memoryStream);
-                            var picture = await _offerRepository.AddPicture(memoryStream.ToArray(), user);
+                            
+                            // Verwende die neue AddPicture-Methode mit OfferId
+                            var picture = await _offerRepository.AddPicture(memoryStream.ToArray(), user, offerId == -1 ? null : offerId);
+                            
+                            // Navigation Properties korrekt setzen
                             picture.Offer = offer;
                             offer.Pictures.Add(picture);
                             hasValidImages = true;
+                            
+                            _logger.LogInformation($"Successfully processed image {i} for offer {offerId}");
                         } catch (Exception ex) {
                             _logger.LogError($"Failed to process image {i}: {ex.Message}");
+                            imageErrors.Add(ex);
                             // Continue with other images instead of failing completely
                         }
                     }
+                }
+                
+                // Log all image errors
+                if (imageErrors.Count > 0) {
+                    _logger.LogWarning($"Failed to process {imageErrors.Count} images: {string.Join(", ", imageErrors.Select(e => e.Message))}");
                 }
                 
                 // Validate that at least one valid image was processed
@@ -339,9 +359,24 @@ public class OfferController : ControllerBase
                 return BadRequest("Mindestens ein Bild ist erforderlich");
             }
             
+            // Process existing images (for updates)
+            if (offerId != -1 && offerViewModel.ExistingImages != null && offerViewModel.ExistingImages.Length > 0) {
+                // Ensure the existing images are correctly assigned
+                foreach (var existingImageId in offerViewModel.ExistingImages) {
+                    if (int.TryParse(existingImageId, out int pictureId)) {
+                        var existingPicture = offer.Pictures?.FirstOrDefault(p => p.Id == pictureId);
+                        if (existingPicture != null) {
+                            // Stelle sicher, dass die OfferId korrekt gesetzt ist
+                            existingPicture.OfferId = offerId;
+                        }
+                    }
+                }
+            }
+            
             // Save the offer after processing images
-            if(offerId == -1)
+            if(offerId == -1) {
                 await _context.offers.AddAsync(offer);
+            }
             
             // Save all in a transaction
             await _context.SaveChangesAsync();
@@ -559,6 +594,64 @@ public class OfferController : ControllerBase
         {
             _logger.LogError($"Exception occurred deleting picture: {ex.Message} | StackTrace: {ex.StackTrace}");
             return StatusCode(500, "Internal server error.");
+        }
+    }
+
+    [HttpGet("debug-pictures/{offerId:int}")]
+    [AllowAnonymous]
+    public async Task<IActionResult> DebugPictures(int offerId)
+    {
+        try {
+            var offer = await _context.offertypelodgings
+                .Include(o => o.Pictures)
+                .FirstOrDefaultAsync(o => o.Id == offerId);
+            
+            if (offer == null) {
+                return NotFound($"Offer {offerId} not found");
+            }
+            
+            var pictureInfo = new List<object>();
+            if (offer.Pictures != null) {
+                pictureInfo = offer.Pictures.Select(p => new {
+                    Id = p.Id,
+                    Hash = p.Hash,
+                    OfferId = p.OfferId,
+                    UserId = p.UserId,
+                    Width = p.Width,
+                    ImageDataLength = p.ImageData?.Length ?? 0,
+                    HasValidOfferId = p.OfferId == offerId
+                }).Cast<object>().ToList();
+            }
+            
+            var result = new {
+                OfferId = offer.Id,
+                OfferTitle = offer.Title,
+                TotalPictures = pictureInfo.Count,
+                Pictures = pictureInfo,
+                HasPictures = offer.Pictures?.Any() ?? false,
+                PicturesLoaded = offer.Pictures != null
+            };
+            
+            _logger.LogInformation($"DebugPictures for offer {offerId}: {pictureInfo.Count} pictures found");
+            return Ok(result);
+        }
+        catch (Exception ex) {
+            _logger.LogError($"DebugPictures exception: {ex.Message}");
+            return StatusCode(500, $"Internal server error: {ex.Message}");
+        }
+    }
+    
+    [HttpPost("fix-pictures/{offerId:int}")]
+    [AllowAnonymous]
+    public async Task<IActionResult> FixPictures(int offerId)
+    {
+        try {
+            await _offerRepository.EnsureOfferPicturesConsistencyAsync(offerId);
+            return Ok($"Pictures for offer {offerId} have been fixed");
+        }
+        catch (Exception ex) {
+            _logger.LogError($"FixPictures exception: {ex.Message}");
+            return StatusCode(500, $"Internal server error: {ex.Message}");
         }
     }
 }
