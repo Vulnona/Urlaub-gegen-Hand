@@ -253,6 +253,7 @@ public class OfferRepository
     }
 
     // todo: generalize for different formats and other pictures (like profile pic)
+    // important: pictures aren't added to the db anymore
     public async Task<Picture>AddPicture(byte[] data, User user, int? offerId = null){
         try {
             // Calculate hash from the original image, not from the processed image
@@ -287,9 +288,7 @@ public class OfferRepository
                     Hash = originalHash, // Use hash from original
                     Owner = user
                     // OfferId is set via Navigation Property
-                };
-                
-                await _context.pictures.AddAsync(p);
+                };                
                 return p;
             }
         } catch (MagickException ex) {

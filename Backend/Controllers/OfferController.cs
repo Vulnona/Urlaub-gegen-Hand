@@ -233,7 +233,8 @@ public class OfferController : ControllerBase
     public async Task<IActionResult> PutOffer([FromForm] OfferViewModel offerViewModel)
     {
         using var transaction = await _context.Database.BeginTransactionAsync();
-        
+        Picture[] pictures = new Picture[8];
+        OfferTypeLodging offer;
         try
         {
             var userId = _userProvider.UserId;
@@ -263,8 +264,7 @@ public class OfferController : ControllerBase
             if (user == null)
                 return BadRequest("UserNotFound");            
 
-            int offerId = offerViewModel.OfferId ?? -1;
-            OfferTypeLodging offer;
+            int offerId = offerViewModel.OfferId ?? -1;            
             if (offerId != -1) {
                 offer = await _context.offertypelodgings
                     .Include(o => o.OfferApplications)
@@ -332,7 +332,13 @@ public class OfferController : ControllerBase
                             
                             // Navigation Properties korrekt setzen
                             picture.Offer = offer;
-                            offer.Pictures.Add(picture);
+                            if (i == 0) {
+                                offer.Pictures.Add(picture);
+                                await _context.pictures.AddAsync(picture);
+                            }
+                            else  
+                                pictures[i] = picture;                            
+                            
                             hasValidImages = true;
                             
                             _logger.LogInformation($"Successfully processed image {i} for offer {offerId}");
@@ -383,8 +389,6 @@ public class OfferController : ControllerBase
             await transaction.CommitAsync();
             
             _logger.LogInformation("New Offer Added Successfully!");                        
-
-            return Ok("New Offer Added Successfully!");
         }
         catch (Exception ex)
         {
@@ -392,6 +396,21 @@ public class OfferController : ControllerBase
             _logger.LogError($"Exception occurred: {ex.Message} | StackTrace: {ex.StackTrace}");
             return StatusCode(500, $"Internal server error.");
         }
+        // pictures[0] is always null
+        try {
+            for (int i = 1; i<8; i++){
+                if (pictures[i] == null)
+                    continue;
+                offer.Pictures.Add(pictures[i]);
+                await _context.pictures.AddAsync(pictures[i]);
+            }
+            await _context.SaveChangesAsync();
+            return Ok("New Offer Added Successfully!");
+        } catch (Exception ex) {
+            _logger.LogError($"Adding additional pictures failed: {ex.Message} | StackTrace: {ex.StackTrace}");
+            return StatusCode(500, $"Internal server error.");
+        }
+        
     }
 
     [HttpPut("close-offer/{OfferId:int}")]
