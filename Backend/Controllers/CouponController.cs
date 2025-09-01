@@ -154,7 +154,7 @@ namespace UGHApi.Controllers
             {
                 _logger.LogInformation($"=== DEBUG: GetAllCoupon called ===");
                 _logger.LogInformation($"Request URI: {Request.Path}{Request.QueryString}");
-                _logger.LogInformation($"Headers: {string.Join(", ", Request.Headers.Select(h => $"{h.Key}={h.Value}"))}");
+                _logger.LogInformation($"Request headers count: {Request.Headers.Count}");
                 _logger.LogInformation($"pageNumber: {pageNumber}, pageSize: {pageSize}");
                 
                 if (pageNumber < 1 || pageSize < 1)

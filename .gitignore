@@ -30,3 +30,123 @@ Frontend-Vuetify/package.json
 
 /.docker/*/secrets/*
 !/.docker/*/secrets/.*
+
+# AWS Configuration
+**/aws-config.json
+**/aws-credentials.json
+**/aws-keys.txt
+**/aws-secrets.txt
+
+# Database Configuration
+**/database-credentials.json
+**/db-keys.txt
+**/connection-strings.txt
+
+# JWT and Authentication
+**/jwt-keys.txt
+**/auth-secrets.txt
+**/token-keys.txt
+
+# Stripe Configuration
+**/stripe-keys.txt
+**/stripe-secrets.txt
+**/payment-keys.txt
+
+# Email Configuration
+**/email-credentials.json
+**/smtp-keys.txt
+**/mail-secrets.txt
+
+# Facebook Configuration
+**/facebook-credentials.json
+**/fb-keys.txt
+**/social-media-secrets.txt
+
+# Backup and Migration Files
+**/backup-credentials.json
+**/migration-keys.txt
+
+# User Secrets (ASP.NET Core)
+**/secrets.json
+**/user-secrets.json
+
+# Docker Secrets
+**/docker-secrets.txt
+**/container-keys.txt
+
+# Log Files (may contain sensitive data)
+**/logs/
+**/*.log
+**/logfiles/
+
+# Temporary Files
+**/temp/
+**/tmp/
+**/*.tmp
+**/*.temp
+
+# IDE and Editor Files
+**/.vscode/
+**/.idea/
+**/*.suo
+**/*.ntvs*
+**/*.njsproj
+**/*.sln
+**/*.sw?
+
+# OS Generated Files
+**/.DS_Store
+**/Thumbs.db
+**/ehthumbs.db
+**/Desktop.ini
+
+# Build Output
+**/dist/
+**/build/
+**/out/
+**/target/
+
+# Dependencies
+**/node_modules/
+**/packages/
+**/.nuget/
+**/packages.lock.json
+
+# ADDITIONAL SECURITY RULES - NEVER commit these files
+# Configuration files that might contain secrets
+**/appsettings.Production.json
+**/appsettings.Staging.json
+**/appsettings.Local.json
+**/appsettings.Development.json
+**/appsettings.*.json
+!**/appsettings.example.json
+
+# Environment files (already covered but being explicit)
+**/.env*
+**/environment.*
+**/config.local.*
+
+# Secret files
+**/secrets.json
+**/user-secrets.json
+**/appsettings.secrets.json
+
+# Docker secrets and configs
+**/docker-compose.override.yml
+**/docker-compose.prod.yml
+**/docker-compose.local.yml
+**/.docker/secrets/*.txt
+**/.docker/secrets/*.key
+**/.docker/secrets/*.pem
+
+# Backup files that might contain sensitive data
+**/backup-*.sql
+**/migration-backup-*/
+**/backups/
+
+# IDE and editor specific files
+**/.vscode/settings.json
+**/.vscode/launch.json
+**/.idea/workspace.xml
+**/.idea/tasks.xml
+**/.idea/deploymentTargets.xml

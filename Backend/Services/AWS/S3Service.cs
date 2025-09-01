@@ -21,7 +21,7 @@ public class S3Service
         _bucketName = awsConfig.BucketName;
         _awsUrl = awsConfig.AWS_Url;
 
-        _logger.LogInformation($"S3Service initialized with bucket: {_bucketName}, region: {awsConfig.Region}");
+        _logger.LogInformation("S3Service initialized successfully");
 
         _s3Client = new AmazonS3Client(
             awsConfig.AccessKey,
@@ -34,7 +34,7 @@ public class S3Service
     {
         try
         {
-            _logger.LogInformation($"Starting upload for key: {keyName}, content type: {contentType}, file size: {fileData.Length} bytes");
+            _logger.LogInformation($"Starting file upload: {contentType}, size: {fileData.Length} bytes");
 
             // Validate input
             if (fileData == null || fileData.Length == 0)
@@ -69,7 +69,7 @@ public class S3Service
                 await fileTransferUtility.UploadAsync(uploadRequest);
                 string fileLink = $"{_awsUrl}{keyName}";
                 
-                _logger.LogInformation($"File uploaded successfully. Key: {keyName}, Link: {fileLink}");
+                _logger.LogInformation("File uploaded successfully");
                 return fileLink;
             }
         }
@@ -89,11 +89,11 @@ public class S3Service
     {
         try
         {
-            _logger.LogInformation($"Retrieving file with key: {key}");
+            _logger.LogInformation("Retrieving file from S3");
             
             var response = await _s3Client.GetObjectAsync(_bucketName, key);
             
-            _logger.LogInformation($"File retrieved successfully. Key: {key}, Content-Type: {response.Headers["Content-Type"]}");
+            _logger.LogInformation($"File retrieved successfully. Content-Type: {response.Headers["Content-Type"]}");
             return (response.ResponseStream, response.Headers["Content-Type"]);
         }
         catch (AmazonS3Exception e)
@@ -112,7 +112,7 @@ public class S3Service
     {
         try
         {
-            _logger.LogInformation($"Deleting file with key: {keyName}");
+            _logger.LogInformation("Deleting file from S3");
             
             var deleteObjectRequest = new DeleteObjectRequest
             {
@@ -124,7 +124,7 @@ public class S3Service
 
             if (response.HttpStatusCode == System.Net.HttpStatusCode.NoContent)
             {
-                _logger.LogInformation($"File deleted successfully. Key: {keyName}");
+                _logger.LogInformation("File deleted successfully from S3");
                 return "File deleted successfully.";
             }
             else
@@ -154,7 +154,7 @@ public class S3Service
     {
         try
         {
-            _logger.LogInformation($"Starting upload for key: {keyName}, content type: {contentType}");
+            _logger.LogInformation($"Starting stream upload: {contentType}");
 
             // Validate input
             if (fileStream == null)
@@ -180,7 +180,7 @@ public class S3Service
             await fileTransferUtility.UploadAsync(uploadRequest);
             string fileLink = $"{_awsUrl}{keyName}";
             
-            _logger.LogInformation($"File uploaded successfully. Key: {keyName}, Link: {fileLink}");
+            _logger.LogInformation("Stream uploaded successfully");
             return fileLink;
         }
         catch (AmazonS3Exception e)
@@ -199,7 +199,7 @@ public class S3Service
     {
         try
         {
-            _logger.LogInformation($"Listing files with prefix: {prefix}");
+            _logger.LogInformation("Listing files from S3");
             
             var listRequest = new ListObjectsV2Request
             {
@@ -209,7 +209,7 @@ public class S3Service
 
             var response = await _s3Client.ListObjectsV2Async(listRequest);
             
-            _logger.LogInformation($"Found {response.S3Objects.Count} files with prefix: {prefix}");
+            _logger.LogInformation($"Found {response.S3Objects.Count} files");
             return response.S3Objects;
         }
         catch (AmazonS3Exception e)

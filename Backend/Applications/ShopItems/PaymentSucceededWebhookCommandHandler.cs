@@ -57,7 +57,7 @@ public class PaymentSucceededWebhookCommandHandler
                 return Result.Failure(Errors.General.InvalidOperation("Invalid webhook request."));
             }
 
-            _logger.LogInformation($"Received Stripe Webhook: {request.JsonPayload}");
+            _logger.LogInformation("Received Stripe Webhook");
 
             var stripeEvent = EventUtility.ConstructEvent(
                 request.JsonPayload,
@@ -65,6 +65,8 @@ public class PaymentSucceededWebhookCommandHandler
                 _stripeWebhookSecret,
                 throwOnApiVersionMismatch: false
             );
+
+            _logger.LogInformation($"Processing Stripe Webhook event type: {stripeEvent.Type}");
 
             if (stripeEvent.Type != "payment_intent.succeeded")
             {

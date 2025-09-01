@@ -193,12 +193,12 @@ namespace UGHApi.Services.BackgroundTasks
                 var fileName = Path.GetFileName(backupFilePath);
                 var s3Key = $"{_backupSettings.S3BackupPrefix}{fileName}";
 
-                _logger.LogInformation($"Uploading backup to S3: {s3Key}");
+                _logger.LogInformation("Uploading backup to S3");
 
                 using var fileStream = File.OpenRead(backupFilePath);
                 await s3Service.UploadFileAsync(fileStream, s3Key, "application/sql");
 
-                _logger.LogInformation($"Backup uploaded successfully to S3: {s3Key}");
+                _logger.LogInformation("Backup uploaded successfully to S3");
             }
             catch (Exception ex)
             {
@@ -232,7 +232,7 @@ namespace UGHApi.Services.BackgroundTasks
                         {
                             await s3Service.DeleteFileAsync(file.Key);
                             deletedCount++;
-                            _logger.LogInformation($"Deleted old backup: {file.Key}");
+                            _logger.LogInformation("Deleted old backup file");
                         }
                     }
                 }

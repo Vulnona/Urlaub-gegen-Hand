@@ -21,3 +21,53 @@ pnpm-debug.log*
 *.njsproj
 *.sln
 *.sw?
+
+# Environment Variables
+**/.env*
+**/environment.*
+**/config.local.*
+
+# API Keys and Secrets
+**/api-keys.txt
+**/secrets.json
+**/keys.txt
+**/credentials.json
+
+# Build Configuration with Secrets
+**/vite.config.local.ts
+**/vite.config.prod.ts
+**/vite.config.secrets.ts
+
+# AWS Configuration
+**/aws-config.json
+**/aws-credentials.json
+**/aws-keys.txt
+
+# Stripe Configuration
+**/stripe-keys.txt
+**/stripe-secrets.txt
+
+# Authentication
+**/auth-keys.txt
+**/jwt-keys.txt
+**/token-keys.txt
+
+# Log Files
+**/logs/
+**/*.log
+
+# Temporary Files
+**/temp/
+**/tmp/
+**/*.tmp
+**/*.temp
+
+# OS Generated Files
+**/Thumbs.db
+**/ehthumbs.db
+**/Desktop.ini
+
+# Build Output
+**/build/
+**/out/
+**/target/
