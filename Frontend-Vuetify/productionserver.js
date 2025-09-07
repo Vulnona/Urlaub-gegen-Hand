@@ -6,7 +6,7 @@ const fs = require('node:fs');
 const axios = require('axios');
 
 //environment variable or default to localhost for API URL
-const API_BASE_URL = 'https://alreco.de:8443';
+const API_BASE_URL = 'https://alreco.de';
 
 const url = `${API_BASE_URL}/api/offer/get-offer-by-id/`;
 const headers = {'Content-Type': 'application/json'};

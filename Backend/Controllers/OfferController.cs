@@ -221,6 +221,22 @@ public class OfferController : ControllerBase
         }
     }
 
+    // url for the preview picture
+    [AllowAnonymous]
+    [HttpGet("get-preview-picture/{OfferId:int}")]
+    public async Task<IActionResult> GetPreviewPicture([Required] int OfferId){
+        try {
+        var offer = await _context.offers.Include(o => o.Pictures).FirstOrDefaultAsync(o => o.Id == OfferId);
+        if (offer != null)
+            return File(offer.Pictures.FirstOrDefault().ImageData, "image/jpeg");
+        else
+            return BadRequest("OfferNotFound");
+        } catch (Exception ex) {
+            _logger.LogError($"Exception occurred fetching preview picture: {ex.Message} | StackTrace: {ex.StackTrace}");
+            return StatusCode(500, $"Internal server error.");
+        } 
+    }
+    
     // Multi-Bild-Unterstützung: Bilder werden über Images Array im DTO bereitgestellt
 
     public class OfferMeta{
