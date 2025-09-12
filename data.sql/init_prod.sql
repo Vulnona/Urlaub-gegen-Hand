@@ -368,7 +368,7 @@ INSERT INTO `memberships` (`MembershipID`, `Description`, `DurationDays`, `IsAct
 (4,'Lebenslange Mitgliedschaft - einmal zahlen, für immer dabei',9999,1,'Lebenslang',299);
 
 -- Insert users (VerificationState: 0=IsNew, 1=VerificationPending, 2=VerificationFailed, 3=Verified)
--- UserRole: 0=User, 1=Admin
+-- UserRole: 0d=User, 1=Admin
 -- IsTwoFactorEnabled: 0=Disabled, 1=Enabled
 INSERT INTO `users` (`User_Id`, `FirstName`, `LastName`, `DateOfBirth`, `Gender`, `AddressId`, `Email_Address`, `Password`, `SaltKey`, `IsEmailVerified`, `MembershipId`, `VerificationState`, `UserRole`, `IsTwoFactorEnabled`, `TwoFactorSecret`, `BackupCodes`) VALUES
 ('08ddca8e-a8b9-48ef-8e0b-09db16414bfa', 'Test', 'User', '1990-01-01', 'Other', 1, 'test@example.com', 'DT33XYI18fq7DKWeywMHoa+sctP2bk05fYdmOtlJk9g=', 'AZ33I+EyDoPaub13xSPDG6rlXi3fPqBSUk5ZdjkrOQ8=', 1, 1, 3, 0, 0, NULL, NULL),
