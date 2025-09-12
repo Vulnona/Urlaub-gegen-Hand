@@ -164,6 +164,21 @@ const routes: RouteRecordRaw[] = [
     meta: { roles: ['User'] },
   },
   {
+    path: '/agb',
+    name: 'AGB',
+    component: () => import('@/pages/AGB.vue'),
+  },
+  {
+    path: '/impressum',
+    name: 'Impressum',
+    component: () => import('@/pages/Impressum.vue'),
+  },
+  {
+    path: '/datenschutzerklaerung',
+    name: 'Datenschutzerklärung',
+    component: () => import('@/pages/Datenschutzerklaerung.vue'),
+  },
+  {
     path: '/:catchAll(.*)',
     name: 'Error',
     component: () => import('@/views/Errorpage.vue'),

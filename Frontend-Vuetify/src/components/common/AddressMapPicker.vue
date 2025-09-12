@@ -72,7 +72,7 @@
       >
         <i class="ri-gps-line" v-if="!isLocating"></i>
         <i class="ri-loader-4-line spinning" v-else></i>
-        Mein Standort verwenden
+        Meinen Standort verwenden
       </button>
       
       <!-- Confirm Button -->

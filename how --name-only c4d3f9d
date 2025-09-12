@@ -1,0 +1,12 @@
+[33mcommit e0fe7b028e2b2753ae92b157990179b6873fc880[m[33m ([m[1;36mHEAD -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m
+Author: Vulnona <sturmiechen@googlemail.com>
+Date:   Mon Sep 1 10:21:54 2025 +0200
+
+    updated git ignore for more secure configuration, reduced debug logs to prevent leaking
+
+.gitignore
+Backend/Applications/ShopItems/PaymentSucceededWebhookCommandHandler.cs
+Backend/Controllers/CouponController.cs
+Backend/Services/AWS/S3Service.cs
+Backend/Services/BackgroundTasks/DatabaseBackupService.cs
+Frontend-Vuetify/.gitignore
